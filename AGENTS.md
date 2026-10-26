@@ -1,9 +1,10 @@
-# <repo name>
+# app-ui
 
 Instructions for every AI assistant working here (Claude Code reads this through `CLAUDE.md`).
-Replace the placeholders in angle brackets, then delete this line.
 
-<One or two lines: what this repo is and who uses it.>
+The UI core for the owner's web apps: `@core/ui`, `@core/theme`, `@core/settings`, the looks and the `/kit/`
+galleries. Each release tag is served unchanged at `core.anawj.com/ui/<version>/`; apps pin an exact version in their
+import map, so treat every change as one that reaches every app.
 
 ## Public here, private elsewhere
 
@@ -13,7 +14,13 @@ repo; never copy anything from there into this repo, a PR or an issue (neutral p
 
 ## Rules that bite
 
-- <Rule the next session must not get wrong.>
+- **A released version never changes.** `versions.lock.json` holds every version's file hashes; the deploy refuses a
+  tag that no longer matches. Changes go in a new version: bump `package.json`, then `node tools/build-ui.mjs --lock`
+  as the last step of the PR (the deploy workflow tags it on merge).
+- **Relative imports only** in `ui/`, `theme/`, `settings/`, `kit/` (`tools/check.mjs`): a version must work from any
+  base address. No inline script or style in the gallery pages (the Worker's page policy forbids them).
+- Nothing app-specific: no app names, collections or wording; apps pass them in.
+- Every part or behaviour the gallery gains gets a test and a line in [docs/kit-tests.md](docs/kit-tests.md).
 
 ## App defaults
 
@@ -24,8 +31,10 @@ repo; never copy anything from there into this repo, a PR or an issue (neutral p
 ## Checks before merging
 
 ```
-node tools/check.mjs        # repo checks + Worker tests
-node tools/proofread.mjs    # page and doc mistakes
+node tools/check.mjs        # lock, relative imports, gallery page policy
+npm test                    # Worker, UI core and tools unit tests
+npm run typecheck           # ui, theme, settings, kit under strict
+npx playwright test         # browser tests (README, "Tests")
 ```
 
 ## Working with the owner

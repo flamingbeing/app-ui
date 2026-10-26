@@ -1,11 +1,14 @@
-# Deploys this repo's Worker on every push to main (and to beta, as the Worker's "beta" environment, if
-# wrangler.jsonc has one). The deploy build stamps the service worker versions first (tools/stamp-versions.mjs).
-# Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID; without them the run says so and skips.
+# On every push to main: tag the version if it is new, then deploy this repo's Worker (core.anawj.com/ui/*).
+# Tag: if package.json's version has no tag yet, tag that commit vX.Y.Z (the version must be in versions.lock.json:
+# tools/build-ui.mjs --check). An existing tag is never moved or replaced (versions are immutable).
+# Deploy (after the tag, so a new version is served by the same run): builds dist/ from every release tag
+# (tools/build-ui.mjs), which fails if a released version no longer matches versions.lock.json.
+# Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID; without them the deploy says so and skips.
 name: Deploy
 
 on:
   push:
-    branches: [main, beta]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -16,35 +19,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  tag:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
     steps:
-      - name: Secrets present?
-        id: gate
-        run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "::notice::No Cloudflare secrets in this repo yet (gh-admin deploy-secrets); skipping the deploy."
-            echo "go=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "go=true" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/checkout@v4
-        if: steps.gate.outputs.go == 'true'
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 0   # stamp-versions dates each app by its last commit
-      - uses: actions/setup-node@v4
-        if: steps.gate.outputs.go == 'true'
-        with:
-          node-version: 22
-      - name: Stamp service worker versions
-        if: steps.gate.outputs.go == 'true'
-        run: if [ -f tools/stamp-versions.mjs ]; then node tools/stamp-versions.mjs; fi
-      - name: Deploy
-        if: steps.gate.outputs.go == 'true'
+          fetch-depth: 0
+      - name: Tag the version if it is new
         run: |
-          if [ "$GITHUB_REF_NAME" = beta ]; then npx --yes wrangler@4 deploy --env beta
-          else npx --yes wrangler@4 deploy; fi
+          v="v$(node -p "require('./package.json').version")"
+          node tools/build-ui.mjs --check
+          if git ls-remote --exit-code --tags origin "refs/tags/$v" >/dev/null; then echo "$v exists; nothing to do"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$v" -m "app-ui ${v#v}" "$GITHUB_SHA"
+          git push origin "refs/tags/$v"
+          echo "tagged $v at $GITHUB_SHA"
+
+  deploy:
+    needs: tag
+    uses: flamingbeing/app-devkit/.github/workflows/deploy-worker.yml@v1.11.0
+    with:
+      build-command: git fetch --tags --force --quiet && node tools/build-ui.mjs   # dist/ui/<x.y.z>/ from the release tags
+      beta-env: false
+    secrets: inherit

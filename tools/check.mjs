@@ -1,57 +1,56 @@
 // Repo checks for mistakes tests don't catch. Run before merging: node tools/check.mjs
-// 1. Each app's sw.js has a plain VERSION starting with its folder name (no deploy stamp) and deletes only caches with
-//    its own prefix (apps can share an origin).
-// 2. Every file in an app's SHELL list exists.
-// 3. wrangler.jsonc keeps preview links and the workers.dev address off.
-// 4. The Worker's tests pass (node --test 'worker/test/*.test.mjs').
+// 1. wrangler.jsonc keeps preview links and the workers.dev address off, and routes only core.anawj.com/ui/*.
+// 2. The package.json version is in versions.lock.json and matches the published files (tools/build-ui.mjs --check):
+//    a released version never changes, so a change to ui/, theme/, settings/, kit/ or icons/ needs a new version.
+// 3. The published code imports only its own files (relative paths): no engine, no other site, no bare names. A page
+//    hands each part the module api it shows.
+// 4. The gallery pages carry no inline script or style (the Worker's page policy allows none).
+// 5. The Worker's tests pass (node --test 'worker/test/*.test.mjs').
 // Exits 1 on any failure.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { PUBLISHED } from './build-ui.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
 const fail = msg => errors.push(msg);
 
-const apps = fs.readdirSync(ROOT).filter(d => fs.existsSync(path.join(ROOT, d, 'sw.js')));
-for (const app of apps) {
-  const swPath = `${app}/sw.js`;
-  const sw = fs.readFileSync(path.join(ROOT, swPath), 'utf8');
-  const prefix = `${app}-`;
+const w = fs.readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8').replace(/^\s*\/\/.*$/gm, '');
+if (!/"preview_urls"\s*:\s*false/.test(w)) fail('wrangler.jsonc: "preview_urls" should be false (no preview links)');
+if (!/"workers_dev"\s*:\s*false/.test(w)) fail('wrangler.jsonc: "workers_dev" should be false (real addresses only)');
+const patterns = [...w.matchAll(/"pattern"\s*:\s*"([^"]+)"/g)].map(m => m[1]);
+if (patterns.join() !== 'core.anawj.com/ui/*') fail(`wrangler.jsonc: the only route should be core.anawj.com/ui/* (the rest of core.anawj.com is app-sync's), not ${patterns.join(', ') || 'none'}`);
+if (/custom_domain/.test(w)) fail('wrangler.jsonc: no custom domain (core.anawj.com is app-sync\'s custom domain)');
 
-  const version = sw.match(/const VERSION = '([^']+)'/)?.[1];
-  if (!version) fail(`${swPath}: no VERSION constant`);
-  else if (!version.startsWith(prefix)) fail(`${swPath}: VERSION '${version}' should start with '${prefix}'`);
-  // a stamped VERSION (from a deploy build) committed by mistake
-  else if (/-[0-9a-f]{8}$/.test(version)) fail(`${swPath}: VERSION '${version}' carries a deploy stamp; put back the plain '${version.replace(/-(\d{4}-\d{2}-\d{2}-)?[0-9a-f]{8}$/, '')}'`);
+try { execFileSync(process.execPath, ['tools/build-ui.mjs', '--check'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] }); }
+catch (e) { fail(String(e.stderr || e.message).trim()); }
 
-  for (const line of sw.split('\n').filter(l => l.includes('caches.delete'))) {
-    if (!line.includes(`startsWith('${prefix}')`)) fail(`${swPath}: caches.delete without a startsWith('${prefix}') guard deletes other apps' caches:\n    ${line.trim()}`);
+const walk = rel => {
+  const abs = path.join(ROOT, rel);
+  if (!fs.existsSync(abs)) return [];
+  return fs.statSync(abs).isDirectory() ? fs.readdirSync(abs).flatMap(f => walk(path.posix.join(rel, f))) : [rel];
+};
+const files = PUBLISHED.flatMap(walk);
+for (const f of files.filter(f => f.endsWith('.js'))) {
+  const code = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"\\])\/\/.*$/gm, '$1');
+  for (const m of code.matchAll(/(?:^|[;\s}(])(?:import|export)\s*(?:[\w*{}\s,$]*?\sfrom\s*)?\(?\s*['"]([^'"]+)['"]/g)) {
+    if (!m[1].startsWith('./') && !m[1].startsWith('../')) fail(`${f} imports '${m[1]}': only the repo's own files, by relative path`);
   }
-
-  const shellSrc = sw.match(/const SHELL = \[([\s\S]*?)\];/)?.[1];
-  if (!shellSrc) { fail(`${swPath}: no SHELL list`); continue; }
-  const shell = [...shellSrc.matchAll(/'([^']+)'/g)].map(m => m[1]).filter(f => f !== './')
-    .map(f => path.posix.normalize(`${app}/${f}`));
-  for (const f of shell) if (!fs.existsSync(path.join(ROOT, f))) fail(`${swPath}: SHELL lists ${f}, which doesn't exist`);
+}
+for (const f of files.filter(f => f.endsWith('.html'))) {
+  const html = fs.readFileSync(path.join(ROOT, f), 'utf8');
+  if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) fail(`${f}: an inline <script> (the page policy allows none; use a file)`);
+  if (/<style[\s>]|\sstyle="/i.test(html)) fail(`${f}: inline style (the page policy allows none; use the page's CSS file)`);
 }
 
-const wrangler = path.join(ROOT, 'wrangler.jsonc');
-if (fs.existsSync(wrangler)) {
-  const w = fs.readFileSync(wrangler, 'utf8').replace(/^\s*\/\/.*$/gm, '');
-  if (!/"preview_urls"\s*:\s*false/.test(w)) fail('wrangler.jsonc: "preview_urls" should be false (no preview links)');
-  if (!/"workers_dev"\s*:\s*false/.test(w)) fail('wrangler.jsonc: "workers_dev" should be false (real addresses only)');
-}
-
-if (fs.existsSync(path.join(ROOT, 'worker/test'))) {
-  try { execFileSync(process.execPath, ['--test', 'worker/test/*.test.mjs'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] }); }
-  catch (e) { fail('worker tests failed:\n' + String(e.stdout || e.message).split('\n').filter(l => /not ok|Error|expected|actual/.test(l)).slice(0, 10).join('\n')); }
-}
+try { execFileSync(process.execPath, ['--test', 'worker/test/*.test.mjs'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] }); }
+catch (e) { fail('worker tests failed:\n' + String(e.stdout || e.message).split('\n').filter(l => /not ok|Error|expected|actual/.test(l)).slice(0, 10).join('\n')); }
 
 if (errors.length) {
   console.error(`check: ${errors.length} problem(s)\n- ` + errors.join('\n- '));
   process.exit(1);
 }
-console.log(`check: ok (${apps.join(', ') || 'no apps'}; worker tests pass)`);
+console.log(`check: ok (${files.length} published files; worker tests pass)`);

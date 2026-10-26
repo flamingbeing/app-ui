@@ -1,0 +1,17 @@
+{
+  // Type check only (npm run typecheck; CI): ui/, theme/, settings/ and the gallery's JS under strict. Nothing is
+  // emitted; the browser runs the files as is.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noEmit": true,
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": [],
+    "skipLibCheck": true
+  },
+  "include": ["ui/**/*.js", "ui/**/*.d.ts", "theme/**/*.js", "settings/*.js", "settings/*.d.ts", "kit/**/*.js"]
+}

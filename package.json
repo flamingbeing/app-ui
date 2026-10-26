@@ -1,8 +1,34 @@
 {
+  "name": "app-ui",
+  "version": "1.0.0-rc.1",
+  "description": "The UI core for the apps: @core/ui, @core/theme, @core/settings, the looks and the /kit/ gallery, served at exact versions from core.anawj.com/ui/<version>/.",
   "private": true,
   "type": "module",
+  "exports": {
+    "./ui": "./ui/index.js",
+    "./theme": "./theme/index.js",
+    "./settings": "./settings/index.js",
+    "./ui/*": "./ui/*",
+    "./theme/*": "./theme/*",
+    "./settings/*": "./settings/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "ui",
+    "theme",
+    "settings",
+    "kit",
+    "icons"
+  ],
   "scripts": {
     "check": "node tools/check.mjs",
-    "test": "node --test 'worker/test/*.test.mjs'"
+    "test": "node --test 'worker/test/*.test.mjs' 'test/*.unit.test.mjs' 'tools/test/*.test.mjs'",
+    "typecheck": "tsc -p .",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "axe-core": "4.14.0",
+    "typescript": "5.8.3"
   }
 }
