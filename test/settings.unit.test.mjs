@@ -2,9 +2,9 @@
 // fake engine (module.js). node --test app/test/settings.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { compile, valueOf, isCustom } from '../public/settings/schema.js';
-import { readFile, writeFile, KIND } from '../public/settings/file.js';
-import { settings } from '../public/settings/module.js';
+import { compile, valueOf, isCustom } from '../settings/schema.js';
+import { readFile, writeFile, KIND } from '../settings/file.js';
+import { settings } from '../settings/module.js';
 
 const OPTIONS = {
   big: { scope: 'device' },

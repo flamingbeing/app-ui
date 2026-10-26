@@ -5,7 +5,7 @@ current at the end of each stage (what landed, what the next stage needs to know
 
 ## K1: gestures + gallery (done)
 
-- Modules in `app/public/ui/`, ES modules with no dependencies, each starting only where its markup is
+- Modules in `ui/`, ES modules with no dependencies, each starting only where its markup is
   (`startGestures()` in `gestures.js` starts them all): `gesture.js` (shared: hold time, slop, Still, haptic,
   no-gesture zones), `hold-menu.js`, `select-mode.js`, `detent-sheet.js`, `screens.js`, `tab-bar.js`,
   `large-title.js`. Look: `ui/gestures.css`, on the theme's existing tokens only (no look work yet).
@@ -15,7 +15,7 @@ current at the end of each stage (what landed, what the next stage needs to know
 - Edge swipe back is on only in the iPhone home-screen app (elsewhere the system has a Back gesture);
   `html[data-edge-back="always"]` (the gallery's `?edge=always`) forces it for tests.
 - Toasts take an `action` (Undo): reversible actions never ask "are you sure?".
-- Gallery: `app/public/kit/`, tests listed in [kit-tests.md](kit-tests.md).
+- Gallery: `kit/`, tests listed in [kit-tests.md](kit-tests.md).
 
 Gotchas found:
 - Chrome gives a modal `<dialog>` `overflow: auto`; a sheet must set `overflow: hidden` or a drag scrolls the whole sheet.
@@ -47,9 +47,9 @@ Gotchas found:
 
 ## K3: tablet and laptop shell (done)
 
-- `app/public/ui/shell/` (`shell.js`, `shell.css`): `adaptiveShell(shell, { screens, render })` sets `data-size`
+- `ui/shell/` (`shell.js`, `shell.css`): `adaptiveShell(shell, { screens, render })` sets `data-size`
   (phone / tablet / laptop at 600 and 840 px), opens rows into the detail, filters rows from the search fields,
-  Ctrl/Cmd+K, Esc and arrow keys. Rules and keys are in [ui-kit.md](ui-kit.md); the sample is `app/public/kit/shell/`.
+  Ctrl/Cmd+K, Esc and arrow keys. Rules and keys are in [ui-kit.md](ui-kit.md); the sample is `kit/shell/`.
 - `select-mode.js` gained Ctrl/Cmd-click (add) and Shift-click (range); `detent-sheet.js` leaves a
   `data-wide="panel"` sheet's height alone from 840 px.
 - No router change: the detail is a pushed `.ui-screen` on a phone, and both panes just show from 600 px.
@@ -66,7 +66,7 @@ Gotchas found:
 - Cause: sw-core's `navigate()` answers any page address whose folder is not in SHELL with the app's own page
   (`./`). SHELL lists `kit/index.html` but not the folders `kit/` and `kit/shell/`, and `/kit` (no slash) never
   matches, so a phone that had opened the app once got the app's sign-in screen at `/kit`.
-- Fix in `app/public/sw.js` (not in sw-core): `KIT_PAGES` in the `never` list sends page addresses under `/kit`
+- Fix in app-starter's `app/public/sw.js` (not in sw-core): `KIT_PAGES` in the `never` list sends page addresses under `/kit`
   (no dot in the path: `/kit`, `/kit/`, `/kit/shell/`, any later `/kit/<page>`) to the network. Files under `/kit/`
   still come from SHELL. A new gallery page needs no SW change. Cost: the gallery's pages open online only.
 - `sw.js` changed byte for byte, so phones with the old worker fetch the new one on their next visit and take over
@@ -76,7 +76,7 @@ Gotchas found:
 ## K4: layout parts + extra-dense (done)
 
 - `ui/layout.css`, `ui/layout.js` (grid, stack, split, toolbar, segmented, stepper) and `data-dense="extra"`; rules
-  in [ui-kit.md](ui-kit.md#layout-parts-and-extra-dense). Gallery `app/public/kit/dense/`, tests `e2e/dense.spec.mjs`
+  in [ui-kit.md](ui-kit.md#layout-parts-and-extra-dense). Gallery `kit/dense/`, tests `e2e/dense.spec.mjs`
   and `app/test/layout.unit.test.mjs`.
 - Feedback fixed on earlier parts: look B's bar now keeps the band's colour when the title collapses (no white flash,
   no empty band; `large-title.js` collapses when the title's words, not its padding, reach the bar); B's band in the

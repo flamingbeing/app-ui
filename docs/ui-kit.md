@@ -1,7 +1,7 @@
 # The UI kit (`@core/ui`)
 
 Gesture parts, the adaptive shell, the looks and the placement rules every app built on this starter follows. The code is in
-`app/public/ui/`; the galleries are `/kit/` (the gesture parts) and `/kit/shell/` (the sample list app in the shell).
+`ui/`; the galleries are `/kit/` (the gesture parts) and `/kit/shell/` (the sample list app in the shell).
 Tests are listed in [kit-tests.md](kit-tests.md); stage notes in [ui-kit-progress.md](ui-kit-progress.md).
 
 ## The shell (`ui/shell/`)
@@ -15,7 +15,7 @@ says which; a `ui-size` event fires when it changes (a window resize or a tablet
 | 600–839 px | tablet | side bar, list and detail side by side; sheets stay bottom sheets |
 | 840 px and up | laptop | wider side bar, list and detail side by side; sheets become centred dialogs, or a side panel |
 
-Use it with the markup in `app/public/kit/shell/index.html`: a `.ui-shell` holding `.ui-sidebar`, `main.ui-screens.ui-panes`
+Use it with the markup in `kit/shell/index.html`: a `.ui-shell` holding `.ui-sidebar`, `main.ui-screens.ui-panes`
 (a `.ui-pane-list` and a `.ui-pane-detail` screen) and `nav.ui-tabbar`. Start it after `startGestures()`:
 
 ```js
@@ -70,7 +70,7 @@ What Settings lets you change, by where it lives.
 
 ## Looks, density and the glass guard (`@core/theme`)
 
-`@core/theme` (in `app/public/theme/`) and `@core/ui` (in `app/public/ui/`) are incubating in the starter. Each device
+`@core/theme` (in `theme/`) and `@core/ui` (in `ui/`) live in this repo (app-ui), served at exact versions. Each device
 chooses three things, kept in `choice.js`: **look × theme × density**, plus Bars and sheets (glass or Solid). The
 gallery at `/kit/` shows every part in every look; its tests are listed in [kit-tests.md](kit-tests.md).
 
@@ -130,7 +130,7 @@ chrome, with at most three layers and two blur tiers. Reduce transparency, more 
 
 No component code. If a look seems to need a fork of a part, add a variant instead, and ask first.
 
-1. Copy `app/public/theme/looks/c.js` to a new file (say `d.js`). Give it an `id`, a `name` and a one-line `desc`, then
+1. Copy `theme/looks/c.js` to a new file (say `d.js`). Give it an `id`, a `name` and a one-line `desc`, then
    pick its variants and set every token. `app/test/looks.unit.test.mjs` fails if a key is missing or a variant is
    unknown.
 2. Import it in `theme/looks.js` and add it to `LOOKS`. Its words show up in both switchers on their own.

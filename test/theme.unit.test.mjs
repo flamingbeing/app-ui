@@ -2,13 +2,13 @@
 // contrast floor (colour.js, palette-css.js), the presets and the accent grid. node --test app/test/theme.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseChoice, chooseTheme, themeChoice, THEMES, DENSITIES } from '../public/theme/choice.js';
-import { LOOKS } from '../public/theme/looks.js';
-import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS } from '../public/theme/schema.js';
-import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, BACKDROP } from '../public/theme/colour.js';
-import { palettes, paletteCss, shapeTokens, accentOf, glassTokens, DEFAULT_ACCENT } from '../public/theme/palette-css.js';
-import { PRESETS, SURFACES } from '../public/theme/presets.js';
-import { GRID, HUES, SHADES, gridIndex, snap } from '../public/theme/grid.js';
+import { parseChoice, chooseTheme, themeChoice, THEMES, DENSITIES } from '../theme/choice.js';
+import { LOOKS } from '../theme/looks.js';
+import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS } from '../theme/schema.js';
+import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, BACKDROP } from '../theme/colour.js';
+import { palettes, paletteCss, shapeTokens, accentOf, glassTokens, DEFAULT_ACCENT } from '../theme/palette-css.js';
+import { PRESETS, SURFACES } from '../theme/presets.js';
+import { GRID, HUES, SHADES, gridIndex, snap } from '../theme/grid.js';
 
 const DEFAULTS = { theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '', look: '', density: 'regular', material: 'glass', motion: 'auto' };
 // what show() puts on <html> for look A (the default), besides the marks a choice sets

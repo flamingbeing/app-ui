@@ -3,12 +3,12 @@
 // node --test app/test/gestures.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HOLD_MS, SLOP, velocity, still, haptic } from '../public/ui/gesture.js';
-import { placeMenu } from '../public/ui/hold-menu.js';
-import { settle, topDetent } from '../public/ui/detent-sheet.js';
-import { tabBarStep } from '../public/ui/tab-bar.js';
-import { dragRange, needs, TICKS } from '../public/ui/select-mode.js';
-import { swipeGoesBack, edgeBackOn, EDGE } from '../public/ui/screens.js';
+import { HOLD_MS, SLOP, velocity, still, haptic } from '../ui/gesture.js';
+import { placeMenu } from '../ui/hold-menu.js';
+import { settle, topDetent } from '../ui/detent-sheet.js';
+import { tabBarStep } from '../ui/tab-bar.js';
+import { dragRange, needs, TICKS } from '../ui/select-mode.js';
+import { swipeGoesBack, edgeBackOn, EDGE } from '../ui/screens.js';
 
 test('the port rules: hold 500 ms within 10 px; ticks and screen edge are finger-sized', () => {
   assert.equal(HOLD_MS, 500);

@@ -1,30 +1,52 @@
-// The Cloudflare Worker for this repo's addresses. It serves the repo's files (the static assets, bound as ASSETS)
-// and decides which folder an address may see (routes.js). No data, no storage: just files.
+// The Cloudflare Worker for core.anawj.com/ui/*: serves each released version of the UI core (dist/ui/<x.y.z>/, built
+// from the release tags by tools/build-ui.mjs, bound as ASSETS) and the list of versions. Files only. The rest of
+// core.anawj.com (/sync/, /update/) is app-sync's Worker; this route runs first for /ui/ addresses only.
 // wrangler.jsonc: "run_worker_first" sends every request here.
-import { resolve } from './routes.js';
 
 const NOINDEX = 'noindex, nofollow';
+// x.y.z with an optional pre-release (1.0.0-rc.1), the same shape as tools/semver.mjs VERSION_RE
+const SEMVER = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
+// a released version's files never change: browsers and the CDN may keep them for a year. The list of versions can.
+// Files by type, and the gallery's folders (/kit/, /kit/shell/, …: their index.html; without the "/", a redirect).
+const VERSIONED = new RegExp(String.raw`^/ui/${SEMVER}/(?:(?:ui|theme|settings|kit|icons)/[\w./-]*\.(?:js|css|html|svg|d\.ts)|kit(?:/[\w-]+)*/?)$`);
+const LISTING = '/ui/versions.json';
+const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8',
+  svg: 'image/svg+xml', json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
+// public code, no cookies or credentials, so any app origin may import it (and <link> its CSS)
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Cross-Origin-Resource-Policy': 'cross-origin' };
+// the gallery pages: their own files, the design kit's tokens and its fonts; nothing else
+const KIT = 'https://design.flamingbeing.com';
+export const PAGE_CSP = [
+  "default-src 'self'", `script-src 'self' ${KIT}`, `style-src 'self' ${KIT} https://fonts.googleapis.com`,
+  `font-src 'self' ${KIT} https://fonts.gstatic.com`, `img-src 'self' data: blob: ${KIT}`,
+  `connect-src 'self' ${KIT} https://fonts.googleapis.com https://fonts.gstatic.com`, "object-src 'none'", "base-uri 'self'",
+  "form-action 'self'", "frame-ancestors 'none'",
+].join('; ');
 
 export default {
   async fetch(request, env) {
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     const url = new URL(request.url);
-    const r = resolve(url.hostname, url.pathname);
-    if (r.redirect) return redirect(url, r.redirect);
-    if (r.notFound) return notFound();
+    if ((url.pathname !== LISTING && !VERSIONED.test(url.pathname)) || url.pathname.includes('..')) return notFound();   // no folder listings, no other files
 
-    // a folder (address ending in "/") serves its index.html
-    let file = r.file;
-    if (file === '' || file.endsWith('/')) file += 'index.html';
-    let res = await asset(env, url, file);
-    if (res.status === 404 && !/\.[^/]+$/.test(file)) {
-      // no such file, but a folder of that name: send the browser to the address with a "/" (as GitHub Pages does)
+    // a folder (address ending in "/") serves its index.html; without the "/", the browser is sent to it (as GitHub
+    // Pages does), so the page's relative links work
+    let file = url.pathname.slice(1);
+    if (file.endsWith('/')) file += 'index.html';
+    else if (!/\.[^/]+$/.test(file)) {
       const dir = await asset(env, url, file + '/index.html');
-      if (dir.status === 200) return redirect(url, url.pathname + '/');
+      return dir.status === 200 ? redirect(url, url.pathname + '/') : notFound();
     }
-    if (res.status === 404) return notFound();
+    let res = await asset(env, url, file);
+    if (res.status !== 200) return notFound();
+    const ext = file.endsWith('.d.ts') ? 'ts' : file.split('.').pop() || '';
     res = new Response(res.body, res);
     res.headers.set('X-Robots-Tag', NOINDEX);
+    res.headers.set('X-Content-Type-Options', 'nosniff');
+    for (const [k, v] of Object.entries(CORS)) res.headers.set(k, v);
+    res.headers.set('Cache-Control', url.pathname === LISTING ? 'public, max-age=300' : 'public, max-age=31536000, immutable');
+    res.headers.set('Content-Type', TYPES[ext]);
+    if (ext === 'html') res.headers.set('Content-Security-Policy', PAGE_CSP);
     return res;
   },
 };

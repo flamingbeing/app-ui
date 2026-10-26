@@ -1,6 +1,6 @@
 # Kit gallery tests
 
-The gallery is `app/public/kit/` (served at `/kit/`, or `/app/kit/` on the e2e server): every `@core/ui` gesture part
+The gallery is `kit/` (served at `core.anawj.com/ui/<version>/kit/`, or `/ui/0.0.0-dev/kit/` on the e2e server): every `@core/ui` gesture part
 on made-up plants, signed out. Its browser tests are `e2e/kit.spec.mjs`; each runs with an emulated finger (touch
 through the DevTools protocol) at **390, 820 and 1280 px**, fails on any Content-Security-Policy report, and checks axe
 (serious and critical) where noted. Pure parts have unit tests in `app/test/gestures.unit.test.mjs`.

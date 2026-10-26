@@ -1,8 +1,8 @@
 // @core/ui's modal focus trap (the pure part) and the default words. node --test app/test/ui-parts.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { wrapIndex } from '../public/ui/modal.js';
-import { LABELS } from '../public/ui/labels.js';
+import { wrapIndex } from '../ui/modal.js';
+import { LABELS } from '../ui/labels.js';
 
 test('Tab moves on and wraps at the last control', () => {
   assert.equal(wrapIndex(3, 0, false), 1);

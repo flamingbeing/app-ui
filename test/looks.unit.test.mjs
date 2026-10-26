@@ -2,9 +2,9 @@
 // node --test app/test/looks.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LOOKS, LOOK_IDS, VARIANTS, DEFAULT_LOOK, lookOf } from '../public/theme/looks.js';
-import { verdict, median, MEMORY_FLOOR, SLOW_FRAME_MS, PROBE_FRAMES } from '../public/theme/guard.js';
-import { placeSheetMenu } from '../public/ui/hold-menu.js';
+import { LOOKS, LOOK_IDS, VARIANTS, DEFAULT_LOOK, lookOf } from '../theme/looks.js';
+import { verdict, median, MEMORY_FLOOR, SLOW_FRAME_MS, PROBE_FRAMES } from '../theme/guard.js';
+import { placeSheetMenu } from '../ui/hold-menu.js';
 
 test('every look: a unique id, a name, every variant picked from VARIANTS, the same token keys', () => {
   assert.deepEqual(LOOK_IDS, ['a', 'b', 'c']);

@@ -5,7 +5,7 @@
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
-const DENSE = '/app/kit/dense/';
+const DENSE = '/ui/0.0.0-dev/kit/dense/';
 const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
 
 // every target on the shown screen, measured where the finger lands (a radio or checkbox: its label); links inside

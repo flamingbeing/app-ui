@@ -3,7 +3,7 @@
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
-const SHELL = '/app/kit/shell/?edge=always';
+const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
 const SIZE = { 390: 'phone', 820: 'tablet', 1280: 'laptop' };
 const depth = page => page.evaluate(() => window.kit.screens.depth());
 const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
@@ -187,7 +187,7 @@ test('the shell follows a window resize across the classes, keeping the open row
 
 test('startGestures and the shell on a page without the markup start nothing', async ({ sized }) => {
   const page = await sized(1280);
-  await page.goto('/app/kit/?edge=always');
+  await page.goto('/ui/0.0.0-dev/kit/?edge=always');
   await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
   expect(await page.evaluate(() => document.querySelector('.ui-shell'))).toBeNull();
   expect(await page.evaluate(() => document.documentElement.dataset.size)).toBeUndefined();

@@ -4,7 +4,7 @@
 // attached to the report. A real phone is still the proof (docs/ui-kit-progress.md, "Cheap-Android check").
 import { test, expect } from './fixtures.mjs';
 
-const KIT = '/app/kit/?edge=always';
+const KIT = '/ui/0.0.0-dev/kit/?edge=always';
 const VERDICT = page => page.evaluate(() => JSON.parse(localStorage.getItem('core-glass-guard') || 'null'));
 
 /** @param {import('@playwright/test').Page} page  scroll the gallery by touch-sized wheel steps, return the gaps (ms) between frames */

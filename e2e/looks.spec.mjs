@@ -4,7 +4,7 @@
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
-const KIT = '/app/kit/?edge=always';
+const KIT = '/ui/0.0.0-dev/kit/?edge=always';
 const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
 /** @param {import('@playwright/test').Page} page @param {string} sel @param {string} prop */
 const style = (page, sel, prop) => page.locator(sel).first().evaluate((e, p) => getComputedStyle(e).getPropertyValue(p), prop);
@@ -101,7 +101,7 @@ test('glass guard: little memory turns glass down, kept on this device; Solid an
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   await context.addInitScript(() => Object.defineProperty(Navigator.prototype, 'deviceMemory', { configurable: true, get: () => 2 }));
   const page = await context.newPage();
-  await page.goto('/app/?emulator');
+  await page.goto('/test/plain.html');
   const root = page.locator('html');
   await expect(root).not.toHaveClass(/\bglass\b/);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('core-glass-guard') || 'null'))).toEqual({ solid: true, why: 'memory' });

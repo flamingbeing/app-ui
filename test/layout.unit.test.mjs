@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { stepValue } from '../public/ui/layout.js';
+import { stepValue } from '../ui/layout.js';
 
 test('a step stays in min/max and keeps the step\'s decimals', () => {
   assert.equal(stepValue('36.6', 1, { step: 0.1 }), '36.7');
@@ -21,7 +21,7 @@ test('an empty or unreadable box starts at its start value, else at 0 kept in ra
 });
 
 test('extra-dense never takes a target under 24 px', () => {
-  const css = fs.readFileSync(new URL('../public/ui/layout.css', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../ui/layout.css', import.meta.url), 'utf8');
   const sizes = [...css.matchAll(/--(?:tap|tap-s|row):\s*(\d+)px/g)].map(m => Number(m[1]));
   assert.ok(sizes.length >= 6, 'extra-dense sets its sizes in px');
   for (const px of sizes) assert.ok(px >= 24, `${px}px is under the 24 px floor`);

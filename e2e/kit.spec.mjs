@@ -3,7 +3,7 @@
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
-const KIT = '/app/kit/?edge=always';
+const KIT = '/ui/0.0.0-dev/kit/?edge=always';
 
 // a finger, through the DevTools protocol (Playwright's own touchscreen only taps)
 async function finger(page) {
@@ -280,7 +280,7 @@ for (const width of [390, 820, 1280]) {
 
     test('no edge swipe of its own where the phone has its own Back (Android, browsers)', async ({ sized }) => {
       const page = await sized(width);
-      await page.goto('/app/kit/');
+      await page.goto('/ui/0.0.0-dev/kit/');
       await page.click('#push');
       await expect.poll(() => depth(page)).toBe(1);
       await settled(page);
@@ -339,7 +339,7 @@ test('the phone\'s own Reduce Motion counts as Still', async ({ sized }) => {
 
 test('a page without the markup is left alone', async ({ phone }) => {
   const page = await phone();
-  await page.goto('/app/?emulator');
+  await page.goto('/test/plain.html');
   await expect(page.locator('#signed-out')).toBeVisible();
   const r = await page.evaluate(async () => { const { startGestures } = await import('@core/ui'); const g = startGestures(); const out = { menus: g.menus, screens: g.screens, sheets: g.sheets.size }; g.stop(); return out; });
   expect(r).toEqual({ menus: null, screens: null, sheets: 0 });
@@ -396,7 +396,7 @@ test('at 390 px a toast clears the home indicator on a page without a tab bar', 
   const page = await sized(390);
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Emulation.setSafeAreaInsetsOverride', { insets: { top: 47, bottom: 34 } });
-  await page.goto('/app/?emulator');
+  await page.goto('/test/plain.html');
   await expect(page.locator('#signed-out')).toBeVisible();
   await page.evaluate(async () => { const { toaster } = await import('@core/ui'); toaster(document.body).show('Saved'); });
   const toast = page.locator('.toast', { hasText: 'Saved' });
