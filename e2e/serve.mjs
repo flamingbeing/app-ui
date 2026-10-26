@@ -1,6 +1,7 @@
 // The e2e server: the real Worker (worker/sites.js) in Node, with the working tree served as one released version,
 // /ui/0.0.0-dev/ (fixtures.mjs BASE), so the tests load the files the way an app does. /test/ serves e2e/pages/: test
-// pages that are not part of a release (a page without the gallery's markup). node e2e/serve.mjs [port]
+// pages that are not part of a release (a page without the gallery's markup); their ../../ links (to this checkout's
+// files, so the link check can follow them) are served as /ui/0.0.0-dev/. node e2e/serve.mjs [port]
 import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -27,7 +28,7 @@ http.createServer(async (req, res) => {
     const file = path.join(PAGES, url.pathname.slice('/test/'.length));
     const body = file.startsWith(PAGES + path.sep) ? await read(file) : null;
     res.writeHead(body ? 200 : 404, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(body || 'Not found');
+    res.end(body ? body.toString().replaceAll('../../', DEV) : 'Not found');
     return;
   }
   const r = await worker.fetch(new Request(url, { method: req.method }), env);

@@ -1,4 +1,4 @@
-// @core/theme (incubating in the starter, with @core/ui): this device's theme choice (theme, dark style, look,
+// @core/theme (app-ui, with @core/ui): this device's theme choice (theme, dark style, look,
 // accent, ground, density, glass or Solid), the looks (looks.js: token sets + variants), the glass guard, the palettes
 // worked out from it with a contrast floor, the switch, the screen-switch motion, and theme/theme.css's custom properties and theme/glass.css's glass (loaded with <link>; the
 // palette replaces their values once applyTheme runs).

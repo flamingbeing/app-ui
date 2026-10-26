@@ -1,6 +1,6 @@
 # The UI kit (`@core/ui`)
 
-Gesture parts, the adaptive shell, the looks and the placement rules every app built on this starter follows. The code is in
+Gesture parts, the adaptive shell, the looks and the placement rules every app built on app-starter follows. The code is in
 `ui/`; the galleries are `/kit/` (the gesture parts) and `/kit/shell/` (the sample list app in the shell).
 Tests are listed in [kit-tests.md](kit-tests.md); stage notes in [ui-kit-progress.md](ui-kit-progress.md).
 
@@ -131,7 +131,7 @@ chrome, with at most three layers and two blur tiers. Reduce transparency, more 
 No component code. If a look seems to need a fork of a part, add a variant instead, and ask first.
 
 1. Copy `theme/looks/c.js` to a new file (say `d.js`). Give it an `id`, a `name` and a one-line `desc`, then
-   pick its variants and set every token. `app/test/looks.unit.test.mjs` fails if a key is missing or a variant is
+   pick its variants and set every token. `test/looks.unit.test.mjs` fails if a key is missing or a variant is
    unknown.
 2. Import it in `theme/looks.js` and add it to `LOOKS`. Its words show up in both switchers on their own.
 3. Add it to `LOOKS` in `e2e/looks.spec.mjs` with the variants it should show. It then gets axe and screenshots at 390,

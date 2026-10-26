@@ -1,16 +1,10 @@
 # Status
 
 ## Now
--
+- 1.0.0-rc.1: first release, moved from app-starter. app-starter and sandbox-app switch to it next.
 
 ## Waiting on the owner
 -
 
-## Next (in order)
-1.
-
-## Recently done
--
-
-## Decisions (dated, one line each)
--
+## Next
+- 1.0.0 once the apps run on rc.1.

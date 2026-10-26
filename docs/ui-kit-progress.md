@@ -32,7 +32,7 @@ Gotchas found:
 - Density (`comfortable` 60 / `regular` 50 / `compact` 44 px rows) replaces v0's layout (`compact` migrates).
 - Glass guard in `theme/guard.js`; material `always` ("Glass, even here") overrides it, Solid wins.
 - Look and density switchers in Settings and the gallery (`?look=`, `?density=` preview without keeping; `?guard=again`).
-- Tests: `e2e/looks.spec.mjs` (each look × 390/820/1280, screenshots in the test output), `app/test/looks.unit.test.mjs`.
+- Tests: `e2e/looks.spec.mjs` (each look × 390/820/1280, screenshots in the test output), `test/looks.unit.test.mjs`.
 
 Gotchas found:
 - The e2e fixtures seed the guard's verdict as fast; a test of the guard needs its own context.
@@ -77,7 +77,7 @@ Gotchas found:
 
 - `ui/layout.css`, `ui/layout.js` (grid, stack, split, toolbar, segmented, stepper) and `data-dense="extra"`; rules
   in [ui-kit.md](ui-kit.md#layout-parts-and-extra-dense). Gallery `kit/dense/`, tests `e2e/dense.spec.mjs`
-  and `app/test/layout.unit.test.mjs`.
+  and `test/layout.unit.test.mjs`.
 - Feedback fixed on earlier parts: look B's bar now keeps the band's colour when the title collapses (no white flash,
   no empty band; `large-title.js` collapses when the title's words, not its padding, reach the bar); B's band in the
   laptop detail pane runs edge to edge; from 600 px the glass scroll-edge veil no longer blurs the pane headings.
@@ -91,7 +91,7 @@ Gotchas found:
 - Feedback: F1.3 (look B when the header hides) was fixed in K4 (see above); `e2e/looks.spec.mjs` ("Look B's band"
   in kit-tests.md) keeps it fixed.
 - Default look: A, set in `theme/looks.js` (`DEFAULT_LOOK`); a device's own pick wins, then the app's
-  `applyTheme({ look })`. Pinned by `app/test/looks.unit.test.mjs` and the gallery test that a link's `?look=b` is only a preview.
+  `applyTheme({ look })`. Pinned by `test/looks.unit.test.mjs` and the gallery test that a link's `?look=b` is only a preview.
 - Cheap-Android check: `e2e/cheap-android.spec.mjs` stands in for a cheap phone in Chromium (2 GB memory figure;
   slow frames with no figure). Both turn glass Solid and the verdict is kept. **Not done: a real phone.** Open `/kit/`
   on the oldest Android, scroll the gallery once with Bars and sheets on "Glass, even here" and once on Solid, and

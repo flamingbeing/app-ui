@@ -8,13 +8,13 @@
   <!-- A page without the gallery's markup, loading the kit the way an app does (import map, <link> CSS) and showing
        the theme switcher, as the starter app's signed-out page does. Test-only: not part of a release. -->
   <script type="importmap">
-{ "imports": { "@core/ui": "/ui/0.0.0-dev/ui/index.js", "@core/theme": "/ui/0.0.0-dev/theme/index.js" } }
+{ "imports": { "@core/ui": "../../ui/index.js", "@core/theme": "../../theme/index.js" } }
   </script>
-  <script src="/ui/0.0.0-dev/theme/early.js"></script>
+  <script src="../../theme/early.js"></script>
   <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
-  <link rel="stylesheet" href="/ui/0.0.0-dev/theme/theme.css">
-  <link rel="stylesheet" href="/ui/0.0.0-dev/ui/ui.css">
-  <link rel="stylesheet" href="/ui/0.0.0-dev/theme/glass.css">
+  <link rel="stylesheet" href="../../theme/theme.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../theme/glass.css">
   <script type="module">
     import { applyTheme, themeSwitch } from '@core/theme';
     applyTheme({ accent: '#3a6390' });

@@ -212,7 +212,7 @@ for (const width of [390, 820, 1280]) {
       }
       await page.goBack();
       await expect(sheet).toBeHidden();
-      await expect(page).toHaveURL(/\/app\/kit\//);
+      await expect(page).toHaveURL(/\/ui\/0\.0\.0-dev\/kit\//);
     });
 
     test('a field and a sideways scroller in the sheet keep the finger', async ({ sized }) => {
