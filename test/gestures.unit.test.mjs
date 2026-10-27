@@ -4,7 +4,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { HOLD_MS, SLOP, velocity, still, haptic } from '../ui/gesture.js';
-import { placeMenu } from '../ui/hold-menu.js';
+import { placeMenu, placeAtPointer } from '../ui/hold-menu.js';
 import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
 import { dragRange, needs, TICKS } from '../ui/select-mode.js';
@@ -122,4 +122,11 @@ test('edge swipe is on only in the iPhone home-screen app (or when forced for te
   assert.equal(edgeBackOn(android, standalone, null), false, 'Android has a system Back');
   assert.equal(edgeBackOn(android, browser, 'always'), true);
   assert.equal(edgeBackOn(iphone, standalone, 'off'), false);
+});
+
+test('right-click menu: its corner at the pointer; flipped left or up near an edge, kept 8 px inside', () => {
+  const desk = { w: 1280, h: 800 };
+  assert.deepEqual(placeAtPointer(menu, desk, { x: 500, y: 300 }), { left: 500, top: 300, below: true });
+  assert.deepEqual(placeAtPointer(menu, desk, { x: 1200, y: 700 }), { left: 1200 - 220, top: 700 - 200, below: false });
+  assert.deepEqual(placeAtPointer(menu, { w: 230, h: 210 }, { x: 100, y: 100 }), { left: 8, top: 8, below: false });
 });

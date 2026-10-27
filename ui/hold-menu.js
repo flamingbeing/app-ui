@@ -24,6 +24,20 @@ export function placeMenu(r, menu, view, at) {
   return { left, top, previewTop, below: top > previewTop };
 }
 
+/**
+ * Where a mouse's right-click menu goes (pure): its corner at the pointer, as on a desktop; flipped left or up when it
+ * would run off the screen, and kept 8 px inside it.
+ * @param {{ w: number, h: number }} menu @param {{ w: number, h: number }} view @param {{ x: number, y: number }} at
+ * @returns {{ left: number, top: number, below: boolean }}
+ */
+export function placeAtPointer(menu, view, at) {
+  const edge = 8;
+  const left = at.x + menu.w <= view.w - edge ? at.x : at.x - menu.w;
+  const below = at.y + menu.h <= view.h - edge;
+  const top = below ? at.y : at.y - menu.h;
+  return { left: Math.max(edge, Math.min(left, view.w - edge - menu.w)), top: Math.max(edge, Math.min(top, view.h - edge - menu.h)), below };
+}
+
 // a look whose menus come up as a sheet (data-menu="sheet" on <html>, looks.js) shows them so on phones
 export const SHEET_BELOW = 840;
 
@@ -90,8 +104,8 @@ export function holdMenus(root = document) {
     return box;
   }
 
-  /** @param {HTMLElement} el @param {{ x: number, y: number } | null} [at] @param {boolean} [byKey] */
-  function open(el, at = null, byKey = false) {
+  /** @param {HTMLElement} el @param {{ x: number, y: number } | null} [at] @param {boolean} [byKey] @param {boolean} [mouse]  a mouse's right-click: the menu at the pointer, the row not lifted */
+  function open(el, at = null, byKey = false, mouse = false) {
     const sel = el.getAttribute('data-hold-menu');
     const tpl = sel ? document.querySelector(sel) : null;
     if (!(tpl instanceof HTMLTemplateElement)) return;
@@ -99,7 +113,7 @@ export function holdMenus(root = document) {
     close(true);
     menuFor = el;
     const r = el.getBoundingClientRect();
-    const sheet = html.dataset.menu === 'sheet' && innerWidth < SHEET_BELOW;
+    const sheet = html.dataset.menu === 'sheet' && innerWidth < SHEET_BELOW && !mouse;
     const copy = /** @type {HTMLElement} */ (el.cloneNode(true));
     copy.removeAttribute('id');
     copy.classList.remove('is-holding');
@@ -129,15 +143,17 @@ export function holdMenus(root = document) {
     layer.classList.add('is-open');   // before measuring: a closed layer is display:none, so the menu would measure 0
     menu.classList.toggle('is-sheet', sheet);   // (before measuring: the sheet is wider)
     const view = { w: innerWidth, h: innerHeight };
+    const size = { w: menu.offsetWidth, h: menu.offsetHeight };
     const p = sheet ? placeSheetMenu({ h: menu.offsetHeight }, { h: view.h - (layer.querySelector('.ui-menu-safe')?.clientHeight || 0) })
-      : placeMenu(r, { w: menu.offsetWidth, h: menu.offsetHeight }, view, at);
+      : mouse && at ? { ...placeAtPointer(size, view, at), previewTop: r.top }
+      : placeMenu(r, size, view, at);
     if ('left' in p) menu.style.left = `${p.left}px`; else menu.style.removeProperty('left');
     menu.style.top = `${p.top}px`;
     menu.style.setProperty('--ui-menu-origin', 'below' in p && !p.below ? '50% 100%' : '50% 0');
     html.classList.add('ui-menu-open');
     if ('previewTop' in p) requestAnimationFrame(() => {
       preview.style.top = `${p.previewTop}px`;
-      if (!still()) preview.classList.add('is-lifted');
+      if (!still() && !mouse) preview.classList.add('is-lifted');
     });
     menu.addEventListener('click', e => {
       const b = /** @type {Element} */ (e.target).closest('.ui-menu-item');
@@ -211,7 +227,9 @@ export function holdMenus(root = document) {
     const el = holdable(e.target);
     if (!el) return;
     e.preventDefault();
-    if (menuFor !== el) { cancel(); open(el, e.clientX ? { x: e.clientX, y: e.clientY } : null, !e.clientX); }
+    // a mouse (not Android's long press, which also sends this): the menu at the pointer
+    const mouse = 'pointerType' in e ? /** @type {PointerEvent} */ (e).pointerType === 'mouse' : matchMedia('(pointer: fine)').matches;
+    if (menuFor !== el) { cancel(); open(el, e.clientX ? { x: e.clientX, y: e.clientY } : null, !e.clientX, mouse && !!e.clientX); }
   });
   l.on(document, 'keydown', (/** @type {KeyboardEvent} */ e) => {
     if (!(e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) return;

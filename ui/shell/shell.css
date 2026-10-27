@@ -3,6 +3,7 @@
 
 .ui-row[hidden], .ui-shell [hidden] { display: none; }
 .ui-sidebar, .ui-pane-head { display: none; }
+.ui-pane-detail[data-empty] .ui-detail-actions { display: none; }   /* nothing open: nothing to act on */
 .ui-pane-head button, .ui-detail-actions button { min-height: var(--tap); border: 0; border-radius: var(--radius); background: var(--selection); color: var(--text); padding: 0 var(--pad); }
 .ui-pane-head .ui-primary { background: var(--accent); color: var(--bg); font-weight: 600; }
 .ui-shell kbd { display: none; }
@@ -41,6 +42,10 @@
   .ui-pane-list > .ui-large-title { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden;
     clip-path: inset(50%); white-space: nowrap; }
   .ui-pane-list .ui-list { border-inline: 0; }
+  /* rows in the list pane are flush and close together, so each look gets a faint line between them, even one without
+     row lines on a phone */
+  .ui-pane-list .ui-row + .ui-row { background: linear-gradient(color-mix(in srgb, var(--line) 30%, transparent),
+    color-mix(in srgb, var(--line) 30%, transparent)) right top / calc(100% - var(--pad)) var(--border) no-repeat, var(--surface); }
   .ui-pane-list .ui-row[aria-current="true"] { background: var(--selection); }
   .ui-pane-detail { padding: calc(env(safe-area-inset-top, 0px) + var(--pad)) calc(var(--pad) * 2) var(--pad); }
   .ui-pane-detail .ui-large-title { margin-inline: 0; font-size: 1.6rem; }

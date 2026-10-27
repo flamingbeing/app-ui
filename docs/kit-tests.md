@@ -46,15 +46,17 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Delete | removing from the detail shows an Undo toast; Undo puts the row back | |
 | Resize | the layout follows the width when the window crosses a size class | |
 | Other pages | `startGestures()` on a page without the shell markup starts nothing | |
+| Desktop details | 1280 px: the detail shows Water and Delete only with a row open, and empties when that row is deleted; right-click opens the menu with its corner at the pointer, the row not lifted; looks A, B, C have a line between rows in the list pane | |
 
 ### Looks, density and the glass guard (`e2e/looks.spec.mjs`)
 
 | Part | What is tested | axe |
 | --- | --- | --- |
 | Looks A, B, C | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
-| Look B's menu | under 840 px the hold menu is a bottom sheet on the bottom edge, named in its head (no lifted copy) with the tab bar hidden; from 840 px it opens beside the row | menu open |
+| Look B's menu | under 840 px the hold menu from touch or Shift+F10 is a bottom sheet (a mouse's right-click opens at the pointer) on the bottom edge, named in its head (no lifted copy) with the tab bar hidden; from 840 px it opens beside the row | menu open |
 | Dark | 390 and 1280 px, each look: the gallery and the shell are clean; look B's band takes white text; menus, sheets and the action bar are solid (no blur, no see-through) | gallery, shell |
 | Ticks | square in B, round in A and C | |
+| Wide bar | 1280 px, looks A, B, C, gallery and dense page: the top bar is full width, its title centred and its start in line with the large title's words; an edge tab bar keeps its tabs together in the middle | |
 | Density | rows 60 / 50 / 44 px; taps never under 44; a link's `?look=` is a preview, a pick is kept after reload | |
 | Glass guard | little memory turns glass off, kept, with the reason in Settings; Solid and "Glass, even here" still win | yes |
 
