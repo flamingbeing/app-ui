@@ -5,6 +5,15 @@ import { test, expect } from './fixtures.mjs';
 
 const PARTS = '/ui/0.0.0-dev/kit/parts/';
 
+// a finger, through the DevTools protocol (Playwright's own touchscreen only taps)
+async function drag(page, x0, y0, x1, y1) {
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  await send('touchStart', x0, y0);
+  for (let i = 1; i <= 8; i++) { await send('touchMove', x0 + (x1 - x0) * i / 8, y0 + (y1 - y0) * i / 8); await page.waitForTimeout(16); }
+  await send('touchEnd', 0, 0);
+}
+
 for (const width of [390, 1280]) {
   test.describe(`at ${width} px`, () => {
     test('undo toast: Undo puts the row back where it was; one toast at a time', async ({ sized }) => {
@@ -51,6 +60,77 @@ for (const width of [390, 1280]) {
       await page.keyboard.press('Escape');
       await expect(sheet).toHaveCount(0);
       await expect(page.locator('#about-open')).toBeFocused();
+    });
+
+    test('drafts: typing is kept and a reload finds it; Send clears it', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      await page.locator('#draft-text').fill('half a thought');
+      await expect(page.locator('#draft-state')).toHaveText('Draft kept on this device.');
+      await page.reload();
+      await expect(page.locator('#draft-text')).toHaveValue('half a thought');
+      await expect(page.locator('#draft-state')).toHaveText('Draft restored.');
+      await page.locator('#draft-send').click();
+      await page.reload();
+      await expect(page.locator('#draft-text')).toHaveValue('');
+      expect(await AxeBuilder(page), 'axe').toEqual([]);
+    });
+
+    test('drag to reorder: dragging the grip down moves the row', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      const grip = page.locator('#drag-list li').first().locator('.ui-grip');
+      await grip.scrollIntoViewIfNeeded();
+      const box = await grip.boundingBox();
+      const rowH = (await page.locator('#drag-list li').nth(1).boundingBox())?.height ?? 40;
+      await drag(page, box.x + box.width / 2, box.y + box.height / 2, box.x + box.width / 2, box.y + box.height / 2 + rowH * 2.6);
+      await expect(page.locator('#drag-order')).toHaveText('Order: Pear, Plum, Apple, Fig');
+      expect(await AxeBuilder(page), 'axe').toEqual([]);
+    });
+
+    test('share out: Copy says so; Share without a share sheet copies', async ({ sized, context }) => {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
+      const page = await sized(width);
+      await page.addInitScript(() => { Object.defineProperty(navigator, 'share', { value: undefined, configurable: true }); });
+      await page.goto(PARTS);
+      await page.locator('#share-copy').click();
+      await expect(page.locator('.toast').last()).toHaveText(/Copied|Could not copy/);
+      await page.locator('#share-send').click();
+      await expect(page.locator('.toast').last()).toHaveText(/Copied: paste it|Could not copy/);
+    });
+
+    test('Back closes the top dialog first, then the next; the page stays', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      await page.locator('#back-open').click();
+      await page.locator('#back-second').click();
+      await expect(page.locator('#back-dialog-2')).toHaveAttribute('open', '');
+      await page.goBack();
+      await expect(page.locator('#back-dialog-2')).not.toHaveAttribute('open', '');
+      await expect(page.locator('#back-dialog')).toHaveAttribute('open', '');
+      await page.goBack();
+      await expect(page.locator('#back-dialog')).not.toHaveAttribute('open', '');
+      await expect(page.locator('#back-state')).toHaveText('Dialog closed.');
+      expect(page.url()).toContain('/kit/parts/');
+    });
+
+    test('hide mode: a tap hides a button or card; the main button and inputs stay; Show all brings them back', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      await page.locator('#hide-on').check();
+      await expect(page.locator('#hide-page .hide-cand')).toHaveCount(3);   // the weather button, the weather card, the tips card
+      await page.getByRole('button', { name: 'Refresh weather' }).click();
+      await expect(page.locator('#hide-list')).toHaveText('Hidden: Refresh weather');
+      await expect(page.getByRole('button', { name: 'Refresh weather' })).toBeHidden();
+      await page.getByRole('heading', { name: 'Tips' }).click();
+      await expect(page.locator('#hide-list')).toHaveText('Hidden: Refresh weather, Tips');
+      await page.getByRole('button', { name: 'Save notes' }).click({ force: true });
+      await expect(page.getByRole('button', { name: 'Save notes' })).toBeVisible();
+      await page.reload();
+      await expect(page.getByRole('heading', { name: 'Tips' })).toBeHidden();
+      await page.locator('#hide-all').click();
+      await expect(page.getByRole('heading', { name: 'Tips' })).toBeVisible();
+      await expect(page.locator('#hide-list')).toHaveText('Nothing hidden.');
     });
   });
 }

@@ -123,3 +123,23 @@ test('the switch: keyboard flips it, it is named by its row, and Less motion sti
   await page.evaluate(() => { document.documentElement.dataset.motion = 'still'; });
   expect(await sw.evaluate(e => getComputedStyle(e).transitionDuration)).toBe('0s');
 });
+
+test('a row with more help opens it behind ⓘ; Reset this page goes back to the defaults and Undo returns the choices', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(PAGE);
+  const detail = page.locator('.ui-row-more');
+  await expect(detail).toBeHidden();
+  const info = page.getByRole('button', { name: 'More about this setting: Watering reminders' });
+  await info.click();
+  await expect(detail).toBeVisible();
+  await expect(info).toHaveAttribute('aria-expanded', 'true');
+  expect(await AxeBuilder(page), 'axe with the detail open').toEqual([]);
+  await page.evaluate(() => Promise.all([window.kit.settings.set('reminders', false), window.kit.settings.set('reminderHour', 5)]));
+  await page.getByRole('button', { name: 'Reset this page' }).click();
+  expect(await get(page, 'reminders')).toBe(true);
+  expect(await get(page, 'reminderHour')).toBe(8);
+  await expect(page.locator('.ui-settings-status')).toContainText('Back to the defaults');
+  await page.locator('.ui-undo').click();
+  expect(await get(page, 'reminders')).toBe(false);
+  expect(await get(page, 'reminderHour')).toBe(5);
+});

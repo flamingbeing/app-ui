@@ -87,8 +87,8 @@ const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById(
       { key: 'sort', label: 'Sort the list by', choices: [['due', 'Next watering'], ['name', 'Name'], ['room', 'Room']] },
       { key: 'units', label: 'Units', sub: 'For pot sizes and water', choices: [['metric', 'Litres and cm'], ['imperial', 'Cups and inches']] },
     ] },
-    { title: 'Reminders', rows: [
-      { key: 'reminders', label: 'Watering reminders' },
+    { title: 'Reminders', reset: true, rows: [
+      { key: 'reminders', label: 'Watering reminders', more: 'Reminders arrive once a day, at the hour below, and only for plants that are due.' },
       { key: 'reminderHour', label: 'Remind at', sub: 'Hour of the day, 0 to 23', min: 0, max: 23, step: 1 },
     ] },
     { title: 'This device', rows: [

@@ -108,3 +108,11 @@ stand-in for `@core/settings` on the page.
 | Loading and errors | skeleton rows with `aria-busy` while loading, then the list; the error shows with Try again, which recovers; axe in each state | |
 | About sheet | version, the newest-version answer, outside code listed from the import map with versions and licences; Esc closes and focus returns; axe with the sheet open | |
 | About sheet (unit) | `packagesFromImportMap` leaves out the app's own files and reads versions from addresses | |
+| Drafts | typing is kept and a reload finds it again; Send clears it; axe | |
+| Drafts (unit) | a reload takes over a released slot, a held slot stays; blocked storage reads nothing and save throws | |
+| Drag to reorder | dragging the grip with a finger moves the row to the new place; axe | |
+| Share out | Copy and Share (no share sheet) copy and say so; (unit) a closed share sheet is not an error | |
+| Back closes the dialog | Back closes the newest dialog first, then the one under it; the page stays (unit: dismissAll, reset) | |
+| Screen history (unit) | go pushes, Back returns, a deep link gets its parent trail | |
+| Hide mode | a tap hides a button or card; the main button and inputs stay; kept after reload; Show all (unit: the saved list is cleaned) | |
+| Settings rows | ⓘ opens the rest of the help (axe with it open); Reset this page puts the section's rows back and Undo returns them | |
