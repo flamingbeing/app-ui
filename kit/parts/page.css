@@ -1,0 +1,5 @@
+/* The reference parts gallery: a list of rows, nothing else of its own. */
+main { padding: var(--pad); max-width: 40rem; margin: 0 auto; }
+.parts-list { list-style: none; margin: 0 0 var(--gap); padding: 0; }
+.parts-list li { display: flex; justify-content: space-between; align-items: center; min-height: var(--row); border-bottom: 1px solid var(--line); }
+section { margin-bottom: calc(var(--pad) * 2); }
