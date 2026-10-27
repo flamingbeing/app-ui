@@ -7,6 +7,9 @@
   <title>Dense screens gallery</title>
   <script src="../../theme/early.js"></script>
   <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <script src="../installable.js"></script>
   <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
   <link rel="stylesheet" href="../../theme/theme.css">
   <link rel="stylesheet" href="../../ui/ui.css">
@@ -29,7 +32,7 @@
   <main>
     <h1 class="ui-large-title" id="page-title">Readings</h1>
     <div class="kit-controls">
-      <label class="kit-check"><input type="checkbox" id="dense-on" checked> Extra-dense (this screen)</label>
+      <label class="kit-check"><input type="checkbox" id="dense-on" checked> Extra-dense</label>
       <div id="kit-looks" class="kit-looks"></div>
     </div>
 
@@ -39,7 +42,6 @@
         <div class="ui-stack" data-gap="pad">
           <div class="ui-stack" data-dir="row">
             <strong>Demo 07</strong><span class="kit-badge">Group B</span>
-            <span class="ui-push small" id="next-due">Next: 30 min reading at 08:45</span>
           </div>
           <section aria-labelledby="times-h">
             <h2 id="times-h">Key times</h2>

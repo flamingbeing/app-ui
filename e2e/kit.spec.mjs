@@ -537,3 +537,49 @@ test('at 390 px: Back sits in the bar; Select all on one line; the sheet, contro
   expect(ab.x).toBe(0);
   expect(Math.round(ab.y + ab.height)).toBe(844);
 });
+
+// the owner's review: the sync chip on made-up states; no pull-to-refresh; plain demo words; an installable gallery
+test('the sync chip shows each state in its word, with a count where there is one; axe clean', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(KIT);
+  const chip = page.locator('#status');
+  await expect(chip).toHaveText('Saved');
+  await expect(chip).toHaveAttribute('role', 'status');
+  for (const [state, text] of [['pending', 'Sending… (3)'], ['offline', 'Offline, kept on this device (2)'], ['attention', 'Needs you'],
+    ['unknown', 'Connecting…'], ['at-risk', 'Not saved on this device yet (1)'], ['synced', 'Saved']]) {
+    await page.locator('#sync-pick').selectOption(state);
+    await expect(chip).toHaveText(text);
+    await expect(chip).toHaveAttribute('data-state', state);
+  }
+  await page.locator('#sync-pick').selectOption('attention');
+  expect(await AxeBuilder(page)).toEqual([]);
+});
+
+for (const path of ['', 'shell/', 'dense/']) {
+  test(`kit/${path}: no pull-to-refresh; demo words, not notes; installable, never prompted`, async ({ sized, request }) => {
+    const page = await sized(390);
+    await page.goto(`/ui/0.0.0-dev/kit/${path}?edge=always`);
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).overscrollBehaviorY)).toBe('none');
+    const words = await page.evaluate(() => document.body.innerText + [...document.querySelectorAll('dialog')].map(d => d.textContent).join(' '));
+    for (const note of [/made-up paragraph/i, /pushed screen/i, /history entry/i, /\(this (device|screen)\)/i, /\bNext:/, /from 840 px/])
+      expect(words).not.toMatch(note);
+    // the manifest and its icons are served; the page cancels the browser's own install prompt
+    const href = await page.locator('link[rel="manifest"]').evaluate(l => /** @type {HTMLLinkElement} */ (l).href);
+    const res = await request.get(href);
+    expect(res.headers()['content-type']).toBe('application/manifest+json');
+    const manifest = await res.json();
+    expect(manifest.display).toBe('standalone');
+    for (const icon of manifest.icons) expect((await request.get(new URL(icon.src, href).href)).status()).toBe(200);
+    expect(manifest.icons.map(i => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
+    expect(await page.evaluate(() => {
+      const e = new Event('beforeinstallprompt', { cancelable: true });
+      dispatchEvent(e);
+      return e.defaultPrevented;
+    })).toBe(true);
+    // the service worker (scope: kit/) takes the page over
+    const scope = await page.evaluate(() => navigator.serviceWorker.ready.then(r => r.scope));
+    expect(new URL(scope).pathname).toBe('/ui/0.0.0-dev/kit/');
+    await page.reload();
+    expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+  });
+}

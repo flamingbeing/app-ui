@@ -3,6 +3,9 @@
    glass.css). Glass only on the floating bars (top bar, tab bar); menus, sheets and the action bar are solid, as is the
    content. Still (data-motion on <html>) or the device's Reduce Motion: no springs, slides or lifts. */
 
+/* no pull-to-refresh: a pull down at the top would reload the page (and lose a sheet's or a form's state) */
+html { overscroll-behavior-y: none; }
+
 /* the hidden switch the iPhone haptic toggles (gesture.js) */
 .ui-haptic { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; }
 

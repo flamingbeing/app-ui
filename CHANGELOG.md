@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.7
+- No pull-to-refresh (owner's review): `ui/gestures.css` sets `overscroll-behavior-y: none` on the page, so a pull
+  down at the top no longer reloads it (and loses a sheet's or a form's state).
+- The gallery is installable to try as a home-screen app: a manifest, 192 and 512 px icons and a service worker
+  (network first, the last copy offline). The browser's own install prompt is cancelled (`kit/installable.js`, a file
+  because the page policy has no inline scripts); no install buttons. The Worker serves `.webmanifest` and `.png`.
+- Gallery: the sync chip on made-up states (pick one to see its word and count). Demo words read as an app's would:
+  plant care notes in the sheet instead of "Note 1: a made-up paragraph…", no "On a phone this is a pushed screen",
+  no second "Next" line on the readings screen, "Less motion" for Still.
+
 ## 1.0.0-rc.6
 - Shell, laptop (owner's review): with no row open the detail shows no Water or Delete; deleting the open row empties
   the detail again. The list pane has a faint line between rows in every look (look B's phone cards have none).

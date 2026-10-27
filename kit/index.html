@@ -7,6 +7,9 @@
   <title>Kit gallery</title>
   <script src="../theme/early.js"></script>
   <link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <script src="installable.js"></script>
   <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
   <link rel="stylesheet" href="../theme/theme.css">
   <link rel="stylesheet" href="../ui/ui.css">
@@ -34,9 +37,13 @@
       <div class="kit-actions">
         <button type="button" id="open-sheet" data-open-sheet="#sheet">Open the sheet</button>
         <button type="button" id="push" data-push="#detail">Push a screen</button>
-        <label class="kit-still"><input type="checkbox" id="still"> Still (this device)</label>
+        <label class="kit-still"><input type="checkbox" id="still"> Less motion</label>
       </div>
       <div class="kit-looks" id="kit-looks"></div>
+      <div class="kit-sync">
+        <span id="sync-host"></span>
+        <label>Try a state <select id="sync-pick"></select></label>
+      </div>
       <ul class="ui-list" id="plants" data-select aria-label="Plants">
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Basil">
           <span class="ui-row-main">Basil<span class="ui-row-sub">Kitchen window · water every 2 days</span></span>
@@ -92,15 +99,14 @@
     <section class="ui-screen" id="detail" aria-labelledby="detail-title" hidden>
       <button type="button" class="ui-back">Plants</button>
       <h1 class="ui-large-title" id="detail-title">Details</h1>
-      <p class="kit-lede" id="detail-text">A pushed screen. Back, the browser's Back, or (in the iPhone home-screen app)
-        a swipe from the left edge goes back.</p>
+      <p class="kit-lede" id="detail-text">Pick a plant from the list.</p>
       <button type="button" id="push-more" data-push="#more">Push another</button>
     </section>
 
     <section class="ui-screen" id="more" aria-labelledby="more-title" hidden>
       <button type="button" class="ui-back">Details</button>
       <h1 class="ui-large-title" id="more-title">One more</h1>
-      <p class="kit-lede">Two screens deep. Each one is a history entry.</p>
+      <p class="kit-lede">Care notes and the last few waterings would go here.</p>
     </section>
   </main>
 
@@ -136,14 +142,14 @@
         <button type="button">Bedroom</button><button type="button">Hall</button><button type="button">Study</button>
         <button type="button">Living room</button><button type="button">Window box</button>
       </div>
-        <p>Note 1: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 2: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 3: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 4: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 5: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 6: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 7: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
-        <p>Note 8: a made-up paragraph so the sheet has something to scroll. Pull the grabber up for the full height; at the top of this text, pull down to bring it back.</p>
+        <p>Water when the top few centimetres of soil are dry; most plants here would rather be a little thirsty than sit in a wet pot.</p>
+        <p>Turn the pot a quarter turn each week so the plant grows evenly instead of leaning towards the window.</p>
+        <p>Wipe broad leaves with a damp cloth every month or so; dust blocks the light they need.</p>
+        <p>Feed in spring and summer only, at half the strength the bottle suggests.</p>
+        <p>Yellow lower leaves usually mean too much water; brown crispy tips usually mean dry air.</p>
+        <p>Repot when roots come out of the drainage holes, into a pot one size bigger, not more.</p>
+        <p>Herbs on the kitchen window like to be picked often; it keeps them bushy.</p>
+        <p>Bring balcony plants in before the first cold night, and check under the leaves for visitors.</p>
     </div>
   </dialog>
 </body>
