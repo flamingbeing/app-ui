@@ -386,7 +386,11 @@ test('at 390 px the sheet and the sheet menu clear the home indicator', async ({
     const last = b.lastElementChild.getBoundingClientRect().bottom; return innerHeight - last; });
   expect(bodyEnd).toBeGreaterThanOrEqual(34);
   await page.keyboard.press('Escape');
-  await page.locator('#plants .ui-row').first().focus();   // (Shift+F10: a mouse's right-click opens the menu at the pointer)
+  await expect(page.locator('#sheet')).toBeHidden();
+  await settled(page);   // closed, the sheet hands focus back to its opener; only then focus the row
+  const first = page.locator('#plants .ui-row').first();
+  await first.focus();   // (Shift+F10: a mouse's right-click opens the menu at the pointer)
+  await expect(first).toBeFocused();
   await page.keyboard.press('Shift+F10');
   await expect(page.locator('.ui-menu.is-sheet')).toBeVisible();
   await settled(page);
