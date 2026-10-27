@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0-rc.4
+- Components (owner's review): a pushed screen's Back shows in the top bar's leading slot (`[data-bar-lead]`, else
+  the bar's start) instead of below an empty bar; bar buttons stay on one line.
+- Sheets: Done is a word in the link colour, the title a little larger; a row of chips that scrolls sideways runs to
+  the sheet's edges; a centred dialog with a mouse has no drag handle.
+- Selects, text fields and checkboxes are styled: 44 px high, a drawn chevron with room for the words, 22 px boxes
+  in the accent.
+- Select mode's action bar: the count in the text colour, off buttons faded, Delete red; along the bottom edge in a
+  look whose tab bar is there (look C).
+- The look's heading face (look A's serif) is for page titles only; sheet, section and bar titles use the text face.
+- Large titles have a full gap above them (look C's sat right under the bar).
+
 ## 1.0.0-rc.3
 - Contrast and glass (owner's review): the selection colour (the ground of a current tab, side bar item or key) is
   floored against the text, muted, link and danger colours drawn on it, so dark mode passes axe again.

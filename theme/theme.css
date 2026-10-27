@@ -68,10 +68,24 @@
 :root[data-density="compact"] { --row: 44px; --gap: .25rem; --pad: .75rem; font-size: 93.75%; }
 
 body { font-family: var(--font); line-height: var(--leading); background: var(--bg); color: var(--text); }
-h1, h2, h3 { font-family: var(--font-head); line-height: 1.2; }
+h1, h2, h3 { line-height: 1.2; }
+/* the look's heading face (a serif in look A) for page titles only: sheet, section and bar titles stay in the text face */
+h1 { font-family: var(--font-head); }
 button, input, select { font: inherit; color: inherit; }
 button { min-height: var(--tap); padding: 0 var(--pad); cursor: pointer; border-radius: var(--control-r); }
 button, select { background: var(--surface); border: var(--border) solid var(--line); }
+/* form controls a finger can hit, in the theme's colours (zero specificity: a page's own rules win). A select draws
+   its own chevron (two gradients, no image) with room so the words never run under it. */
+select { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border-radius: var(--control-r); -webkit-appearance: none;
+  appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+  linear-gradient(135deg, currentColor 50%, transparent 50%); background-repeat: no-repeat;
+  background-position: calc(100% - 1rem) 50%, calc(100% - .7rem) 50%; background-size: .3rem .3rem; cursor: pointer; }
+:where(input:not([type]), input[type="text"], input[type="search"], input[type="email"], input[type="number"],
+  input[type="tel"], input[type="url"], input[type="password"], input[type="date"], input[type="time"], textarea) {
+  min-height: var(--tap); padding: 0 var(--gap); box-sizing: border-box; background: var(--surface);
+  border: var(--border) solid var(--line); border-radius: var(--radius); }
+:where(textarea) { padding: var(--gap); }
+:where(input[type="checkbox"], input[type="radio"]) { width: 1.375rem; height: 1.375rem; margin: 0; accent-color: var(--accent); }
 input[type="color"] { min-height: var(--tap); min-width: var(--tap); padding: 2px; border: var(--border) solid var(--line);
   border-radius: var(--radius); background: var(--surface); }
 button:not(:disabled):active { box-shadow: inset 0 0 0 100vmax var(--press); }

@@ -470,3 +470,69 @@ test('at 390 px an edge tab bar keeps every tab when scrolled', async ({ sized }
   await expect(page.locator('.ui-tabbar')).toHaveClass(/is-minimised/);
   await expect(page.locator('.ui-tabbar').getByRole('link', { name: 'Rooms' })).toBeVisible();
 });
+
+// components (owner's review): Back in the bar; bar buttons on one line; sheet head, chip row and controls; the action
+// bar's count and off state, along the edge in look C; serif only on page titles
+test('at 390 px: Back sits in the bar; Select all on one line; the sheet, controls and action bar read clearly', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(`${KIT}&look=a`);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  const back = page.locator('.ui-bar .ui-bar-back');
+  await expect(back).toBeHidden();
+  await page.click('#push');
+  await expect(back).toBeVisible();
+  await expect(back).toHaveText('Plants');
+  await expect(page.locator('#detail > .ui-back')).toBeHidden();
+  const [bb, bar] = [await back.boundingBox(), await page.locator('.ui-bar').boundingBox()];
+  expect(bb.y >= bar.y && bb.y + bb.height <= bar.y + bar.height + 1).toBe(true);
+  await page.click('#push-more');
+  await expect(back).toHaveText('Details');
+  await back.click();
+  await expect.poll(() => depth(page)).toBe(1);
+  await back.click();
+  await expect.poll(() => depth(page)).toBe(0);
+  await expect(back).toBeHidden();
+
+  // serif (look A) on the page title only
+  const face = sel => page.locator(sel).evaluate(e => getComputedStyle(e).fontFamily);
+  expect(await face('#home-title')).toMatch(/serif/);
+  expect(await face('#sheet-title')).not.toMatch(/Georgia/);
+
+  // controls a finger can hit
+  for (const sel of ['#look-pick', '#density-pick']) expect((await page.locator(sel).boundingBox()).height).toBeGreaterThanOrEqual(44);
+  expect((await page.locator('#still').boundingBox()).width).toBeGreaterThanOrEqual(20);
+
+  // select mode: Select all on one line; the count in the text colour; an off button faded, Delete red
+  await page.click('#select');
+  const all = await page.locator('.ui-bar [data-select-all]').boundingBox();
+  expect(all.height).toBeLessThanOrEqual(48);
+  await page.locator('#plants .ui-row').first().click();
+  const look = await page.evaluate(() => {
+    const st = s => getComputedStyle(document.querySelector(s));
+    return { count: st('[data-select-count]').color, text: getComputedStyle(document.body).color,
+      off: st('#compare').opacity, del: st('#delete-selected').color, danger: st('.ui-menu-item.danger, .danger').color };
+  });
+  expect(look.count).toBe(look.text);
+  expect(look.off).toBe('0.4');
+  expect(look.del).toBe(look.danger);
+  await page.click('#select');
+
+  // the sheet: Done is a word, not a pill; the chip row runs to the sheet's edges
+  await page.click('#open-sheet');
+  await settled(page);
+  const done = await page.locator('#sheet [data-close]').evaluate(e => getComputedStyle(e).borderTopStyle);
+  expect(done).toBe('none');
+  const [chips, sheet] = [await page.locator('#sheet .kit-chips').boundingBox(), await page.locator('#sheet').boundingBox()];
+  expect(Math.abs(chips.x - sheet.x)).toBeLessThan(2);
+  expect(Math.abs(chips.x + chips.width - sheet.x - sheet.width)).toBeLessThan(2);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sheet')).toBeHidden();
+
+  // look C: the action bar along the bottom edge, like its tab bar
+  const pageC = await sized(390);
+  await pageC.goto(`${KIT}&look=c`);
+  await pageC.click('#select');
+  const ab = await pageC.locator('.ui-action-bar').boundingBox();
+  expect(ab.x).toBe(0);
+  expect(Math.round(ab.y + ab.height)).toBe(844);
+});
