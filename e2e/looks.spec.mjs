@@ -157,3 +157,29 @@ test('glass guard: little memory turns glass down, kept on this device; Solid an
   expect(await AxeBuilder(page)).toEqual([]);
   await context.close();
 });
+
+// the owner's desktop review: on a laptop the top bar runs the full width with its ends lined up with the content, and
+// an edge tab bar keeps its tabs together in the middle
+for (const look of ['a', 'b', 'c']) {
+  test(`at 1280 px look ${look.toUpperCase()}: the bar is full width, its title centred; tabs stay together`, async ({ sized }) => {
+    const page = await sized(1280);
+    for (const path of ['', 'dense/']) {
+      await page.goto(`/ui/0.0.0-dev/kit/${path}?edge=always&look=${look}`);
+      await expect(page.locator('html')).toHaveAttribute('data-look', look);
+      const bar = await page.locator('body > .ui-bar').boundingBox();
+      expect(bar.x, path).toBeLessThanOrEqual(0);
+      expect(bar.width, path).toBeGreaterThanOrEqual(1279);
+      const title = await page.locator('.ui-bar-title').boundingBox();
+      expect(Math.abs(title.x + title.width / 2 - 640), path).toBeLessThanOrEqual(2);
+      // the bar's start lines up with the large title's words; the gallery's column is narrower than the screen
+      const lead = (await page.locator('body > .ui-bar > :first-child').boundingBox()).x;
+      const words = await page.locator('main h1').first().evaluate(h => h.getBoundingClientRect().x + parseFloat(getComputedStyle(h).paddingLeft));
+      expect(Math.abs(lead - words), path).toBeLessThanOrEqual(1);
+      if (!path) expect(lead).toBeGreaterThan(100);
+      const tabs = await page.locator('nav.ui-tabbar .ui-tab').evaluateAll(t => t.map(e => e.getBoundingClientRect()).map(r => ({ l: r.left, r: r.right })));
+      const left = tabs[0].l, right = tabs.at(-1).r;
+      expect(Math.abs((left + right) / 2 - 640), path).toBeLessThanOrEqual(2);
+      for (let i = 1; i < tabs.length; i++) expect(tabs[i].l - tabs[i - 1].r, path).toBeLessThanOrEqual(8);
+    }
+  });
+}

@@ -1,5 +1,13 @@
 /* The gallery page's own layout (the parts' look is ui/gestures.css on the theme's tokens). */
-body { margin: 0 auto; max-width: 48rem; padding: 0 0 calc(var(--tap) * 2 + env(safe-area-inset-bottom, 0px)); }
+/* the bar runs the full width; the page's content keeps a readable column, the bar's ends lined up with it */
+body { margin: 0; padding: 0 0 calc(var(--tap) * 2 + env(safe-area-inset-bottom, 0px)); }
+:root { --kit-w: 48rem; --kit-g: max(0px, calc((100vw - var(--kit-w)) / 2)); }
+body > main { padding-inline: var(--kit-g); }
+body > .ui-bar { padding-inline: calc(var(--kit-g) + var(--pad)); }
+/* a colour band title runs the full width too, its words in the column */
+[data-header="band"] body > main .ui-large-title { margin-inline: calc(var(--kit-g) * -1); padding-inline: calc(var(--kit-g) + var(--pad)); }
+/* mid-swipe the screen under sits in the same column (ui/gestures.css pins it to the stack's edges) */
+body > main.ui-screens.is-swiping .ui-screen:not(.is-top) { inset: 0 var(--kit-g) auto; }
 .kit-bar-side { flex: 1; display: flex; gap: var(--gap); }
 .kit-end { justify-content: flex-end; }
 .ui-bar button { border: 0; background: none; color: var(--link); padding: 0 var(--gap); min-height: var(--tap); }

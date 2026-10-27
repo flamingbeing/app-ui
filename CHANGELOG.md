@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.6
+- Shell, laptop (owner's review): with no row open the detail shows no Water or Delete; deleting the open row empties
+  the detail again. The list pane has a faint line between rows in every look (look B's phone cards have none).
+- Right-click with a mouse opens the row menu with its corner at the pointer, flipped near an edge, and the row is not
+  lifted; touch and Shift+F10 are unchanged.
+- An edge tab bar (look B, C) keeps its tabs together in the middle on a wide screen instead of spreading them out.
+- Galleries on a laptop: the top bar (and look B's band) runs the full width, its ends lined up with the content.
+
 ## 1.0.0-rc.5
 - Extra-dense (owner's review): labels and small print never under 12 px; a stepper's field is 32 px tall (its
   buttons stay 24 px wide). Segments, tags and stepper buttons keep the 24 px floor.

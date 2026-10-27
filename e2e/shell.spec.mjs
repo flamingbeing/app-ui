@@ -208,3 +208,46 @@ test('at 390 px the shrunk tab bar keeps the current tab, and Tab reaches it', a
   await expect(page.locator('a.ui-tab[aria-current="page"], a.ui-side-link[aria-current="page"]')).toHaveText(['Jobs', 'Jobs']);
   expect(new URL(await page.locator('a.ui-tab', { hasText: 'Rooms' }).evaluate(a => a.href)).search).toContain('tab=rooms');
 });
+
+// the owner's desktop review: an empty detail shows no actions; right-click opens the menu at the pointer, no lift;
+// rows in the list pane have a line between them in every look
+test.describe('shell at 1280 px: desktop details', () => {
+  test('the detail shows Water and Delete only with a row open, and empties when that row is deleted', async ({ sized }) => {
+    const page = await load(sized, 1280);
+    const actions = page.locator('.ui-pane-detail .ui-detail-actions');
+    await expect(page.locator('.ui-pane-detail')).toHaveAttribute('data-empty', '');
+    await expect(actions).toBeHidden();
+    await row(page, 'Fern').click();
+    await expect(actions).toBeVisible();
+    await page.locator('#delete-one').click();
+    await expect(row(page, 'Fern')).toHaveCount(0);
+    await expect(page.locator('#detail-title')).toHaveText('Pick a plant');
+    await expect(actions).toBeHidden();
+  });
+
+  test('right-click: the menu opens with its corner at the pointer, the row not lifted', async ({ sized }) => {
+    const page = await load(sized, 1280);
+    const box = await row(page, 'Jade').boundingBox();
+    const at = { x: box.x + 60, y: box.y + box.height / 2 };
+    await page.mouse.click(at.x, at.y, { button: 'right' });
+    const menu = page.locator('.ui-menu[role=menu]');
+    await expect(menu).toBeVisible();
+    await settled(page);
+    const m = await menu.boundingBox();
+    expect(Math.abs(m.x - at.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(m.y - at.y)).toBeLessThanOrEqual(2);
+    await expect(page.locator('.ui-menu-preview')).not.toHaveClass(/is-lifted/);
+    await page.keyboard.press('Escape');
+  });
+
+  for (const look of ['a', 'b', 'c']) {
+    test(`look ${look.toUpperCase()}: a line between rows in the list pane`, async ({ sized }) => {
+      const page = await sized(1280);
+      await page.goto(`${SHELL}&look=${look}`);
+      await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
+      const bg = await page.locator('.ui-pane-list .ui-row').nth(1).evaluate(r => getComputedStyle(r).backgroundImage);
+      expect(bg).toContain('gradient');
+      expect(bg).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+    });
+  }
+});
