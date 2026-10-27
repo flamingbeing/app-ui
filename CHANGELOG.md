@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.9
+- New reference parts in `@core/ui` (named exports; an app imports only what it uses):
+  `undoToast(toasts, { ms, labels })` (Undo, a timer, one at a time), `loadState(host, { rows, labels })` (skeleton rows,
+  or the error with Try again; still under Still / Reduce Motion) and `aboutSheet({ name, update, licences, importMap })`
+  (version, "Get the newest version" through the update api, the outside code listed from the page's import map;
+  `packagesFromImportMap` is the pure part). New default words in `LABELS`.
+- Gallery: `/kit/parts/`, the three parts on made-up data.
+
 ## 1.0.0-rc.8
 - New: the settings screen, `settingsScreen(host, { settings, sections, file, labels })` from `@core/ui`. It shows a
   `@core/settings` api's options as grouped rows (a switch, a picker or a number field each), the profile picker with a
