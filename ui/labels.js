@@ -19,6 +19,7 @@ export const LABELS = Object.freeze({
   getNewest: 'Get the newest version',
   checking: 'Checking…',
   updated: 'Updated.',
+  checkFailed: 'Could not check. Try again when online.',
   newest: 'This is the newest version (or the update waits until nothing is open).',
   notInstalled: 'not installed yet',
   licences: 'Open-source code in this app',

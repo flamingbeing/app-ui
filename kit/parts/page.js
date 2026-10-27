@@ -19,8 +19,8 @@ for (const name of ['Apple', 'Pear', 'Plum', 'Fig']) {
 }
 const undo = undoToast(toaster(document.body));
 fruit.addEventListener('click', e => {
-  const row = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('li'));
-  if (!row) return;
+  const row = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('li:has(> button)'));
+  if (!row || !/** @type {Element} */ (e.target).closest('button')) return;
   const next = row.nextElementSibling;
   row.remove();
   undo.show(`Deleted ${row.dataset.name}`, () => fruit.insertBefore(row, next && fruit.contains(next) ? next : null));
@@ -29,11 +29,14 @@ fruit.addEventListener('click', e => {
 // loading and error: Load shows skeleton rows then the list; Fail shows the error and Retry loads again
 const state = loadState($('load-host'), { rows: 3 });
 const loaded = $('loaded');
+let runs = 0;
 /** @param {boolean} ok */
 function run(ok) {
   loaded.hidden = true;
   state.loading();
+  const mine = ++runs;
   setTimeout(() => {
+    if (mine !== runs) return;   // a newer load has begun
     if (!ok) { state.failed('Could not load the list.', () => run(true)); return; }
     state.done();
     loaded.replaceChildren(...['Rose', 'Tulip'].map(n => Object.assign(document.createElement('li'), { textContent: n })));

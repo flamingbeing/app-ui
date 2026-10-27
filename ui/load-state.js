@@ -16,15 +16,20 @@ export function loadState(host, { rows = 4, labels = {} } = {}) {
   const done = () => { box.replaceChildren(); box.hidden = true; host.removeAttribute('aria-busy'); };
   return {
     loading() {
+      const hadFocus = box.contains(document.activeElement);
       const skeleton = Array.from({ length: rows }, () => el('div', { class: 'load-row' }));
-      box.replaceChildren(el('p', { class: 'load-note', role: 'status' }, words.loading), ...skeleton);
+      box.replaceChildren(el('p', { class: 'load-note', role: 'status', tabindex: '-1' }, words.loading), ...skeleton);
       box.hidden = false;
+      if (hadFocus) /** @type {HTMLElement} */ (box.firstElementChild).focus();   // Try again was pressed: focus stays in the block
       host.setAttribute('aria-busy', 'true');
     },
     failed(message, retry) {
+      const hadFocus = box.contains(document.activeElement);
       done();
-      box.replaceChildren(el('p', { class: 'load-error', role: 'alert' }, message), button(words.retry, retry, { class: 'load-retry' }));
+      const again = button(words.retry, retry, { class: 'load-retry' });
+      box.replaceChildren(el('p', { class: 'load-error', role: 'alert' }, message), again);
       box.hidden = false;
+      if (hadFocus) again.focus();
     },
     done,
     stop() { done(); box.remove(); },

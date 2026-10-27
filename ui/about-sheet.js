@@ -3,7 +3,7 @@
 import { LABELS } from './labels.js';
 import { el, button } from './dom.js';
 
-const VERSION = /[@/](\d+\.\d+\.\d+(?:-[\w.]+)?)(?=[/.]|$)/;
+const VERSION = /[@/](\d+\.\d+\.\d+(?:-[\w.]+)?)(?=[/.?+]|$)/;
 
 /**
  * The outside packages an import map lists: its own files (relative targets) left out, a version read from the address.
@@ -13,7 +13,7 @@ const VERSION = /[@/](\d+\.\d+\.\d+(?:-[\w.]+)?)(?=[/.]|$)/;
  */
 export function packagesFromImportMap(map, licences = {}) {
   return Object.entries(map?.imports ?? {})
-    .filter(([name, target]) => !/^(\.|\/)/.test(target) && !name.endsWith('/'))
+    .filter(([name, target]) => !/^\.|^\/(?!\/)/.test(target) && !name.endsWith('/'))
     .map(([name, target]) => ({ name, version: VERSION.exec(target)?.[1] ?? '', licence: licences[name] ?? '' }));
 }
 
@@ -38,10 +38,11 @@ export function aboutSheet({ name, update, licences = {}, importMap = pageImport
     el('h2', { id: 'about-title' }, name),
     el('p', {}, 'Version ', version)));
   if (update) {
-    update.versionLabel().then(v => { version.textContent = v || words.notInstalled; }, () => {});
+    update.versionLabel().then(v => { version.textContent = v || words.notInstalled; }, () => { version.textContent = words.notInstalled; });
     box.append(button(words.getNewest, async () => {
       answer.textContent = words.checking;
-      answer.textContent = await update.checkNow() ? words.updated : words.newest;
+      try { answer.textContent = await update.checkNow() ? words.updated : words.newest; }
+      catch { answer.textContent = words.checkFailed; }
     }, { class: 'about-update' }), answer);
   }
   const packages = packagesFromImportMap(importMap, licences);
