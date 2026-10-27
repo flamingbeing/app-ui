@@ -64,6 +64,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | --- | --- | --- |
 | Both dense screens | in looks A, B, C at 390, 820 and 1280 px: every target 24 px or more (a radio or checkbox measured by its label), nothing wider than the screen; screenshots kept (`dense-<screen>-<look>-<width>.png`) | yes |
 | Sizes | extra-dense is 32 / 24 px; unticking it gives the density's own sizes; Comfortable gets 44 / 36 px | |
+| Readable, lined up | looks A, B, C at 390 px: no text under 12 px, stepper fields 32 px tall, the screen's left edge matches the controls', the collapsed bar title centred, an unset key time reads "Not set" in normal weight | |
 | Segmented | arrows pick and move focus; a second tap clears a clearable one, Space does not; a plain one keeps its pick | |
 | Stepper | − and + step by the step, stay in min/max, an empty box starts at `data-start`; buttons out of the Tab order | |
 | Toolbar | one Tab stop; arrows wrap, Home, End; Tab leaves it | |

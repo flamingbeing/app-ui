@@ -35,12 +35,13 @@ const esc = s => s.replace(/[&<>"]/g, c => `&${{ '&': 'amp', '<': 'lt', '>': 'gt
 const radios = (name, opts, on) => opts.map(([v, l]) =>
   `<label><input type="radio" name="${name}" value="${v}"${v === on ? ' checked' : ''}>${esc(l)}</label>`).join('');
 
-$('times').innerHTML = TIMES.map(([l, t], i) => `<button type="button" class="kit-time${t ? ' is-set' : ''}">`
-  + `<i>${i + 1}</i><span>${l}</span><b>${t || 'Set'}</b></button>`).join('');
+const UNSET = 'Not set';
+$('times').innerHTML = TIMES.map(([l, t], i) => `<button type="button" class="kit-time${t ? ' is-set' : ''}" data-name="${l}">`
+  + `<span><i>${i + 1}</i> ${l}</span><b>${t || UNSET}</b></button>`).join('');
 $('points').insertAdjacentHTML('beforeend', radios('point', POINTS.map(p => [p, p]), '30'));
 $('board').innerHTML = STEPS.map(([l, u, min, max, step, start, v], i) => `<div class="ui-field"><span id="f-${i}">${l} <small>${u}</small></span>`
   + `<div class="ui-stepper" data-start="${start}"><button type="button" data-step="-1" aria-label="${l} down">−</button>`
-  + `<input type="number" inputmode="decimal" min="${min}" max="${max}" step="${step}" value="${v}" placeholder="tap" aria-labelledby="f-${i}">`
+  + `<input type="number" inputmode="decimal" min="${min}" max="${max}" step="${step}" value="${v}" placeholder="–" aria-labelledby="f-${i}">`
   + `<button type="button" data-step="1" aria-label="${l} up">+</button></div></div>`).join('')
   + `<div class="ui-field"><span>Shivering</span><fieldset class="ui-segmented" data-clearable><legend>Shivering</legend>${radios('shiver', [['1', 'Yes'], ['0', 'No']], '0')}</fieldset></div>`
   + `<div class="ui-field"><span>Gown on</span><fieldset class="ui-segmented" data-clearable><legend>Gown on</legend>${radios('gown', [['1', 'Yes'], ['0', 'No']])}</fieldset></div>`
@@ -100,8 +101,8 @@ $('times').addEventListener('click', e => {
   const now = new Date(), t = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   /** @type {HTMLElement} */ (b.querySelector('b')).textContent = t;
   b.classList.add('is-set');
-  toasts.show(`${b.querySelector('span')?.textContent} set to ${t}`, { ms: 6000, action: { label: 'Undo', run: () => {
-    /** @type {HTMLElement} */ (b.querySelector('b')).textContent = 'Set'; b.classList.remove('is-set'); } } });
+  toasts.show(`${b.dataset.name} set to ${t}`, { ms: 6000, action: { label: 'Undo', run: () => {
+    /** @type {HTMLElement} */ (b.querySelector('b')).textContent = UNSET; b.classList.remove('is-set'); } } });
 });
 for (const g of ['suggest', 'common']) $(g).addEventListener('click', e => {
   const b = /** @type {Element} */ (e.target).closest('button');

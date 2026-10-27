@@ -150,3 +150,25 @@ test('look B: the colour band stays one colour as the title scrolls under the ba
   await expect(page.locator('.ui-bar')).toHaveClass(/\bis-collapsed\b/);
   expect(await bg('.ui-bar')).toBe(band);
 });
+
+test('readable and lined up: no text under 12 px, stepper fields 32 px, one left edge, the bar title centred, unset times quiet', async ({ sized }) => {
+  const page = await sized(390);
+  for (const look of ['a', 'b', 'c']) {
+    await page.goto(`${DENSE}?look=${look}`);
+    await settled(page);
+    const tiny = await page.evaluate(() => [...document.querySelectorAll('#readings *')]
+      .filter(e => [...e.childNodes].some(n => n.nodeType === 3 && n.textContent?.trim()) && e.getBoundingClientRect().width)
+      .map(e => [e.textContent?.trim().slice(0, 20), parseFloat(getComputedStyle(e).fontSize)]).filter(([, s]) => Number(s) < 12));
+    expect(tiny, `text under 12 px, look ${look}`).toEqual([]);
+    for (const f of await page.locator('#board .ui-stepper input').all()) expect((await f.boundingBox())?.height).toBeGreaterThanOrEqual(32);
+    const left = sel => page.locator(sel).first().evaluate(e => Math.round(e.getBoundingClientRect().left));
+    expect(await left('#readings .ui-segmented'), `screen edge = controls edge, look ${look}`).toBe(await left('.kit-controls'));
+    await page.mouse.wheel(0, 400);
+    await expect(page.locator('.ui-bar')).toHaveClass(/\bis-collapsed\b/);
+    const mid = await page.locator('#bar-title').evaluate(e => { const r = e.getBoundingClientRect(); return r.left + r.width / 2; });
+    expect(Math.abs(mid - 195), `bar title centred, look ${look}`).toBeLessThanOrEqual(2);
+    const unset = page.locator('#times .kit-time:not(.is-set) b').first();
+    await expect(unset).toHaveText('Not set');
+    expect(Number(await unset.evaluate(e => getComputedStyle(e).fontWeight))).toBeLessThan(600);
+  }
+});
