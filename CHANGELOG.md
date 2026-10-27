@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.5
+- Extra-dense (owner's review): labels and small print never under 12 px; a stepper's field is 32 px tall (its
+  buttons stay 24 px wide). Segments, tags and stepper buttons keep the 24 px floor.
+- Dense gallery: the screens keep the page's left edge; key-time numbers sit beside the name, not on the border; an
+  unset time says "Not set" quietly; empty boxes show "–"; the previous/next arrows are the text colour; the
+  collapsed bar title is centred; the look and density pickers are full size.
+
 ## 1.0.0-rc.4
 - Components (owner's review): a pushed screen's Back shows in the top bar's leading slot (`[data-bar-lead]`, else
   the bar's start) instead of below an empty bar; bar buttons stay on one line.

@@ -159,8 +159,10 @@ timed readings screen and a case-entry screen on made-up data (`?screen=readings
 | Stepper | `.ui-stepper` with `[data-step="-1"]` and `[data-step="1"]` buttons around an `input type=number` (`data-start`) | the field is the Tab stop and takes typing and arrows; the buttons step in its `step`, kept in `min`/`max`; an empty box starts at `data-start` |
 | Field | `.ui-field` | a small label over a stepper or segmented control |
 
-**Extra-dense** is opt-in per screen: `data-dense="extra"` on the screen (or a part of it). Main targets 32 px, small
-ones (`--tap-s`: segments, stepper buttons, tags) 24 px, the WCAG 2.2 target-size minimum; text 14 px. Never go
+**Extra-dense** is opt-in per screen: `data-dense="extra"` on the screen (or a part of it). Main targets 32 px (a
+stepper's field too: it takes typing), small ones (`--tap-s`: segments, stepper buttons, tags) 24 px, the WCAG 2.2
+target-size minimum; text 14 px, labels and small print never under 12 px. Keep the screen on the page's own edge
+(its `--pad` is smaller), and show an empty value as a quiet "Not set", never as a word that reads like a value. Never go
 under 24 px: if a screen doesn't fit, cut or split it instead. A device set to Comfortable gets 44 / 36 px there,
 since its owner asked for bigger targets. Use it for data entry that a trained person repeats many times a day,
 not for a screen someone meets once. `e2e/dense.spec.mjs` measures every target on the gallery screens.
