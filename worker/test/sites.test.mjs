@@ -11,6 +11,8 @@ const FILES = {
   '/ui/1.0.0/kit/index.html': '<h1>kit</h1>',
   '/ui/1.0.0/kit/shell/index.html': '<h1>shell</h1>',
   '/ui/1.0.0/icons/icon.svg': '<svg/>',
+  '/ui/1.0.0/icons/icon-192.png': 'png',
+  '/ui/1.0.0/kit/manifest.webmanifest': '{}',
   '/ui/1.0.0-rc.1/theme/index.js': 'export {};',
 };
 const env = { ASSETS: { fetch: async req => {
@@ -22,6 +24,7 @@ const get = (path, method = 'GET') => worker.fetch(new Request(BASE + path, { me
 
 test('a released file: its type, a year immutable, any origin may load it, noindex', async () => {
   for (const [path, type] of [['/ui/1.0.0/ui/index.js', 'text/javascript'], ['/ui/1.0.0/ui/ui.css', 'text/css'], ['/ui/1.0.0/icons/icon.svg', 'image/svg+xml'],
+    ['/ui/1.0.0/icons/icon-192.png', 'image/png'], ['/ui/1.0.0/kit/manifest.webmanifest', 'application/manifest+json'],
     ['/ui/1.0.0/ui/types.d.ts', 'text/plain'], ['/ui/1.0.0-rc.1/theme/index.js', 'text/javascript']]) {
     const r = await get(path);
     assert.equal(r.status, 200, path);

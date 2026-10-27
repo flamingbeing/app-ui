@@ -29,6 +29,8 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Other pages | `startGestures()` on a page without the markup starts nothing | |
 | Page held still | 390 and 1280 px: a wheel over an open sheet or hold menu doesn't scroll the page (the menu's preview stays on its row); closed, it scrolls again | |
 | Home indicator | 390 px with a 34 px bottom inset: a full-height sheet's last row, look B's sheet menu and a toast on a page without a tab bar clear it | |
+| Sync chip | 390 px: the chip shows each made-up state in its word (`Saved`, `Sending… (3)`, …), its `data-state` set, a `status` role; axe clean with "Needs you" | |
+| Installable, no pull | each gallery page: `overscroll-behavior-y: none` (no pull-to-refresh); demo words with no developer notes; the manifest (standalone) and its 192 and 512 icons are served; the page cancels `beforeinstallprompt`; the service worker (scope `kit/`) controls the page after a reload | |
 
 ## Shell gallery
 

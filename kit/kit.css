@@ -22,4 +22,5 @@ body > main.ui-screens.is-swiping .ui-screen:not(.is-top) { inset: 0 var(--kit-g
 /* toasts sit above the tab bar */
 .toasts { bottom: calc(var(--tap) + var(--pad) * 2 + env(safe-area-inset-bottom, 0px)); }
 .kit-looks { margin: 0 var(--pad) var(--pad); }
+.kit-sync { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pad); margin: 0 var(--pad) var(--pad); }
 .kit-looks .theme-switch { gap: var(--pad); }

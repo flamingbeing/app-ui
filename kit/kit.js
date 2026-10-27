@@ -2,7 +2,7 @@
 // no import map. ?edge=always turns the edge swipe on outside the iPhone home-screen app (for tests and desktops);
 // ?look= and ?density= preview without keeping (preview.js; the switcher on the page keeps a pick on this device),
 // ?guard=again reruns the glass guard. window.kit is the started parts, for the tests.
-import { startGestures, toaster } from '../ui/index.js';
+import { startGestures, toaster, syncChip, LABELS } from '../ui/index.js';
 import { chooseTheme, themeChoice, lookSwitch } from '../theme/index.js';
 import { galleryPreview } from './preview.js';
 
@@ -31,6 +31,18 @@ const kit = startGestures();
 /** @type {any} */ (window).kit = kit;
 const toasts = toaster(document.body);
 const list = $('plants');
+
+// the sync chip on a made-up sync: the picker plays each state an app's sync module reports (a count where it has one)
+/** @type {Set<(st: { state: string, count: number }) => void>} */
+const listeners = new Set();
+const COUNTS = /** @type {Record<string, number>} */ ({ pending: 3, offline: 2, 'at-risk': 1 });
+const fakeSync = { status$(/** @type {(st: { state: string, count: number }) => void} */ cb) {
+  listeners.add(cb); cb({ state: 'synced', count: 0 }); return () => listeners.delete(cb);
+} };
+const syncPick = /** @type {HTMLSelectElement} */ ($('sync-pick'));
+for (const state of ['synced', 'pending', 'offline', 'attention', 'unknown', 'at-risk']) syncPick.add(new Option(LABELS[state], state));
+syncPick.addEventListener('change', () => { for (const cb of listeners) cb({ state: syncPick.value, count: COUNTS[syncPick.value] || 0 }); });
+syncChip($('sync-host'), { sync: /** @type {any} */ (fakeSync) });
 
 // Still: this device only, off until picked
 const stillBox = /** @type {HTMLInputElement} */ ($('still'));

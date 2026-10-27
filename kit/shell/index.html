@@ -7,6 +7,9 @@
   <title>Shell gallery</title>
   <script src="../../theme/early.js"></script>
   <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <script src="../installable.js"></script>
   <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
   <link rel="stylesheet" href="../../theme/theme.css">
   <link rel="stylesheet" href="../../ui/ui.css">
@@ -100,7 +103,7 @@
         <button type="button" class="ui-back">Plants</button>
         <div class="ui-detail-one">
           <h2 class="ui-large-title" id="detail-title" data-detail-title>Pick a plant</h2>
-          <p class="kit-lede" data-detail-sub>Rows open here. On a phone this is a pushed screen.</p>
+          <p class="kit-lede" data-detail-sub>Pick a plant from the list.</p>
           <div class="ui-detail-actions">
             <button type="button" id="water">Water</button>
             <button type="button" id="delete-one" class="danger">Delete</button>
@@ -136,7 +139,7 @@
     </div>
     <div class="ui-sheet-body">
       <label class="kit-field">Name <input id="sheet-name" autocomplete="off"></label>
-      <p class="small">On a phone this rises from the bottom; from 840 px it is a panel at the side.</p>
+      <p class="small">Give it a name now; the room and watering can wait.</p>
     </div>
   </dialog>
 </body>
