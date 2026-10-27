@@ -16,9 +16,11 @@
 .ui-bar.is-collapsed { border-bottom-color: var(--line); }
 .ui-bar.is-collapsed .ui-bar-title { opacity: 1; }
 .ui-bar-instant, .ui-bar-instant * { transition: none !important; }
+/* bar buttons keep to one line ("Select all" beside Done) */
+.ui-bar :is(button, a) { white-space: nowrap; }
 .glass .ui-bar.is-collapsed { background: var(--glass-bg); border-bottom-color: transparent; box-shadow: var(--glass-rim);
   -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
-.ui-large-title { margin: var(--gap) var(--pad) var(--pad); font-family: var(--font-head); font-size: var(--title-size);
+.ui-large-title { margin: var(--pad) var(--pad); font-family: var(--font-head); font-size: var(--title-size);
   font-weight: var(--title-weight); letter-spacing: var(--title-track); line-height: 1.15; }
 /* a look with the title on a band of the accent (data-header="band"): the bar is the band's top until it collapses */
 [data-header="band"] .ui-large-title { margin: 0 0 var(--pad); padding: var(--gap) var(--pad) calc(var(--pad) * 1.5);
@@ -102,7 +104,12 @@ dialog.ui-sheet.is-dragging { transition: none; }
   transform: translateX(-50%); border-radius: 3px; background: var(--line); }
 .ui-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--gap);
   padding: 0 var(--pad) var(--gap); flex: none; }
-.ui-sheet-head h2 { margin: 0; font-size: 1.1rem; }
+.ui-sheet-head h2 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+/* Done is a word in the link colour, lighter than the title (not a pill that outweighs it) */
+.ui-sheet-head button { border: 0; background: none; color: var(--link); font-weight: 600; padding: 0 var(--gap);
+  margin-inline-end: calc(var(--gap) * -1); }
+/* a row of chips that scrolls sideways runs to the sheet's edges instead of being cut at the padding */
+.ui-sheet-body > .ui-scroll-x { margin-inline: calc(var(--pad) * -1); padding-inline: var(--pad); scroll-padding-inline: var(--pad); }
 .ui-sheet-body { flex: 1; overflow: auto; overscroll-behavior: contain; padding: 0 var(--pad) var(--pad); }
 /* along the bottom edge (below 840 px) the last row clears the home indicator */
 @media (max-width: 839.98px) { .ui-sheet-body { padding-bottom: calc(var(--pad) + env(safe-area-inset-bottom, 0px)); } }
@@ -111,6 +118,11 @@ dialog.ui-sheet.is-dragging { transition: none; }
     border-radius: var(--sheet-r); }
   .glass dialog.ui-sheet { border-radius: var(--glass-r); }
   dialog.ui-sheet[data-detent="large"] { height: min(calc(100dvh - 48px), 52rem); }
+}
+/* a centred dialog with a mouse: no drag handle (nothing to drag it with) */
+@media (min-width: 840px) and (hover: hover) and (pointer: fine) {
+  .ui-sheet-grabber { display: none; }
+  .ui-sheet-head { padding-top: var(--pad); }
 }
 
 /* ---------- pushed screens ---------- */
@@ -127,6 +139,10 @@ dialog.ui-sheet.is-dragging { transition: none; }
 .ui-swipe-shade { position: absolute; inset: 0; z-index: 1; background: var(--backdrop); pointer-events: none; }
 .ui-back { display: inline-flex; align-items: center; gap: .25rem; border: 0; background: none; color: var(--link); padding: 0 var(--gap); }
 .ui-back::before { content: "‹"; font-size: 1.6em; line-height: 1; }
+.ui-back[hidden] { display: none; }
+/* Back in the bar (gestures.js), so the screen's own one doesn't show below it */
+.ui-screens.has-bar-back > .ui-screen > .ui-back { display: none; }
+.ui-bar-back { min-height: var(--tap); margin-inline-start: calc(var(--gap) * -1); white-space: nowrap; }
 
 /* ---------- lists and select mode ---------- */
 /* a card inset from the edges, or flush (the look's card-r, list-inset, list-edge); rows the density's height, with
@@ -153,10 +169,14 @@ dialog.ui-sheet.is-dragging { transition: none; }
   display: flex; align-items: center; gap: var(--gap); max-width: 40rem; margin: 0 auto; padding: 4px 4px 4px var(--pad);
   background: var(--surface); border: var(--border) solid var(--line); border-radius: var(--pill-r); }
 .ui-action-bar[hidden] { display: none; }
-.ui-action-bar [data-select-count] { flex: 1; font-size: .9rem; color: var(--muted); }
-.ui-action-bar button { border: 0; background: none; color: var(--link); border-radius: calc(var(--pill-r) - 4px); }
-.ui-action-bar button:disabled { color: var(--muted); cursor: default; }
-.ui-action-bar button.danger:not(:disabled) { color: var(--danger); }
+.ui-action-bar [data-select-count] { flex: 1; font-weight: 600; color: var(--text); }
+.ui-action-bar button { border: 0; background: none; color: var(--link); font-weight: 600; border-radius: calc(var(--pill-r) - 4px); }
+.ui-action-bar button.danger { color: var(--danger); }
+/* nothing to act on yet: the same colour, faded, so it reads as off rather than as another colour */
+.ui-action-bar button:disabled { opacity: .4; cursor: default; }
+/* a look with the tab bar along the edge has the action bar there too, not a floating pill */
+[data-tabbar="edge"] .ui-action-bar { left: 0; right: 0; bottom: 0; max-width: none; border-width: var(--border) 0 0; border-radius: 0;
+  padding: 4px 4px calc(env(safe-area-inset-bottom, 0px) + 4px) var(--pad); }
 .glass .ui-action-bar { background: var(--glass-bg-thick); border-color: transparent; box-shadow: var(--glass-rim), var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur-thick); backdrop-filter: var(--glass-blur-thick); }
 
