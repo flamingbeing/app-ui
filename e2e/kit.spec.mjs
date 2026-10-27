@@ -405,3 +405,68 @@ test('at 390 px a toast clears the home indicator on a page without a tab bar', 
   const box = await toast.boundingBox();
   expect(844 - (box.y + box.height)).toBeGreaterThanOrEqual(34 + 16);
 });
+
+// motion (owner's review 27 Oct): a push slides the new screen in over the old one, not below it; a phone sheet's drag
+// and settle move it by transform only; menus and bars take the quick 340 ms, sheets keep 480; a press shows at once
+test('at 390 px a push overlaps the screens; the sheet drags by transform only; quick and sheet durations', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(KIT);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  // scrolled down a little, then a push (clicked in the page, so nothing scrolls first); read mid-slide
+  const mid = await page.evaluate(() => {
+    scrollTo(0, Math.min(150, document.documentElement.scrollHeight - innerHeight));
+    const y = scrollY, home = document.querySelector('#home'), title = document.querySelector('#home-title');
+    const before = title.getBoundingClientRect().top;
+    document.querySelector('#push').click();
+    return { y, before, home: title.getBoundingClientRect().top, under: home.classList.contains('is-under'),
+      detail: document.querySelector('#detail').getBoundingClientRect().top, host: document.querySelector('.ui-screens').getBoundingClientRect().top };
+  });
+  expect(mid.y).toBeGreaterThan(50);
+  const before = mid.before;
+  expect(mid.under).toBe(true);
+  expect(Math.abs(mid.home - before)).toBeLessThan(2);
+  expect(mid.detail - mid.host).toBeLessThan(40);   // (not below the old screen)
+  await settled(page);
+  await expect(page.locator('#home')).toBeHidden();
+  await page.goBack();
+  await expect.poll(() => depth(page)).toBe(0);
+  await settled(page);
+  // back where it was on screen (scroll anchoring may move scrollY by the bar's change)
+  expect(Math.abs(await page.locator('#home-title').evaluate(n => n.getBoundingClientRect().top) - before)).toBeLessThan(2);
+
+  const quick = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--d-quick').trim());
+  expect(quick).toBe('340ms');
+  expect(await page.locator('.ui-bar').evaluate(n => getComputedStyle(n).transitionDuration)).toMatch(/^0\.34s/);
+
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.click('#open-sheet');
+  const sheet = page.locator('#sheet');
+  await settled(page);
+  const f = await finger(page);
+  const g = await centre(page.locator('.ui-sheet-grabber'));
+  await f.down(g.x, g.y);
+  const heights = [];
+  for (const d of [-40, 30, -80, 60, -120, 20, -10, -10, -10, -10]) {   // up and down, then still (no flick)
+    await f.move(g.x, g.y + d);
+    await page.waitForTimeout(16);
+    heights.push(await sheet.evaluate(n => n.style.height));
+  }
+  await f.up();
+  expect(new Set(heights).size).toBe(1);   // the same box all the drag, up and down: only the transform moves
+  await settled(page);
+  expect(await sheet.evaluate(n => n.getAttribute('style') || '')).not.toMatch(/height|transform/);
+  const b = await sheet.boundingBox();
+  expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height);
+});
+
+// R3 (owner 27 Oct): only a floating tab bar shrinks to the current tab; one along the edge (looks B, C) keeps them all
+test('at 390 px an edge tab bar keeps every tab when scrolled', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(`${KIT}&look=b`);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  await expect(page.locator('html')).toHaveAttribute('data-tabbar', 'edge');
+  const max = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  for (let y = 25; y <= max; y += 25) { await page.evaluate(v => scrollTo(0, v), y); await page.waitForTimeout(20); }
+  await expect(page.locator('.ui-tabbar')).toHaveClass(/is-minimised/);
+  await expect(page.locator('.ui-tabbar').getByRole('link', { name: 'Rooms' })).toBeVisible();
+});

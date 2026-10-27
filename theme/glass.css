@@ -59,11 +59,11 @@ html.glass {
 
 /* ---------- toasts: capsules that spring up ---------- */
 .glass .toast { border-radius: var(--glass-r); padding-inline: calc(var(--pad) * 1.25) var(--gap);
-  animation: glass-in var(--d-spring) var(--spring-bouncy); }
+  animation: glass-in var(--d-quick) var(--spring-bouncy); }
 
-/* ---------- controls: a small spring when pressed ---------- */
-.glass button { transition: transform var(--d-spring) var(--spring-snappy); }
-.glass button:active { transform: scale(.96); }
+/* ---------- controls: in at once when pressed, a small spring back out ---------- */
+.glass button { transition: transform var(--d-quick) var(--spring-snappy); }
+.glass button:active { transform: scale(.96); transition-duration: min(60ms, var(--d-quick)); }
 
 /* ---------- a look with glass on its floating pills only (data-glass="pill", looks.js) ---------- */
 /* the bar, menus, sheets and dialogs are solid card colour; the toasts, the action bar and a floating tab bar keep the

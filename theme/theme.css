@@ -38,7 +38,10 @@
   --spring: linear(0, .075, .228, .391, .537, .657, .751, .822, .874, .912, .939, .958, .971, .98, .987, .991, .994, .996, .997, .998, 1);
   --spring-snappy: linear(0, .166, .462, .72, .891, .983, 1.021, 1.028, 1.023, 1.015, 1.007, 1.003, 1, .999, .999, .999, 1);
   --spring-bouncy: linear(0, .208, .589, .906, 1.079, 1.126, 1.101, 1.053, 1.012, .99, .984, .987, .993, .998, 1.001, 1.002, 1);
-  --d-spring: 480ms;
+  --d-spring: 480ms;   /* sheets and dialogs */
+  --d-quick: 340ms;    /* everything else that moves: menus, bars, fades, toasts (pushed screens use the same 340) */
+  /* a pressed control: a wash of the text colour over its fill, on at once (no transition in) */
+  --press: color-mix(in srgb, var(--text) 12%, transparent);
   --radius-s: .25rem;
   --radius: .4rem;
   --radius-l: .75rem;
@@ -57,8 +60,8 @@
 }
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] { color-scheme: dark; }
-@media (prefers-reduced-motion: reduce) { :root { --d-spring: 1ms; } }
-:root[data-motion="still"] { --d-spring: 1ms; }
+@media (prefers-reduced-motion: reduce) { :root { --d-spring: 1ms; --d-quick: 1ms; } }
+:root[data-motion="still"] { --d-spring: 1ms; --d-quick: 1ms; }
 :root[data-density="comfortable"] { --row: 60px; --tap: 48px; --gap: .625rem; --pad: 1.125rem; font-size: 106.25%; }
 :root[data-density="compact"] { --row: 44px; --gap: .25rem; --pad: .75rem; font-size: 93.75%; }
 
@@ -69,6 +72,7 @@ button { min-height: var(--tap); padding: 0 var(--pad); cursor: pointer; border-
 button, select { background: var(--surface); border: var(--border) solid var(--line); }
 input[type="color"] { min-height: var(--tap); min-width: var(--tap); padding: 2px; border: var(--border) solid var(--line);
   border-radius: var(--radius); background: var(--surface); }
+button:not(:disabled):active { box-shadow: inset 0 0 0 100vmax var(--press); }
 a { color: var(--link); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 ::selection { background: var(--selection); color: var(--text); }

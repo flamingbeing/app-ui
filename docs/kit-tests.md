@@ -19,6 +19,8 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Sheet | opens at medium; drag up to large, down to medium, down to close (phone); Enter on the grabber cycles; Back closes it; centred dialog from 840 px, bottom edge below | open |
 | Sheet | a drag from a field or a sideways scroller neither moves the sheet nor scrolls the body; the same drag from the body does | |
 | Screens | push twice, Back pops with focus on the pusher; bar title follows; edge swipe (forced on) follows the finger, goes back past a third; a short swipe springs back; the tab bar doesn't move | pushed |
+| Motion | 390 px: a push slides the new screen in over the old one (the old one's content stays put, out of the flow), Back returns to the same place; menus and bars take `--d-quick` (340 ms); a sheet's drag keeps one box height (transform only) and settles back to its own height on the bottom edge | |
+| Tab bar | 390 px, look B: a tab bar along the edge keeps every tab when scrolled (only the floating one shrinks) | |
 | Screens | without `?edge=always` (Android, browsers) the screen doesn't follow an edge swipe | |
 | Tab bar + title | scrolling down shrinks the tab bar to the current tab and collapses the large title into the bar; up / top brings them back | |
 | Still | off until picked; on: no lifted preview, no slide; kept after reload | |
