@@ -1,5 +1,6 @@
 // Touch and hold: [data-hold-menu="#template-id"] gets a menu from that <template> (its .ui-menu-item buttons, each
-// with data-action), with a lifted copy of the element as a preview. Also right-click, Android's own long press, the
+// with data-action), with a lifted copy of the element as a preview (a sheet menu names the element in its head
+// instead: a copy over the list beside the sheet read as part of it). Also right-click, Android's own long press, the
 // context-menu key and Shift+F10. A pick sends a "ui-menu" event (detail.action) from the element.
 // A hold is HOLD_MS without moving more than SLOP; the click that comes with lifting the finger is swallowed (it
 // neither opens the row nor presses a menu item); no hold from fields, dialogs, sideways scrollers or select mode.
@@ -27,16 +28,19 @@ export function placeMenu(r, menu, view, at) {
 export const SHEET_BELOW = 840;
 
 /**
- * The sheet menu's place (pure): along the bottom edge; the preview stays put unless the sheet would cover it, then
- * it moves up to sit just above.
- * @param {{ top: number, height: number }} r  the element's rect @param {{ h: number }} menu @param {{ h: number }} view
- * @returns {{ top: number, previewTop: number }}
+ * The sheet menu's place (pure): along the bottom edge, never above the top one.
+ * @param {{ h: number }} menu @param {{ h: number }} view @returns {{ top: number }}
  */
-export function placeSheetMenu(r, menu, view) {
-  const gap = 10, edge = 8;
-  const top = view.h - edge - menu.h;
-  return { top, previewTop: Math.max(edge, Math.min(r.top, top - gap - r.height)) };
+export function placeSheetMenu(menu, view) {
+  const edge = 8;
+  return { top: Math.max(edge, view.h - edge - menu.h) };
 }
+
+/** @param {Element} el @returns {string}  the element's first words (a row's title), for a sheet menu's head */
+const firstText = el => {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: n => (n.textContent || '').trim() ? 1 : 3 });
+  return (w.nextNode()?.textContent || '').trim();
+};
 
 /**
  * Starts hold menus for every [data-hold-menu] inside root (now or added later).
@@ -95,6 +99,7 @@ export function holdMenus(root = document) {
     close(true);
     menuFor = el;
     const r = el.getBoundingClientRect();
+    const sheet = html.dataset.menu === 'sheet' && innerWidth < SHEET_BELOW;
     const copy = /** @type {HTMLElement} */ (el.cloneNode(true));
     copy.removeAttribute('id');
     copy.classList.remove('is-holding');
@@ -113,18 +118,24 @@ export function holdMenus(root = document) {
     menu.setAttribute('aria-label', el.getAttribute('aria-label') || (el.textContent || '').trim().slice(0, 60) || 'Actions');
     menu.append(tpl.content.cloneNode(true));
     menu.querySelectorAll('.ui-menu-item').forEach(b => { b.setAttribute('role', 'menuitem'); if (b instanceof HTMLButtonElement) b.type = 'button'; });
-    layer.append(preview, menu);
+    if (sheet) {
+      const head = document.createElement('p');
+      head.className = 'ui-menu-head';
+      head.setAttribute('aria-hidden', 'true');   // (the menu's label says it)
+      head.textContent = firstText(el);
+      if (head.textContent) menu.prepend(head);
+      layer.append(menu);
+    } else layer.append(preview, menu);
     layer.classList.add('is-open');   // before measuring: a closed layer is display:none, so the menu would measure 0
-    const sheet = html.dataset.menu === 'sheet' && innerWidth < SHEET_BELOW;
     menu.classList.toggle('is-sheet', sheet);   // (before measuring: the sheet is wider)
     const view = { w: innerWidth, h: innerHeight };
-    const p = sheet ? placeSheetMenu(r, { h: menu.offsetHeight }, { h: view.h - (layer.querySelector('.ui-menu-safe')?.clientHeight || 0) })
+    const p = sheet ? placeSheetMenu({ h: menu.offsetHeight }, { h: view.h - (layer.querySelector('.ui-menu-safe')?.clientHeight || 0) })
       : placeMenu(r, { w: menu.offsetWidth, h: menu.offsetHeight }, view, at);
     if ('left' in p) menu.style.left = `${p.left}px`; else menu.style.removeProperty('left');
     menu.style.top = `${p.top}px`;
     menu.style.setProperty('--ui-menu-origin', 'below' in p && !p.below ? '50% 100%' : '50% 0');
     html.classList.add('ui-menu-open');
-    requestAnimationFrame(() => {
+    if ('previewTop' in p) requestAnimationFrame(() => {
       preview.style.top = `${p.previewTop}px`;
       if (!still()) preview.classList.add('is-lifted');
     });

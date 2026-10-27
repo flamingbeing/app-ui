@@ -16,6 +16,8 @@
   --line: light-dark(var(--home-control, #8a8a91), #8e8e93);
   --accent: light-dark(var(--home-accent, #3a6390), #8fb4e0);
   --on-accent: light-dark(#ffffff, #111113);
+  --band: light-dark(var(--accent), #3878c0);   /* a band of colour behind a title (look B): deep in dark, white text */
+  --on-band: #ffffff;
   --danger: light-dark(var(--home-bad, #b3261e), #ff8a80);
   --ok: light-dark(#197934, #74dd90);
   --warn: light-dark(#8a5a00, #f3c46e);
@@ -29,7 +31,7 @@
   --glass: color-mix(in srgb, var(--surface) 92%, transparent);
   --glass-thick: color-mix(in srgb, var(--surface) 94%, transparent);
   --glass-clear: color-mix(in srgb, var(--surface) 92%, transparent);
-  --glass-blur: blur(14px) saturate(1.6);
+  --glass-blur: blur(24px) saturate(1.8);
   --glass-blur-thick: blur(28px) saturate(1.4);
   --glass-rim: inset 0 1px 0 light-dark(rgb(255 255 255 / .8), rgb(255 255 255 / .14)),
     inset 0 0 0 .5px light-dark(rgb(255 255 255 / .5), rgb(255 255 255 / .1));

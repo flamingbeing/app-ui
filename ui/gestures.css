@@ -1,7 +1,7 @@
 /* @core/ui gestures: the look of the hold menu, sheets with detents, pushed screens, the shrinking tab bar, the
    collapsing large title and select mode, on @core/theme's custom properties (load after theme.css, ui.css and
-   glass.css). Glass only on floating chrome (bars, tab bar, menus, sheets); content stays solid. Still (data-motion on
-   <html>) or the device's Reduce Motion: no springs, slides or lifts. */
+   glass.css). Glass only on the floating bars (top bar, tab bar); menus, sheets and the action bar are solid, as is the
+   content. Still (data-motion on <html>) or the device's Reduce Motion: no springs, slides or lifts. */
 
 /* the hidden switch the iPhone haptic toggles (gesture.js) */
 .ui-haptic { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; }
@@ -22,13 +22,13 @@
   font-weight: var(--title-weight); letter-spacing: var(--title-track); line-height: 1.15; }
 /* a look with the title on a band of the accent (data-header="band"): the bar is the band's top until it collapses */
 [data-header="band"] .ui-large-title { margin: 0 0 var(--pad); padding: var(--gap) var(--pad) calc(var(--pad) * 1.5);
-  background: var(--accent); color: var(--on-accent); border-radius: 0 0 var(--sheet-r) var(--sheet-r); }
+  background: var(--band); color: var(--on-band); border-radius: 0 0 var(--sheet-r) var(--sheet-r); }
 /* the bar keeps the band's colour when the title goes under it (large-title.js waits for the title's words, not the
    band's padding): no empty band, no flash to the page colour; collapsed, it takes the small title and a soft edge */
-[data-header="band"] .ui-bar, .glass[data-header="band"] .ui-bar.is-collapsed { background: var(--accent); color: var(--on-accent);
+[data-header="band"] .ui-bar, .glass[data-header="band"] .ui-bar.is-collapsed { background: var(--band); color: var(--on-band);
   border-bottom-color: transparent; }
-[data-header="band"] .ui-bar :is(button, a, .ui-back) { color: var(--on-accent); background: transparent;
-  border-color: color-mix(in srgb, var(--on-accent) 45%, transparent); }
+[data-header="band"] .ui-bar :is(button, a, .ui-back) { color: var(--on-band); background: transparent;
+  border-color: color-mix(in srgb, var(--on-band) 45%, transparent); }
 [data-header="band"] .ui-bar.is-collapsed { box-shadow: 0 1px 6px rgb(0 0 0 / .18); }
 
 /* ---------- tab bar ---------- */
@@ -67,7 +67,9 @@
   -webkit-backdrop-filter: var(--glass-blur-thick); backdrop-filter: var(--glass-blur-thick); }
 .ui-menu-item { display: flex; align-items: center; justify-content: space-between; gap: var(--pad); width: 100%;
   min-height: var(--tap); border: 0; background: none; text-align: start; border-radius: calc(var(--menu-r) - 4px); }
-.ui-menu-item:hover, .ui-menu-item:focus-visible { background: var(--selection); }
+/* (hover only where there is a pointer: a finger's last touch would otherwise mark the item under it) */
+.ui-menu-item:focus-visible { background: var(--selection); }
+@media (hover: hover) { .ui-menu-item:hover { background: var(--selection); } }
 .ui-menu-item.danger { color: var(--danger); }
 .ui-menu hr { width: 100%; margin: 4px 0; border: 0; border-top: var(--border) solid var(--line); }
 /* a look whose menus come up as a sheet on phones (data-menu="sheet"; hold-menu.js adds is-sheet under 840 px) */
@@ -76,6 +78,10 @@
 .ui-menu.is-sheet::before { content: ""; position: absolute; left: 50%; top: 10px; width: 36px; height: 5px;
   transform: translateX(-50%); border-radius: 3px; background: var(--line); }
 .ui-menu.is-sheet .ui-menu-item { padding-inline: var(--pad); }
+.ui-menu-head { margin: 0 0 4px; padding: 0 var(--pad) 4px; color: var(--muted); font-size: .85rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* the sheet covers the bottom: the tab bar along the edge would show beside it, under the veil, as a stray stripe */
+:root:has(.ui-menu.is-sheet) .ui-tabbar { visibility: hidden; }
 [data-hold-menu] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 [data-hold-menu].is-holding { transform: scale(.98); transition: transform var(--d-quick) var(--spring); }
 
@@ -151,8 +157,8 @@ dialog.ui-sheet.is-dragging { transition: none; }
 .ui-action-bar button { border: 0; background: none; color: var(--link); border-radius: calc(var(--pill-r) - 4px); }
 .ui-action-bar button:disabled { color: var(--muted); cursor: default; }
 .ui-action-bar button.danger:not(:disabled) { color: var(--danger); }
-.glass .ui-action-bar { background: var(--glass-bg); border-color: transparent; box-shadow: var(--glass-rim), var(--glass-shadow);
-  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.glass .ui-action-bar { background: var(--glass-bg-thick); border-color: transparent; box-shadow: var(--glass-rim), var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur-thick); backdrop-filter: var(--glass-blur-thick); }
 
 @keyframes ui-fade { from { opacity: 0; } }
 @keyframes ui-pop { from { opacity: 0; transform: scale(.9); } }

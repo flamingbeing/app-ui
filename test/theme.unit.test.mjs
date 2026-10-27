@@ -102,9 +102,12 @@ test('awkward accents and grounds still pass: pale, white, black, grey, neon, ev
 });
 
 test('the floor only moves what fails: a passing palette is unchanged, a failing token is nudged', () => {
-  const light = lightPalette('#2563eb');
+  const light = lightPalette('#3a6390');
   const floored = floor(light);
   for (const k of Object.keys(light)) assert.equal(floored[k], light[k], k);
+  // a bright accent reads on white but not on its own tint: the selection (a current tab's ground) is paled until it does
+  const bright = floor(lightPalette('#2563eb'));
+  assert.ok(contrast(bright.link, bright.selection) >= 4.5 && contrast(bright.muted, bright.selection) >= 4.5);
   const pale = floor({ ...light, muted: '#cccccc', line: '#eeeeee' });
   assert.ok(contrast(pale.muted, pale.bg) >= 4.5 && contrast(pale.line, pale.bg) >= 3);
   assert.match(checkPalette({ ...floored, text: '#999999' })[0], /^text on bg: 2\.\d\d:1 \(needs 4\.5:1\)$/);
@@ -160,7 +163,7 @@ test('paletteCss: light on :root, dark for a dark device (unless Light) and for 
   assert.match(auto, /^@media \(prefers-color-scheme: dark\) \{ :root:not\(\[data-theme="light"\]\) \{ .*--bg: #000000;/);
   assert.match(dark, /^:root\[data-theme="dark"\] \{ .*--bg: #000000;/);
   const names = new Set([...css.matchAll(/--([a-z-]+):/g)].map(m => m[1]));
-  const allowed = ['bg', 'surface', 'text', 'muted', 'line', 'accent', 'on-accent', 'danger', 'ok', 'warn', 'fill', 'on-fill', 'link', 'focus', 'selection',
+  const allowed = ['bg', 'surface', 'text', 'muted', 'line', 'accent', 'on-accent', 'danger', 'ok', 'warn', 'fill', 'on-fill', 'link', 'focus', 'selection', 'band', 'on-band',
     'radius-s', 'radius', 'radius-l', 'border', 'shadow', 'font-head', 'leading', 'glass', 'glass-thick', 'glass-clear', ...Object.keys(LOOKS[0].tokens)];
   assert.deepEqual([...names].sort(), allowed.sort());
   assert.ok(!paletteCss({ accent: '</style><script>', surface: '} body {' }).includes('<'), 'only cleaned values reach the CSS');
@@ -202,7 +205,7 @@ test('text on glass: every look x light/dark/OLED keeps its floor over the page,
       assert.deepEqual(glassMisses(p, glassSamples(p, true), at.thick, strong), [], `${where}: thick glass over the backdrop`);
       // see-through on every look (no palette change needed): never the solid card colour
       for (const [tier, a] of Object.entries(at)) assert.ok(a >= 0.5 && a < 1, `${where}: ${tier} ${a}`);
-      assert.ok(at.thick >= 0.88 && at.glass >= 0.72, `${where}: the least strength of each tier`);
+      assert.ok(at.thick >= 0.88 && at.glass >= 0.86, `${where}: the least strength of each tier`);
     }
   }
 });
