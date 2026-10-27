@@ -129,7 +129,7 @@ test('a row with more help opens it behind ⓘ; Reset this page goes back to the
   await page.goto(PAGE);
   const detail = page.locator('.ui-row-more');
   await expect(detail).toBeHidden();
-  const info = page.getByRole('button', { name: 'More about this setting' });
+  const info = page.getByRole('button', { name: 'More about this setting: Watering reminders' });
   await info.click();
   await expect(detail).toBeVisible();
   await expect(info).toHaveAttribute('aria-expanded', 'true');

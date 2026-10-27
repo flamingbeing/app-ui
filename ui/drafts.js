@@ -1,4 +1,5 @@
-// Drafts: an unsent editor kept in the browser's storage so a crash, reload or reopened app finds it again. Where
+// Drafts: an unsent editor kept in the browser's storage so a reload (or the phone unloading the page) finds it again; a
+// draft left by an earlier document, such as after a crash, is listed by listDrafts for the app to offer back. Where
 // storage is blocked, reading it throws: then reads find nothing and save() throws, so the caller can say the draft
 // isn't kept. Each document owns its own slot: a reload restores that slot, other tabs keep their own, and a duplicated
 // tab (which inherits sessionStorage) copies on open, so two documents never overwrite one another.
@@ -16,8 +17,9 @@ const store = name => { try { return /** @type {DraftStore | undefined} */ (glob
  * @param {{ storage?: DraftStore, session?: DraftStore, move?: boolean }} [o]  storage: where drafts live (default
  *   localStorage); session: where this document remembers its slot (default sessionStorage); move: the old slot is taken
  *   over, not copied (one draft at a time); a hidden or closing page puts it down for the next document to take
- * @returns {{ key: string, initial: unknown, release: () => void, save: (value: unknown) => void, clear: () => void }}
- *   initial: the draft found on open (null: none); save throws where storage is blocked
+ * @returns {{ key: string, initial: unknown, release: () => void, save: (value: unknown) => void, clear: () => void, stop: () => void }}
+ *   initial: the draft found on open (null: none); save throws where storage is blocked; stop: removes the page listeners
+ *   (when the editor closes)
  */
 export function draftSlot(prefix, owner, { storage = store('localStorage'), session = store('sessionStorage'), move = false } = {}) {
   const pointer = `${prefix}:active:${owner}`;
@@ -43,12 +45,19 @@ export function draftSlot(prefix, owner, { storage = store('localStorage'), sess
   }
   const release = () => { try { storage.setItem(released(key), '1'); } catch { /* as above */ } };
   const hold = () => { try { storage.removeItem(released(key)); } catch { /* as above */ } };
-  if (move && typeof document !== 'undefined' && typeof addEventListener === 'function') {
+  const onVisible = () => (document.visibilityState === 'hidden' ? release() : hold());
+  const watching = move && typeof document !== 'undefined' && typeof addEventListener === 'function';
+  if (watching) {
     addEventListener('pagehide', release);
-    document.addEventListener('visibilitychange', () => (document.visibilityState === 'hidden' ? release() : hold()));
+    document.addEventListener('visibilitychange', onVisible);
   }
   return {
     key, initial, release,
+    stop() {
+      if (!watching) return;
+      removeEventListener('pagehide', release);
+      document.removeEventListener('visibilitychange', onVisible);
+    },
     save(value) { storage.setItem(key, JSON.stringify(value)); remember(); hold(); },
     clear() { storage.removeItem(key); hold(); },
   };

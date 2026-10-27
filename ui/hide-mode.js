@@ -2,7 +2,8 @@
 // with Show, and Show all. The app keeps the list (a device setting) and calls applyHidden after drawing a page.
 // What can't be hidden, so nothing needed to undo goes: the main button, anything holding the app's keep markup, the
 // bar and pop-ups (keepOut), choices between options, and names with a number in them (a day, a count), which can't be
-// found again. A hidden item is matched by its page, kind and words (a button's label, a card's heading), so it stays
+// found again. While hide mode is on, the page's tap handler must stop the tap (preventDefault and stopPropagation in
+// the capture phase) so the button's own action doesn't run. A hidden item is matched by its page, kind and words (a button's label, a card's heading), so it stays
 // hidden after the page is drawn again; `?nohide` in the address shows everything for that visit. Style: ui/ui.css.
 // Nothing runs on import; the list code is pure, the rest needs a page.
 
@@ -10,6 +11,7 @@ export const MAX_HIDDEN = 100;
 const KINDS = ['btn', 'card'];
 const PROTECT_WORDS = /^(save|undo|done|cancel|close|back|settings|sign in|sign out|show all)\b/i;
 const BUTTONS = 'button, a.btn, label.btn';
+const FIELDS = 'textarea, input, select, [contenteditable]';
 const CARDS = 'section.card';
 const KEEP_OUT = 'dialog, .modal, .toasts, .ui-tab-bar, .ui-bar, [data-keep]';
 
@@ -23,7 +25,7 @@ const word = s => String(s || '').replace(/[\u0000-\u001f]/g, '').replace(/\s+/g
 export const hideKey = x => `${x.tab}|${x.kind}|${x.name}`;
 
 /**
- * The saved list made safe: known kinds, short words, no repeats.
+ * The saved list made safe: known kinds, short words, no repeats; past MAX_HIDDEN the oldest go.
  * @param {unknown} v
  * @returns {Hidden[]}
  */
@@ -37,9 +39,8 @@ export function cleanHideList(v) {
     if (!/^[a-z0-9]+$/.test(e.tab) || !KINDS.includes(e.kind) || !e.name || seen.has(hideKey(e))) continue;
     seen.add(hideKey(e));
     out.push(e);
-    if (out.length >= MAX_HIDDEN) break;
   }
-  return out;
+  return out.slice(-MAX_HIDDEN);
 }
 
 /** the words that name an element: a button's label, a card's first heading (none: it can't be hidden) @param {Element} el */
@@ -49,7 +50,7 @@ export function nameOf(el) {
   return head ? word(head.textContent) : '';
 }
 /** @param {Element} el */
-const isKept = el => el.matches('.primary, textarea, [data-keep]') || (el.matches(BUTTONS) && PROTECT_WORDS.test(nameOf(el)));
+const isKept = el => el.matches(`.primary, ${FIELDS}, [data-keep]`) || (el.matches(BUTTONS) && PROTECT_WORDS.test(nameOf(el)));
 
 /**
  * Why it can't be hidden, or '' when it can.
@@ -58,7 +59,7 @@ const isKept = el => el.matches('.primary, textarea, [data-keep]') || (el.matche
  */
 export function keptBecause(el, { keepOut = '' } = {}) {
   if (el.closest(keepOut ? `${KEEP_OUT}, ${keepOut}` : KEEP_OUT)) return 'The bars and pop-ups always stay.';
-  if (el.matches(CARDS) && [...el.querySelectorAll(`${BUTTONS}, textarea`)].some(isKept)) return 'It holds the main button or an input, which always stay.';
+  if (el.matches(CARDS) && [...el.querySelectorAll(`${BUTTONS}, ${FIELDS}`)].some(isKept)) return 'It holds the main button or an input, which always stay.';
   if (!nameOf(el)) return 'It has no name to find it by again.';
   if (isKept(el)) return 'The main button, Save and inputs always stay.';
   if (el.matches('[aria-pressed], [role=tab], [role=radio]') || el.closest('[role=tablist], [role=radiogroup]')) return 'Choices between options always stay, so you can always switch back.';

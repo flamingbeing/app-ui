@@ -66,7 +66,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
     const li = el('li', { class: 'ui-row ui-setting' }, main, control);
     if (more) {
       const detail = el('p', { class: 'ui-row-more small', id: id(), hidden: '' }, more);
-      const info = el('button', { type: 'button', class: 'ui-info', 'aria-label': words.moreInfo, 'aria-expanded': 'false', 'aria-controls': detail.id }, 'ⓘ');
+      const info = el('button', { type: 'button', class: 'ui-info', 'aria-label': `${words.moreInfo}: ${label}`, 'aria-expanded': 'false', 'aria-controls': detail.id }, 'ⓘ');
       info.addEventListener('click', () => {
         detail.hidden = !detail.hidden;
         info.setAttribute('aria-expanded', String(!detail.hidden));
@@ -114,12 +114,16 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       const before = keys.map(k => /** @type {const} */ ([k, settings.get(k)]));
       const results = await Promise.allSettled(keys.map(k => settings.set(k, null)));
       const failed = results.find(r => r.status === 'rejected');
-      if (failed) { say(failed.reason instanceof Error ? failed.reason.message : String(failed.reason), true); return; }
-      status.replaceChildren(words.resetDone, ' ', button(words.undo, async () => {
-        await Promise.allSettled(before.map(([k, v]) => settings.set(k, v)));
-        say('');
-      }, { class: 'ui-undo' }));
-      status.classList.remove('error');
+      const undo = button(words.undo, async () => {
+        const back = await Promise.allSettled(before.map(([k, v]) => settings.set(k, v)));
+        const bad = back.find(r => r.status === 'rejected');
+        if (bad) say(bad.reason instanceof Error ? bad.reason.message : String(bad.reason), true); else say('');
+      }, { class: 'ui-undo' });
+      // the offer goes with the next change to any option (a stale Undo would overwrite it)
+      const gone = settings.watch(null, () => { gone(); if (status.contains(undo)) say(''); });
+      if (failed) say(failed.reason instanceof Error ? failed.reason.message : String(failed.reason), true);
+      else { status.classList.remove('error'); status.replaceChildren(words.resetDone); }
+      status.append(' ', undo);
     }, { class: 'ui-reset small' });
     return el('p', { class: 'ui-settings-part' }, link);
   }

@@ -1,5 +1,5 @@
 // Drag a row of a list by its grip (a finger or a mouse). The row follows the pointer; on release, onDrop(from, to)
-// gets its old and new index among the list's rows. Style: ui/ui.css, "drag-reorder".
+// gets its old and new index among the list's rows. A cancelled drag (the browser took the touch) puts the row back. Style: ui/ui.css, "drag-reorder".
 
 /**
  * Start the drag from a grip's pointerdown.
@@ -16,19 +16,22 @@ export function gripDrag(e, list, onDrop) {
   row.classList.add('dragging');
   grip.setPointerCapture?.(e.pointerId);
   const move = (/** @type {PointerEvent} */ ev) => { row.style.transform = `translateY(${ev.clientY - y0}px)`; };
-  const up = (/** @type {PointerEvent} */ ev) => {
+  const end = () => {
     grip.removeEventListener('pointermove', move);
     grip.removeEventListener('pointerup', up);
-    grip.removeEventListener('pointercancel', up);
+    grip.removeEventListener('pointercancel', end);
     row.classList.remove('dragging');
     row.style.transform = '';
+  };
+  const up = (/** @type {PointerEvent} */ ev) => {
+    end();
     const to = rows.filter(r => r !== row && ev.clientY > r.getBoundingClientRect().top + r.getBoundingClientRect().height / 2).length;
     const from = rows.indexOf(row);
     if (to !== from) onDrop(from, to);
   };
   grip.addEventListener('pointermove', move);
   grip.addEventListener('pointerup', up);
-  grip.addEventListener('pointercancel', up);
+  grip.addEventListener('pointercancel', end);
 }
 
 /**

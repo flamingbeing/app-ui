@@ -123,6 +123,7 @@ hidePage.addEventListener('click', e => {
   const el = targetOf(/** @type {Element} */ (e.target));
   if (!el || keptBecause(el)) return;
   e.preventDefault();
+  e.stopPropagation();   // the tapped button's own action must not run
   const entry = entryFor(el, 'gallery');
   hidden = [...cleanHideList(hidden).filter(x => hideKey(x) !== hideKey(entry)), entry];
   drawHidden();
