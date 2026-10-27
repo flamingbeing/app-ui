@@ -30,7 +30,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Page held still | 390 and 1280 px: a wheel over an open sheet or hold menu doesn't scroll the page (the menu's preview stays on its row); closed, it scrolls again | |
 | Home indicator | 390 px with a 34 px bottom inset: a full-height sheet's last row, look B's sheet menu and a toast on a page without a tab bar clear it | |
 | Sync chip | 390 px: the chip shows each made-up state in its word (`Saved`, `Sending… (3)`, …), its `data-state` set, a `status` role; axe clean with "Needs you" | |
-| Installable, no pull | each gallery page: `overscroll-behavior-y: none` (no pull-to-refresh); demo words with no developer notes; the manifest (standalone) and its 192 and 512 icons are served; the page cancels `beforeinstallprompt`; the service worker (scope `kit/`) controls the page after a reload | |
+| Installable, no pull | each gallery page (settings too): `overscroll-behavior-y: none` (no pull-to-refresh); demo words with no developer notes; the manifest (standalone) and its 192 and 512 icons are served; the page cancels `beforeinstallprompt`; the service worker (scope `kit/`) controls the page after a reload | |
 
 ## Shell gallery
 
@@ -49,6 +49,21 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Resize | the layout follows the width when the window crosses a size class | |
 | Other pages | `startGestures()` on a page without the shell markup starts nothing | |
 | Desktop details | 1280 px: the detail shows Water and Delete only with a row open, and empties when that row is deleted; right-click opens the menu with its corner at the pointer, the row not lifted; looks A, B, C have a line between rows in the list pane | |
+
+## Settings screen gallery
+
+`/kit/settings/` is tested by `e2e/settings.spec.mjs`: `settingsScreen` on a made-up plant app's options, held by a
+stand-in for `@core/settings` on the page.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Page | 390 and 1280 px, looks A, B, C: the groups in order with the theme switch in "This device", one level-1 heading, controls 24 px or more, nothing wider than the screen | yes |
+| Rows | a switch (the whole row's label flips it), a picker and a number field save to the settings; kept after reload | |
+| Refused | a value the option refuses shows why in the status line, the field goes back to the value in force | |
+| Profile | picking one shows its defaults; a change by hand shows the note; picking another clears it | |
+| Followed | a change made elsewhere shows at once | |
+| Settings file | Export downloads the account options only, under the app's file name; Import says "Imported: N changes, M left out", "Nothing to change", or why the file isn't one | |
+| Switch | Space flips it, named by its row; Less motion (`data-motion="still"`) takes its slide away | |
 
 ### Looks, density and the glass guard (`e2e/looks.spec.mjs`)
 

@@ -1,0 +1,11 @@
+/* The settings screen gallery page's own bits; the screen itself is ui/gestures.css, "settings screen". */
+/* the bar runs the full width; the screen keeps a column, the bar's ends lined up with it */
+body { margin: 0; padding: 0 0 calc(var(--tap) + env(safe-area-inset-bottom, 0px)); }
+:root { --kit-w: 40rem; --kit-g: max(0px, calc((100vw - var(--kit-w)) / 2)); }
+body > main { padding-inline: var(--kit-g); }
+body > .ui-bar { padding-inline: calc(var(--kit-g) + var(--pad)); }
+[data-header="band"] body > main .ui-large-title { margin-inline: calc(var(--kit-g) * -1); padding-inline: calc(var(--kit-g) + var(--pad)); }
+/* the side matches the Back link's padding, so the bar title sits in the middle */
+.kit-bar-side { flex: 1; padding-inline: var(--gap); }
+.ui-bar .kit-home { flex: 1; text-decoration: none; }
+.ui-settings-part .theme-switch { display: flex; flex-wrap: wrap; gap: var(--gap) var(--pad); }
