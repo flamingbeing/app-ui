@@ -50,6 +50,56 @@
       <h2 id="about-title-h">About</h2>
       <button type="button" id="about-open">About this app</button>
     </section>
+
+    <section aria-labelledby="draft-title">
+      <h2 id="draft-title">Drafts</h2>
+      <label for="draft-text">Write something, then reload the page</label>
+      <textarea id="draft-text" rows="3"></textarea>
+      <p class="small" id="draft-state" role="status">Nothing kept yet.</p>
+      <button type="button" id="draft-send">Send (clears the draft)</button>
+    </section>
+
+    <section aria-labelledby="drag-title">
+      <h2 id="drag-title">Drag to reorder</h2>
+      <ul id="drag-list" class="parts-list"></ul>
+      <p class="small" id="drag-order">Order: Apple, Pear, Plum, Fig</p>
+    </section>
+
+    <section aria-labelledby="share-title">
+      <h2 id="share-title">Share out</h2>
+      <div class="row">
+        <button type="button" id="share-send">Share</button>
+        <button type="button" id="share-copy">Copy</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="back-title">
+      <h2 id="back-title">Back closes the dialog</h2>
+      <button type="button" id="back-open">Open a dialog</button>
+      <p class="small" id="back-state" role="status">No dialog open.</p>
+      <dialog id="back-dialog" aria-labelledby="back-dialog-title">
+        <h3 id="back-dialog-title">A dialog</h3>
+        <p>The Back button closes this first, not the page.</p>
+        <button type="button" id="back-second">Open another on top</button>
+        <button type="button" id="back-close">Close</button>
+      </dialog>
+      <dialog id="back-dialog-2" aria-labelledby="back-dialog-2-title">
+        <h3 id="back-dialog-2-title">Another dialog</h3>
+        <button type="button" id="back-close-2">Close</button>
+      </dialog>
+    </section>
+
+    <section aria-labelledby="hide-title">
+      <h2 id="hide-title">Hide mode</h2>
+      <label class="check"><input type="checkbox" id="hide-on"> Hide mode</label>
+      <div id="hide-page">
+        <section class="card"><h3>Weather</h3><button type="button">Refresh weather</button></section>
+        <section class="card"><h3>Tips</h3><p>Water early.</p></section>
+        <section class="card"><h3>Notes</h3><textarea aria-label="Notes"></textarea><button type="button" class="primary">Save notes</button></section>
+      </div>
+      <p class="small" id="hide-list" role="status">Nothing hidden.</p>
+      <button type="button" id="hide-all">Show all</button>
+    </section>
   </main>
 </body>
 </html>

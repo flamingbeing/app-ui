@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0-rc.10
+- Opt-in parts for `@core/ui` (named exports; nothing runs on import and nothing changes for an app that doesn't import
+  them): `draftSlot` / `listDrafts` (an unsent editor kept in storage; copes with blocked storage and duplicated tabs),
+  `gripDrag` / `moveIn` (drag a list row by its grip; `ui.css`, "drag-reorder"), `shareText` / `copyText` (the system
+  share sheet, else the clipboard; the page's toaster says what happened), `createTransients` (Back closes the top
+  dialog first) and `createNavigation` (screen history with scroll positions and a parent trail for deep links), and
+  hide mode (`applyHidden`, `cleanHideList`, `keptBecause`, `targetOf`, `entryFor`; `ui.css`, "hide mode").
+- Settings rows: `settingsScreen` rows take `more` (the rest of the help behind an ⓘ button) and a section takes
+  `reset: true` ("Reset this page": its rows back to the defaults, then Undo, no "Are you sure?"). Existing screens
+  are unchanged.
+- Gallery: `/kit/parts/` gains the five parts; `/kit/settings/` shows the ⓘ and Reset rows.
+
 ## 1.0.0-rc.9
 - New reference parts in `@core/ui` (named exports; an app imports only what it uses):
   `undoToast(toasts, { ms, labels })` (Undo, a timer, one at a time), `loadState(host, { rows, labels })` (skeleton rows,
