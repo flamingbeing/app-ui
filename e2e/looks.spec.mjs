@@ -35,7 +35,6 @@ for (const width of [390, 820, 1280]) {
         if (want.tabbar === 'edge') expect(tabbar.width).toBe(width);
         else expect(tabbar.width).toBeLessThan(width);
         expect(await style(page, '.ui-list', 'border-top-left-radius')).toMatch(id === 'c' ? /^0px$/ : /^[1-9]/);   // flush, or a card
-        if (id === 'c') expect(await style(page, '.ui-action-bar', 'backdrop-filter')).toContain('blur');
         if (id === 'c') expect(await style(page, '.ui-bar', 'backdrop-filter')).toBe('none');
         await expect(title).toBeVisible();
         await settled(page);
@@ -61,6 +60,9 @@ for (const width of [390, 820, 1280]) {
           await settled(page);
           const b = await menu.boundingBox();
           expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height - 8);   // on the bottom edge
+          await expect(page.locator('.ui-menu-preview')).toHaveCount(0);   // named in its head, no copy over the list
+          await expect(menu.locator('.ui-menu-head')).toHaveText('Fig');
+          await expect(page.locator('.ui-tabbar')).toBeHidden();
         } else await expect(menu).not.toHaveClass(/\bis-sheet\b/);
         await settled(page);
         expect(await AxeBuilder(page), `look ${id} at ${width}: hold menu`).toEqual([]);
@@ -68,6 +70,43 @@ for (const width of [390, 820, 1280]) {
         await page.keyboard.press('Escape');
         await expect(menu).toBeHidden();
       });
+    }
+  });
+}
+
+// dark: every look's gallery and shell pass axe (the current tab and side item, links, keys on the selection colour);
+// look B's band is the accent deepened under white text; menus, sheets and the action bar are solid card colour
+const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
+const solid = (page, sel) => page.locator(sel).first().evaluate(e => ({ bg: getComputedStyle(e).backgroundColor, blur: getComputedStyle(e).backdropFilter }));
+for (const width of [390, 1280]) {
+  test(`at ${width} px dark: each look's gallery and shell are clean (axe); B's band takes white text; menus and sheets are solid`, async ({ sized }) => {
+    const page = await sized(width);
+    await page.emulateMedia({ colorScheme: 'dark' });
+    for (const id of ['a', 'b', 'c']) {
+      for (const url of [`${KIT}&look=${id}`, `${SHELL}&look=${id}`]) {
+        await page.goto(url);
+        await settled(page);
+        expect(await AxeBuilder(page), `${url} dark`).toEqual([]);
+      }
+      await page.goto(`${KIT}&look=${id}`);
+      if (id === 'b') expect(await style(page, '#home-title', 'color')).toBe('rgb(255, 255, 255)');
+      await page.locator('#plants .ui-row').nth(1).click({ button: 'right' });
+      await expect(page.locator('.ui-menu')).toBeVisible();
+      await settled(page);
+      const m = await solid(page, '.ui-menu');
+      expect(m.blur, `look ${id} menu`).toBe('none');
+      expect(m.bg).not.toMatch(/rgba\(.*, 0\.\d+\)$/);
+      await page.keyboard.press('Escape');
+      await page.click('#open-sheet');
+      await settled(page);
+      const sh = await solid(page, '#sheet');
+      expect(sh.blur, `look ${id} sheet`).toBe('none');
+      expect(sh.bg).not.toMatch(/rgba\(.*, 0\.\d+\)$/);
+      await page.keyboard.press('Escape');
+      await page.click('#select');
+      const bar = await solid(page, '.ui-action-bar');
+      expect(bar.blur, `look ${id} action bar`).toBe('none');
+      expect(bar.bg).not.toMatch(/rgba\(.*, 0\.\d+\)$/);
     }
   });
 }

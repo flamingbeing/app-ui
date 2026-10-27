@@ -55,9 +55,7 @@ test('glass guard: little memory turns glass down at once; slow frames on the fi
   assert.equal(median([]), 0);
 });
 
-test('a sheet menu sits on the bottom edge; the preview moves up only when the sheet would cover it', () => {
-  const view = { h: 800 }, menu = { h: 300 };
-  assert.deepEqual(placeSheetMenu({ top: 100, height: 60 }, menu, view), { top: 492, previewTop: 100 });
-  assert.deepEqual(placeSheetMenu({ top: 600, height: 60 }, menu, view), { top: 492, previewTop: 422 });
-  assert.equal(placeSheetMenu({ top: 600, height: 60 }, { h: 760 }, view).previewTop, 8, 'never above the screen');
+test('a sheet menu sits on the bottom edge, never above the top one', () => {
+  assert.deepEqual(placeSheetMenu({ h: 300 }, { h: 800 }), { top: 492 });
+  assert.deepEqual(placeSheetMenu({ h: 900 }, { h: 800 }), { top: 8 });
 });

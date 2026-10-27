@@ -51,7 +51,8 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Part | What is tested | axe |
 | --- | --- | --- |
 | Looks A, B, C | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
-| Look B's menu | under 840 px the hold menu is a bottom sheet on the bottom edge; from 840 px it opens beside the row | menu open |
+| Look B's menu | under 840 px the hold menu is a bottom sheet on the bottom edge, named in its head (no lifted copy) with the tab bar hidden; from 840 px it opens beside the row | menu open |
+| Dark | 390 and 1280 px, each look: the gallery and the shell are clean; look B's band takes white text; menus, sheets and the action bar are solid (no blur, no see-through) | gallery, shell |
 | Ticks | square in B, round in A and C | |
 | Density | rows 60 / 50 / 44 px; taps never under 44; a link's `?look=` is a preview, a pick is kept after reload | |
 | Glass guard | little memory turns glass off, kept, with the reason in Settings; Solid and "Glass, even here" still win | yes |
