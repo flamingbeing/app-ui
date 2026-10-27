@@ -6,7 +6,7 @@ The UI core for the owner's web apps, served at exact versions from `core.anawj.
 - `theme/`: `@core/theme`, the device's theme choice, the looks, glass and motion; `theme/early.js` runs before first
   paint.
 - `settings/`: `@core/settings`, settings kept through the app's sync engine (passed in).
-- `kit/`: the galleries (`/kit/`, `/kit/shell/`, `/kit/dense/`) the browser tests drive; installable (manifest, service
+- `kit/`: the galleries (`/kit/`, `/kit/shell/`, `/kit/dense/`, `/kit/settings/`) the browser tests drive; installable (manifest, service
   worker), never prompted.
 - `icons/`: shared icons.
 

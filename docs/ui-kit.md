@@ -68,6 +68,27 @@ What Settings lets you change, by where it lives.
 - **Per app:** only things that change what the app does (units, a default section, list sort), never layout.
 - **Not offered:** custom colours per screen, moving buttons around. Fewer knobs keeps every look testable.
 
+### The settings screen (`settingsScreen`)
+
+`settingsScreen(host, { settings, sections, file, labels })` draws Settings from a `@core/settings` api; it returns
+`stop()`. The gallery is `/kit/settings/`.
+
+```js
+settingsScreen(el, { settings, file: 'plants-settings.json', sections: [
+  { title: 'Plants', rows: [{ key: 'sort', label: 'Sort the list by', choices: [['due', 'Next watering'], ['name', 'Name']] }] },
+  { title: 'Reminders', rows: [{ key: 'reminders', label: 'Watering reminders' }, { key: 'hour', label: 'Remind at', min: 0, max: 23 }] },
+  { title: 'This device', mount: host => themeSwitch(host) },
+] });
+```
+
+- A row with `choices` is a picker; an option whose value is a number is a number field; anything else is a switch.
+  `sub` adds a small line under the label.
+- The app names its rows and sections; `labels` changes the screen's own words (`SETTINGS_WORDS`).
+- When the app has profiles, a "Profile" group comes first, with a note when a value was changed by hand.
+- The settings file (Export, Import) comes last; `file: false` leaves it out.
+- A refused value (its clean says no, or an account option while signed out) shows the reason in the status line and
+  the control goes back to the value in force. Changes made elsewhere show at once.
+
 ## Looks, density and the glass guard (`@core/theme`)
 
 `@core/theme` (in `theme/`) and `@core/ui` (in `ui/`) live in this repo (app-ui), served at exact versions. Each device

@@ -555,7 +555,7 @@ test('the sync chip shows each state in its word, with a count where there is on
   expect(await AxeBuilder(page)).toEqual([]);
 });
 
-for (const path of ['', 'shell/', 'dense/']) {
+for (const path of ['', 'shell/', 'dense/', 'settings/']) {
   test(`kit/${path}: no pull-to-refresh; demo words, not notes; installable, never prompted`, async ({ sized, request }) => {
     const page = await sized(390);
     await page.goto(`/ui/0.0.0-dev/kit/${path}?edge=always`);

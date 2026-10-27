@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" class="glass">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Settings screen gallery</title>
+  <script src="../../theme/early.js"></script>
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <script src="../installable.js"></script>
+  <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
+  <link rel="stylesheet" href="../../theme/theme.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../theme/glass.css">
+  <link rel="stylesheet" href="../../ui/gestures.css">
+  <link rel="stylesheet" href="page.css">
+  <script type="module" src="page.js"></script>
+</head>
+<body>
+  <!-- The settings screen (ui/settings-screen.js) on a made-up plant app's options, signed out: the values live in a
+       stand-in for @core/settings on this page only. Tests: docs/kit-tests.md. Rules: docs/ui-kit.md "Settings rules". -->
+  <header class="ui-bar">
+    <a class="ui-back kit-home" href="../">Gallery</a>
+    <h2 class="ui-bar-title" aria-hidden="true">Settings</h2>
+    <span class="kit-bar-side"></span>
+  </header>
+
+  <main>
+    <h1 class="ui-large-title">Settings</h1>
+    <div id="screen"></div>
+  </main>
+</body>
+</html>

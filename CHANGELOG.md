@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.8
+- New: the settings screen, `settingsScreen(host, { settings, sections, file, labels })` from `@core/ui`. It shows a
+  `@core/settings` api's options as grouped rows (a switch, a picker or a number field each), the profile picker with a
+  note when a value was changed by hand, and the settings file (Export, Import with what changed). It follows changes
+  made elsewhere at once; a refused value says why and the control goes back. A section can hold the app's own part,
+  such as `themeSwitch` for "This device". Styles in `ui/gestures.css`, "settings screen".
+- Gallery: `/kit/settings/`, the screen on a made-up plant app's options (a stand-in for `@core/settings`, signed out).
+
 ## 1.0.0-rc.7
 - No pull-to-refresh (owner's review): `ui/gestures.css` sets `overscroll-behavior-y: none` on the page, so a pull
   down at the top no longer reloads it (and loses a sheet's or a form's state).
