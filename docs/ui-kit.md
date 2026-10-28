@@ -184,6 +184,23 @@ A new variant value takes one more step. Add it to `VARIANTS` in `looks.js`, add
 `[data-<variant>="<value>"]` (in `ui.css`, the part's file in `ui/gestures/` or `glass.css`), add the mark to `early.js`'s list if the
 variant is new, and give it a test.
 
+## Content parts (`ui/gestures/content.css`)
+
+Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/kit/parts/`):
+
+- **Sections:** `.ui-section` holding `.ui-section-head` (small caps words, an optional link or button at the end), a
+  `.ui-list` and `.ui-section-foot` (a muted note).
+- **Row extras** inside `.ui-row`: `.ui-row-lead` (30 px icon tile, `data-tone="grey|danger"`) or `.ui-row-thumb`
+  (44 px), then `.ui-row-main`, then `.ui-row-trail` (badges, buttons), `.ui-row-value` (muted number),
+  `.ui-row-input` (a value typed into the row) or `.ui-row-chevron`. `data-tone="action|danger"` colours the row's words; `data-align="center"` centres them.
+- **Cards and stats:** `.ui-card` (`-title`, `-text`, `-actions`); `.ui-stats` of `.ui-stat` (`-value`, `-label`).
+- **Badges:** `.ui-badge`, `data-tone="accent|ok|warn|danger"`.
+- **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-tint` (accent-tinted), `.ui-wide` (full width),
+  `data-size="small"` (32 px), `.ui-buttons` (a stack of buttons with the list's inset).
+- **Filter chips:** `.ui-chips` holding `button.ui-chip` with `aria-pressed` (ticked when on), a full tap tall;
+  scrolls sideways, or wraps with `data-wrap="on"`. A `.ui-chip` elsewhere stays the small status chip.
+- **Empty and loading:** `.ui-empty` (`-icon`, `-title`, `-text`); `.ui-skeleton` with `data-shape="line|short|thumb"`.
+
 ## Layout parts and extra-dense
 
 `ui/layout.css` and `ui/layout.js` (load the CSS after `ui.css`; `startLayout()` starts the parts that need script).

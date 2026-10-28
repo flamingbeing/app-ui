@@ -1,0 +1,90 @@
+/* @core/ui gestures, content parts: grouped sections (head and foot words around a list), row extras (a lead icon or
+   thumbnail, trailing value, badge or chevron, action and danger rows), cards, stat tiles, badges, an empty state and
+   skeleton rows. One part of ui/gestures.css (which loads them all, in order); link it alone after theme.css and
+   list.css. Colours from the palette only (accent, muted, surface, danger, ok, warn), sizes from the density. */
+/* ---------- sections ---------- */
+.ui-section { margin: 0 0 calc(var(--pad) * 1.5); }
+.ui-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--gap);
+  margin: 0; padding: 0 var(--pad) 6px; color: var(--muted); font-size: .8125rem; font-weight: 400; text-transform: uppercase; letter-spacing: .02em; }
+.ui-section-head :is(a, button) { min-height: 24px; padding: 0; border: 0; background: none; color: var(--link);
+  font: inherit; text-transform: none; letter-spacing: 0; font-weight: 500; text-decoration: none; cursor: pointer; }
+.ui-section-foot { margin: 0; padding: 6px var(--pad) 0; color: var(--muted); font-size: .8125rem; line-height: 1.45; }
+/* ---------- row extras ---------- */
+.ui-row-lead { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.ui-row-lead[data-tone="grey"] { background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--muted); }
+.ui-row-lead[data-tone="danger"] { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+.ui-row-thumb { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius);
+  background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--muted); overflow: hidden; object-fit: cover; }
+.ui-row-lead svg { width: 19px; height: 19px; }
+.ui-row-thumb svg { width: 22px; height: 22px; }
+.ui-row-trail { flex: none; display: flex; align-items: center; gap: var(--gap); margin-inline-start: auto; }
+.ui-row-value { flex: none; margin-inline-start: auto; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ui-row-chevron { flex: none; width: 18px; height: 18px; margin-inline-end: -4px; color: var(--line); }
+.ui-row[data-tone="action"] .ui-row-main { color: var(--link); }
+.ui-row[data-tone="danger"] .ui-row-main { color: var(--danger); }
+.ui-row[data-align="center"] { justify-content: center; text-align: center; }
+/* a lead or thumbnail moves the separator to start after it */
+.ui-list > li + li > .ui-row:has(> .ui-row-lead), .ui-row + .ui-row:has(> .ui-row-lead) { background-size: calc(100% - var(--pad) - 30px - var(--pad)) var(--border), auto; }
+.ui-list > li + li > .ui-row:has(> .ui-row-thumb), .ui-row + .ui-row:has(> .ui-row-thumb) { background-size: calc(100% - var(--pad) - 44px - var(--pad)) var(--border), auto; }
+/* ---------- cards and stats ---------- */
+.ui-card { display: block; margin: 0 var(--list-inset) var(--pad); padding: var(--pad); border-radius: max(var(--card-r), var(--radius-l));
+  background: var(--card-bg, var(--surface)); color: var(--text); text-decoration: none; }
+.ui-card-title { margin: 0 0 4px; font-size: 1.25rem; font-weight: 700; line-height: 1.25; }
+.ui-card-text { margin: 0; color: var(--muted); font-size: .875rem; line-height: 1.5; }
+.ui-card-actions { display: flex; flex-wrap: wrap; gap: var(--gap); margin-top: var(--pad); }
+.ui-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 5.5em), 1fr)); gap: var(--gap);
+  margin: 0 var(--list-inset) var(--pad); padding: 0; list-style: none; }
+.ui-stat { padding: calc(var(--pad) * .75) var(--pad); border-radius: max(var(--card-r), var(--radius-l)); background: var(--card-bg, var(--surface)); }
+.ui-stat-value { display: block; font-size: 1.75rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.ui-stat-label { display: block; overflow-wrap: anywhere; color: var(--muted); font-size: .875rem; line-height: 1.35; }
+/* ---------- badges ---------- */
+.ui-badge { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 0 8px; border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--muted); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.ui-badge[data-tone="accent"] { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--link); }
+.ui-badge[data-tone="ok"] { background: color-mix(in srgb, var(--ok) 14%, var(--surface)); color: var(--ok); }
+.ui-badge[data-tone="warn"] { background: color-mix(in srgb, var(--warn) 16%, var(--surface)); color: var(--warn); }
+.ui-badge[data-tone="danger"] { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); color: var(--danger); }
+/* a mark beside the words, so the tone is not told by colour alone: a tick (ok), a ring (warn), a dot (danger) */
+.ui-badge[data-tone="ok"]::before { content: ""; width: 8px; height: 4px; margin: -3px 1px 0 0; border: solid currentColor; border-width: 0 0 1.75px 1.75px; transform: rotate(-45deg); }
+.ui-badge[data-tone="warn"]::before { content: ""; width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1.75px currentColor; }
+.ui-badge[data-tone="danger"]::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+/* ---------- empty state and skeleton rows ---------- */
+.ui-empty { display: flex; flex-direction: column; align-items: center; gap: var(--gap); padding: calc(var(--pad) * 2.5) calc(var(--pad) * 1.5); text-align: center; }
+.ui-empty-icon { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: var(--gap); border-radius: 50%;
+  background: color-mix(in srgb, var(--text) 8%, var(--surface)); color: var(--muted); }
+.ui-empty-icon svg { width: 30px; height: 30px; }
+.ui-empty-title { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.25; }
+.ui-empty-text { margin: 0 0 calc(var(--gap) * 1.5); max-width: 30ch; color: var(--muted); font-size: .875rem; line-height: 1.5; }
+.ui-skeleton { display: block; border-radius: var(--radius-s); background: color-mix(in srgb, var(--text) 9%, var(--surface)); }
+.ui-skeleton[data-shape="line"] { width: 70%; height: .9em; }
+.ui-skeleton[data-shape="short"] { width: 40%; height: .8em; margin-top: 6px; }
+.ui-skeleton[data-shape="thumb"] { flex: none; width: 44px; height: 44px; border-radius: var(--radius); }
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="still"]) .ui-skeleton { animation: ui-skeleton 1.4s ease-in-out infinite alternate; }
+}
+@keyframes ui-skeleton { to { opacity: .45; } }
+/* ---------- button sizes (with theme.css's button, .ui-fill and .ui-plain) ---------- */
+/* theme.css's :where(.ui-fill) / :where(.ui-plain) lose to its own button rule, so on a button they need the class's weight */
+button.ui-fill, a.ui-fill { background: var(--fill); color: var(--on-fill); border-color: var(--fill); }
+button.ui-plain, a.ui-plain { background: none; border-color: transparent; color: var(--link); }
+.ui-wide { display: flex; width: 100%; }
+.ui-tint { background: color-mix(in srgb, var(--accent) 13%, var(--surface)); border-color: transparent; color: var(--link); font-weight: 600; }
+/* a value typed straight into a row (a name, a number): no box until focused, words at the end */
+.ui-row-input { flex: 0 1 55%; width: auto; min-width: 0; min-height: var(--tap); margin: 0; padding: 0; border: 0; background: none;
+  box-shadow: none; color: var(--muted); font: inherit; text-align: end; }
+.ui-row-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-s); }
+:where(button, a, .button)[data-size="small"] { min-height: 32px; padding-inline: .75rem; font-size: .875rem; }
+.ui-buttons { display: flex; flex-direction: column; gap: var(--gap); margin: var(--pad) var(--list-inset); }
+/* ---------- filter chips: a row of toggle buttons (aria-pressed), a full tap tall; data-wrap="on" wraps instead of
+   scrolling sideways ---------- */
+.ui-chips { display: flex; gap: var(--gap); margin: var(--gap) 0 calc(var(--gap) * 1.5); padding: 0; overflow-x: auto; scrollbar-width: none; }
+.ui-chips::-webkit-scrollbar { display: none; }
+.ui-chips[data-wrap="on"] { flex-wrap: wrap; overflow: visible; }
+.ui-chips > button.ui-chip { flex: none; min-height: var(--tap); padding: 0 .875rem; border: 0; border-radius: var(--pill-r);
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text); font-size: .9375rem; font-weight: 400; cursor: pointer; }
+.ui-chips > button.ui-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--link); font-weight: 600; }
+.ui-chips > button.ui-chip[aria-pressed="true"]::before { content: ""; width: 10px; height: 5px; margin: -3px 1px 0 0;
+  border: solid currentColor; border-width: 0 0 2px 2px; transform: rotate(-45deg); }
+.ui-chips > button.ui-chip:disabled { opacity: .6; }
