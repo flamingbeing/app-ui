@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.0.0-rc.12
+- Shipped, not gallery-only: `.ui-detail-actions` (the detail pane's buttons; danger ones in red), `.ui-back` at the
+  top of a pushed screen, `.toasts` placement, `.ui-tab` on one line (`white-space: nowrap`), and the bar's two ends
+  `.ui-bar-side` / `.ui-bar-end` (equal flexible sides keep `.ui-bar-title` in the middle; apps drop their own copies).
+- `ui/gestures.css` is split by part into `ui/gestures/*.css` (base, bar, tabbar, menu, sheet, screens, list, settings,
+  action-bar, motion). `gestures.css` still loads them all, in order, so a `<link>` or Vite import of it is unchanged;
+  link one part alone for just that part.
+- `adaptiveShell`: the detail pane is optional. Without `.ui-pane-detail` a list-only shell opens a row by marking it
+  current and sending `ui-open` (new, sent every time a row opens: `detail.row`, `detail.size`); from 600 px the list
+  takes the width. No hidden placeholder pane needed.
+- The current tab is in the link colour (held to 4.5:1 on the page, the surface and the selection) instead of the
+  accent, which was 4.1:1 in Navy.
+- Toasts sit above a showing tab bar or action bar, however many are stacked (wide shells without one: at the bottom).
+- `.ui-switch` has `min-width: 0; max-width: 3.1rem`: an app's bare `input { min-width: 10rem; flex: 1 }` no longer
+  stretches it.
+- The bar is glass only once collapsed: intended (at the top it is the page's ground, one piece with the large title),
+  now documented in `ui/gestures/bar.css`.
+- Kit class names start `ui-`: `.ui-chip`, `.ui-error`, `.ui-danger`, `.ui-small`, `.ui-inline`, `.ui-attention`,
+  `.ui-sides`, `.ui-conflict-list`, `.ui-refused`. The parts emit both names; the bare ones (`.chip`, `.error`,
+  `.danger`, `.small`, `.row`, `.attention`, `.sides`) keep working and go in 1.0. The sheets' CSS no longer hangs on
+  `#conflict-list` / `#refused`.
+- No fixed ids needed: `syncChip`, `updatePrompt`, `signInSheet`, `conflictSheet` and `refusedList` take `idPrefix`
+  (put before each id: two on one page, or ids the app already uses); the default keeps today's ids. The About sheet's
+  title id is numbered.
+- Presets and looks: `<html>` no longer gets `data-preset`. A preset (the switch's style) acts only through the
+  palette's custom properties; the look's marks are the only shape marks. Nothing in the kit read it.
+- `package.json`: no longer `private`; `sideEffects` (the CSS and `theme/early.js`); TypeScript declarations in
+  `types/` (from the JSDoc, `npm run types`; `npm run typecheck` checks they are current) with `types` conditions on
+  the exports.
+- Hide mode keeps the tab bar and action bar out (it named `.ui-tab-bar`, which no part has).
+- `@layer`: not yet. Layered kit CSS loses to the design tokens' unlayered base rules (`:where(button)` colour and
+  font, focus outline), so the kit stays unlayered until `tokens.css` puts its base in a layer.
+- Tests: axe runs without its CSS preload (it copies each `@import`-ed sheet into an inline `<style>`, which the page's
+  CSP reports).
+
 ## 1.0.0-rc.11
 - Plain tabs: `.ui-tab` resets the theme's button border and fill, so `<button class="ui-tab">` looks like the link
   tabs; a `<span class="ui-tab-icon" aria-hidden="true">` before the label puts an icon above it.

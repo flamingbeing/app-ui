@@ -135,3 +135,14 @@ stand-in for `@core/settings` on the page.
 | Screen history (unit) | go pushes, Back returns, a deep link gets its parent trail | |
 | Hide mode | a tap hides a button or card; the main button and inputs stay; kept after reload; Show all (unit: the saved list is cleaned) | |
 | Settings rows | ⓘ opens the rest of the help (axe with it open); Reset this page puts the section's rows back and Undo returns them | |
+
+### An app's own page (`e2e/app-shell.spec.mjs`, `e2e/pages/app-shell.html`)
+
+| Part | What is checked | Screenshot |
+|---|---|---|
+| List-only shell | with no `.ui-pane-detail`, opening a row sends `ui-open` and marks it current; nothing is pushed on a phone; the list takes the width (390, 1280 px) | |
+| Bar ends | `.ui-bar-side` ends keep the title in the middle; `.ui-bar-end` puts its buttons at the end | |
+| Switch | an app's `input { min-width: 10rem; flex: 1 }` leaves `.ui-switch` at 3.1rem | |
+| Toasts | three stacked toasts sit above the tab bar | |
+| Current tab | in Navy, light and dark, the current tab is 4.5:1 or more on the page | |
+| `idPrefix` | two sync chips on one page get their own ids; without `idPrefix` the ids are as before | |

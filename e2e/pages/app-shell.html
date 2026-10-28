@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" class="glass">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>App shell</title>
+  <!-- An app's own page, as app-starter builds one: a list-only shell (no detail pane), the bar's two ends from the
+       kit, a tab bar, and an app rule that styles every input. Test-only: not part of a release. -->
+  <script type="importmap">
+{ "imports": { "@core/ui": "../../ui/index.js", "@core/theme": "../../theme/index.js" } }
+  </script>
+  <script src="../../theme/early.js"></script>
+  <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
+  <link rel="stylesheet" href="../../theme/theme.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../theme/glass.css">
+  <link rel="stylesheet" href="../../ui/gestures.css">
+  <link rel="stylesheet" href="../../ui/shell/shell.css">
+  <style>
+    /* the app's own form rule (as notes had it): it must not stretch the kit's switch */
+    input { min-width: 10rem; flex: 1; }
+  </style>
+  <script type="module">
+    import { applyTheme } from '@core/theme';
+    import { startGestures, adaptiveShell, toaster } from '@core/ui';
+    applyTheme({ accent: '#3a6390' });
+    const kit = startGestures();
+    const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.screens });
+    const opened = [];
+    document.addEventListener('ui-open', e => opened.push(e.detail.row.dataset.name));
+    window.app = { kit, shell, opened, toasts: toaster(document.body) };
+  </script>
+</head>
+<body>
+  <div class="ui-shell">
+    <header class="ui-bar">
+      <span class="ui-bar-side"><button type="button" id="lead">Edit</button></span>
+      <h2 class="ui-bar-title">Notes</h2>
+      <span class="ui-bar-side ui-bar-end"><button type="button" id="end">New</button></span>
+    </header>
+    <main class="ui-screens ui-panes">
+      <section class="ui-screen ui-pane-list" id="home" aria-labelledby="home-title">
+        <h1 id="home-title">Notes</h1>
+        <ul class="ui-list" id="notes" data-select aria-label="Notes">
+          <li class="ui-row" data-name="First" tabindex="0">First</li>
+          <li class="ui-row" data-name="Second" tabindex="0">Second</li>
+        </ul>
+        <label class="ui-row" id="sync-row">Sync <input type="checkbox" role="switch" class="ui-switch" id="sync"></label>
+      </section>
+    </main>
+    <nav class="ui-tabbar" aria-label="Sections">
+      <a class="ui-tab" href="#home" aria-current="page"><span class="ui-tab-icon" aria-hidden="true">✎</span>Notes</a>
+      <a class="ui-tab" href="#tags"><span class="ui-tab-icon" aria-hidden="true">#</span>Tags</a>
+      <a class="ui-tab" href="#search"><span class="ui-tab-icon" aria-hidden="true">⌕</span>Search</a>
+      <a class="ui-tab" href="#settings"><span class="ui-tab-icon" aria-hidden="true">≡</span>Settings</a>
+    </nav>
+  </div>
+</body>
+</html>

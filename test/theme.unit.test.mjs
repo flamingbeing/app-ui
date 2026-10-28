@@ -54,7 +54,7 @@ test('storage refused: picks on this page still build on each other', () => {
   chooseTheme({ density: 'compact' });
   chooseTheme({ dark: 'oled', preset: 'eye' });
   assert.deepEqual(themeChoice(), { ...DEFAULTS, theme: 'dark', density: 'compact', dark: 'oled', preset: 'eye' });
-  assert.deepEqual(document.documentElement.dataset, { ...LOOK_A, theme: 'dark', density: 'compact', dark: 'oled', preset: 'eye' });
+  assert.deepEqual(document.documentElement.dataset, { ...LOOK_A, theme: 'dark', density: 'compact', dark: 'oled' });   // (the preset shows in the palette only, no mark)
   assert.ok(classes.has('glass'), 'glass by default');
   chooseTheme({ material: 'solid' });
   assert.ok(!classes.has('glass'), 'Solid takes the glass class off');

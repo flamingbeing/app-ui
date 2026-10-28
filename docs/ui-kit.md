@@ -180,7 +180,7 @@ No component code. If a look seems to need a fork of a part, add a variant inste
 5. Check the gallery by eye in light and dark: `/kit/?look=d`.
 
 A new variant value takes one more step. Add it to `VARIANTS` in `looks.js`, add the CSS that styles
-`[data-<variant>="<value>"]` (in `ui.css`, `ui/gestures.css` or `glass.css`), add the mark to `early.js`'s list if the
+`[data-<variant>="<value>"]` (in `ui.css`, the part's file in `ui/gestures/` or `glass.css`), add the mark to `early.js`'s list if the
 variant is new, and give it a test.
 
 ## Layout parts and extra-dense

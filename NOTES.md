@@ -9,3 +9,8 @@ Lasting rules, owner preferences and lessons (never task chatter), and how to te
 - Tab pages are the screen stack's bottom screen (`screenStack().base`), so pushed screens, the bar title and Back
   work unchanged on every page. Swipe tests: Chromium's own edge Back takes a touch starting at the left edge, so the
   edge tests park a spare history entry first. CDP drops a `touchMove` to the same point, so a "held" finger moves 1 px.
+- No `@layer` while `tokens.css` (design.flamingbeing.com) has unlayered base rules: unlayered CSS beats every layer,
+  so its `:where(button){color:inherit}` and focus reset win over the kit's layered rules (seen as failed axe contrast
+  and plain bar buttons in rc.12's try).
+- axe runs with `preload: false`: its CSSOM preload copies `@import`-ed sheets into inline `<style>`s, which the
+  Worker's page CSP reports a moment later (flaky "style-src-elem inline" fails).

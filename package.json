@@ -1,13 +1,38 @@
 {
   "name": "app-ui",
-  "version": "1.0.0-rc.11",
+  "version": "1.0.0-rc.12",
   "description": "The UI core for the apps: @core/ui, @core/theme, @core/settings, the looks and the /kit/ gallery, served at exact versions from core.anawj.com/ui/<version>/.",
-  "private": true,
   "type": "module",
+  "sideEffects": [
+    "**/*.css",
+    "theme/early.js"
+  ],
+  "types": "./types/ui/index.d.ts",
   "exports": {
-    "./ui": "./ui/index.js",
-    "./theme": "./theme/index.js",
-    "./settings": "./settings/index.js",
+    "./ui": {
+      "types": "./types/ui/index.d.ts",
+      "default": "./ui/index.js"
+    },
+    "./theme": {
+      "types": "./types/theme/index.d.ts",
+      "default": "./theme/index.js"
+    },
+    "./settings": {
+      "types": "./types/settings/index.d.ts",
+      "default": "./settings/index.js"
+    },
+    "./ui/*.js": {
+      "types": "./types/ui/*.d.ts",
+      "default": "./ui/*.js"
+    },
+    "./theme/*.js": {
+      "types": "./types/theme/*.d.ts",
+      "default": "./theme/*.js"
+    },
+    "./settings/*.js": {
+      "types": "./types/settings/*.d.ts",
+      "default": "./settings/*.js"
+    },
     "./ui/*": "./ui/*",
     "./theme/*": "./theme/*",
     "./settings/*": "./settings/*",
@@ -18,13 +43,15 @@
     "theme",
     "settings",
     "kit",
-    "icons"
+    "icons",
+    "types"
   ],
   "scripts": {
     "check": "node tools/check.mjs",
     "test": "node --test 'worker/test/*.test.mjs' 'test/*.unit.test.mjs' 'tools/test/*.test.mjs'",
-    "typecheck": "tsc -p .",
-    "e2e": "playwright test"
+    "typecheck": "tsc -p . && node tools/types.mjs --check",
+    "e2e": "playwright test",
+    "types": "node tools/types.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",
