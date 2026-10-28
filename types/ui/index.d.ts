@@ -20,6 +20,7 @@ export { detentSheet } from "./detent-sheet.js";
 export { screenStack } from "./screens.js";
 export { selectMode } from "./select-mode.js";
 export { alertModal, confirmModal } from "./modal.js";
+export { hoverCard, placeCard } from "./hover-card.js";
 export { aboutSheet, packagesFromImportMap } from "./about-sheet.js";
 export { settingsScreen, SETTINGS_WORDS } from "./settings-screen.js";
 export { draftSlot, listDrafts } from "./drafts.js";
