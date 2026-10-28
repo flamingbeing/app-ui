@@ -12,7 +12,7 @@ const settled = page => page.evaluate(() => Promise.all(document.getAnimations()
 // running text are exempt (WCAG 2.5.8's inline exception), as are the hidden ones
 const targets = page => page.evaluate(() => {
   const out = [];
-  for (const el of document.querySelectorAll('main button, main a[href], main input, main select, main textarea, .ui-tabbar a, .ui-bar a')) {
+  for (const el of document.querySelectorAll('main button, main a[href], main input, main select, main textarea, main td[tabindex], .ui-tabbar a, .ui-bar a')) {
     const hit = el.matches('input[type=radio], input[type=checkbox]') ? el.closest('label') || el : el;
     const r = hit.getBoundingClientRect();
     if (!r.width && !r.height) continue;
@@ -24,7 +24,7 @@ const targets = page => page.evaluate(() => {
 for (const width of [390, 820, 1280]) {
   test.describe(`at ${width} px`, () => {
     for (const look of ['a', 'b', 'c', 'd']) {
-      for (const screen of ['readings', 'log']) {
+      for (const screen of ['readings', 'log', 'grid']) {
         test(`look ${look.toUpperCase()}, ${screen}: clean (axe), targets 24 px or more, fits; screenshot kept`, async ({ sized }, info) => {
           const page = await sized(width);
           await page.goto(`${DENSE}?screen=${screen}&look=${look}`);
@@ -171,4 +171,92 @@ test('readable and lined up: no text under 12 px, stepper fields 32 px, one left
     await expect(unset).toHaveText('Not set');
     expect(Number(await unset.evaluate(e => getComputedStyle(e).fontWeight))).toBeLessThan(600);
   }
+});
+
+// the data grid (ui/data-grid.js) on the grid screen: sticky header row and first column, sizes, keyboard and taps
+const GRID = `${DENSE}?screen=grid&look=a`;
+const rotaCell = (page, plant, day) => page.locator(`#rota tr[data-key="${plant}"] td`).nth(day - 1);
+
+for (const width of [390, 1280]) {
+  test(`data grid at ${width} px: scrolls sideways in its box, the header row and first column stay; cell sizes; screenshot kept`, async ({ sized }, info) => {
+    const page = await sized(width);
+    await page.goto(GRID);
+    await expect(page.locator('#rota')).toHaveAttribute('role', 'grid');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), 'the page itself never scrolls sideways').toBeLessThanOrEqual(width);
+    const box = page.locator('#rota-box');
+    const sideways = await box.evaluate(b => b.scrollWidth > b.clientWidth);
+    if (width === 390) expect(sideways, 'at 390 px the grid scrolls in its box').toBe(true);
+    // sizes: dense 32, extra-dense 24 (the floor), the screen's own tap size otherwise
+    const h = () => rotaCell(page, 'Fig', 3).evaluate(c => [c.getBoundingClientRect().width, c.getBoundingClientRect().height]);
+    let [w, ht] = await h(); expect(ht).toBeGreaterThanOrEqual(32); expect(w).toBeGreaterThanOrEqual(32);
+    await page.locator('#grid-size label', { hasText: 'Extra-dense' }).click();
+    [w, ht] = await h(); expect(ht).toBeGreaterThanOrEqual(24); expect(ht).toBeLessThan(32); expect(w).toBeGreaterThanOrEqual(24);
+    expect(await AxeBuilder(page), `grid, extra-dense at ${width}`).toEqual([]);
+    await page.screenshot({ path: info.outputPath(`dense-grid-extra-${width}.png`) });
+    await page.locator('#grid-size label', { hasText: 'Screen' }).click();
+    [, ht] = await h(); expect(ht).toBeGreaterThanOrEqual(32);
+    await page.locator('#grid-size label', { hasText: /^Dense$/ }).click();
+    // scroll the box to its far corner: the header row and the first column stay where they were
+    const head = page.locator('#rota thead th').first(), name = page.locator('#rota tr[data-key="Tomato"] th');
+    const before = { head: await head.boundingBox(), day: await page.locator('#rota thead th').nth(1).boundingBox() };
+    await box.evaluate(b => b.scrollTo(b.scrollWidth, b.scrollHeight));
+    await expect.poll(() => box.evaluate(b => b.scrollLeft > 0 || b.scrollWidth <= b.clientWidth)).toBe(true);
+    const after = await head.boundingBox();
+    expect(Math.round(after.y)).toBe(Math.round(before.head.y));
+    expect(Math.round(after.x)).toBe(Math.round(before.head.x));
+    const nm = await name.boundingBox(), bb = await box.boundingBox();
+    expect(Math.round(nm.x)).toBe(Math.round(bb.x + 1));   // the box's 1 px border
+    await page.screenshot({ path: info.outputPath(`dense-grid-scrolled-${width}.png`) });
+  });
+}
+
+test('data grid: one Tab stop; arrows, Home/End and Ctrl+End move; a group row keeps the column; Enter selects and fills', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(GRID);
+  await expect(page.locator('#rota td[tabindex="0"], #rota th[tabindex="0"]')).toHaveCount(1);
+  await page.locator('#grid-size input').last().focus();   // just before the grid
+  await page.keyboard.press('Tab');
+  await expect(rotaCell(page, 'Fern', 1)).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  await expect(rotaCell(page, 'Fern', 3)).toBeFocused();
+  for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowDown');   // past Snake plant into the Balcony group row
+  await expect(page.locator('#rota tr[data-group] th').nth(1)).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(rotaCell(page, 'Basil', 3)).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(rotaCell(page, 'Basil', 14)).toBeFocused();
+  await expect.poll(() => page.locator('#rota-box').evaluate(b => b.scrollLeft), 'the box follows the focus').toBeGreaterThan(0);
+  await page.keyboard.press('Home');
+  await expect(page.locator('#rota tr[data-key="Basil"] th')).toBeFocused();
+  await page.keyboard.press('Control+End');
+  await expect(page.locator('#rota tfoot td').last()).toBeFocused();
+  await page.keyboard.press('Control+Home');
+  await expect(page.locator('#rota thead th').first()).toBeFocused();
+  // Enter on a body cell selects it; the toolbar fills it; the redraw keeps one Tab stop and the pick
+  await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight');   // Fig, day 2
+  await page.keyboard.press('Enter');
+  await expect(rotaCell(page, 'Fig', 2)).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('#rota-picked')).toHaveText('Fig, day 2');
+  await page.getByRole('button', { name: 'Feed' }).click();
+  await expect(rotaCell(page, 'Fig', 2)).toHaveText('F');
+  await expect(rotaCell(page, 'Fig', 2)).toHaveAttribute('aria-selected', 'true');
+  await expect(page.locator('#rota [aria-selected="true"]')).toHaveCount(1);
+  await expect.poll(() => page.locator('#rota [tabindex="0"]').count()).toBe(1);
+  expect(await AxeBuilder(page), 'grid with a pick').toEqual([]);
+});
+
+test('data grid: a tap selects a cell (one at a time) and makes it the Tab stop; header cells are not selected', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(GRID);
+  await rotaCell(page, 'Mint', 4).tap();
+  await expect(rotaCell(page, 'Mint', 4)).toHaveAttribute('aria-selected', 'true');
+  await expect(rotaCell(page, 'Mint', 4)).toHaveAttribute('tabindex', '0');
+  await rotaCell(page, 'Pothos', 2).tap();
+  await expect(page.locator('#rota [aria-selected="true"]')).toHaveCount(1);
+  await expect(page.locator('#rota-picked')).toHaveText('Pothos, day 2');
+  await page.locator('#rota thead th').nth(3).tap();
+  await expect(page.locator('#rota thead [aria-selected]')).toHaveCount(0);
+  await expect(page.locator('#rota-picked')).toHaveText('Pothos, day 2');
 });
