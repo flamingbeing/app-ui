@@ -1,0 +1,7 @@
+{
+  // npm run types: the .d.ts files package.json's "types" conditions point at (types/), from the JSDoc in ui/, theme/
+  // and settings/. Run it after changing a public signature; tools/check.mjs fails when types/ is out of date.
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": false, "declaration": true, "emitDeclarationOnly": true, "outDir": "types", "rootDir": "." },
+  "include": ["ui/**/*.js", "ui/**/*.d.ts", "theme/**/*.js", "settings/*.js", "settings/*.d.ts"]
+}
