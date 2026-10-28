@@ -29,9 +29,9 @@ export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entr
 // gestures (ui/gestures.css): each part starts only where its markup is; startGestures() starts them all
 export { startGestures } from './gestures.js';
 export { largeTitle } from './large-title.js';
-export { shrinkingTabBar } from './tab-bar.js';
+export { shrinkingTabBar, tabBarRoom } from './tab-bar.js';
 export { holdMenus } from './hold-menu.js';
-export { detentSheet } from './detent-sheet.js';
+export { detentSheet, sheetsSettled } from './detent-sheet.js';
 export { screenStack } from './screens.js';
 export { selectMode } from './select-mode.js';
 export { tabPages, swipeIntent, pageStep } from './tab-pages.js';

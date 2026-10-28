@@ -723,3 +723,74 @@ test('buttons are centred and one height, rounder than list cards; theme-color f
   await page.goto("/ui/0.0.0-dev/kit/shell/?edge=always");
   expect(await page.locator('.ui-tabbar .ui-tab svg.ui-icon').count()).toBeGreaterThanOrEqual(4);
 });
+
+test('at 390 px a sheet opened, or a page pushed, as another sheet closes is not undone by its late step back', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(KIT);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  // a second sheet, opened in the same task as the first one's close (its step back still on the way)
+  await page.evaluate(async () => {
+    const { detentSheet } = await import('../ui/detent-sheet.js');
+    const d = document.createElement('dialog');
+    d.className = 'ui-sheet'; d.id = 'sheet-two'; d.dataset.detents = 'medium';
+    d.setAttribute('aria-label', 'Second'); d.innerHTML = '<div class="ui-sheet-body"><p>Second</p></div>';
+    document.body.append(d);
+    /** @type {any} */ (window).two = detentSheet(d);
+  });
+  await page.click('#open-sheet');
+  await settled(page);
+  await page.evaluate(() => { document.querySelector('#sheet [data-close]').click(); window.two.open(); });
+  await page.waitForTimeout(800);
+  await expect(page.locator('#sheet')).toBeHidden();
+  await expect(page.locator('#sheet-two')).toBeVisible();
+  await page.goBack();   // Back closes the second sheet, and stays on the page
+  await expect(page.locator('#sheet-two')).toBeHidden();
+  await expect(page).toHaveURL(/\/ui\/0\.0\.0-dev\/kit\//);
+
+  // a page pushed after sheetsSettled() stays
+  await page.click('#open-sheet');
+  await settled(page);
+  await page.evaluate(async () => {
+    const { sheetsSettled } = await import('../ui/index.js');
+    document.querySelector('#sheet [data-close]').click();
+    await sheetsSettled();
+    location.hash = '#pushed';
+  });
+  await page.waitForTimeout(800);
+  await expect(page).toHaveURL(/#pushed$/);
+});
+
+test('a single-pane shell: rows that are links or buttons look like rows; the tab bar leaves room under the last row; from 600 px the bar stays', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto('/test/single-pane.html');
+  await expect.poll(() => page.evaluate(() => !!window.app)).toBe(true);
+  const look = await page.evaluate(() => {
+    const css = sel => getComputedStyle(document.querySelector(sel));
+    const [a, b] = [css('#rows a.ui-row'), css('#button-row')];
+    return { line: a.textDecorationLine, aColor: a.color, bColor: b.color, text: css('#home').color, bBorder: b.borderTopWidth,
+      bWidth: document.querySelector('#button-row').getBoundingClientRect().width,
+      listWidth: document.querySelector('#rows').getBoundingClientRect().width,
+      sep: css('#rows > li + li > .ui-row').backgroundImage, marker: css('#rows > li').listStyleType };
+  });
+  expect(look.line).toBe('none');
+  expect(look.aColor).toBe(look.text);
+  expect(look.bColor).toBe(look.text);
+  expect(look.bBorder).toBe('0px');
+  expect(Math.abs(look.bWidth - look.listWidth)).toBeLessThan(2);
+  expect(look.sep).toContain('linear-gradient');
+  expect(look.marker).toBe('none');
+  // scrolled to the end, the last line sits above the tab bar
+  const room = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--ui-tabbar-room'));
+  expect(parseFloat(room)).toBeGreaterThan(40);
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  const last = await page.locator('#last').boundingBox(), tabs = await page.locator('.ui-tabbar').boundingBox();
+  expect(last.y + last.height).toBeLessThanOrEqual(tabs.y);
+  // wide: no tab bar, no room, and the bar beside the side bar
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--ui-tabbar-room'))).toBe('0px');
+  await expect(page.locator('.ui-bar')).toBeVisible();
+  await expect(page.locator('#new')).toBeVisible();
+  const bar = await page.locator('.ui-bar').boundingBox(), side = await page.locator('.ui-sidebar').boundingBox();
+  expect(bar.x).toBeGreaterThanOrEqual(side.x + side.width - 1);
+  expect(await AxeBuilder(page)).toEqual([]);
+});
