@@ -77,22 +77,21 @@ function themeColour(c) {
 function show(c) {
   const root = document.documentElement;
   const look = lookOf(c.look, app.look);
-  mark(root, 'theme', c.theme, THEMES[0]);
-  mark(root, 'dark', c.dark, 'dark');
+  if (!app.ownTheme) { mark(root, 'theme', c.theme, THEMES[0]); mark(root, 'dark', c.dark, 'dark'); }
   root.dataset.look = look.id;
   mark(root, 'density', c.density, DENSITIES[0]);
   mark(root, 'motion', c.motion, 'auto');
   for (const [k, v] of Object.entries(look.variants)) root.dataset[k] = v;
   root.classList.toggle('glass', glassOn(c));
-  themeColour(c);
+  if (!app.ownTheme) themeColour(c);
   // (no constructed stylesheets, as in node or an old browser: theme.css's own values stay)
   if (typeof CSSStyleSheet !== 'function' || !('adoptedStyleSheets' in document)) return;
   // (early.js's sheet, when it put back the last look before the first paint: this one replaces its values)
   if (!sheet) sheet = /** @type {any} */ (globalThis).coreThemeSheet ?? null;
   if (!sheet) { sheet = new CSSStyleSheet(); document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]; }
-  const css = paletteCss(c, app);
+  const css = app.layer ? `@layer ${app.layer} {\n${paletteCss(c, app)}\n}` : paletteCss(c, app);
   sheet.replaceSync(css);
-  const marks = Object.fromEntries(MARKS.map(k => [k, root.dataset[k]]));
+  const marks = Object.fromEntries(MARKS.filter(k => !(app.ownTheme && (k === 'theme' || k === 'dark'))).map(k => [k, root.dataset[k]]));
   try { localStorage.setItem(PAINT, JSON.stringify({ marks, solid: !glassOn(c), css })); } catch { /* early.js finds none */ }
 }
 
@@ -101,12 +100,15 @@ function show(c) {
  * Starts the glass guard too (guard.js): its verdict, once found, shows the choice again.
  * @param {import('./palette-css.js').AppTheme} [appTheme]  the app's own defaults: accent, its colour (hex); look,
  *   the look a device that picked none gets (looks.js ids; none: A); surface, the ground a device that picked none
- *   gets (schema.js SURFACE_IDS; none: theme.css's)
+ *   gets (schema.js SURFACE_IDS; none: theme.css's); layer, the cascade layer the palette sheet goes in; ownTheme, the
+ *   app keeps data-theme (and its browser bar colour) itself
  */
 export function applyTheme(appTheme = {}) {
   const accent = cleanHex(appTheme.accent);
   app = { ...(accent ? { accent } : {}), ...(LOOK_IDS.includes(appTheme.look ?? '') ? { look: appTheme.look } : {}),
-    ...(appTheme.surface && SURFACE_IDS.includes(appTheme.surface) ? { surface: appTheme.surface } : {}) };
+    ...(appTheme.surface && SURFACE_IDS.includes(appTheme.surface) ? { surface: appTheme.surface } : {}),
+    ...(typeof appTheme.layer === 'string' && /^[a-z][a-z0-9-]{0,30}$/.test(appTheme.layer) ? { layer: appTheme.layer } : {}),
+    ...(appTheme.ownTheme === true ? { ownTheme: true } : {}) };
   show(shown ?? themeChoice());
   if (!stopGuard) stopGuard = startGuard(() => show(shown ?? themeChoice()));
 }

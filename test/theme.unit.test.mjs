@@ -2,7 +2,7 @@
 // contrast floor (colour.js, palette-css.js), the presets and the accent grid. node --test app/test/theme.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseChoice, chooseTheme, themeChoice, THEMES, DENSITIES } from '../theme/choice.js';
+import { parseChoice, chooseTheme, themeChoice, applyTheme, THEMES, DENSITIES } from '../theme/choice.js';
 import { LOOKS } from '../theme/looks.js';
 import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS } from '../theme/schema.js';
 import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, BACKDROP } from '../theme/colour.js';
@@ -271,4 +271,42 @@ test('theme-color meta: one per scheme with the page ground; a chosen light or d
   assert.deepEqual(metas.map(m => m.content), [dark, dark], 'dark chosen: both follow it');
   assert.equal(metas.length, 2, 'the same two tags are updated, not added again');
   } finally { if (was) Object.defineProperty(globalThis, 'document', was); else delete globalThis.document; }
+});
+
+test('an app with its own palette: layer puts the kit palette in that cascade layer; ownTheme leaves data-theme, data-dark and theme-color alone', () => {
+  /** @type {Record<string, string | null>} */ const store = {};
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
+    getItem: (/** @type {string} */ k) => store[k] ?? null, setItem: (/** @type {string} */ k, /** @type {string} */ v) => { store[k] = v; } } });
+  /** @type {any[]} */ const metas = [];
+  const dataset = /** @type {Record<string, string>} */ ({ theme: 'auto' });
+  const sheets = /** @type {{ css: string }[]} */ ([]);
+  const was = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  const wasSheet = Object.getOwnPropertyDescriptor(globalThis, 'CSSStyleSheet');
+  Object.defineProperty(globalThis, 'CSSStyleSheet', { configurable: true, value: class { css = ''; replaceSync(/** @type {string} */ c) { this.css = c; } } });
+  Object.defineProperty(globalThis, 'document', { configurable: true, value: {
+    head: { querySelector: () => null, append: (/** @type {any} */ m) => { metas.push(m); } },
+    documentElement: { dataset, classList: { toggle() {} } }, createElement: () => ({ dataset: {} }),
+    get adoptedStyleSheets() { return sheets; }, set adoptedStyleSheets(v) { sheets.splice(0, sheets.length, ...v); } } });
+  try {
+    chooseTheme({ theme: 'light', dark: 'black' });
+    dataset.theme = 'auto'; delete dataset.dark; metas.length = 0;   // (the app marks its own after that)
+    applyTheme({ accent: '#002f6c', layer: 'kit', ownTheme: true });
+    assert.equal(dataset.theme, 'auto', 'the app\'s mark stays');
+    assert.equal(dataset.dark, undefined);
+    assert.equal(metas.length, 0, 'no theme-color tags');
+    assert.ok(LOOKS.some(l => l.id === dataset.look), 'the look marks still come');
+    const css = sheets.at(-1)?.css ?? '';
+    assert.match(css, /^@layer kit \{\n:root \{/);
+    assert.ok(css.trimEnd().endsWith('}\n}'));
+    assert.match(css, /:root\[data-theme="dark"\]/, 'the dark palette follows the app\'s mark');
+    const paint = JSON.parse(store['core-theme-paint'] ?? '{}');
+    assert.ok(!('theme' in paint.marks) && !('dark' in paint.marks), 'early.js does not put a theme mark back');
+    assert.match(paint.css, /^@layer kit/);
+    applyTheme({ layer: 'no such; }', ownTheme: 'yes' });
+    assert.doesNotMatch(sheets.at(-1)?.css ?? '', /@layer/, 'an odd layer name is ignored');
+    assert.equal(dataset.theme, 'light', 'ownTheme must be true');
+  } finally {
+    if (was) Object.defineProperty(globalThis, 'document', was); else delete globalThis.document;
+    if (wasSheet) Object.defineProperty(globalThis, 'CSSStyleSheet', wasSheet); else delete globalThis.CSSStyleSheet;
+  }
 });

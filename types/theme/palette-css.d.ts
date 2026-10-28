@@ -25,11 +25,16 @@ export function accentOf(choice: Partial<Choice>, app?: AppTheme): string;
 export type Choice = import("./schema.js").Choice;
 export type Palette = import("./colour.js").Palette;
 /**
- * the app's own defaults (config): accent colour,
- * look id, ground (SURFACES id)
+ * the app's own
+ * defaults (config): accent colour, look id, ground (SURFACES id); layer: the cascade layer the palette goes in (an app
+ * with its own palette names the lowest layer, so its own values win where both set a name); ownTheme: the app marks
+ * light, dark or auto on <html> data-theme itself (and its own browser bar colour), so the kit leaves data-theme,
+ * data-dark and the theme-color tags alone and its palette follows the app's mark
  */
 export type AppTheme = {
     accent?: string;
     look?: string;
     surface?: string;
+    layer?: string;
+    ownTheme?: boolean;
 };

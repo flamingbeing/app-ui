@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.32
+- `applyTheme({ layer, ownTheme })`, both optional, for an app that keeps its own palette and light/dark switch:
+  `layer` puts the kit palette sheet in that cascade layer (name it first in the page's `@layer` order, so the app's
+  own custom properties of the same name win); `ownTheme: true` leaves `data-theme`, `data-dark` and the theme-color
+  tags to the app (its `light`, `dark` or `auto` mark), and the kit palette follows that mark. Without them nothing
+  changes.
+
 ## 1.0.0-rc.31
 - Tab bar: an optional centre action, `.ui-tab.ui-tab-action` (a button or a link with a `.ui-tab-icon` and its
   label): a raised 44 px circle in the accent colour, the label for screen readers only, never marked as the current
