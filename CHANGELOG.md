@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.33
+- Add-ons (`theme/addons/index.js`, `theme/addons/addons.css`), opt-in and per device, off by default: wallpaper
+  (patterns or a photo, dim, a backing for text on the page, optional see-through cards), fonts (stacks, a typed name,
+  a font file), custom CSS with `@settings`, icon sets for `.ui-icon` and per-tab icons, saved themes with export and
+  import and a night theme, and `#t=` theme links. Saved themes and links take the app's own look schema and lists.
+  Nothing changes for an app that doesn't import them.
+
 ## 1.0.0-rc.32
 - `applyTheme({ layer, ownTheme })`, both optional, for an app that keeps its own palette and light/dark switch:
   `layer` puts the kit palette sheet in that cascade layer (name it first in the page's `@layer` order, so the app's

@@ -232,3 +232,23 @@ under 24 px: if a screen doesn't fit, cut or split it instead. A device set to C
 since its owner asked for bigger targets. Use it for data entry that a trained person repeats many times a day,
 not for a screen someone meets once. `e2e/dense.spec.mjs` measures every target on the gallery screens.
 
+
+## Add-ons (`@core/theme` addons, opt-in)
+
+`theme/addons/index.js` and `theme/addons/addons.css` (link it after the kit's CSS). Every add-on is off until a
+device turns it on, and is kept on that device only (localStorage `core-addons`, an app may pass its own key; photos
+and font files in IndexedDB under a name the app gives).
+
+- **Wallpaper** (`wallpaper.js`): a pattern or the person's own photo behind every page, with a dim. Text straight on
+  the page (mark it `.ui-on-wall`) gets a backing just strong enough for 4.5:1. See-through cards (`wallFrost`, mark
+  cards `.ui-card`) are a separate opt-in: content is solid unless a person turns this on.
+- **Fonts** (`fonts.js`): a stack, a font installed on the device by name, or a font file kept on the device; sets
+  `--font` and `--font-editor`. The kit ships no font files; pass your stacks.
+- **Custom CSS** (`custom-css.js`): anything that loads from elsewhere is refused; `/* @settings */` gives sliders,
+  colours and switches; off on the app's theme pages (`off`) and with `?nocss`.
+- **Icon sets** (`icon-sets.js`): `<html data-icons>` restyles `.ui-icon`; an app may give a set its own paths and let
+  a tab take an icon from the app's list.
+- **Saved themes** (`saved-themes.js`) and **theme links** (`theme-link.js`, `#t=`): the app passes its look schema,
+  presets and lists; the kit holds the engine only.
+- **Per device** (`store.js`): `addonChoice()`, `chooseAddons(patch)`, `applyAddons(choice, { photos, fonts, stacks, off })`.
+  Call `applyAddons` again after light or dark changes.
