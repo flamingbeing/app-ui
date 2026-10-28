@@ -64,6 +64,7 @@ drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeInten
 | Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it | |
 | No swipe | a mostly vertical move, a start within 24 px of either edge, the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
 | Reduce Motion | the swipe changes the tab with nothing moved | |
+| Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
 | Scroll and Back | each page keeps its scroll; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |

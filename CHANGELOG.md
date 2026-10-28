@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.13
+- A tapped tab (or side link) slides its page in from the side the tab sits on (`SLIDE_MS`, 280 ms, the logbook's page
+  motion), at every width; `.ui-screens` clips while it runs (`is-sliding`) so the start offset can't widen the page.
+  Reduce Motion or Still: it just switches. Off for an app: `data-slide="off"` on the tab bar (or `<html>`), or
+  `tabPages(bar, { …, slide: false })`. Apps that did this from the `ui-tab` event (notes) drop their copy.
+
 ## 1.0.0-rc.12
 - Shipped, not gallery-only: `.ui-detail-actions` (the detail pane's buttons; danger ones in red), `.ui-back` at the
   top of a pushed screen, `.toasts` placement, `.ui-tab` on one line (`white-space: nowrap`), and the bar's two ends
