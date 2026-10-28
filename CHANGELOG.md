@@ -1,12 +1,17 @@
 # Changelog
 
-## 1.0.0-rc.15
+## 1.0.0-rc.16
 - Tab swipe: no start within max(24 px, an eighth of the width) of either edge (`swipeEdge`); the sideways test is
   looser (1.3:1, about 37°). A right swipe on the first page calls `onPrevMissing` (`startGestures(root, { onPrevMissing })`
   or `tabPages(..., { onPrevMissing })`), so an app can open its drawer.
 - Page: `overscroll-behavior: none` and `touch-action: pan-x pan-y` on `html` and `body` (no pinch or double-tap zoom).
-- Sheet: the first drag has no forced layout (height measured at open and after each settle) and the sheet gets
-  `will-change: transform` while dragging.
+- Sheet: the first drag has no forced layout (height measured at open and after each settle) and, on a phone, the sheet
+  gets `will-change: transform` while dragging.
+
+## 1.0.0-rc.15
+- Kit gallery, installed: opens the newest version. The manifest's `id` and `start_url` are `/ui/kit/` (the Worker 302s
+  it to the newest gallery) and its scope is `/ui/`, so one home-screen app follows every release instead of staying on
+  the version it was installed from.
 
 ## 1.0.0-rc.14
 - Icons: `icons/lucide.js` (Lucide, ISC; `icon(nodes)` and one named export per icon, so only the icons an app imports
