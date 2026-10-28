@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.19
+- Hover cards: `hoverCard(root, selector, fill)` from `@core/ui` (styles in `ui/ui.css`, `.ui-hover-card`). Rest the
+  mouse on a matching link for a moment and a small card shows what `fill(link)` returns (a note's preview, say); it
+  goes when the mouse leaves (with a moment to move onto it), on Esc, scroll or a click. Mouse only (touch and pen
+  taps are unchanged); in the top layer, so it shows over a modal sheet. `placeCard()` is the placement (below the
+  link, above it when there is no room, inside the window). The parts gallery's prose link has one.
+
 ## 1.0.0-rc.18
 - Prose (`ui/prose.css`, opt-in: link it, put `ui-prose` on the box): rendered Markdown in an Obsidian-like reading
   style. A readable line length (`--measure`, 42rem), a heading scale, hanging list markers, task lists with the box in

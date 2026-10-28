@@ -159,3 +159,4 @@ stand-in for `@core/settings` on the page.
 | Theme-color | the page has two `theme-color` metas (light and dark) holding the page ground | |
 | No glyph icons | `tools/check.mjs` fails on an emoji, dingbat or pictograph character in a published file | |
 | Prose | 390 and 1280 px: a task row has no bullet and its box sits on the text line, left of the words; a code block is not the accent; the box keeps to `--measure`; icon buttons are square | yes |
+| Hover card | 1280 px with a mouse: resting on the prose link shows the card below it (`aria-describedby`), axe passes, moving away removes it; 390 px touch: a tap shows none | yes |

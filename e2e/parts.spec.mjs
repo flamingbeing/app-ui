@@ -158,3 +158,25 @@ for (const width of [390, 1280]) {
     expect(await AxeBuilder(page)).toEqual([]);
   });
 }
+
+test('a hover card shows after the mouse rests on a link, and goes when it leaves; a touch screen gets none', async ({ browser, sized }) => {
+  const touch = await sized(390);   // (no hover there: a tap keeps doing what it did)
+  await touch.goto(PARTS);
+  await touch.locator('#prose a.note-link').tap();
+  await touch.waitForTimeout(700);
+  await expect(touch.locator('.ui-hover-card')).toHaveCount(0);
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });   // a mouse: no touch
+  const page = await context.newPage();
+  await page.goto(PARTS);
+  const link = page.locator('#prose a.note-link'), card = page.locator('.ui-hover-card');
+  await link.hover();
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('Watering');
+  expect(await link.getAttribute('aria-describedby')).toBe(await card.getAttribute('id'));
+  const [l, c] = [await link.boundingBox(), await card.boundingBox()];
+  expect(l && c && c.y >= l.y + l.height, 'below the link').toBe(true);
+  expect(await AxeBuilder(page)).toEqual([]);
+  await page.mouse.move(5, 5);
+  await expect(card).toHaveCount(0);
+  await context.close();
+});

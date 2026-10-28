@@ -74,3 +74,12 @@ test('packagesFromImportMap lists outside packages with versions and known licen
   ]);
   assert.deepEqual(packagesFromImportMap(null), []);
 });
+
+test('a hover card goes below its link, above it when the window has no room below, and stays inside the window', async () => {
+  const { placeCard } = await import('../ui/hover-card.js');
+  const view = { width: 400, height: 600 }, card = { width: 300, height: 200 };
+  assert.deepEqual(placeCard({ left: 20, top: 100, bottom: 120 }, card, view), { left: 20, top: 126 });
+  assert.deepEqual(placeCard({ left: 20, top: 500, bottom: 520 }, card, view), { left: 20, top: 294 });
+  assert.deepEqual(placeCard({ left: 350, top: 100, bottom: 120 }, card, view).left, 94);
+  assert.deepEqual(placeCard({ left: 20, top: 150, bottom: 170 }, { width: 300, height: 500 }, view).top, 176);   // no room either way: below
+});
