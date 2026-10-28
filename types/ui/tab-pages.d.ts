@@ -1,5 +1,5 @@
-/** A first move's direction (pure): 'x' a sideways swipe, 'y' a scroll, null not far enough to tell. A swipe is well
- * under 34° from the horizontal. @param {number} mx @param {number} my */
+/** A first move's direction (pure): 'x' a sideways swipe, 'y' a scroll, null not far enough to tell. A swipe is under
+ * about 37° from the horizontal. @param {number} mx @param {number} my */
 export function swipeIntent(mx: number, my: number): "x" | "y" | null;
 /** Where a let-go swipe goes (pure): 1 the next page, -1 the previous one, 0 back to this one.
  * @param {number} dx  finger travel, negative = to the left @param {number} v  px/ms, signed like dx

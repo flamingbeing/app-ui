@@ -283,7 +283,7 @@ test('swipe: a start inside an eighth of the width does nothing (390 px: 48 px);
 test('swipe: right on the first page fires onPrevMissing once; a short move does not; not on a later page', async ({ sized }) => {
   const page = await load(sized);
   const fired = () => page.evaluate(() => document.documentElement.dataset.prevMissing || '0');
-  await (await finger(page)).drag(250, 420, 230, 420, { steps: 10, ms: 40 });
+  await (await finger(page)).drag(200, 420, 230, 420, { steps: 10, ms: 40 });
   await settled(page);
   expect(await fired(), 'too short').toBe('0');
   await swipe(page, 60, 300);

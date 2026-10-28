@@ -5,7 +5,7 @@
 // (detail.page, detail.tab) after each change.
 // On a phone (< 600 px) a sideways swipe on the content moves to the next or previous page, the pages following the
 // finger (a pager); past a third of the width or a flick, it goes. Never on a pushed screen, in a field, editor,
-// sideways scroller, dialog, sheet or open menu, in select mode, with text selected, or within EDGE px of either edge
+// sideways scroller, dialog, sheet or open menu, in select mode, with text selected, or within swipeEdge() px of either edge (the larger of EDGE and an eighth of the width)
 // (the system's Back gestures and screens.js's edge swipe). A mostly vertical move scrolls instead. Less motion: the
 // swipe switches without the slide. Off: data-swipe="off" on the tab bar (or <html>), or { swipe: false }.
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
@@ -15,8 +15,8 @@ import { still, noGesture, listeners, velocity } from './gesture.js';
 import { EDGE, swipeGoesBack } from './screens.js';
 import { TABLET_MIN } from './shell/shell.js';
 
-/** A first move's direction (pure): 'x' a sideways swipe, 'y' a scroll, null not far enough to tell. A swipe is well
- * under 34° from the horizontal. @param {number} mx @param {number} my */
+/** A first move's direction (pure): 'x' a sideways swipe, 'y' a scroll, null not far enough to tell. A swipe is under
+ * about 37° from the horizontal. @param {number} mx @param {number} my */
 export function swipeIntent(mx, my) {
   if (Math.max(Math.abs(mx), Math.abs(my)) < 10) return null;
   return Math.abs(mx) > Math.abs(my) * 1.3 ? 'x' : 'y';
@@ -30,6 +30,9 @@ export function pageStep(dx, v, width, hasPrev, hasNext) {
   if (dx > 0 && hasPrev && swipeGoesBack(dx, v, width)) return -1;
   return 0;
 }
+
+/** How much of a finger's travel shows where there is no page that way (the page gives a little, then holds). */
+const RUBBER = 3;
 
 /** How far from either edge a tab swipe may not start (pure): the system's Back gesture zone, wider on wide phones.
  * @param {number} width */
@@ -172,19 +175,19 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     }
     if (e.cancelable) e.preventDefault();
     // no page that way: the page gives a little, then holds
-    dx = (mx < 0 && !next) || (mx > 0 && !prev) ? mx / 3 : mx;
+    dx = (mx < 0 && !next) || (mx > 0 && !prev) ? mx / RUBBER : mx;
     hist.push([e.timeStamp, t.clientX]);
     if (hist.length > 5) hist.shift();
     if (!still()) place();
   }, { passive: false });
-  const end = async () => {
+  const end = async (/** @type {Event} */ e) => {
     if (x0 === null) return;
     x0 = null;
     if (dir !== 'x') return;
     const step = pageStep(dx, velocity(hist), w, !!prev, !!next);
     const to = step === 1 ? next : step === -1 ? prev : null;
     // a right swipe on the first page (nothing before it; dx was eased to a third): tell the app (it opens a drawer)
-    const missing = !prev && dx > 0 && swipeGoesBack(dx * 3, velocity(hist), w);
+    const missing = e.type === 'touchend' && !prev && dx > 0 && swipeGoesBack(dx * RUBBER, velocity(hist), w);
     if (still() || !host.classList.contains('is-paging')) { if (to) go(to); else if (missing) onPrevMissing?.(); return; }
     busy = true;
     const last = step === 1 ? -w : step === -1 ? w : 0;

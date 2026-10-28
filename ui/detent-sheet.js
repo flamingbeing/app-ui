@@ -117,6 +117,8 @@ export function detentSheet(sheet) {
   }
   function cycle() { glide(ds[(ds.indexOf(sheet.getAttribute('data-detent') || ds[0]) + 1) % ds.length], shown()); }
 
+  l.on(window, 'resize', () => { rest = 0; });   // rotation, the URL bar, the keyboard: measure again at the next drag
+
   document.querySelectorAll(`[data-open-sheet="#${CSS.escape(sheet.id)}"]`).forEach(b =>
     l.on(b, 'click', () => open(/** @type {HTMLElement} */ (b))));
   sheet.querySelectorAll('[data-close]').forEach(b => l.on(b, 'click', close));
