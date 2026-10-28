@@ -241,3 +241,25 @@ test('Still is off until picked on this device; unknown motion reads as auto', (
   assert.equal(cleanChoice({ motion: 'slow' }).motion, 'auto');
   assert.equal(parseChoice(JSON.stringify({ theme: 'dark' })).motion, 'auto', 'older choices get auto');
 });
+
+test('theme-color meta: one per scheme with the page ground; a chosen light or dark sets both the same', () => {
+  const refuse = () => { throw new Error('storage refused'); };
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { getItem: refuse, setItem: refuse } });
+  /** @type {any[]} */ const metas = [];
+  const head = {
+    querySelector: (/** @type {string} */ q) => metas.find(m => q.includes(`data-scheme="${m.dataset.scheme}"`)) ?? null,
+    append: (/** @type {any} */ m) => { metas.push(m); },
+  };
+  const was = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  Object.defineProperty(globalThis, 'document', { configurable: true, value: {
+    head, documentElement: { dataset: {}, classList: { toggle() {} } }, createElement: () => ({ dataset: {} }) } });
+  try {
+  chooseTheme({ theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '' });
+  const [light, dark] = [palettes({}).light.bg, palettes({}).dark.bg];
+  assert.deepEqual(metas.map(m => [m.name, m.media, m.content]), [
+    ['theme-color', '(prefers-color-scheme: light)', light], ['theme-color', '(prefers-color-scheme: dark)', dark]]);
+  chooseTheme({ theme: 'dark' });
+  assert.deepEqual(metas.map(m => m.content), [dark, dark], 'dark chosen: both follow it');
+  assert.equal(metas.length, 2, 'the same two tags are updated, not added again');
+  } finally { if (was) Object.defineProperty(globalThis, 'document', was); else delete globalThis.document; }
+});

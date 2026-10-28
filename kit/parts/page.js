@@ -2,6 +2,7 @@
 // ?look= and ?density= preview as on the other gallery pages (preview.js). The fake update api and import map stand in for an app's.
 import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, createTransients,
   applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey } from '../../ui/index.js';
+import { icon, gripVertical } from '../../icons/lucide.js';
 import { galleryPreview } from '../preview.js';
 
 galleryPreview();
@@ -73,7 +74,7 @@ function drawOrder() {
     grip.className = 'ui-grip';
     grip.setAttribute('role', 'img');
     grip.setAttribute('aria-label', `Move ${name}`);
-    grip.textContent = '⠿';
+    grip.append(icon(gripVertical));
     grip.addEventListener('pointerdown', e => gripDrag(e, dragList, (from, to) => { order = moveIn(order, from, to); drawOrder(); }));
     row.append(name, grip);
     return row;

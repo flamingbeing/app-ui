@@ -1,5 +1,6 @@
 export { LABELS } from "./labels.js";
 export { plural } from "./dom.js";
+export { icon } from "../icons/lucide.js";
 export { syncChip } from "./sync-chip.js";
 export { signInSheet } from "./sign-in-sheet.js";
 export { conflictSheet } from "./conflict-sheet.js";
