@@ -7,7 +7,7 @@ import { verdict, median, MEMORY_FLOOR, SLOW_FRAME_MS, PROBE_FRAMES } from '../t
 import { placeSheetMenu } from '../ui/hold-menu.js';
 
 test('every look: a unique id, a name, every variant picked from VARIANTS, the same token keys', () => {
-  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c']);
+  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd']);
   assert.equal(new Set(LOOK_IDS).size, LOOKS.length);
   const keys = Object.keys(LOOKS[0].tokens).sort();
   for (const look of LOOKS) {
@@ -36,6 +36,15 @@ test('the looks differ where the canvas does: A glass + floating tab bar, B a ba
   assert.equal(b.variants.tick, 'square');
   assert.equal(a.variants.tabbar, 'float');
   assert.equal(c.tokens['card-r'], '0', 'C: flush lists');
+});
+
+test('look D "Slim": the bar always shows the name, flat lists on the page, an edge tab bar, no band or glass', () => {
+  const d = lookOf('d');
+  assert.equal(d.name, 'Slim');
+  assert.deepEqual(d.variants, { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge' });
+  assert.ok(VARIANTS.header.includes('slim'));
+  assert.equal(d.tokens['card-r'], '0');
+  assert.equal(d.tokens['list-bg'], 'var(--bg)');
 });
 
 test('glass guard: little memory turns glass down at once; slow frames on the first scroll do; fast ones keep it', () => {

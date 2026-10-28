@@ -10,7 +10,6 @@ body > .ui-bar { padding-inline: calc(var(--kit-g) + var(--pad)); }
 body > main.ui-screens.is-swiping .ui-screen:not(.is-top) { inset: 0 var(--kit-g) auto; }
 .kit-bar-side { flex: 1; display: flex; gap: var(--gap); }
 .kit-end { justify-content: flex-end; }
-.ui-bar button { border: 0; background: none; color: var(--link); padding: 0 var(--gap); min-height: var(--tap); }
 .kit-lede { margin: 0 var(--pad) var(--pad); color: var(--muted); max-width: 36rem; }
 .kit-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap); margin: 0 var(--pad) var(--pad); }
 .kit-still { display: inline-flex; align-items: center; gap: .4rem; min-height: var(--tap); }

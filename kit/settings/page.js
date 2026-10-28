@@ -1,6 +1,6 @@
 // The settings screen gallery: a made-up plant app's options in the settings screen. The values live in a stand-in for
 // @core/settings (same api, same option rules from its schema and file code, kept in this tab's sessionStorage), so the
-// page works signed out. window.kit is { settings, stop } for the tests.
+// page works signed out. window.kit is { settings, stop, retries } for the tests.
 import { settingsScreen } from '../../ui/index.js';
 import { themeSwitch } from '../../theme/index.js';
 import { compile, valueOf, isCustom, readFile, writeFile } from '../../settings/index.js';
@@ -79,6 +79,10 @@ function fakeSettings() {
 }
 
 const settings = fakeSettings();
+// a stand-in update api: the first check finds nothing, the next one updates (window.kit.retries counts the retries)
+let checks = 0;
+const update = { versionLabel: async () => '1.2.3', checkNow: async () => ++checks % 2 === 0, retryUpdate: () => { kit.retries++; } };
+const kit = { settings, stop: () => {}, retries: 0 };
 const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById('screen')), {
   settings,
   file: 'plants-settings.json',
@@ -95,5 +99,7 @@ const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById(
       { key: 'photos', label: 'Keep photos on this phone', sub: 'Only here, not on your other devices' },
     ], mount: host => themeSwitch(host) },
   ],
+  about: { name: 'Plants', update, licences: {} },
 });
-Object.assign(window, { kit: { settings, stop } });
+kit.stop = stop;
+Object.assign(window, { kit });

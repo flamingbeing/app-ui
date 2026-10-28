@@ -8,13 +8,13 @@ const get = (page, key) => page.evaluate(k => window.kit.settings.get(k), key);
 const row = (page, label) => page.locator('.ui-setting', { hasText: label });
 
 for (const width of [390, 1280]) {
-  for (const look of ['a', 'b', 'c']) {
+  for (const look of ['a', 'b', 'c', 'd']) {
     test(`at ${width} px look ${look}: grouped rows, one level-1 heading, axe clean, nothing wider than the screen`, async ({ sized }) => {
       const page = await sized(width);
       await page.goto(`${PAGE}?look=${look}`);
       await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
       expect(await page.locator('.ui-settings-title').allTextContents())
-        .toEqual(['Profile', 'Plants', 'Reminders', 'This device', 'Settings file']);
+        .toEqual(['Profile', 'Plants', 'Reminders', 'This device', 'Settings file', 'About']);
       await expect(page.locator('h1')).toHaveCount(1);
       await expect(page.locator('.ui-settings .theme-switch')).toHaveCount(1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
@@ -142,4 +142,28 @@ test('a row with more help opens it behind ⓘ; Reset this page goes back to the
   await page.locator('.ui-undo').click();
   expect(await get(page, 'reminders')).toBe(false);
   expect(await get(page, 'reminderHour')).toBe(5);
+});
+
+test('About: the Version row, Check for updates says what it found, the About sheet opens; a closed sheet retries the owed update', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(PAGE);
+  const about = page.locator('.ui-settings-group', { has: page.getByRole('heading', { name: 'About' }) });
+  await expect(about.locator('.ui-version')).toHaveText(/Version\s*1\.2\.3/);
+  const check = about.getByRole('button', { name: 'Check for updates' });
+  await check.click();
+  await expect(about.getByRole('status')).toHaveText(/newest version/);
+  await check.click();
+  await expect(about.getByRole('status')).toHaveText('Updated.');
+  const before = await page.evaluate(() => window.kit.retries);
+  await about.getByRole('button', { name: 'Open about this app' }).click();
+  const sheet = page.locator('dialog.about-sheet');
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole('heading', { level: 2 })).toHaveText('Plants');
+  await expect(sheet).toContainText('1.2.3');
+  expect(await AxeBuilder(page), 'axe with the sheet open').toEqual([]);
+  await sheet.getByRole('button', { name: 'Close' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => window.kit.retries)).toBeGreaterThan(before);
+  // it is the last group, after the settings file
+  expect(await page.locator('.ui-settings-title').last().textContent()).toBe('About');
 });

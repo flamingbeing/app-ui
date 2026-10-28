@@ -7,7 +7,7 @@ const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
 const SIZE = { 390: 'phone', 820: 'tablet', 1280: 'laptop' };
 const depth = page => page.evaluate(() => window.kit.screens.depth());
 const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
-const row = (page, name) => page.locator('.ui-row', { hasText: name });
+const row = (page, name) => page.locator('#plants .ui-row', { hasText: name });
 const ticked = page => page.locator('.ui-row[aria-selected="true"]').evaluateAll(els => els.map(e => e.dataset.name));
 async function load(sized, width) {
   const page = await sized(width);
@@ -138,7 +138,7 @@ for (const width of [390, 820, 1280]) {
 
     test(`sheets: ${wide && width >= 840 ? 'a side panel' : width >= 600 ? 'a bottom sheet' : 'a bottom sheet'}; Back closes`, async ({ sized }) => {
       const page = await load(sized, width);
-      await page.locator('button:visible', { hasText: 'New' }).click();
+      await page.locator('button.ui-primary:visible', { hasText: 'New' }).click();
       const sheet = page.locator('#sheet');
       await expect(sheet).toBeVisible();
       await settled(page);
@@ -153,7 +153,7 @@ for (const width of [390, 820, 1280]) {
       expect(await AxeBuilder(page)).toEqual([]);
       await page.goBack();
       await expect(sheet).toBeHidden();
-      await page.locator('button:visible', { hasText: 'New' }).click();
+      await page.locator('button.ui-primary:visible', { hasText: 'New' }).click();
       await page.keyboard.press('Escape');
       await expect(sheet).toBeHidden();
     });
@@ -196,17 +196,18 @@ test('startGestures and the shell on a page without the markup start nothing', a
 // the bars mark the picked section (?tab=), so the shrunk tab bar keeps it: visible, and Tab from the list reaches it
 test('at 390 px the shrunk tab bar keeps the current tab, and Tab reaches it', async ({ sized }) => {
   const page = await load(sized, 390);
-  await expect(page.locator('nav.ui-tabbar a[aria-current="page"]')).toHaveText('Plants');
+  await expect(page.locator('nav.ui-tabbar .ui-tab[aria-current="page"]')).toHaveText(/Plants$/);
   await page.evaluate(() => scrollTo(0, document.scrollingElement.scrollHeight));
   await expect(page.locator('nav.ui-tabbar')).toHaveClass(/is-minimised/);
-  await expect(page.locator('nav.ui-tabbar a[aria-current="page"]')).toBeVisible();
+  await expect(page.locator('nav.ui-tabbar .ui-tab[aria-current="page"]')).toBeVisible();
   await page.locator('.ui-pane-list .ui-row').last().focus();
   await page.keyboard.press('Tab');
-  await expect(page.locator('nav.ui-tabbar a[aria-current="page"]')).toBeFocused();
-  // another section: both bars mark it, and the page's other settings stay in the link
+  await expect(page.locator('nav.ui-tabbar .ui-tab[aria-current="page"]')).toBeFocused();
+  // ?tab= starts on another tab page: both bars mark it and its page shows
   await page.goto(`${SHELL}&tab=jobs`);
-  await expect(page.locator('a.ui-tab[aria-current="page"], a.ui-side-link[aria-current="page"]')).toHaveText(['Jobs', 'Jobs']);
-  expect(new URL(await page.locator('a.ui-tab', { hasText: 'Rooms' }).evaluate(a => a.href)).search).toContain('tab=rooms');
+  await expect(page.locator('.ui-tab[aria-current="page"], .ui-side-link[aria-current="page"]')).toHaveText(['Jobs', /Jobs$/]);
+  await expect(page.locator('#jobs')).toBeVisible();
+  await expect(page.locator('#home')).toBeHidden();
 });
 
 // the owner's desktop review: an empty detail shows no actions; right-click opens the menu at the pointer, no lift;
@@ -240,7 +241,7 @@ test.describe('shell at 1280 px: desktop details', () => {
     await page.keyboard.press('Escape');
   });
 
-  for (const look of ['a', 'b', 'c']) {
+  for (const look of ['a', 'b', 'c', 'd']) {
     test(`look ${look.toUpperCase()}: a line between rows in the list pane`, async ({ sized }) => {
       const page = await sized(1280);
       await page.goto(`${SHELL}&look=${look}`);

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.0-rc.11
+- Plain tabs: `.ui-tab` resets the theme's button border and fill, so `<button class="ui-tab">` looks like the link
+  tabs; a `<span class="ui-tab-icon" aria-hidden="true">` before the label puts an icon above it.
+- Bar buttons ship: buttons in `.ui-bar` are borderless, link-coloured text (`.ui-primary` bold; on look B's band,
+  the band's text colour). The gallery-only copies are gone, so `/kit/` shows what apps get. `.ui-bar-menu` in the
+  bar's lead is a side-bar button: on a phone it opens the shell's side bar as a drawer (hidden while Back shows).
+- Tab pages and swipe between tabs (`tabPages`, started by `startGestures()` as `kit.tabs`): tabs and side links with
+  `data-tab-page="#id"` show that `.ui-screen` as the bottom screen (`screenStack().base`), each keeping its scroll; a
+  `ui-tab` event after each change. On a phone a sideways swipe moves to the next or previous page, the pages following
+  the finger; never on a pushed screen, in fields, editors, sideways scrollers, sheets, menus or select mode, with text
+  selected, or within 24 px of either edge; a vertical move scrolls; Reduce Motion switches without the slide; off with
+  `data-swipe="off"` on the tab bar. A tab without `data-tab-page` (one that opens a sheet) is no page. In the shell,
+  extra pages are `.ui-tab-page` screens beside the panes and take both columns from 600 px.
+- About in Settings: `settingsScreen(host, { …, about: { name, update } })` adds an About group last: the Version row,
+  Check for updates and the About sheet, with the owed-update retries `updatePrompt` has. `updatePrompt` stays.
+- Look D "Slim" (`look: 'd'`): the bar always shows the name (header variant `slim`, no large title on show), flat
+  lists on the page background (new token `list-bg` in every look), an icon tab bar along the edge, no band or glass.
+- Gallery: the shell's tab bar is buttons with icons (Plants, Rooms, New, Jobs, Settings) over real tab pages, with a
+  side-bar button; `/kit/settings/` shows the About group.
+
 ## 1.0.0-rc.10
 - Opt-in parts for `@core/ui` (named exports; nothing runs on import and nothing changes for an app that doesn't import
   them): `draftSlot` / `listDrafts` (an unsent editor kept in storage; copes with blocked storage and duplicated tabs),

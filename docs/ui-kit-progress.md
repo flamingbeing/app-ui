@@ -26,7 +26,7 @@ Gotchas found:
 
 ## K2: looks + density + glass guard (done)
 
-- Looks A/B/C are data in `theme/looks/` (token set + variants header/menu/glass/tick/tabbar), shown as `data-*` marks
+- Looks A/B/C (D "Slim" from rc.11) are data in `theme/looks/` (token set + variants header/menu/glass/tick/tabbar), shown as `data-*` marks
   on `<html>`; every part in `ui.css`, `ui/gestures.css` and `glass.css` styles from the tokens and marks. How to add
   one: [ui-kit.md](ui-kit.md#adding-a-look). No component forks; the bottom-sheet hold menu is a class on the same menu.
 - Density (`comfortable` 60 / `regular` 50 / `compact` 44 px rows) replaces v0's layout (`compact` migrates).

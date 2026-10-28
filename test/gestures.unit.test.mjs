@@ -9,6 +9,7 @@ import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
 import { dragRange, needs, TICKS } from '../ui/select-mode.js';
 import { swipeGoesBack, edgeBackOn, EDGE } from '../ui/screens.js';
+import { swipeIntent, pageStep } from '../ui/tab-pages.js';
 
 test('the port rules: hold 500 ms within 10 px; ticks and screen edge are finger-sized', () => {
   assert.equal(HOLD_MS, 500);
@@ -129,4 +130,21 @@ test('right-click menu: its corner at the pointer; flipped left or up near an ed
   assert.deepEqual(placeAtPointer(menu, desk, { x: 500, y: 300 }), { left: 500, top: 300, below: true });
   assert.deepEqual(placeAtPointer(menu, desk, { x: 1200, y: 700 }), { left: 1200 - 220, top: 700 - 200, below: false });
   assert.deepEqual(placeAtPointer(menu, { w: 230, h: 210 }, { x: 100, y: 100 }), { left: 8, top: 8, below: false });
+});
+
+test('tab swipe: a first move under 10 px tells nothing; sideways only when well under 34° from the horizontal', () => {
+  assert.equal(swipeIntent(6, 3), null);
+  assert.equal(swipeIntent(-30, 5), 'x');
+  assert.equal(swipeIntent(30, 20), 'y', 'a diagonal is a scroll');
+  assert.equal(swipeIntent(2, 40), 'y');
+});
+
+test('tab swipe: past a third of the width or a flick goes to the next or previous page, if there is one', () => {
+  assert.equal(pageStep(-150, 0, 400, true, true), 1);
+  assert.equal(pageStep(150, 0, 400, true, true), -1);
+  assert.equal(pageStep(-60, -0.8, 400, true, true), 1, 'a flick');
+  assert.equal(pageStep(-60, 0, 400, true, true), 0, 'too short, too slow');
+  assert.equal(pageStep(-200, 0, 400, true, false), 0, 'no next page');
+  assert.equal(pageStep(200, 0, 400, false, true), 0, 'no previous page');
+  assert.equal(pageStep(-200, 0.8, 400, true, true), 1, 'far enough, though the finger turned back at the end');
 });

@@ -4,14 +4,12 @@ import { galleryPreview } from '../preview.js';
 
 galleryPreview();   // ?look=, ?density=, ?edge= as on the other gallery pages
 
-// the other sections are the same page (there is one list); the bars show which was picked (?tab=, the page's other
-// settings kept). Without a current tab the shrunk tab bar would hide every tab, leaving Tab nothing to reach.
-const tab = new URLSearchParams(location.search).get('tab') || 'plants';
-for (const a of /** @type {NodeListOf<HTMLAnchorElement>} */ (document.querySelectorAll('a.ui-tab, a.ui-side-link'))) {
-  const url = new URL(location.href);
-  url.searchParams.set('tab', a.dataset.tab || '');
-  a.href = url.search;
-  if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+// the tabs are pages of this one (ui/tab-pages.js); ?tab=rooms opens on another one (for the tests and screenshots)
+const tab = new URLSearchParams(location.search).get('tab');
+if (tab && document.getElementById(tab)?.classList.contains('ui-tab-page')) {
+  for (const t of document.querySelectorAll('[data-tab-page]')) {
+    if (t.getAttribute('data-tab-page') === `#${tab}`) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+  }
 }
 
 const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
