@@ -10,6 +10,10 @@
   `[data-size="small"]` 32 px) `.ui-buttons` (a stack of buttons); filter chips (`.ui-chips` of `button.ui-chip`
   with `aria-pressed`, a full tap tall, `data-wrap="on"` to wrap). For
   apps moving off the old home kit, whose screens had these parts and the kit did not.
+## 1.0.0-rc.27
+- Ground "Cool grey" (`cool`): the cool light grey behind grouped lists on a phone (#f2f2f7) in light, the palette's
+  own dark. An app ported from a kit with that ground keeps it with `applyTheme({ surface: 'cool' })`; the default
+  light ground (a near-white tinted 3% with the accent) reads a touch cooler or greyer next to it.
 
 ## 1.0.0-rc.26
 - The current side bar link uses `--link`, as the current tab does, which the palette keeps 4.5:1 on its tint (the raw
