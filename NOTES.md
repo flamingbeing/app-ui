@@ -14,3 +14,5 @@ Lasting rules, owner preferences and lessons (never task chatter), and how to te
   and plain bar buttons in rc.12's try).
 - axe runs with `preload: false`: its CSSOM preload copies `@import`-ed sheets into inline `<style>`s, which the
   Worker's page CSP reports a moment later (flaky "style-src-elem inline" fails).
+
+<!-- docs-only proof, not merged -->
