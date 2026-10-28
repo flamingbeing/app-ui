@@ -197,6 +197,8 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
 - **Badges:** `.ui-badge`, `data-tone="accent|ok|warn|danger"`.
 - **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-wide` (full width),
   `data-size="small"` (32 px), `.ui-buttons` (a stack of buttons with the list's inset).
+- **Filter chips:** `.ui-chips` holding `button.ui-chip` with `aria-pressed` (ticked when on), a full tap tall;
+  scrolls sideways, or wraps with `data-wrap="on"`. A `.ui-chip` elsewhere stays the small status chip.
 - **Empty and loading:** `.ui-empty` (`-icon`, `-title`, `-text`); `.ui-skeleton` with `data-shape="line|short|thumb"`.
 
 ## Layout parts and extra-dense

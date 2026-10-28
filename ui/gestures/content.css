@@ -64,3 +64,15 @@
 :where(.ui-wide) { display: flex; width: 100%; }
 :where(button, a, .button)[data-size="small"] { min-height: 32px; padding-inline: .75rem; font-size: .875rem; }
 .ui-buttons { display: flex; flex-direction: column; gap: var(--gap); margin: var(--pad) var(--list-inset); }
+/* ---------- filter chips: a row of toggle buttons (aria-pressed), a full tap tall; data-wrap="on" wraps instead of
+   scrolling sideways ---------- */
+.ui-chips { display: flex; gap: var(--gap); margin: var(--gap) 0 calc(var(--gap) * 1.5); padding: 0; overflow-x: auto; scrollbar-width: none; }
+.ui-chips::-webkit-scrollbar { display: none; }
+.ui-chips[data-wrap="on"] { flex-wrap: wrap; overflow: visible; }
+.ui-chips > button.ui-chip { flex: none; min-height: var(--tap); padding: 0 .875rem; border: 0; border-radius: var(--pill-r);
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); color: var(--text); font-size: .9375rem; font-weight: 400; cursor: pointer; }
+.ui-chips > button.ui-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--link); font-weight: 600; }
+.ui-chips > button.ui-chip[aria-pressed="true"]::before { content: ""; width: 10px; height: 5px; margin: -3px 1px 0 0;
+  border: solid currentColor; border-width: 0 0 2px 2px; transform: rotate(-45deg); }
+.ui-chips > button.ui-chip:disabled { opacity: .6; }
