@@ -26,6 +26,7 @@
   margin-top: -6px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 1.75rem; line-height: 1;
   box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 28%, transparent); }
 .ui-tab-action svg.ui-tab-icon { padding: 9px; }
+.ui-tab-action .ui-tab-icon > svg { width: 26px; height: 26px; }   /* an <svg> inside a .ui-tab-icon span */
 .ui-tab.ui-tab-action:active { box-shadow: none; }   /* (the circle answers the press, not the whole tab) */
 .ui-tab-action:active .ui-tab-icon { transform: scale(.94); filter: brightness(.9); }
 /* a look with the tab bar along the bottom edge (data-tabbar="edge"); the tabs stay together in the middle on a wide screen */
