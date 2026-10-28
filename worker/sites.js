@@ -4,6 +4,7 @@
 // wrangler.jsonc: "run_worker_first" sends every request here.
 // core.anawj.com/kit and /kit/… (routes too) is the one fixed link to the newest gallery: a 302 to /ui/<latest>/kit/…,
 // "latest" read from the same versions.json the build writes, so no version is typed by hand per release.
+// /ui/kit and /ui/kit/… do the same: the installed gallery starts at /ui/kit/ (its manifest), inside its /ui/ scope.
 
 const NOINDEX = 'noindex, nofollow';
 // x.y.z with an optional pre-release (1.0.0-rc.1), the same shape as tools/semver.mjs VERSION_RE
@@ -12,7 +13,7 @@ const SEMVER = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
 // Files by type (the gallery's manifest and icons too: it is installable), and the gallery's folders (/kit/, /kit/shell/, …: their index.html; without the "/", a redirect).
 const VERSIONED = new RegExp(String.raw`^/ui/${SEMVER}/(?:(?:ui|theme|settings|kit|icons)/[\w./-]*\.(?:js|css|html|svg|png|webmanifest|d\.ts)|kit(?:/[\w-]+)*/?)$`);
 const LISTING = '/ui/versions.json';
-const NEWEST_KIT = /^\/kit(\/(?:[\w-]+\/)*)?$/;
+const NEWEST_KIT = /^\/(?:ui\/)?kit(\/(?:[\w-]+\/)*)?$/;
 const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8',
   svg: 'image/svg+xml', png: 'image/png', webmanifest: 'application/manifest+json', json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
 // public code, no cookies or credentials, so any app origin may import it (and <link> its CSS)
