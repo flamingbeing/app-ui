@@ -3,10 +3,10 @@
 ## 1.0.0-rc.28
 - Content parts (`ui/gestures/content.css`, loaded by `gestures.css`): grouped sections (`.ui-section`,
   `.ui-section-head`, `.ui-section-foot`), row extras (`.ui-row-lead` icon tile with `data-tone="grey|danger"`,
-  `.ui-row-thumb`, `.ui-row-trail`, `.ui-row-value`, `.ui-row-chevron`; `.ui-row[data-tone="action|danger"]`,
+  `.ui-row-thumb`, `.ui-row-trail`, `.ui-row-value`, `.ui-row-chevron`, `.ui-row-input` (a value typed into the row); `.ui-row[data-tone="action|danger"]`,
   `.ui-row[data-align="center"]`), cards (`.ui-card`, `-title`, `-text`, `-actions`), stat tiles (`.ui-stats`,
   `.ui-stat`, `-value`, `-label`), badges (`.ui-badge[data-tone="accent|ok|warn|danger"]`, with a tick, ring or dot so the tone is not colour alone), an empty state
-  (`.ui-empty`, `-icon`, `-title`, `-text`) and skeleton rows (`.ui-skeleton[data-shape="line|short|thumb"]`); button sizes (`.ui-wide` full width,
+  (`.ui-empty`, `-icon`, `-title`, `-text`) and skeleton rows (`.ui-skeleton[data-shape="line|short|thumb"]`); buttons (`.ui-tint` accent-tinted, `.ui-wide` full width,
   `[data-size="small"]` 32 px), `.ui-buttons` (a stack of buttons); filter chips (`.ui-chips` of `button.ui-chip`
   with `aria-pressed`, a full tap tall, `data-wrap="on"` to wrap). For
   apps moving off the old home kit, whose screens had these parts and the kit did not.

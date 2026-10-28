@@ -191,11 +191,11 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
 - **Sections:** `.ui-section` holding `.ui-section-head` (small caps words, an optional link or button at the end), a
   `.ui-list` and `.ui-section-foot` (a muted note).
 - **Row extras** inside `.ui-row`: `.ui-row-lead` (30 px icon tile, `data-tone="grey|danger"`) or `.ui-row-thumb`
-  (44 px), then `.ui-row-main`, then `.ui-row-trail` (badges, buttons), `.ui-row-value` (muted number) or
-  `.ui-row-chevron`. `data-tone="action|danger"` colours the row's words; `data-align="center"` centres them.
+  (44 px), then `.ui-row-main`, then `.ui-row-trail` (badges, buttons), `.ui-row-value` (muted number),
+  `.ui-row-input` (a value typed into the row) or `.ui-row-chevron`. `data-tone="action|danger"` colours the row's words; `data-align="center"` centres them.
 - **Cards and stats:** `.ui-card` (`-title`, `-text`, `-actions`); `.ui-stats` of `.ui-stat` (`-value`, `-label`).
 - **Badges:** `.ui-badge`, `data-tone="accent|ok|warn|danger"`.
-- **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-wide` (full width),
+- **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-tint` (accent-tinted), `.ui-wide` (full width),
   `data-size="small"` (32 px), `.ui-buttons` (a stack of buttons with the list's inset).
 - **Filter chips:** `.ui-chips` holding `button.ui-chip` with `aria-pressed` (ticked when on), a full tap tall;
   scrolls sideways, or wraps with `data-wrap="on"`. A `.ui-chip` elsewhere stays the small status chip.
