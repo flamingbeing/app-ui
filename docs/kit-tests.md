@@ -159,3 +159,4 @@ stand-in for `@core/settings` on the page.
 | Buttons | a button is flex-displayed and centred, `--button-h` high, with `--radius-button` larger than a list card's corner | |
 | Theme-color | the page has two `theme-color` metas (light and dark) holding the page ground | |
 | No glyph icons | `tools/check.mjs` fails on an emoji, dingbat or pictograph character in a published file | |
+| Prose | 390 and 1280 px: a task row has no bullet and its box sits on the text line, left of the words; a code block is not the accent; the box keeps to `--measure`; icon buttons are square | yes |

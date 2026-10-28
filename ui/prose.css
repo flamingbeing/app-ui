@@ -1,0 +1,72 @@
+/* @core/ui prose: rendered Markdown or long text (a note's read view, help pages, an About sheet), Obsidian-like.
+   Opt-in: link this sheet and put class="ui-prose" on the box; nothing else on the page changes. Draws on @core/theme's
+   properties; the four below are the knobs an app may set. */
+.ui-prose {
+  --measure: 42rem;                                                        /* readable line length */
+  --prose-gap: .85em;                                                      /* space between blocks */
+  --code-bg: color-mix(in srgb, var(--text) 7%, transparent);              /* neutral, never the accent */
+  --prose-rule: color-mix(in srgb, var(--line) 45%, transparent);
+  max-width: var(--measure);
+  font-family: var(--font-editor, var(--font));
+  font-size: var(--font-size, 1rem);
+  line-height: 1.65;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+.ui-prose > :first-child { margin-top: 0; }
+.ui-prose > :last-child { margin-bottom: 0; }
+.ui-prose :is(p, ul, ol, blockquote, pre, table, figure, details) { margin: 0 0 var(--prose-gap); }
+
+/* headings: a clear scale, tight leading, more space above than below */
+.ui-prose :is(h1, h2, h3, h4, h5, h6) { font-family: var(--font-head, inherit); line-height: 1.25; font-weight: 700;
+  letter-spacing: -.01em; margin: 1.6em 0 .5em; text-wrap: balance; }
+.ui-prose h1 { font-size: 1.75em; letter-spacing: -.02em; }
+.ui-prose h2 { font-size: 1.4em; }
+.ui-prose h3 { font-size: 1.2em; }
+.ui-prose h4 { font-size: 1.05em; }
+.ui-prose :is(h5, h6) { font-size: 1em; color: var(--muted); }
+
+.ui-prose a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: .18em; }
+.ui-prose a:hover { text-decoration-thickness: 2px; }
+.ui-prose strong { font-weight: 700; }
+.ui-prose mark { background: color-mix(in srgb, var(--warn) 30%, transparent); color: inherit; border-radius: .2em; padding: 0 .1em; }
+
+/* lists: hanging markers, nested lists closer */
+.ui-prose :is(ul, ol) { padding-inline-start: 1.6em; }
+.ui-prose li { margin: .2em 0; }
+.ui-prose li::marker { color: var(--muted); }
+.ui-prose li > :is(ul, ol) { margin: .2em 0 0; }
+.ui-prose li > p { margin: 0; }
+/* task lists (GitHub/marked: <li><input type=checkbox> text): no bullet, the box in the marker's place, on the line */
+.ui-prose li:has(> input[type=checkbox]:first-child),
+.ui-prose li:has(> p:first-child > input[type=checkbox]:first-child) { list-style: none; }
+.ui-prose li > input[type=checkbox]:first-child,
+.ui-prose li > p:first-child > input[type=checkbox]:first-child {
+  display: inline-block; width: 1.05em; height: 1.05em; min-height: 0; margin: 0 .5em 0 -1.55em; padding: 0;
+  vertical-align: -.15em; accent-color: var(--accent); }
+.ui-prose li:has(> input[type=checkbox]:checked:first-child) { color: var(--muted); text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+
+.ui-prose blockquote { margin-inline: 0; padding: .1em 0 .1em 1em; border-inline-start: 3px solid var(--accent); color: var(--muted); }
+.ui-prose blockquote > :last-child { margin-bottom: 0; }
+
+/* code: monospace on a neutral wash; blocks scroll sideways rather than wrap */
+.ui-prose :is(code, kbd, samp, pre) { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; }
+.ui-prose :not(pre) > code { background: var(--code-bg); padding: .12em .35em; border-radius: .35em; }
+.ui-prose kbd { border: 1px solid var(--prose-rule); border-bottom-width: 2px; border-radius: .3em; padding: 0 .35em; }
+.ui-prose pre { background: var(--code-bg); color: var(--text); padding: .8em 1em; border-radius: var(--radius-s, 6px);
+  overflow-x: auto; line-height: 1.5; tab-size: 2; }
+.ui-prose pre code { font-size: inherit; background: none; padding: 0; }
+
+.ui-prose hr { border: 0; border-top: 1px solid var(--prose-rule); margin: 1.6em 0; }
+.ui-prose :is(img, video) { max-width: 100%; height: auto; border-radius: var(--radius-s, 6px); }
+
+/* tables: hairlines, a sideways scroll on a narrow screen */
+.ui-prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-size: .95em; }
+.ui-prose :is(th, td) { border: 1px solid var(--prose-rule); padding: .35em .7em; text-align: start; }
+.ui-prose th { background: var(--code-bg); font-weight: 600; }
+
+/* the selection in the theme's colour (the accent only tints it) */
+.ui-prose ::selection { background: var(--selection); }

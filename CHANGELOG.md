@@ -1,11 +1,18 @@
 # Changelog
 
-## 1.0.0-rc.18
+## 1.0.0-rc.19
 - Tab pages: a tab left while a screen was pushed over it comes back at the tab's own scroll, not the pushed screen's
   (`screens.baseY()`).
 - Conflict sheet: per-field Mine / Theirs picks survive the list redrawing on a queue change while the sheet is open.
 - Stepper: a typed value finer than the step moves by exactly one step (2.5 + 1 is 3.5, was 4).
 - Hide mode: an icon button named only by its `title` can be hidden (the whitespace around its icon is not a name).
+
+## 1.0.0-rc.18
+- Prose (`ui/prose.css`, opt-in: link it, put `ui-prose` on the box): rendered Markdown in an Obsidian-like reading
+  style. A readable line length (`--measure`, 42rem), a heading scale, hanging list markers, task lists with the box in
+  the bullet's place (ticked ones muted and struck through), code on a neutral wash (`--code-bg`, never the accent),
+  an accent bar on quotes, hairline tables that scroll sideways, `kbd`. The parts gallery shows a sample.
+- Icon buttons: `.ui-icon-btn` (square, `--button-h`, no box until hovered; `aria-pressed="true"` turns it the accent).
 
 ## 1.0.0-rc.17
 - Hold menu, iPhone (no `navigator.vibrate`): the haptic fires before the lift's click is armed to be swallowed, and a
