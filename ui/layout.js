@@ -2,7 +2,10 @@
 // move between the buttons: the ARIA toolbar pattern), steppers (− and + step the number field, kept in its min/max
 // and step; the field keeps typing and its own arrow keys) and clearable segmented controls (a second tap on the picked
 // segment clears it). Each starts only where its markup is; startLayout() starts them all under a root.
-// Grid, stack and split are CSS only.
+// Grid, stack and split are CSS only. Data grids (data-grid.js) start here too, with no onSelect: listen for their
+// 'ui-grid-select' event, or start one yourself with dataGrid(table, { onSelect }).
+
+import { dataGrid, runningGrids } from './data-grid.js';
 
 /**
  * The value one step away, kept in [min, max] and rounded to the step's decimals (0.1 + 0.2 is 0.3, not 0.30000000004).
@@ -100,6 +103,7 @@ export function startLayout(root = document) {
     ...[.../** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('.ui-stepper'))].map(stepper),
     ...[.../** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('[role="toolbar"]'))].map(toolbar),
     ...[.../** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('.ui-segmented[data-clearable]'))].map(clearableSegments),
+    ...[.../** @type {NodeListOf<HTMLTableElement>} */ (root.querySelectorAll('table.ui-data-grid'))].filter(t => !runningGrids.has(t)).map(t => dataGrid(t).stop),
   ];
   return { stop: () => stops.forEach(s => s()) };
 }

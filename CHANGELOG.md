@@ -9,6 +9,22 @@
   a hold menu fades or sinks away (its copy on the way out is inert and has no roles or ids). Still closes at once.
 - Select mode: an icon `[data-edit-for]` button keeps its icon (and aria-label) while off; it says Done while on.
 
+## 1.0.0-rc.23
+- Data grid: a cell holding one field (an editable cell, such as a name box in a rota) is reachable from the keyboard:
+  Enter or F2 goes into the field (its text selected), Esc in it comes back to the cell; arrows in the field stay in
+  it, as before. Up and Down now keep the column of a cell the focus came to from outside the grid's own moves (Tab
+  in, a tap or the app's own focus), not the column the grid last left.
+
+## 1.0.0-rc.22
+- Data grid: `dataGrid(table, { onSelect })` from `@core/ui` (styles in `ui/layout.css`, `.ui-data-grid` in a
+  `.ui-data-grid-box`), for tables of small cells such as people by day. The box scrolls both ways at any width with
+  the header row, first column and footer kept in view; `data-size="dense"` (32 px cells) or `"extra"` (24 px, the
+  target floor); theme tokens only. ARIA grid: one Tab stop, arrows, Home / End, Ctrl+Home / Ctrl+End, PageUp /
+  PageDown; a tap, Enter or Space selects a body cell (`aria-selected`) and fires `onSelect` and a bubbling
+  `ui-grid-select` event with the row's and column's `data-key`. The app may redraw the table at any time.
+  `startLayout()` starts any `table.ui-data-grid` it finds. `gridMove()` and `gridStarts()` are the pure moves.
+  The dense gallery has a Grid screen (`?screen=grid`).
+
 ## 1.0.0-rc.21
 - Toasts: Dismiss and the action button are never under 24 px high (axe target-size, WCAG 2.5.8). The room below the
   toasts is a custom property: set `--ui-toast-bottom` (on `:root`, say) or pass `toaster(host, { bottom })` when the

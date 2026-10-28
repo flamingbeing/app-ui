@@ -116,6 +116,9 @@ stand-in for `@core/settings` on the page.
 | Toolbar | one Tab stop; arrows wrap, Home, End; Tab leaves it | |
 | Undo | clearing the boxes and setting a key time show an Undo toast, never a dialog | |
 | Look B's band | the bar keeps the band's colour once the title has scrolled under it | |
+| Data grid | at 390 and 1280 px: the box scrolls sideways, the page does not; cells 32 px (dense), 24 px (extra), the screen's tap size (none); the header row and first column stay in view scrolled to the far corner; screenshots kept (`dense-grid-extra-<width>.png`, `dense-grid-scrolled-<width>.png`) | yes |
+| Data grid keys | one Tab stop; arrows (down past a group row keeps the column), Home, End (scrolls the box), Ctrl+Home, Ctrl+End; Enter selects; the pick survives a redraw | yes |
+| Data grid tap | a tap selects one body cell at a time; header cells are never selected; (unit) `gridStarts`, `gridMove` at the edges and across colspans | |
 
 
 ### Cheap Android stand-in (`e2e/cheap-android.spec.mjs`)

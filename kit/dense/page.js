@@ -1,7 +1,7 @@
 // The dense screens gallery: a timed readings screen and a case-entry screen, both extra-dense, on made-up data.
-// ?screen=readings|log picks the screen; ?look= and ?density= preview as on the other gallery pages (preview.js);
+// ?screen=readings|log|grid picks the screen; ?look= and ?density= preview as on the other gallery pages (preview.js);
 // the checkbox turns extra-dense off for this screen to compare. window.kit is the started parts, for the tests.
-import { startGestures, startLayout, toaster } from '../../ui/index.js';
+import { startGestures, startLayout, toaster, dataGrid } from '../../ui/index.js';
 import { lookSwitch } from '../../theme/index.js';
 import { galleryPreview } from '../preview.js';
 
@@ -62,13 +62,16 @@ $('board').addEventListener('change', markScale);
 markScale();
 
 // ---------- screens, extra-dense switch ----------
-const screen = new URLSearchParams(location.search).get('screen') === 'log' ? 'log' : 'readings';
-const title = screen === 'log' ? 'Log a case' : 'Readings';
+const TITLES = { readings: 'Readings', log: 'Log a case', grid: 'Watering rota' };
+const asked = new URLSearchParams(location.search).get('screen') ?? '';
+const screen = asked === 'log' || asked === 'grid' ? asked : 'readings';
+const title = TITLES[screen];
 $('page-title').textContent = title;
 $('bar-title').textContent = title;
 document.title = `${title} · dense screens gallery`;
 $('readings').hidden = screen !== 'readings';
 $('log').hidden = screen !== 'log';
+$('grid').hidden = screen !== 'grid';
 for (const a of /** @type {NodeListOf<HTMLAnchorElement>} */ (document.querySelectorAll('a.ui-tab'))) {
   // keep a previewed look or density when changing screen
   const url = new URL(location.href);
@@ -84,7 +87,44 @@ denseBox.addEventListener('change', () => {
 });
 
 // ---------- the parts, and what the buttons do ----------
-const kit = { gestures: startGestures(), layout: startLayout() };
+// the data grid: made-up plants by day (two groups, the second foldable), a total per day in the footer
+const PLANTS = [['Indoor', ['Fern', 'Fig', 'Peace lily', 'Pothos', 'Snake plant']], ['Balcony', ['Basil', 'Chilli', 'Mint', 'Rosemary', 'Tomato']]];
+const DAYS = Array.from({ length: 14 }, (_, i) => ({ key: `d${i + 1}`, wd: 'MTWTFSS'[i % 7], n: i + 1 }));
+const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+/** @type {Record<string, string>} */
+const marks = {};
+PLANTS.flat(2).filter(p => typeof p === 'string').forEach((p, i) => DAYS.forEach((d, j) => { if ((i + j) % 3 === 0) marks[`${p}|${d.key}`] = (i + j) % 6 ? 'W' : 'F'; }));
+const rota = /** @type {HTMLTableElement} */ ($('rota'));
+const drawRota = () => {
+  const head = `<thead><tr><th scope="col">Plant</th>${DAYS.map(d => `<th scope="col" data-key="${d.key}"><abbr title="${DAY_NAMES[(d.n - 1) % 7]} ${d.n}">${d.wd}<br>${d.n}</abbr></th>`).join('')}</tr></thead>`;
+  const body = PLANTS.map(([g, ps]) => `<tbody><tr data-group><th colspan="${DAYS.length + 1}" scope="colgroup"><span>${g}</span></th></tr>`
+    + /** @type {string[]} */ (ps).map(p => `<tr data-key="${esc(p)}"><th scope="row">${esc(p)}</th>${DAYS.map(d => `<td>${marks[`${p}|${d.key}`] ?? ''}</td>`).join('')}</tr>`).join('') + '</tbody>').join('');
+  const foot = `<tfoot><tr><th scope="row">Watered</th>${DAYS.map(d => `<td>${Object.entries(marks).filter(([k, v]) => v && k.endsWith(`|${d.key}`)).length}</td>`).join('')}</tr></tfoot>`;
+  rota.innerHTML = head + body + foot;
+};
+drawRota();
+/** @type {import('../../ui/data-grid.js').GridPick | null} */
+let picked = null;
+const grid = dataGrid(rota, { onSelect: p => {
+  picked = p.rowKey ? p : null;
+  $('rota-picked').textContent = picked ? `${picked.rowKey}, day ${String(picked.colKey).slice(1)}` : 'Pick a plant\'s day.';
+} });
+$('grid').addEventListener('click', e => {
+  const b = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('[data-mark]'));
+  if (!b || !picked) return;
+  const { rowKey, colKey } = picked;
+  marks[`${rowKey}|${colKey}`] = b.dataset.mark ?? '';
+  drawRota();   // a redraw, as an app's would be: the grid keeps working and the pick is put back by its keys
+  const cell = /** @type {HTMLTableCellElement | null} */ (rota.querySelector(`tr[data-key="${rowKey}"]`)?.querySelectorAll('td')[Number(String(colKey).slice(1)) - 1] ?? null);
+  grid.select(cell);
+  if (cell) picked = { ...picked, cell };
+});
+$('grid-size').addEventListener('change', e => {
+  const v = /** @type {HTMLInputElement} */ (e.target).value;
+  if (v) rota.dataset.size = v; else delete rota.dataset.size;
+});
+
+const kit = { gestures: startGestures(), layout: startLayout(), grid };
 /** @type {any} */ (window).kit = kit;
 const toasts = toaster(document.body);
 $('save-reading').addEventListener('click', () => toasts.show('Saved the 30 min reading'));

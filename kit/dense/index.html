@@ -21,7 +21,7 @@
 </head>
 <body>
   <!-- Two busy data-entry screens built from the layout parts (grid, stack, split, toolbar, segmented, stepper) at the
-       extra-dense level, on made-up data, signed out: a timed readings screen and a case-entry screen.
+       extra-dense level, on made-up data, signed out: a timed readings screen, a case-entry screen and a data grid.
        Tests: docs/kit-tests.md. Rules: docs/ui-kit.md "Layout parts and extra-dense". -->
   <header class="ui-bar">
     <a class="ui-back kit-home" href="../">Gallery</a>
@@ -121,11 +121,31 @@
         </aside>
       </div>
     </section>
+
+    <!-- 3. a data grid: made-up plants by day, a tap picks a day, the buttons fill it -->
+    <section id="grid" class="kit-screen" data-dense="extra" aria-labelledby="page-title" hidden>
+      <div class="ui-stack">
+        <fieldset class="ui-segmented" id="grid-size"><legend>Cell size</legend>
+          <label><input type="radio" name="grid-size" value="">Screen</label>
+          <label><input type="radio" name="grid-size" value="dense" checked>Dense</label>
+          <label><input type="radio" name="grid-size" value="extra">Extra-dense</label></fieldset>
+        <div class="ui-data-grid-box" id="rota-box">
+          <table class="ui-data-grid" id="rota" data-size="dense" aria-label="Watering rota, plants by day"></table>
+        </div>
+        <p class="small" id="rota-picked" aria-live="polite">Pick a day.</p>
+        <div class="ui-toolbar" role="toolbar" aria-label="Fill the picked day">
+          <button type="button" data-mark="W">Water</button>
+          <button type="button" data-mark="F">Feed</button>
+          <button type="button" data-mark="">Clear</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <nav class="ui-tabbar" data-minimise aria-label="Screens">
     <a class="ui-tab" href="#readings" data-screen="readings" aria-current="page">Readings</a>
     <a class="ui-tab" href="#log" data-screen="log">Log a case</a>
+    <a class="ui-tab" href="#grid" data-screen="grid">Grid</a>
   </nav>
 </body>
 </html>
