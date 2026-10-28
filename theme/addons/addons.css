@@ -1,0 +1,34 @@
+/* Add-ons (theme/addons): wallpaper layers, the backing for text on the bare page, see-through cards and icon sets.
+   Nothing here shows until a device turns an add-on on (store.js marks <html>). Link after the kit's CSS. */
+
+/* Wallpaper: ::before the picture (--wall: a pattern, or the photo), ::after the page colour over it at --wall-dim */
+html.wall { background: var(--bg); }
+html.wall body { background: transparent; }
+html.wall::before, html.wall::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+html.wall::before { background-image: var(--wall, none); background-size: var(--wall-size, cover); background-repeat: var(--wall-repeat, no-repeat); background-position: center; }
+html.wall::after { background: var(--bg); opacity: var(--wall-dim, 0); }
+@media print { html.wall::before, html.wall::after { display: none; } }
+
+/* Text straight on the page (the app marks it .ui-on-wall): a soft backing just strong enough for 4.5:1 over the
+   picture (--wall-scrim, worked out by store.js), so the picture needn't be dimmed for it */
+html.wall .ui-on-wall {
+  --scrim: color-mix(in srgb, var(--bg) var(--wall-scrim, 0%), transparent);
+  background-color: var(--scrim); box-shadow: 0 0 0 5px var(--scrim); border-radius: 6px;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+
+/* See-through cards (opt-in, wallFrost; the app marks its cards .ui-card): the card colour at --card-alpha (80% or
+   more, enough for 4.5:1 over the picture), the picture blurred behind; solid where the browser can't blur */
+html.wall.wall-frost .ui-card {
+  background-color: color-mix(in srgb, var(--surface) var(--card-alpha, 100%), transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html.wall.wall-frost .ui-card { background-color: var(--surface); }
+}
+
+/* Icon sets (icon-sets.js): the kit's line icons drawn another way */
+:root[data-icons="sharp"] .ui-icon { stroke-linecap: square; stroke-linejoin: miter; }
+:root[data-icons="soft"] .ui-icon { stroke-width: 2.2; fill: color-mix(in srgb, currentColor 14%, transparent); }
+:root[data-icons="thin"] .ui-icon { stroke-width: 1.6; }
+:root[data-icons="even"] .ui-icon { stroke-width: 2; stroke-linecap: butt; stroke-linejoin: miter; }
