@@ -141,6 +141,9 @@ test('grounds tint light and dark, never OLED', () => {
   assert.equal(o.dark.bg, '#000000');
   assert.equal(o.dark.surface, '#000000');
   assert.equal(palettes({ preset: 'eye' }).light.bg, SURFACES.sepia.light?.bg, "the look's ground");
+  // a ground with no dark of its own keeps the palette's dark
+  assert.equal(palettes({}, { surface: 'cool' }).light.bg, '#f2f2f7');
+  assert.deepEqual(palettes({}, { surface: 'cool' }).dark, palettes({}).dark);
 });
 
 test('presets: the 8 classic and Violet, unique ids, known grounds, no NUHS colours', () => {
