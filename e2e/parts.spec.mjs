@@ -158,3 +158,26 @@ for (const width of [390, 1280]) {
     expect(await AxeBuilder(page)).toEqual([]);
   });
 }
+
+test('conflict sheet: per-field picks survive a queue change while the sheet is open', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(PARTS);
+  await page.evaluate(async () => {
+    const { conflictSheet } = await import('/ui/0.0.0-dev/ui/conflict-sheet.js');
+    const side = v => ({ value: v, when: '10:00' });
+    const c = { key: 'k1', mine: side({ a: 1, b: 1 }), theirs: side({ a: 2, b: 2 }), deleted: {},
+      fields: [{ path: 'a', mine: side(1), theirs: side(2) }, { path: 'b', mine: side(1), theirs: side(2) }] };
+    let changed = () => {};
+    window.resolved = [];
+    window.queueChanged = () => changed();
+    conflictSheet(document.body, { idPrefix: 't-', sync: { conflicts: () => [c], describe: () => c,
+      resolve: (k, p) => window.resolved.push([k, { ...p }]), queue: { onChange: fn => { changed = fn; return () => {}; } } } });
+  });
+  await page.locator('#t-attention').click();
+  const sheet = page.locator('#t-conflicts');
+  await sheet.getByRole('button', { name: 'Mine', exact: true }).first().click();
+  await page.evaluate(() => window.queueChanged());   // another save goes out meanwhile: the list redraws
+  await sheet.getByRole('button', { name: 'Theirs', exact: true }).nth(1).click();
+  await sheet.getByRole('button', { name: 'Keep these choices' }).click();
+  expect(await page.evaluate(() => window.resolved)).toEqual([['k1', { a: 'mine', b: 'theirs' }]]);
+});

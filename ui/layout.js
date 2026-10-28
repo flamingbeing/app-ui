@@ -12,11 +12,14 @@
  * @returns {string}
  */
 export function stepValue(value, dir, { step = 1, min = -Infinity, max = Infinity, start } = {}) {
-  const places = (String(step).split('.')[1] || '').length;
   const n = parseFloat(value);
+  const dec = (/** @type {unknown} */ s) => (String(s).split('.')[1] || '').length;
+  const places = dec(step), more = Math.max(places, Number.isFinite(n) ? dec(String(value).trim()) : 0);
   let next = Number.isFinite(n) ? n + dir * step : (start ?? (dir > 0 ? Math.max(0, min) : Math.min(0, max)));
   next = Math.min(max, Math.max(min, next));
-  return next.toFixed(places);
+  // the step's decimals, unless a typed value has more (2.5 + 1 is 3.5, not 4)
+  const exact = Number(next.toFixed(more));
+  return Number(exact.toFixed(places)) === exact ? exact.toFixed(places) : exact.toFixed(more);
 }
 
 /** @param {string | undefined} s */

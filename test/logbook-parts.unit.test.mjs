@@ -7,7 +7,7 @@ import { moveIn } from '../ui/drag-list.js';
 import { shareText, copyText } from '../ui/share.js';
 import { createTransients } from '../ui/transients.js';
 import { createNavigation } from '../ui/navigation.js';
-import { cleanHideList, hideKey, MAX_HIDDEN } from '../ui/hide-mode.js';
+import { cleanHideList, hideKey, MAX_HIDDEN, nameOf } from '../ui/hide-mode.js';
 import { LABELS } from '../ui/labels.js';
 
 /** a Storage stand-in: keys are enumerable like the real one */
@@ -159,4 +159,10 @@ test('the hide list keeps only known kinds and short words, without repeats, up 
   const many = Array.from({ length: MAX_HIDDEN + 20 }, (_, n) => ({ tab: 'home', kind: 'btn', name: `b${n}` }));
   assert.equal(cleanHideList(many).length, MAX_HIDDEN);
   assert.deepEqual(cleanHideList('nope'), []);
+});
+
+test('an icon button named only by its title has a name (whitespace around the icon is not one)', () => {
+  const attrs = { title: 'Pick a day' };
+  const btn = { matches: (/** @type {string} */ q) => q.includes('button'), getAttribute: (/** @type {string} */ a) => attrs[a] ?? null, textContent: '\n    \n  ' };
+  assert.equal(nameOf(/** @type {any} */ (btn)), 'Pick a day');
 });

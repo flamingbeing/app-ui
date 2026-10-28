@@ -13,6 +13,12 @@ test('a step stays in min/max and keeps the step\'s decimals', () => {
   assert.equal(stepValue('21', 1, { step: 0.5 }), '21.5');
 });
 
+test('a typed value finer than the step moves by exactly one step', () => {
+  assert.equal(stepValue('2.5', 1, { step: 1 }), '3.5');
+  assert.equal(stepValue('0.25', 1, { step: 0.5 }), '0.75');
+  assert.equal(stepValue('2.5', -1, { step: 0.5 }), '2.0');
+});
+
 test('an empty or unreadable box starts at its start value, else at 0 kept in range', () => {
   assert.equal(stepValue('', 1, { step: 0.5, start: 21 }), '21.0');
   assert.equal(stepValue('', -1, { step: 0.1, start: 36.5 }), '36.5');
