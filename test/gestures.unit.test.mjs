@@ -9,7 +9,7 @@ import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
 import { dragRange, needs, TICKS } from '../ui/select-mode.js';
 import { swipeGoesBack, edgeBackOn, EDGE } from '../ui/screens.js';
-import { swipeIntent, pageStep } from '../ui/tab-pages.js';
+import { swipeIntent, pageStep, swipeEdge } from '../ui/tab-pages.js';
 
 test('the port rules: hold 500 ms within 10 px; ticks and screen edge are finger-sized', () => {
   assert.equal(HOLD_MS, 500);
@@ -132,11 +132,22 @@ test('right-click menu: its corner at the pointer; flipped left or up near an ed
   assert.deepEqual(placeAtPointer(menu, { w: 230, h: 210 }, { x: 100, y: 100 }), { left: 8, top: 8, below: false });
 });
 
-test('tab swipe: a first move under 10 px tells nothing; sideways only when well under 34° from the horizontal', () => {
+test('tab swipe: a first move under 10 px tells nothing; sideways only when under about 37° from the horizontal', () => {
   assert.equal(swipeIntent(6, 3), null);
   assert.equal(swipeIntent(-30, 5), 'x');
-  assert.equal(swipeIntent(30, 20), 'y', 'a diagonal is a scroll');
+  assert.equal(swipeIntent(30, 24), 'y', 'a diagonal is a scroll');
   assert.equal(swipeIntent(2, 40), 'y');
+});
+
+test('tab swipe: a looser angle still reads as sideways (under 40°), a steeper one as a scroll', () => {
+  assert.equal(swipeIntent(30, 22), 'x');
+  assert.equal(swipeIntent(30, 26), 'y');
+});
+
+test('tab swipe: no start within 24 px of an edge, or an eighth of the width on a wider phone', () => {
+  assert.equal(swipeEdge(390), 48.75);
+  assert.equal(swipeEdge(160), 24);
+  assert.equal(swipeEdge(430), 53.75);
 });
 
 test('tab swipe: past a third of the width or a flick goes to the next or previous page, if there is one', () => {

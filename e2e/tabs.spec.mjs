@@ -270,3 +270,34 @@ test('at 820 px the tab pages are the side bar\'s: a page takes both panes; no s
   await expect(page.locator('.ui-pane-detail')).toBeVisible();
   expect(await AxeBuilder(page)).toEqual([]);
 });
+
+test('swipe: a start inside an eighth of the width does nothing (390 px: 48 px); outside it works', async ({ sized }) => {
+  const page = await load(sized);
+  await swipe(page, 44, 300 + 44);
+  await swipe(page, 390 - 44, 60);
+  expect(await shown(page)).toEqual(['home']);
+  await swipe(page, 300, 60);
+  expect(await shown(page)).toEqual(['rooms']);
+});
+
+test('swipe: right on the first page fires onPrevMissing once; a short move does not; not on a later page', async ({ sized }) => {
+  const page = await load(sized);
+  const fired = () => page.evaluate(() => document.documentElement.dataset.prevMissing || '0');
+  await (await finger(page)).drag(200, 420, 230, 420, { steps: 10, ms: 40 });
+  await settled(page);
+  expect(await fired(), 'too short').toBe('0');
+  await swipe(page, 60, 300);
+  expect(await shown(page)).toEqual(['home']);
+  expect(await fired()).toBe('1');
+  await swipe(page, 300, 60);
+  await swipe(page, 60, 300);
+  expect(await fired(), 'coming back from page 2 is a page change').toBe('1');
+});
+
+test('zoom and overscroll are off on the page', async ({ sized }) => {
+  const page = await load(sized);
+  expect(await page.evaluate(() => ['documentElement', 'body'].map(k => {
+    const c = getComputedStyle(document[k]);
+    return [c.touchAction, c.overscrollBehaviorY, c.overscrollBehaviorX];
+  }))).toEqual([['pan-x pan-y', 'none', 'none'], ['pan-x pan-y', 'none', 'none']]);
+});
