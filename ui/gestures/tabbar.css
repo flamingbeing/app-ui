@@ -17,6 +17,18 @@
 /* the current tab in the link colour: the palette holds it to 4.5:1 on the ground, the surface and the selection (the
    accent itself has no floor, and was 4.1:1 in Navy) */
 .ui-tab[aria-current="page"] { color: var(--link); font-weight: 600; background: var(--tab-active); }
+/* an optional centre action (.ui-tab.ui-tab-action, a <button> or a link holding a .ui-tab-icon and its label): a
+   raised accent circle, the label left for screen readers only (font-size 0). It is no page, so it never shows as the
+   current tab. Put it in the middle of the tabs; a bar without one is unchanged */
+.ui-tab-action, .ui-tab-action[aria-current="page"] { color: var(--muted); font-weight: inherit; background: transparent; }
+.ui-tab-action:has(.ui-tab-icon) { gap: 0; padding-block: 0; font-size: 0; }
+.ui-tab-action .ui-tab-icon { box-sizing: border-box; display: grid; place-items: center; width: var(--tap); height: var(--tap);
+  margin-top: -6px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 1.75rem; line-height: 1;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 28%, transparent); }
+.ui-tab-action svg.ui-tab-icon { padding: 9px; }
+.ui-tab-action .ui-tab-icon > svg { width: 26px; height: 26px; }   /* an <svg> inside a .ui-tab-icon span */
+.ui-tab.ui-tab-action:active { box-shadow: none; }   /* (the circle answers the press, not the whole tab) */
+.ui-tab-action:active .ui-tab-icon { transform: scale(.94); filter: brightness(.9); }
 /* a look with the tab bar along the bottom edge (data-tabbar="edge"); the tabs stay together in the middle on a wide screen */
 [data-tabbar="edge"] .ui-tabbar { left: 0; right: 0; bottom: 0; transform: none; max-width: none; justify-content: center;
   padding: 4px 4px calc(env(safe-area-inset-bottom, 0px) + 4px); border-width: var(--border) 0 0; border-radius: 0; }

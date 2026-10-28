@@ -76,6 +76,31 @@ for (const look of ['a', 'b', 'c', 'd', 'e']) {
   });
 }
 
+for (const [look, scheme] of [['a', 'light'], ['b', 'light'], ['c', 'dark'], ['b', 'dark']]) {
+  test(`look ${look} ${scheme}: the centre action (New) is a raised 44 px accent circle, its label for screen readers only`, async ({ sized }) => {
+    const page = await load(sized, `&look=${look}`);
+    await page.emulateMedia({ colorScheme: scheme });
+    const action = page.locator('nav.ui-tabbar .ui-tab-action');
+    await expect(action).toHaveAccessibleName('New');
+    const got = await action.evaluate(a => {
+      const i = a.querySelector('.ui-tab-icon'), c = getComputedStyle(i), r = i.getBoundingClientRect();
+      const probe = document.createElement('span');
+      document.body.append(probe);
+      const want = v => { probe.style.color = `var(${v})`; return getComputedStyle(probe).color; };
+      const out = { w: r.width, h: r.height, radius: c.borderRadius, bg: c.backgroundColor === want('--accent'),
+        fg: c.color === want('--on-accent'), label: getComputedStyle(a).fontSize, top: r.top,
+        others: Math.min(...[...a.parentElement.querySelectorAll('.ui-tab:not(.ui-tab-action) .ui-tab-icon')].map(o => o.getBoundingClientRect().top)) };
+      probe.remove();
+      return out;
+    });
+    expect(got).toMatchObject({ w: 44, h: 44, radius: '50%', bg: true, fg: true, label: '0px' });
+    expect(got.top, 'raised above the other icons').toBeLessThan(got.others);
+    const box = await action.boundingBox();
+    expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(44);
+    expect(await AxeBuilder(page)).toEqual([]);
+  });
+}
+
 test('tapping a tab shows its page, marks both bars and names the bar; New opens the sheet and is no page', async ({ sized }) => {
   const page = await load(sized);
   expect(await shown(page)).toEqual(['home']);
