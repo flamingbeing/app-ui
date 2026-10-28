@@ -179,6 +179,7 @@ test('a hover card shows after the mouse rests on a link, and goes when it leave
   await page.mouse.move(5, 5);
   await expect(card).toHaveCount(0);
   await context.close();
+});
 
 test('conflict sheet: per-field picks survive a queue change while the sheet is open', async ({ sized }) => {
   const page = await sized(390);
