@@ -2,7 +2,9 @@
 // the first column and any footer row kept in view (ui/layout.css), with the ARIA grid pattern: one Tab stop; arrow
 // keys, Home / End (the row), Ctrl+Home / Ctrl+End (the grid), PageUp / PageDown move between cells; a tap, Enter or
 // Space on a body cell (td) selects it (aria-selected) and fires onSelect and a bubbling 'ui-grid-select' event.
-// A cell holding one button or link: Enter clicks it (its click selects as a tap does). Hidden rows are skipped and a
+// A cell holding one button or link: Enter clicks it (its click selects as a tap does). A cell holding one field (an
+// editable cell): Enter or F2 goes into the field, Esc in it comes back to the cell (the app's own Enter or change
+// handler still runs; it may call focus(cell) to come back too). Hidden rows are skipped and a
 // colspan counts as the columns it covers. The app owns the markup and may redraw any of it at any time:
 //   <div class="ui-data-grid-box"><table class="ui-data-grid" data-size="dense|extra" aria-label="…">
 //     <thead><tr><th scope="col">…</th><th scope="col" data-key="…">…</th>…</tr></thead>
@@ -70,6 +72,7 @@ export function dataGrid(table, { onSelect } = {}) {
   /** @type {HTMLTableCellElement | null} */ let current = null;
   /** @type {HTMLTableCellElement | null} */ let chosen = null;
   let want = 0;
+  let moving = false;   // the grid's own focus() is moving the focus (focusin then keeps want)
 
   const shown = () => [...table.rows].filter(r => !r.hidden && r.closest('table') === table && !r.parentElement?.hidden);
   /** @param {HTMLTableRowElement[]} rows */
@@ -126,7 +129,8 @@ export function dataGrid(table, { onSelect } = {}) {
   const focus = (cell = current ?? undefined) => {
     if (!cell) return;
     setCurrent(cell);
-    cell.focus({ preventScroll: true });
+    moving = true;
+    try { cell.focus({ preventScroll: true }); } finally { moving = false; }
     reveal(cell);
   };
   /** @param {HTMLTableCellElement | null} cell */
@@ -151,9 +155,21 @@ export function dataGrid(table, { onSelect } = {}) {
   /** @param {KeyboardEvent} e */
   function key(e) {
     const cell = cellOf(e.target);
-    if (!cell || (e.target instanceof Element && e.target.matches(FIELD))) return;
+    if (!cell) return;
+    if (e.target instanceof Element && e.target.matches(FIELD)) {
+      if (e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); focus(cell); }
+      return;
+    }
+    const inner = cell.querySelectorAll('button, a[href]');
+    const fields = cell.querySelectorAll(FIELD);
+    if ((e.key === 'Enter' || e.key === 'F2') && !inner.length && fields.length === 1) {
+      e.preventDefault();
+      const field = /** @type {HTMLInputElement} */ (fields[0]);
+      field.focus();
+      if (typeof field.select === 'function' && field.matches('input:not([type]), input[type="text"], input[type="search"], textarea')) field.select();
+      return;
+    }
     if (e.key === 'Enter' || e.key === ' ') {
-      const inner = cell.querySelectorAll('button, a[href]');
       if (e.key === 'Enter' && inner.length === 1) { e.preventDefault(); /** @type {HTMLElement} */ (inner[0]).click(); return; }
       if (cell.tagName === 'TD') { e.preventDefault(); pick(cell); }
       return;
@@ -181,7 +197,8 @@ export function dataGrid(table, { onSelect } = {}) {
   /** @param {FocusEvent} e */
   function focusin(e) {
     const cell = cellOf(e.target);
-    if (cell && cell !== current) { setCurrent(cell); want = posOf(cell, shown()).col; }
+    // a new cell, or focus from outside the grid's own moves (Tab in, a tap, the app): up and down keep its column
+    if (cell && (cell !== current || !moving)) { setCurrent(cell); want = posOf(cell, shown()).col; }
   }
 
   table.addEventListener('keydown', key);
