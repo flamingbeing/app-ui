@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.28
+- Content parts (`ui/gestures/content.css`, loaded by `gestures.css`): grouped sections (`.ui-section`,
+  `.ui-section-head`, `.ui-section-foot`), row extras (`.ui-row-lead` icon tile with `data-tone="grey|danger"`,
+  `.ui-row-thumb`, `.ui-row-trail`, `.ui-row-value`, `.ui-row-chevron`; `.ui-row[data-tone="action|danger"]`,
+  `.ui-row[data-align="center"]`), cards (`.ui-card`, `-title`, `-text`, `-actions`), stat tiles (`.ui-stats`,
+  `.ui-stat`, `-value`, `-label`), badges (`.ui-badge[data-tone="accent|ok|warn|danger"]`), an empty state
+  (`.ui-empty`, `-icon`, `-title`, `-text`) and skeleton rows (`.ui-skeleton[data-shape="line|short|thumb"]`). For
+  apps moving off the old home kit, whose screens had these parts and the kit did not.
+
 ## 1.0.0-rc.26
 - The current side bar link uses `--link`, as the current tab does, which the palette keeps 4.5:1 on its tint (the raw
   accent fell to 3.6:1 there for Violet); a test reads every preset in light and dark. The e2e axe helper takes

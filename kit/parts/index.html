@@ -53,6 +53,27 @@ mint    in a pot</code></pre>
         <button type="button" class="ui-icon-btn" aria-label="Read view" aria-pressed="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></button></p>
     </section>
 
+    <section aria-labelledby="content-title">
+      <h2 id="content-title">Content parts</h2>
+      <ul class="ui-stats" aria-label="Pantry">
+        <li class="ui-stat"><span class="ui-stat-value">12</span><span class="ui-stat-label">Items</span></li>
+        <li class="ui-stat"><span class="ui-stat-value">3</span><span class="ui-stat-label">Use soon</span></li>
+      </ul>
+      <div class="ui-card"><p class="ui-card-title">Use these first</p><p class="ui-card-text">Three things run out this week.</p>
+        <div class="ui-card-actions"><button type="button" class="ui-primary">See them</button></div></div>
+      <div class="ui-section">
+        <h3 class="ui-section-head">Shelf <button type="button">Edit</button></h3>
+        <ul class="ui-list">
+          <li><a class="ui-row" href="#content-title"><span class="ui-row-thumb" aria-hidden="true"></span><span class="ui-row-main">Oat milk<span class="ui-row-sub">Fridge</span></span><span class="ui-row-trail"><span class="ui-badge" data-tone="warn">2 days</span></span></a></li>
+          <li><div class="ui-row"><span class="ui-row-lead" aria-hidden="true"></span><span class="ui-row-main">Rice</span><span class="ui-row-value">2 kg</span></div></li>
+          <li><button type="button" class="ui-row" data-tone="action"><span class="ui-row-main">Add an item</span></button></li>
+        </ul>
+        <p class="ui-section-foot">Sorted by what runs out first.</p>
+      </div>
+      <div class="ui-empty"><span class="ui-empty-icon" aria-hidden="true"></span><p class="ui-empty-title">Nothing to buy</p><p class="ui-empty-text">Items you mark as low show here.</p></div>
+      <ul class="ui-list" aria-busy="true" aria-label="Loading"><li><div class="ui-row"><span class="ui-skeleton" data-shape="thumb"></span><span class="ui-row-main"><span class="ui-skeleton" data-shape="line"></span><span class="ui-skeleton" data-shape="short"></span></span></div></li></ul>
+    </section>
+
     <section aria-labelledby="undo-title">
       <h2 id="undo-title">Undo toast</h2>
       <ul id="fruit" class="parts-list"></ul>
