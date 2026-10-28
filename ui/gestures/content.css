@@ -65,8 +65,11 @@
 }
 @keyframes ui-skeleton { to { opacity: .45; } }
 /* ---------- button sizes (with theme.css's button, .ui-fill and .ui-plain) ---------- */
-:where(.ui-wide) { display: flex; width: 100%; }
-:where(.ui-tint) { background: color-mix(in srgb, var(--accent) 13%, var(--surface)); border-color: transparent; color: var(--link); font-weight: 600; }
+/* theme.css's :where(.ui-fill) / :where(.ui-plain) lose to its own button rule, so on a button they need the class's weight */
+button.ui-fill, a.ui-fill { background: var(--fill); color: var(--on-fill); border-color: var(--fill); }
+button.ui-plain, a.ui-plain { background: none; border-color: transparent; color: var(--link); }
+.ui-wide { display: flex; width: 100%; }
+.ui-tint { background: color-mix(in srgb, var(--accent) 13%, var(--surface)); border-color: transparent; color: var(--link); font-weight: 600; }
 /* a value typed straight into a row (a name, a number): no box until focused, words at the end */
 .ui-row-input { flex: 0 1 55%; width: auto; min-width: 0; min-height: var(--tap); margin: 0; padding: 0; border: 0; background: none;
   box-shadow: none; color: var(--muted); font: inherit; text-align: end; }

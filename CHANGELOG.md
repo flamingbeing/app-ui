@@ -10,6 +10,8 @@
   `[data-size="small"]` 32 px), `.ui-buttons` (a stack of buttons); filter chips (`.ui-chips` of `button.ui-chip`
   with `aria-pressed`, a full tap tall, `data-wrap="on"` to wrap). For
   apps moving off the old home kit, whose screens had these parts and the kit did not.
+- Fix: `.ui-fill` and `.ui-plain` on a `<button>` (or link) now apply; theme.css's zero-weight `:where()` rules lost
+  to its own `button` rule.
 
 ## 1.0.0-rc.27
 - Ground "Cool grey" (`cool`): the cool light grey behind grouped lists on a phone (#f2f2f7) in light, the palette's
