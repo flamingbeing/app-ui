@@ -7,7 +7,8 @@ export function themeChoice(): Choice;
  * Starts the glass guard too (guard.js): its verdict, once found, shows the choice again.
  * @param {import('./palette-css.js').AppTheme} [appTheme]  the app's own defaults: accent, its colour (hex); look,
  *   the look a device that picked none gets (looks.js ids; none: A); surface, the ground a device that picked none
- *   gets (schema.js SURFACE_IDS; none: theme.css's)
+ *   gets (schema.js SURFACE_IDS; none: theme.css's); layer, the cascade layer the palette sheet goes in; ownTheme, the
+ *   app keeps data-theme (and its browser bar colour) itself
  */
 export function applyTheme(appTheme?: import("./palette-css.js").AppTheme): void;
 /** @param {Partial<Choice>} change  shows the choice with this change on this page only, keeping nothing (the
