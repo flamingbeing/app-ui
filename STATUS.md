@@ -6,6 +6,7 @@
 - rc.9 reference parts (undo toast, loading and error states, About); rc.10 logbook UI parts (drafts, drag-reorder, share out, Back closes dialogs, screen history, hide mode, settings ⓘ and Reset rows), 27 Oct.
 - rc.11 plug-and-play fixes (plain `<button>` tabs with icons, borderless bar buttons, tab pages with swipe between tabs on phones, the About group in `settingsScreen`, look D "Slim" and a phone side-bar drawer), 10:05 SGT 28 Oct.
 - rc.12 core-review follow-ups (gallery CSS shipped, gestures.css split, `ui-` names and `idPrefix`, optional detail pane, bar ends, tab contrast, toasts over the tab bar, switch width, types and sideEffects; `@layer` waits on tokens.css), 28 Oct.
+- rc.13 tab slide on tap (owner, 28 Oct).
 
 ## Waiting on the owner
 -

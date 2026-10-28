@@ -183,6 +183,34 @@ test('swipe with Reduce Motion: the tab changes without the slide', async ({ siz
   await expect.poll(() => shown(page)).toEqual(['rooms']);
 });
 
+test('a tapped tab slides its page in from its side; Reduce Motion or data-slide="off" just switches', async ({ sized }) => {
+  const page = await load(sized);
+  // the page's running slide: where it starts (px, signed) and how long it takes, or null
+  const slide = id => page.evaluate(id => {
+    const a = document.getElementById(id).getAnimations().find(x => x.playState === 'running');
+    if (!a) return null;
+    const k = /** @type {KeyframeEffect} */ (a.effect).getKeyframes()[0];
+    return { from: Math.sign(new DOMMatrix(String(k.transform)).m41), ms: a.effect.getTiming().duration };
+  }, id);
+  const tap = name => page.locator('nav.ui-tabbar .ui-tab', { hasText: name }).click();
+  await tap('Rooms');
+  await expect.poll(() => slide('rooms')).toEqual({ from: 1, ms: 280 });   // Rooms sits to the right of Plants
+  await expect(page.locator('.ui-screens')).toHaveClass(/is-sliding/);
+  await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
+  await tap('Plants');
+  await expect.poll(() => slide('home')).toEqual({ from: -1, ms: 280 });
+  await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await tap('Rooms');
+  await expect(page.locator('#rooms')).toBeVisible();
+  expect(await slide('rooms')).toBeNull();
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.evaluate(() => { document.querySelector('nav.ui-tabbar').dataset.slide = 'off'; });
+  await tap('Plants');
+  await expect(page.locator('#home')).toBeVisible();
+  expect(await slide('home')).toBeNull();
+});
+
 test('a tab page keeps its scroll; tapping the current tab over a pushed screen goes back to it', async ({ sized }) => {
   const page = await load(sized);
   await page.evaluate(() => scrollTo(0, 200));
