@@ -13,6 +13,9 @@
 .ui-search input { flex: 1; min-width: 0; min-height: calc(var(--tap) - 4px); border: 0; background: none; color: var(--text); font: inherit; }
 .ui-search input::-webkit-search-cancel-button { display: none; }
 .ui-phone-search { margin: 0 var(--pad) var(--pad); }
+/* look E: the search is a quiet filled box, no line round it */
+:root[data-look="e"] .ui-search { border-color: transparent; background: color-mix(in srgb, var(--text) 6%, transparent); }
+:root[data-look="e"] .ui-search:focus-within { border-color: var(--accent); }
 .ui-shell-empty { margin: var(--pad); color: var(--muted); }
 
 /* the side bar: a column from 600 px; on a phone, a drawer the bar's .ui-bar-menu opens (ui/shell/shell.js) */

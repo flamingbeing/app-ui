@@ -140,6 +140,7 @@ export function holdMenus(root = document) {
       if (head.textContent) menu.prepend(head);
       layer.append(menu);
     } else layer.append(preview, menu);
+    document.querySelectorAll('.ui-menu-layer.is-leaving').forEach(g => g.remove());   // one menu on screen at a time
     layer.classList.add('is-open');   // before measuring: a closed layer is display:none, so the menu would measure 0
     menu.classList.toggle('is-sheet', sheet);   // (before measuring: the sheet is wider)
     const view = { w: innerWidth, h: innerHeight };
@@ -168,12 +169,36 @@ export function holdMenus(root = document) {
     (byKey && first ? first : menu).focus({ preventScroll: true });
   }
 
+  // the closed menu slides (a sheet) or fades away on a layer of its own that takes no input, then goes; the real
+  // layer is already closed, so a new menu can open at once
+  /** @param {Element[]} nodes */
+  function leave(nodes) {
+    const ghost = document.createElement('div');
+    ghost.className = 'ui-menu-layer is-open is-leaving';
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.inert = true;
+    const veil = document.createElement('div');
+    veil.className = 'ui-menu-veil';
+    ghost.append(veil, ...nodes);
+    // the copy on its way out is no menu: no roles or ids left for a reader, a test or the next menu to find
+    ghost.querySelectorAll('[role], [id]').forEach(n => { n.removeAttribute('role'); n.removeAttribute('id'); });
+    document.body.append(ghost);
+    const done = () => ghost.remove();
+    ghost.addEventListener('animationend', e => { if (/** @type {Element} */ (e.target).classList.contains('ui-menu-veil')) done(); });
+    // (no animationend when the page is hidden): the longest leaving animation, and a little over
+    setTimeout(done, (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--d-quick')) || 340) * .7 + 160);
+  }
+
   /** @param {boolean} [quiet]  true: focus stays where it is (another menu is opening) */
   function close(quiet = false) {
     if (!layer || !layer.classList.contains('is-open')) return;
     layer.classList.remove('is-open');
     html.classList.remove('ui-menu-open');
-    layer.querySelectorAll('.ui-menu-preview,.ui-menu').forEach(n => n.remove());
+    // the lifted copy goes at once (the row is under it); the menu itself fades or sinks away
+    layer.querySelectorAll('.ui-menu-preview').forEach(n => n.remove());
+    const gone = [...layer.querySelectorAll('.ui-menu')];
+    if (quiet || still()) gone.forEach(n => n.remove());
+    else leave(gone);
     if (menuFor && !quiet) menuFor.focus({ preventScroll: true });
     menuFor = null;
   }

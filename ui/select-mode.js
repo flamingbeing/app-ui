@@ -1,5 +1,5 @@
 // Select mode: .ui-list[data-select] with .ui-row rows. [data-edit-for="#list"] buttons switch it on and off (Select /
-// Done); a "ui-edit" event on the list switches it on from code (a hold menu's Select, detail.row ticks that row).
+// Done; an icon button keeps its icon while off); a "ui-edit" event on the list switches it on from code (a hold menu's Select, detail.row ticks that row).
 // While on, the list is a multi-select listbox: a tap ticks a row (no navigation), Space ticks the focused one, Esc
 // leaves, Shift-click ticks the range from the last row clicked and Ctrl/Cmd-click adds one (also outside select mode:
 // they start it from the open row, aria-current), and a finger that starts on the ticks and moves up or down sets the whole range from where it started to
@@ -37,6 +37,8 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
   const sel = `#${CSS.escape(list.id)}`;
   const q = (/** @type {string} */ attr) => /** @type {HTMLElement[]} */ ([...document.querySelectorAll(`[${attr}="${sel}"]`)]);
   const toggles = /** @type {HTMLButtonElement[]} */ (q('data-edit-for'));
+  // an icon toggle (an svg or [data-icon] inside) keeps its icon and name while off and says Done while on
+  const icons = new Map(toggles.filter(b => b.querySelector('svg, [data-icon]')).map(b => [b, { nodes: [...b.childNodes], name: b.getAttribute('aria-label') }]));
   const bar = q('data-select-toolbar')[0] ?? null;
   const counts = q('data-select-count');
   const alls = q('data-select-all');
@@ -74,7 +76,12 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
       if (v) { r.dataset.role = r.getAttribute('role') || ''; r.setAttribute('role', 'option'); tick(r, false); }
       else { if (r.dataset.role) r.setAttribute('role', r.dataset.role); else r.removeAttribute('role'); delete r.dataset.role; r.removeAttribute('aria-selected'); }
     }
-    for (const b of toggles) { b.textContent = v ? 'Done' : b.dataset.label || 'Select'; b.setAttribute('aria-pressed', String(v)); }
+    for (const b of toggles) {
+      const icon = icons.get(b);
+      if (v) b.textContent = 'Done'; else if (icon) b.replaceChildren(...icon.nodes); else b.textContent = b.dataset.label || 'Select';
+      if (icon?.name) { if (v) b.removeAttribute('aria-label'); else b.setAttribute('aria-label', icon.name); }
+      b.setAttribute('aria-pressed', String(v));
+    }
     for (const b of alls) b.hidden = !v;
     if (bar) bar.hidden = !v;
     if (tabBar) tabBar.hidden = v;

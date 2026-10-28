@@ -67,6 +67,12 @@ export function detentSheet(sheet) {
   }
   /** @param {HTMLElement | null} [from] */
   function open(from = null) {
+    if (leaving) {   // opened again while sliding away: it comes back
+      stay();
+      if (from) opener = from;
+      if (!pushed) try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
+      return;
+    }
     if (sheet.open) return;
     opener = from ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     sheet.showModal();
@@ -74,7 +80,35 @@ export function detentSheet(sheet) {
     rest = sheet.getBoundingClientRect().height;   // pre-sized now, so a drag's first frame needs no layout
     try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
   }
-  const close = () => { if (sheet.open) sheet.close(); };
+  // Close: on a phone the sheet slides down from wherever it is (mid-drag too) and the backdrop fades, then it closes;
+  // a centred dialog fades. Still: at once.
+  /** @type {Animation | null} */
+  let leaving = null;
+  /** @type {Animation | null} */
+  let fading = null;
+  // a close cut short (opened again, or closed for real): the sheet back as it was
+  function stay() {
+    leaving?.cancel(); fading?.cancel(); leaving = fading = null;
+    unstyle(); sheet.classList.remove('is-dragging');
+  }
+  const close = () => {
+    if (!sheet.open || leaving) return;
+    if (still() || typeof sheet.animate !== 'function') { sheet.close(); return; }
+    glider?.cancel(); glider = null;
+    const t = getComputedStyle(sheet).transform, y = t && t !== 'none' ? new DOMMatrixReadOnly(t).m42 : 0;
+    const ms = Math.round((parseFloat(getComputedStyle(sheet).getPropertyValue('--d-quick')) || 340) * .75);
+    sheet.classList.add('is-dragging');   // (no CSS transition while the animation moves it)
+    const frames = wide.matches ? [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.97)' }]
+      : [{ transform: `translateY(${y}px)` }, { transform: `translateY(${sheet.getBoundingClientRect().height + 8}px)` }];
+    const a = leaving = sheet.animate(frames, { duration: ms, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' });
+    try { fading = sheet.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, pseudoElement: '::backdrop', fill: 'forwards' }); } catch { /* no ::backdrop animation */ }
+    const end = () => { if (leaving === a && sheet.open) sheet.close(); };
+    a.finished.then(end, end);
+    // its history entry goes now, not at the end: what the app does next (a push, say) is not undone by it
+    if (pushed) { pushed = false; try { history.back(); } catch { /* none */ } }
+  };
+  // Esc: the same slide (the browser would close it at once)
+  l.on(sheet, 'cancel', (/** @type {Event} */ e) => { if (!still() && e.cancelable) { e.preventDefault(); close(); } });
   /** @type {Animation | null} */
   let glider = null;
   // the sheet's height at rest (0 = unknown: measure at drag start); keeps begin() free of a forced layout
@@ -124,7 +158,7 @@ export function detentSheet(sheet) {
   sheet.querySelectorAll('[data-close]').forEach(b => l.on(b, 'click', close));
   l.on(sheet, 'click', (/** @type {MouseEvent} */ e) => { if (e.target === sheet) close(); });   // the backdrop
   l.on(sheet, 'close', () => {
-    unstyle();
+    stay();
     setDetent(ds[0]);
     html.classList.remove('ui-sheet-large-open');
     if (pushed) { pushed = false; try { history.back(); } catch { /* none */ } }
@@ -159,6 +193,7 @@ export function detentSheet(sheet) {
   /** @param {PointerEvent} e @param {HTMLElement} el @param {boolean} fromBody */
   function down(e, el, fromBody) {
     const t = /** @type {Element} */ (e.target);
+    if (leaving) return;   // on its way out
     if (sheet.dataset.wide === 'panel' && wide.matches) return;   // a side panel keeps its height
     if (fromBody) {   // a finger on the body, below full height
       if (e.pointerType === 'mouse' || sheet.getAttribute('data-detent') === top || noGestureInSheet(t)) return;
@@ -180,6 +215,7 @@ export function detentSheet(sheet) {
   /** @param {{ pointerId: number | string, clientX: number, clientY: number, timeStamp: number }} e */
   function move(e) {
     if (y0 === null || e.pointerId !== id) return;
+    if (leaving) { y0 = null; live = false; return; }   // closed mid-drag (Back, say): the slide out wins
     dy = e.clientY - y0;
     last.push([e.timeStamp, e.clientY]);
     if (last.length > 5) last.shift();
@@ -206,9 +242,10 @@ export function detentSheet(sheet) {
     if (y0 === null || e.pointerId !== id) return;
     const wasLive = live;
     y0 = null; live = false;
+    if (leaving) return;
     if (!wasLive || !moved) { unstyle(); sheet.classList.remove('is-dragging'); return; }
     const to = settle(ds, from0, dy, velocity(last));
-    if (to === 'close') { unstyle(); sheet.classList.remove('is-dragging'); close(); }
+    if (to === 'close') close();   // (slides on from where the finger left it)
     else if (wide.matches) { sheet.classList.remove('is-dragging'); sheet.style.height = ''; sheet.style.maxHeight = ''; setDetent(to); }
     else glide(to, h);
   }
@@ -269,5 +306,5 @@ export function detentSheet(sheet) {
   }, true);
   l.on(window, 'resize', () => { if (sheet.open) setDetent(sheet.getAttribute('data-detent') || ds[0]); });
   setDetent(ds[0]);
-  return { open, close, setDetent, stop() { l.stop(); close(); } };
+  return { open, close, setDetent, stop() { l.stop(); stay(); if (sheet.open) sheet.close(); } };
 }

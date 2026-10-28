@@ -16,6 +16,9 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Hold menu | Delete removes the row with an Undo toast (no confirm); Undo puts it back in place | |
 | Hold menu | its Select starts select mode with that row ticked; no hold menu while selecting | |
 | Hold menu | a menu for a row near the bottom of the screen stays fully on screen | |
+| Closing | 390 px: a sheet slides down to the bottom edge before it shuts (Esc); a closed hold menu fades out, inert, with no roles or ids, gone within 600 ms; Still closes both at once | |
+| Select toggle | an icon `[data-edit-for]` button keeps its icon and name while off and says Done while on | |
+| Look E chip and search | look E: the synced chip shows only its icon (the word stays for screen readers), other states show the word; the shell search box has no outline until focused | |
 | Select mode | Select/Done; listbox + aria-selected; tap ticks (doesn't open); drag down the ticks takes a range; action bar replaces the tab bar; `data-needs` enables buttons; Esc leaves | selecting |
 | Sheet | opens at medium; drag up to large, down to medium, down to close (phone); Enter on the grabber cycles; Back closes it; centred dialog from 840 px, bottom edge below | open |
 | Components | 390 px: a pushed screen's Back shows in the bar (the screen's own is hidden), names the screen under it and pops; Select all stays on one line; look A's serif on the page title only; selects 44 px high, checkboxes 20 px or more; select mode's count in the text colour, off buttons faded, Delete red; the sheet's Done has no border and its chip row runs edge to edge; look C's action bar runs along the bottom edge | |
@@ -93,7 +96,7 @@ stand-in for `@core/settings` on the page.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
-| Looks A, B, C, D | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; D's bar title showing from the start, no large title on show, lists on the page background; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
+| Looks A, B, C, D, E | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; D's bar title showing from the start, no large title on show, lists on the page background; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
 | Look B's menu | under 840 px the hold menu from touch or Shift+F10 is a bottom sheet (a mouse's right-click opens at the pointer) on the bottom edge, named in its head (no lifted copy) with the tab bar hidden; from 840 px it opens beside the row | menu open |
 | Dark | 390 and 1280 px, each look: the gallery and the shell are clean; look B's band takes white text; menus, sheets and the action bar are solid (no blur, no see-through) | gallery, shell |
 | Ticks | square in B, round in A and C | |

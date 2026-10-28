@@ -128,6 +128,12 @@ test("the accent: the choice's, else the look's, else the app's, else v0's", () 
   assert.equal(palettes({}, { accent: '#2563eb' }).light.accent, lightPalette('#2563eb').accent);
 });
 
+test("the ground: the choice's, else the preset's, else the app's", () => {
+  assert.equal(palettes({}, { surface: 'ink' }).dark.bg, '#1e1e1e');
+  assert.equal(palettes({ preset: 'paper' }, { surface: 'ink' }).light.bg, palettes({ preset: 'paper' }).light.bg);
+  assert.equal(palettes({ surface: 'sepia' }, { surface: 'ink' }).dark.bg, palettes({ surface: 'sepia' }).dark.bg);
+});
+
 test('grounds tint light and dark, never OLED', () => {
   const s = palettes({ surface: 'sepia' }), o = palettes({ surface: 'sepia', dark: 'oled' });
   assert.equal(s.light.bg, SURFACES.sepia.light?.bg);
@@ -137,9 +143,9 @@ test('grounds tint light and dark, never OLED', () => {
   assert.equal(palettes({ preset: 'eye' }).light.bg, SURFACES.sepia.light?.bg, "the look's ground");
 });
 
-test('presets: 8 classic, unique ids, known grounds, no NUHS colours', () => {
-  assert.equal(PRESETS.length, 8);
-  assert.equal(new Set(PRESET_IDS).size, 8);
+test('presets: the 8 classic and Violet, unique ids, known grounds, no NUHS colours', () => {
+  assert.equal(PRESETS.length, 9);
+  assert.equal(new Set(PRESET_IDS).size, 9);
   assert.equal(PRESETS[0].id, 'default');
   assert.equal(PRESETS[0].accent, undefined, "the default look takes the app's colour");
   for (const p of PRESETS) if (p.surface) assert.ok(SURFACES[p.surface], p.id);

@@ -12,7 +12,8 @@ export const DEFAULT_ACCENT = '#3a6390';
 
 /** @typedef {import('./schema.js').Choice} Choice */
 /** @typedef {import('./colour.js').Palette} Palette */
-/** @typedef {{ accent?: string, look?: string }} AppTheme  the app's own defaults (config): accent colour, look id */
+/** @typedef {{ accent?: string, look?: string, surface?: string }} AppTheme  the app's own defaults (config): accent colour,
+ *  look id, ground (SURFACES id) */
 
 /** @param {Partial<Choice>} choice */
 const presetOf = choice => PRESETS.find(p => p.id === choice.preset) ?? PRESETS[0];
@@ -26,7 +27,7 @@ export const accentOf = (choice, app = {}) => cleanChoice(choice).accent || pres
  */
 export function palettes(choice, app = {}) {
   const c = cleanChoice(choice), preset = presetOf(c), accent = accentOf(c, app);
-  const ground = SURFACES[c.surface || preset.surface || ''];
+  const ground = SURFACES[c.surface || preset.surface || app.surface || ''];
   const oled = c.dark === 'oled', strong = !!preset.strong;
   return {
     light: floor({ ...lightPalette(accent), ...ground?.light }, { strong }),
