@@ -21,7 +21,10 @@ export function syncChip(host, { sync, labels = {}, idPrefix = '' }) {
   host.append(chip);
   const off = sync.status$(st => {
     chip.dataset.state = st.state;
-    mark.replaceChildren(icon(ICON[/** @type {keyof typeof ICON} */ (st.state)] || ICON.unknown), badge);
+    if (mark.dataset.state !== st.state) {   // (a new icon only when the state changes, so the spin keeps turning)
+      mark.dataset.state = st.state;
+      mark.replaceChildren(icon(ICON[/** @type {keyof typeof ICON} */ (st.state)] || ICON.unknown), badge);
+    }
     badge.textContent = st.count ? String(st.count) : '';
     text.textContent = (words[st.state] || st.state) + (st.count ? ` (${st.count})` : '');
   });

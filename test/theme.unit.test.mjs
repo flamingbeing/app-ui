@@ -250,8 +250,10 @@ test('theme-color meta: one per scheme with the page ground; a chosen light or d
     querySelector: (/** @type {string} */ q) => metas.find(m => q.includes(`data-scheme="${m.dataset.scheme}"`)) ?? null,
     append: (/** @type {any} */ m) => { metas.push(m); },
   };
+  const was = Object.getOwnPropertyDescriptor(globalThis, 'document');
   Object.defineProperty(globalThis, 'document', { configurable: true, value: {
     head, documentElement: { dataset: {}, classList: { toggle() {} } }, createElement: () => ({ dataset: {} }) } });
+  try {
   chooseTheme({ theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '' });
   const [light, dark] = [palettes({}).light.bg, palettes({}).dark.bg];
   assert.deepEqual(metas.map(m => [m.name, m.media, m.content]), [
@@ -259,4 +261,5 @@ test('theme-color meta: one per scheme with the page ground; a chosen light or d
   chooseTheme({ theme: 'dark' });
   assert.deepEqual(metas.map(m => m.content), [dark, dark], 'dark chosen: both follow it');
   assert.equal(metas.length, 2, 'the same two tags are updated, not added again');
+  } finally { if (was) Object.defineProperty(globalThis, 'document', was); else delete globalThis.document; }
 });

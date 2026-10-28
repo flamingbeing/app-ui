@@ -91,6 +91,7 @@ button, input, select { font: inherit; color: inherit; }
 button { display: inline-flex; align-items: center; justify-content: center; gap: .4em; box-sizing: border-box; min-height: var(--button-h);
   padding: 0 var(--pad); cursor: pointer; font-family: var(--font-ui); color: var(--button-text); border-radius: var(--radius-button); }
 button, select { background: var(--button-bg); border: var(--border) solid var(--line); }
+button[hidden] { display: none; }   /* (the rule above would otherwise show a hidden button) */
 /* two kinds of button: plain (the default) and filled (the accent); a link-style one has no box at all */
 :where(.ui-fill) { background: var(--fill); color: var(--on-fill); border-color: var(--fill); }
 :where(.ui-plain) { background: none; border-color: transparent; color: var(--link); }

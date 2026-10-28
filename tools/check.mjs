@@ -51,7 +51,7 @@ for (const f of files.filter(f => f.endsWith('.html'))) {
 // punctuation such as ‹ › … × − “ ” is text, not an icon, and stays)
 const PICTOGRAPH = /[\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{24FF}\u{25A0}-\u{27BF}\u{2800}-\u{28FF}\u{2B00}-\u{2BFF}\u{1F000}-\u{1FAFF}\u{2261}\u{FE0F}]/u;
 for (const f of files.filter(f => /\.(js|css|html)$/.test(f))) {
-  const text = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/(^|[^:'"\\])\/\/.*$/gm, '$1');
+  const text = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, '')).replace(/<!--[\s\S]*?-->/g, m => m.replace(/[^\n]/g, '')).replace(/(^|[^:'"\\])\/\/.*$/gm, '$1');
   const hit = text.split('\n').findIndex(l => PICTOGRAPH.test(l));
   if (hit >= 0) fail(`${f}:${hit + 1}: an emoji or pictograph character (${text.split('\n')[hit].match(PICTOGRAPH)?.[0]}): draw an icon from icons/lucide.js instead`);
 }
