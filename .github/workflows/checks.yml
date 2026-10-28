@@ -55,7 +55,8 @@ jobs:
       pull-requests: read
     steps:
       # A PR that changes only .md files skips the browser steps below; the job still runs and reports success, so the
-      # check never hangs. Pushes to main always run everything. Any doubt (API error, 3000+ files) runs everything.
+      # check never hangs. Renames count by both names. Pushes to main always run everything; any doubt (API error, 3000+
+      # files) runs everything. Unit tests (the checks job, which reads NOTES.md) always run.
       - name: Only .md files changed?
         id: docs
         env:
@@ -63,7 +64,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           docs=false
-          if [ "$GITHUB_EVENT_NAME" = pull_request ] && files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[].filename')" && [ -n "$files" ]; then
+          if [ "$GITHUB_EVENT_NAME" = pull_request ] && files="$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" --jq '.[] | .filename, (.previous_filename // empty)')" && [ -n "$files" ]; then
             n="$(printf '%s\n' "$files" | wc -l)"
             if [ "$n" -lt 3000 ] && ! printf '%s\n' "$files" | grep -qv '\.md$'; then docs=true; fi
           fi
