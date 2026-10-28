@@ -27,7 +27,7 @@ export const swipeGoesBack = (dx, v, width) => dx > width / 3 || (v > 0.5 && dx 
  * @param {HTMLElement} host  .ui-screens
  * @param {{ onChange?: (top: HTMLElement) => void }} [opts]  onChange: after each push or pop (e.g. largeTitle.watch)
  * @returns {{ push: (target: string | HTMLElement, from?: HTMLElement | null) => void, pop: (animate?: boolean) => void,
- *   depth: () => number, base: (screen: HTMLElement) => Promise<void>, stop: () => void }}  base: tab pages (tab-pages.js)
+ *   depth: () => number, baseY: () => number, base: (screen: HTMLElement) => Promise<void>, stop: () => void }}  base: tab pages (tab-pages.js)
  */
 export function screenStack(host, { onChange } = {}) {
   const l = listeners();
@@ -216,5 +216,5 @@ export function screenStack(host, { onChange } = {}) {
     l.on(document, 'touchcancel', end, { passive: true });
   }
   top().classList.add('is-top');
-  return { push, pop, depth: () => stack.length - 1, base, stop: l.stop };
+  return { push, pop, depth: () => stack.length - 1, baseY: () => stack[0].y, base, stop: l.stop };
 }

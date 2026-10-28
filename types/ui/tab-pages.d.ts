@@ -7,7 +7,7 @@ export function swipeIntent(mx: number, my: number): "x" | "y" | null;
 export function pageStep(dx: number, v: number, width: number, hasPrev: boolean, hasNext: boolean): 1 | 0 | -1;
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
- * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number }, host: HTMLElement,
+ * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean, onPrevMissing?: () => void }} o  screens: the page's screen stack; host: its
  *   .ui-screens; root: where the tabs and side links are (default the page); onPrevMissing: a right swipe on the
  *   first page (nothing before it)
@@ -17,6 +17,7 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
     screens: {
         base: (s: HTMLElement) => Promise<void>;
         depth: () => number;
+        baseY?: () => number;
     };
     host: HTMLElement;
     root?: ParentNode;

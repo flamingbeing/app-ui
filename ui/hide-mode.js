@@ -45,7 +45,7 @@ export function cleanHideList(v) {
 
 /** the words that name an element: a button's label, a card's first heading (none: it can't be hidden) @param {Element} el */
 export function nameOf(el) {
-  if (el.matches(BUTTONS)) return word(el.getAttribute('aria-label') || el.textContent || el.getAttribute('title'));
+  if (el.matches(BUTTONS)) return word(el.getAttribute('aria-label')) || word(el.textContent) || word(el.getAttribute('title'));
   const head = el.querySelector('h2, h3, summary, legend');
   return head ? word(head.textContent) : '';
 }
