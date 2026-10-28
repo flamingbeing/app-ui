@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.25
+- Theme switch: `themeSwitch` / `lookSwitch` lay themselves out (`theme/theme.css`, zero specificity): one row per
+  setting, its name at the start and its control at the end, two to a row when there is room. Before, a page without
+  its own `.theme-switch` rules (any app that does not load the gallery CSS) got the labels and pickers run together.
+
 ## 1.0.0-rc.24
 - Look E, "Workspace": flat and compact, like a desktop notes app. A slim bar, flush lists on the page background, menus
   as bottom sheets, no glass, a filled search box; the sync chip shows only its icon when all is synced.
