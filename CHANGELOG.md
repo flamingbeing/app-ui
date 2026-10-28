@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.27
+- Ground "Cool grey" (`cool`): the cool light grey behind grouped lists on a phone (#f2f2f7) in light, the palette's
+  own dark. An app ported from a kit with that ground keeps it with `applyTheme({ surface: 'cool' })`; the default
+  light ground (a near-white tinted 3% with the accent) reads a touch cooler or greyer next to it.
+
 ## 1.0.0-rc.26
 - The current side bar link uses `--link`, as the current tab does, which the palette keeps 4.5:1 on its tint (the raw
   accent fell to 3.6:1 there for Violet); a test reads every preset in light and dark. The e2e axe helper takes
