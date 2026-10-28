@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.23
+- Data grid: a cell holding one field (an editable cell, such as a name box in a rota) is reachable from the keyboard:
+  Enter or F2 goes into the field (its text selected), Esc in it comes back to the cell; arrows in the field stay in
+  it, as before. Up and Down now keep the column of a cell the focus came to from outside the grid's own moves (Tab
+  in, a tap or the app's own focus), not the column the grid last left.
+
 ## 1.0.0-rc.22
 - Data grid: `dataGrid(table, { onSelect })` from `@core/ui` (styles in `ui/layout.css`, `.ui-data-grid` in a
   `.ui-data-grid-box`), for tables of small cells such as people by day. The box scrolls both ways at any width with

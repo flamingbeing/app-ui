@@ -260,3 +260,37 @@ test('data grid: a tap selects a cell (one at a time) and makes it the Tab stop;
   await expect(page.locator('#rota thead [aria-selected]')).toHaveCount(0);
   await expect(page.locator('#rota-picked')).toHaveText('Pothos, day 2');
 });
+
+test('data grid: a cell holding one field: Enter or F2 goes into it, Esc comes back to the cell; arrows in the field stay in it', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(GRID);
+  await page.evaluate(async () => {
+    const { dataGrid } = await import('/ui/0.0.0-dev/ui/data-grid.js');
+    const box = document.createElement('div');
+    box.className = 'ui-data-grid-box';
+    box.innerHTML = '<table class="ui-data-grid" data-size="dense" id="edit" aria-label="Notes"><thead><tr><th scope="col">Day</th><th scope="col" data-key="am">AM</th><th scope="col" data-key="pm">PM</th></tr></thead>'
+      + '<tbody><tr data-key="1"><th scope="row">1</th><td><input aria-label="AM, day 1" value="Fern"></td><td><input aria-label="PM, day 1"></td></tr>'
+      + '<tr data-key="2"><th scope="row">2</th><td><input aria-label="AM, day 2"></td><td><input aria-label="PM, day 2"></td></tr></tbody></table>';
+    document.querySelector('#rota-box').after(box);
+    dataGrid(/** @type {HTMLTableElement} */ (box.querySelector('table')));
+  });
+  const cell = (r, c) => page.locator(`#edit tbody tr:nth-child(${r}) td`).nth(c);
+  await expect(cell(1, 0).locator('input')).toHaveAttribute('tabindex', '-1');
+  await cell(1, 0).focus();
+  await page.keyboard.press('Enter');
+  await expect(cell(1, 0).locator('input')).toBeFocused();
+  expect(await cell(1, 0).locator('input').evaluate(i => [i.selectionStart, i.selectionEnd])).toEqual([0, 4]);
+  await page.keyboard.press('ArrowLeft');   // moves the caret, not the focus
+  await expect(cell(1, 0).locator('input')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(cell(1, 0)).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('F2');
+  await expect(cell(2, 1).locator('input')).toBeFocused();
+  await page.keyboard.type('Mint');
+  await page.keyboard.press('Escape');
+  await expect(cell(2, 1)).toBeFocused();
+  await expect(cell(2, 1).locator('input')).toHaveValue('Mint');
+  expect(await AxeBuilder(page), 'grid with field cells').toEqual([]);
+});
