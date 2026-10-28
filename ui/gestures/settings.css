@@ -7,6 +7,8 @@
 .ui-settings-title { margin: calc(var(--pad) * 1.5) calc(var(--list-inset) + var(--pad)) var(--gap); font-size: .85rem;
   font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .ui-settings-part { margin: 0 calc(var(--list-inset) + var(--pad)); }
+/* an app's list card in a part lines up with the groups' cards (the list keeps its own inset) */
+.ui-settings-part:has(> .ui-list) { margin-inline: 0; }
 .ui-settings-status { margin: var(--pad) calc(var(--list-inset) + var(--pad)) 0; min-height: 1lh; }
 .ui-setting > label.ui-row-main { cursor: pointer; }
 .ui-setting select { flex: none; max-width: 55%; }

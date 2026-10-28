@@ -12,6 +12,10 @@
   takes the width. No hidden placeholder pane needed.
 - The current tab is in the link colour (held to 4.5:1 on the page, the surface and the selection) instead of the
   accent, which was 4.1:1 in Navy.
+- Tab pages in the shell need no `.ui-tab-page`: any other screen beside the panes takes both panes' room while it
+  shows, so a page opened on a phone is still the one showing when the window grows to tablet or laptop.
+- A list card an app mounts in a settings part (`mount`) lines up with the groups' cards (it was inset twice).
+- Tab icons: the `.ui-tab-icon` slot (rc.11) takes any glyph or inline SVG; no icon set ships yet.
 - Toasts sit above a showing tab bar or action bar, however many are stacked (wide shells without one: at the bottom).
 - `.ui-switch` has `min-width: 0; max-width: 3.1rem`: an app's bare `input { min-width: 10rem; flex: 1 }` no longer
   stretches it.

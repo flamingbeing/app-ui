@@ -145,4 +145,6 @@ stand-in for `@core/settings` on the page.
 | Switch | an app's `input { min-width: 10rem; flex: 1 }` leaves `.ui-switch` at 3.1rem | |
 | Toasts | three stacked toasts sit above the tab bar | |
 | Current tab | in Navy, light and dark, the current tab is 4.5:1 or more on the page | |
+| Tab page on resize | a tab page without `.ui-tab-page`, opened on a phone, still shows (both panes' room) at 820 px, and again back at 390 | |
+| Settings part list | an app's list card in a settings part is as wide as the groups' cards | |
 | `idPrefix` | two sync chips on one page get their own ids; without `idPrefix` the ids are as before | |

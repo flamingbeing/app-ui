@@ -48,12 +48,21 @@
         </ul>
         <label class="ui-row" id="sync-row">Sync <input type="checkbox" role="switch" class="ui-switch" id="sync"></label>
       </section>
+      <!-- the app's other tab pages, without .ui-tab-page (as notes had them) -->
+      <section class="ui-screen" id="tags" aria-label="Tags" hidden><h1>Tags</h1></section>
+      <section class="ui-screen" id="search" aria-label="Search" hidden><h1>Search</h1></section>
+      <section class="ui-screen" id="settings" aria-label="Settings" hidden>
+        <div class="ui-settings">
+          <section><h2 class="ui-settings-title">Look</h2><ul class="ui-list" id="group-list"><li class="ui-row">Theme</li></ul></section>
+          <section><h2 class="ui-settings-title">Folders</h2><div class="ui-settings-part"><ul class="ui-list" id="part-list"><li class="ui-row">Work</li></ul></div></section>
+        </div>
+      </section>
     </main>
     <nav class="ui-tabbar" aria-label="Sections">
-      <a class="ui-tab" href="#home" aria-current="page"><span class="ui-tab-icon" aria-hidden="true">✎</span>Notes</a>
-      <a class="ui-tab" href="#tags"><span class="ui-tab-icon" aria-hidden="true">#</span>Tags</a>
-      <a class="ui-tab" href="#search"><span class="ui-tab-icon" aria-hidden="true">⌕</span>Search</a>
-      <a class="ui-tab" href="#settings"><span class="ui-tab-icon" aria-hidden="true">≡</span>Settings</a>
+      <button type="button" class="ui-tab" data-tab-page="#home" aria-current="page"><span class="ui-tab-icon" aria-hidden="true">✎</span>Notes</button>
+      <button type="button" class="ui-tab" data-tab-page="#tags"><span class="ui-tab-icon" aria-hidden="true">#</span>Tags</button>
+      <button type="button" class="ui-tab" data-tab-page="#search"><span class="ui-tab-icon" aria-hidden="true">⌕</span>Search</button>
+      <button type="button" class="ui-tab" data-tab-page="#settings"><span class="ui-tab-icon" aria-hidden="true">≡</span>Settings</button>
     </nav>
   </div>
 </body>

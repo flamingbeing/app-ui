@@ -52,10 +52,12 @@
   .ui-panes { display: grid; grid-template-columns: var(--shell-list) minmax(0, 1fr); min-height: 0; overflow: hidden; }
   /* both panes always show; the screen stack's hidden/transform only matter on a phone (!important: the kit has [hidden] { display: none !important }) */
   .ui-panes > .ui-screen, .ui-panes > .ui-screen[hidden] { display: block !important; min-height: 0; overflow: auto; transform: none; }
-  /* another tab's page (.ui-tab-page, ui/tab-pages.js) takes both panes' room while it shows */
-  .ui-panes > .ui-tab-page { grid-column: 1 / -1; }
-  .ui-panes > .ui-tab-page[hidden] { display: none !important; }
-  .ui-panes:has(> .ui-tab-page:not([hidden])) > :is(.ui-pane-list, .ui-pane-detail) { display: none !important; }
+  /* another tab's page (ui/tab-pages.js: .ui-tab-page, or any other screen beside the panes) takes both panes' room
+     while it shows, so a page opened on a phone is still the one showing after the window grows */
+  .ui-panes > :is(.ui-tab-page, .ui-screen:not(.ui-pane-list, .ui-pane-detail)) { grid-column: 1 / -1; }
+  .ui-panes > :is(.ui-tab-page, .ui-screen:not(.ui-pane-list, .ui-pane-detail))[hidden] { display: none !important; }
+  .ui-panes:has(> :is(.ui-tab-page, .ui-screen:not(.ui-pane-list, .ui-pane-detail)):not([hidden])) > :is(.ui-pane-list, .ui-pane-detail) {
+    display: none !important; }
   .ui-pane-list { border-inline-end: var(--border) solid var(--line); }
   .ui-pane-head { display: flex; align-items: center; gap: var(--gap); padding: calc(env(safe-area-inset-top, 0px) + var(--gap)) var(--pad) var(--gap); }
   .ui-pane-title { flex: 1; margin: 0; font-size: 1.1rem; }

@@ -87,3 +87,26 @@ test('idPrefix: two of a part on one page get their own ids, and the bare ids st
   });
   expect(ids).toEqual(['status', 'second-status', 'second-version', 'second-check-update', 'second-update-msg']);
 });
+
+test('a tab page opened on a phone (no .ui-tab-page class) is still the one showing after the window grows, and back', async ({ sized }) => {
+  const page = await load(sized, 390);
+  await page.locator('.ui-tabbar .ui-tab', { hasText: 'Settings' }).click();
+  await expect(page.locator('#settings')).toBeVisible();
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await expect(page.locator('html')).toHaveAttribute('data-size', 'tablet');
+  await expect(page.locator('#settings')).toBeVisible();
+  await expect(page.locator('#home')).toBeHidden();
+  const panes = await box(page, '.ui-panes');
+  expect((await box(page, '#settings')).w, 'the page takes both panes').toBeGreaterThan(panes.w - 2);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('html')).toHaveAttribute('data-size', 'phone');
+  await expect(page.locator('#settings')).toBeVisible();
+  await expect(page.locator('#home')).toBeHidden();
+});
+
+test('a list card an app mounts in a settings part is as wide as the groups\' cards', async ({ sized }) => {
+  const page = await load(sized, 390);
+  await page.locator('.ui-tabbar .ui-tab', { hasText: 'Settings' }).click();
+  await expect(page.locator('#part-list')).toBeVisible();
+  expect(Math.round((await box(page, '#part-list')).w)).toBe(Math.round((await box(page, '#group-list')).w));
+});
