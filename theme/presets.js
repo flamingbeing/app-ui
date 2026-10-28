@@ -17,6 +17,8 @@
 export const SURFACES = Object.freeze({
   white: { label: 'White', light: { bg: '#ffffff' }, dark: { bg: '#111111', surface: '#191919' } },
   grey: { label: 'Light grey', light: { bg: '#f3f2f1' }, dark: { bg: '#161616', surface: '#202020' } },
+  // (the cool grey behind grouped lists on a phone; the dark is the palette's own)
+  cool: { label: 'Cool grey', light: { bg: '#f2f2f7' } },
   cream: { label: 'Cream', light: { bg: '#f7f3ec', surface: '#fffdf9' }, dark: { bg: '#1b1916', surface: '#24211d' } },
   sepia: {
     label: 'Sepia',
