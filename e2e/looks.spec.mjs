@@ -5,7 +5,12 @@ import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
 const KIT = '/ui/0.0.0-dev/kit/?edge=always';
-const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
+// two frames first: a transition (the bar title fading in) only exists once the style change has been rendered, so
+// asking for the animations straight after a click can find none yet and axe then reads a half-faded title
+const settled = page => page.evaluate(async () => {
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {})));
+});
 /** @param {import('@playwright/test').Page} page @param {string} sel @param {string} prop */
 const style = (page, sel, prop) => page.locator(sel).first().evaluate((e, p) => getComputedStyle(e).getPropertyValue(p), prop);
 
