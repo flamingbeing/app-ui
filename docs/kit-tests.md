@@ -11,6 +11,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | --- | --- | --- |
 | Page | loads, every part starts (menus, large title, screens, one sheet, one select list) | yes |
 | Hold menu | 500 ms touch opens it; not before; lifting doesn't open the row; a 30 px move cancels; a tap opens the row | menu open |
+| Hold menu | without `navigator.vibrate` (iPhone): the hidden switch ticks and lifting still doesn't open the row | |
 | Hold menu | right-click, Shift+F10, the context-menu key; arrows, End, wrap; Esc gives focus back to the row | |
 | Hold menu | Delete removes the row with an Undo toast (no confirm); Undo puts it back in place | |
 | Hold menu | its Select starts select mode with that row ticked; no hold menu while selecting | |
@@ -43,6 +44,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Open | clicking a row opens it; on a phone it pushes the detail, Back and Esc pop it | |
 | Keyboard | Ctrl/Cmd+K focuses the search; typing filters; Esc clears, then leaves; arrows and Enter work the list | |
 | Pointer | right-click opens the row menu; Ctrl/Cmd-click adds; Shift-click takes a range; the detail summarises a multi-selection; Esc leaves select mode | |
+| Select all | 1280 px, with a search hiding rows: ticks only the shown rows; Deselect all / Select all follows them | |
 | Sheets | a side panel at 1280 px, a bottom sheet below; Back and Esc close it | open |
 | Tab bar | 390 px: the picked section (`?tab=`) is marked in both bars and its page shows; shrunk on scroll, its tab stays and Tab reaches it | |
 | Delete | removing from the detail shows an Undo toast; Undo puts the row back | |
@@ -150,6 +152,7 @@ stand-in for `@core/settings` on the page.
 | Current tab | in Navy, light and dark, the current tab is 4.5:1 or more on the page | |
 | Tab page on resize | a tab page without `.ui-tab-page`, opened on a phone, still shows (both panes' room) at 820 px, and again back at 390 | |
 | Settings part list | an app's list card in a settings part is as wide as the groups' cards | |
+| Update prompt | a failed check or version load says so ("Could not check…", "not installed yet"); no unhandled rejection | |
 | `idPrefix` | two sync chips on one page get their own ids; without `idPrefix` the ids are as before | |
 | Sync chip icons | each state draws an `svg.ui-icon` in its own colour (saved, offline and attention differ), with the count as a badge on the icon | |
 | Buttons | a button is flex-displayed and centred, `--button-h` high, with `--radius-button` larger than a list card's corner | |

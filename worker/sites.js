@@ -13,7 +13,8 @@ const SEMVER = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
 // Files by type (the gallery's manifest and icons too: it is installable), and the gallery's folders (/kit/, /kit/shell/, …: their index.html; without the "/", a redirect).
 const VERSIONED = new RegExp(String.raw`^/ui/${SEMVER}/(?:(?:ui|theme|settings|kit|icons)/[\w./-]*\.(?:js|css|html|svg|png|webmanifest|d\.ts)|kit(?:/[\w-]+)*/?)$`);
 const LISTING = '/ui/versions.json';
-const NEWEST_KIT = /^\/(?:ui\/)?kit(\/(?:[\w-]+\/)*)?$/;
+// the sub-folder with or without its "/" (/kit/shell and /kit/shell/ both reach /ui/<latest>/kit/shell/)
+const NEWEST_KIT = /^\/(?:ui\/)?kit((?:\/[\w-]+)*)\/?$/;
 const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8',
   svg: 'image/svg+xml', png: 'image/png', webmanifest: 'application/manifest+json', json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
 // public code, no cookies or credentials, so any app origin may import it (and <link> its CSS)
@@ -32,7 +33,7 @@ export default {
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     const url = new URL(request.url);
     const kit = NEWEST_KIT.exec(url.pathname);
-    if (kit) return newestKit(env, url, kit[1] || '/');
+    if (kit) return newestKit(env, url, `${kit[1]}/`);
     if ((url.pathname !== LISTING && !VERSIONED.test(url.pathname)) || url.pathname.includes('..')) return notFound();   // no folder listings, no other files
 
     // a folder (address ending in "/") serves its index.html; without the "/", the browser is sent to it (as GitHub

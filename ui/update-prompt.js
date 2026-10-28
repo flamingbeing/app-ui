@@ -15,7 +15,8 @@ export function updatePrompt(host, { update, idPrefix = '' }) {
   const check = button('Check for updates', async () => {
     if (!update) return;
     answer.textContent = 'Checking…';
-    answer.textContent = await update.checkNow() ? 'Updated.' : 'This is the newest version (or the update waits until nothing is open).';
+    try { answer.textContent = await update.checkNow() ? 'Updated.' : 'This is the newest version (or the update waits until nothing is open).'; }
+    catch { answer.textContent = 'Could not check. Try again when online.'; }
   }, { id: `${idPrefix}check-update` });
   const line = el('p', { class: 'ui-small small' }, 'Version ', version, ' ', check);
   host.append(line, answer);
@@ -25,7 +26,7 @@ export function updatePrompt(host, { update, idPrefix = '' }) {
     check.hidden = true;
     return remove;
   }
-  update.versionLabel().then(v => { version.textContent = v || 'not installed yet'; }, () => {});
+  update.versionLabel().then(v => { version.textContent = v || 'not installed yet'; }, () => { version.textContent = 'not installed yet'; });
   const retry = () => setTimeout(() => update.retryUpdate(), 0);
   document.addEventListener('focusout', retry);
   document.addEventListener('close', retry, true);   // a dialog closing ('close' doesn't bubble, so on the way down)

@@ -70,6 +70,14 @@ test('only GET and HEAD', async () => {
   assert.equal((await get('/ui/1.0.0/ui/index.js', 'HEAD')).status, 200);
 });
 
+test('/kit/shell and /ui/kit/shell (no "/"): a 302 to the newest gallery\'s folder', async () => {
+  for (const [from, to] of [['/kit/shell', '/ui/1.0.0/kit/shell/'], ['/ui/kit/shell', '/ui/1.0.0/kit/shell/'], ['/kit/shell?x=1', '/ui/1.0.0/kit/shell/?x=1']]) {
+    const r = await get(from);
+    assert.equal(r.status, 302, from);
+    assert.equal(r.headers.get('Location'), BASE + to, from);
+  }
+});
+
 test('/kit and /kit/…: a 302 to the newest gallery, kept only a minute; the version comes from versions.json', async () => {
   for (const [from, to] of [['/kit', '/ui/1.0.0/kit/'], ['/kit/', '/ui/1.0.0/kit/'], ['/kit/shell/', '/ui/1.0.0/kit/shell/'], ['/kit?x=1', '/ui/1.0.0/kit/?x=1'],
     ['/ui/kit', '/ui/1.0.0/kit/'], ['/ui/kit/', '/ui/1.0.0/kit/'], ['/ui/kit/shell/', '/ui/1.0.0/kit/shell/']]) {

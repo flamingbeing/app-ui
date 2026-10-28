@@ -42,6 +42,8 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
   const alls = q('data-select-all');
   for (const c of counts) { c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); }
   const rows = () => /** @type {HTMLElement[]} */ ([...list.querySelectorAll('.ui-row')]);
+  /** the rows a search leaves shown: Select all, its label and a drag take only these */
+  const shown = () => rows().filter(r => !r.hidden);
   const on = () => list.classList.contains('is-editing');
   const isTicked = (/** @type {HTMLElement} */ r) => r.getAttribute('aria-selected') === 'true';
   const selected = () => rows().filter(isTicked);
@@ -52,13 +54,13 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
   const label = list.getAttribute('aria-label');
 
   function paint() {
-    const n = selected().length, total = rows().length;
+    const n = selected().length, shownRows = shown(), total = shownRows.length;
     for (const c of counts) c.textContent = n ? `${n} selected` : 'Select items';
     if (bar) bar.querySelectorAll('[data-needs]').forEach(b => {
       const [lo, hi] = needs(b.getAttribute('data-needs') || '1');
       /** @type {HTMLButtonElement} */ (b).disabled = n < lo || n > hi;
     });
-    for (const b of alls) b.textContent = n === total && total ? 'Deselect all' : 'Select all';
+    for (const b of alls) b.textContent = total && shownRows.every(isTicked) ? 'Deselect all' : 'Select all';
     list.dispatchEvent(new CustomEvent('ui-select', { bubbles: true, detail: { count: n, rows: selected() } }));
   }
   /** @param {boolean} v */
@@ -86,7 +88,7 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
   }
   for (const b of alls) {
     b.hidden = true;
-    l.on(b, 'click', () => { const all = selected().length < rows().length; rows().forEach(r => tick(r, all)); paint(); });
+    l.on(b, 'click', () => { const all = !shown().every(isTicked); shown().forEach(r => tick(r, all)); paint(); });
   }
   l.on(list, 'ui-edit', (/** @type {CustomEvent} */ e) => {
     setEditing(true);
@@ -145,7 +147,7 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
     if (!on() || e.touches.length > 1) return;
     const t = e.touches[0], r = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('.ui-row'));
     if (!r || t.clientX - list.getBoundingClientRect().left > TICKS) return;
-    const all = rows();
+    const all = shown();
     from = all.indexOf(r); dragged = false; lastY = t.clientY;
     snap = all.map(isTicked);
     setTo = !snap[from];
@@ -155,7 +157,7 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
     const hit = document.elementFromPoint(list.getBoundingClientRect().left + TICKS / 2, y);
     const r = /** @type {HTMLElement | null} */ (hit && hit.closest('.ui-row'));
     if (!r || !list.contains(r)) return;
-    const all = rows(), want = dragRange(snap, from, all.indexOf(r), setTo);
+    const all = shown(), want = dragRange(snap, from, all.indexOf(r), setTo);
     let changed = false;
     all.forEach((x, i) => { if (isTicked(x) !== want[i]) { tick(x, want[i]); changed = true; } });
     if (changed) { haptic(); paint(); }

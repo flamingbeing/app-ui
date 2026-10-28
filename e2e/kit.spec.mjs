@@ -155,6 +155,21 @@ for (const width of [390, 820, 1280]) {
       await expect(page.locator('.ui-action-bar')).toBeHidden();
     });
 
+    test('hold on an iPhone (no navigator.vibrate): the haptic ticks and lifting still does not open the row', async ({ sized }) => {
+      const page = await sized(width);
+      await page.addInitScript(() => { delete Navigator.prototype.vibrate; });
+      await page.goto(KIT);
+      const f = await finger(page);
+      const { x, y } = await centre(page.locator('.ui-row', { hasText: 'Fern' }));
+      await f.down(x, y);
+      await page.waitForTimeout(650);
+      await expect(page.locator('.ui-menu[role=menu]')).toBeVisible();
+      await f.up();
+      await page.waitForTimeout(200);
+      expect(await depth(page)).toBe(0);   // the lift's click was swallowed, not the haptic's own
+      await expect(page.locator('.ui-haptic input')).toBeChecked();
+    });
+
     test('the hold menu\'s Select starts select mode with that row ticked; no hold menu while selecting', async ({ sized }) => {
       const page = await sized(width);
       await page.goto(KIT);

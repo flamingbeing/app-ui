@@ -202,8 +202,8 @@ export function holdMenus(root = document) {
     timer = window.setTimeout(() => {
       const target = /** @type {HTMLElement} */ (holding), at = start;
       cancel();
+      haptic();   // first: on iPhone it clicks a hidden label, which must not use up swallowClick
       swallowClick = true;
-      haptic();
       open(target, at);
     }, HOLD_MS);
   }, { passive: true });
@@ -216,6 +216,7 @@ export function holdMenus(root = document) {
   // lifting the finger after a hold: no mouse events, so focus stays in the menu and the row doesn't open
   l.on(document, 'touchend', (/** @type {TouchEvent} */ e) => { if (swallowClick && e.cancelable) e.preventDefault(); }, { passive: false });
   l.on(document, 'click', (/** @type {MouseEvent} */ e) => {
+    if ((/** @type {Element} */ (e.target)).closest?.('.ui-haptic')) return;   // haptic()'s own click, not the lift
     if (swallowClick) { swallowClick = false; e.preventDefault(); e.stopPropagation(); }
   }, true);
   // Esc closes wherever focus went

@@ -142,6 +142,15 @@ test('module: unknown keys and refused values throw; signed out, an account valu
   assert.equal(api.get('big'), true, 'a device value needs no account');
 });
 
+test('module: signed out, a profile (device and account parts) changes nothing, stored or shown', async () => {
+  const { e, api } = await start({}, engine({ uid: null }));
+  await api.set('big', true);
+  const stored = e.storage.get('settings/device');
+  await assert.rejects(() => api.profile('calm'), /sign in first/);
+  assert.equal(e.storage.get('settings/device'), stored, 'the device values on disk are as they were');
+  assert.equal(api.get('big'), true, 'shown: still the hand-set value');
+});
+
 test('module: a failed account save is undone', async () => {
   const { e, api } = await start();
   e.sync.save = async () => { throw new Error('storage full'); };
