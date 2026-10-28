@@ -35,16 +35,17 @@ test('the looks differ where the canvas does: A glass + floating tab bar, B a ba
   assert.equal(b.variants.menu, 'sheet');
   assert.equal(b.variants.tick, 'square');
   assert.equal(a.variants.tabbar, 'float');
-  assert.equal(c.tokens['card-r'], '0', 'C: flush lists');
+  assert.equal(c.tokens['card-r'], '0px', 'C: flush lists');
 });
 
-test('look D "Slim": the bar always shows the name, flat lists on the page, an edge tab bar, no band or glass', () => {
+test('look D "Slim": the bar always shows the name, lists as inset cards, an edge tab bar, no band or glass', () => {
   const d = lookOf('d');
   assert.equal(d.name, 'Slim');
   assert.deepEqual(d.variants, { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge' });
   assert.ok(VARIANTS.header.includes('slim'));
-  assert.equal(d.tokens['card-r'], '0');
-  assert.equal(d.tokens['list-bg'], 'var(--bg)');
+  assert.equal(d.tokens['card-r'], 'var(--radius-l)', 'rows rounded like cards');
+  assert.equal(d.tokens['list-inset'], 'var(--gap)', 'and inset from the screen edges');
+  assert.equal(d.tokens['list-bg'], 'var(--surface)');
 });
 
 test('glass guard: little memory turns glass down at once; slow frames on the first scroll do; fast ones keep it', () => {

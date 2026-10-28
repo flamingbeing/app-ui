@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.0-rc.14
+- Icons: `icons/lucide.js` (Lucide, ISC; `icon(nodes)` and one named export per icon, so only the icons an app imports
+  ship; `icon` is also exported from `@core/ui`). The kit's text glyphs are gone (toast close, settings info, gallery
+  tabs, menu, grip), and `tools/check.mjs` fails on any emoji, dingbat or pictograph character in published files.
+- Sync chip: an icon per state (check, spinning refresh while sending, cloud-off, alert) in the state's colour, the count
+  as a badge on the icon, the word beside it (`.ui-chip-icon`, `.ui-chip-badge`, `.ui-chip-text`).
+- Theme variables: `--radius-button` (the look's control corner, always rounder than `--card-r`), `--radius-input`,
+  `--editor-bg` (white / near-black), `--card-bg`, `--button-bg`, `--button-text`, `--button-h`, `--font-ui`,
+  `--font-editor`, `--font-size`, and the formatting bar's `--fmt-bg`, `--fmt-text`, `--fmt-h`.
+- Buttons are inline-flex and centred, one height (`--button-h`); `.ui-fill` (accent) and `.ui-plain` (no box) variants.
+- Look D (Slim): lists are cards inset from the screen edges (`--list-inset: var(--gap)`, `--card-r: var(--radius-l)`).
+  `--card-r` is `0px` (not `0`) in look C and at Square corners, so it can sit in `calc()`.
+- `applyTheme` sets `<meta name="theme-color">` (one per scheme, the page's ground) so the browser bar follows the theme.
+
 ## 1.0.0-rc.13
 - A tapped tab (or side link) slides its page in from the side the tab sits on (`SLIDE_MS`, 280 ms, the logbook's page
   motion), at every width; `.ui-screens` clips while it runs (`is-sliding`) so the start offset can't widen the page.

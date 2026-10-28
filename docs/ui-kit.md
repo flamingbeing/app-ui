@@ -139,7 +139,7 @@ The four looks so far:
 | A | Tinted glass | Glass bars with a hint of the accent, a floating tab bar, card lists, round ticks |
 | B | Colour band | The title on a band of the accent, solid bars, bottom-sheet menus, square ticks, a tab bar along the edge |
 | C | Dense and quiet | Flush lists, small titles, glass only on the floating pills |
-| D | Slim | A slim bar always showing the name, flat lists on the page background, an icon tab bar along the edge, no band or glass |
+| D | Slim | A slim bar always showing the name, lists as cards inset from the edges, an icon tab bar along the edge, no band or glass |
 
 The app picks its own look with `applyTheme({ look: 'b' })`. A device's own pick wins. Without either, the look is A.
 

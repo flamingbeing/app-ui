@@ -23,7 +23,7 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
 }): () => void;
 /**
  * @typedef {{ key: string, label: string, sub?: string, more?: string, choices?: [unknown, string][], min?: number,
- *   max?: number, step?: number }} SettingRow  sub: one line of help; more: the rest, behind an ⓘ button; choices:
+ *   max?: number, step?: number }} SettingRow  sub: one line of help; more: the rest, behind an info button; choices:
  *   [value, word] pairs (a picker); a boolean default is a switch; a number one a number field (min, max, step)
  * @typedef {{ title: string, rows?: SettingRow[], reset?: boolean, mount?: (host: HTMLElement) => (() => void) | void }} SettingSection
  *   reset: adds "Reset this page", which puts this section's rows back to their defaults and offers Undo
@@ -31,7 +31,7 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
 /** @type {Readonly<Record<string, string>>} */
 export const SETTINGS_WORDS: Readonly<Record<string, string>>;
 /**
- * sub: one line of help; more: the rest, behind an ⓘ button; choices:
+ * sub: one line of help; more: the rest, behind an info button; choices:
  *   [value, word] pairs (a picker); a boolean default is a switch; a number one a number field (min, max, step)
  */
 export type SettingRow = {

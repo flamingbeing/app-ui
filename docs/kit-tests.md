@@ -149,3 +149,7 @@ stand-in for `@core/settings` on the page.
 | Tab page on resize | a tab page without `.ui-tab-page`, opened on a phone, still shows (both panes' room) at 820 px, and again back at 390 | |
 | Settings part list | an app's list card in a settings part is as wide as the groups' cards | |
 | `idPrefix` | two sync chips on one page get their own ids; without `idPrefix` the ids are as before | |
+| Sync chip icons | each state draws an `svg.ui-icon` in its own colour (saved, offline and attention differ), with the count as a badge on the icon | |
+| Buttons | a button is flex-displayed and centred, `--button-h` high, with `--radius-button` larger than a list card's corner | |
+| Theme-color | the page has two `theme-color` metas (light and dark) holding the page ground | |
+| No glyph icons | `tools/check.mjs` fails on an emoji, dingbat or pictograph character in a published file | |

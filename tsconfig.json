@@ -13,5 +13,5 @@
     "types": [],
     "skipLibCheck": true
   },
-  "include": ["ui/**/*.js", "ui/**/*.d.ts", "theme/**/*.js", "settings/*.js", "settings/*.d.ts", "kit/**/*.js"]
+  "include": ["ui/**/*.js", "ui/**/*.d.ts", "theme/**/*.js", "settings/*.js", "settings/*.d.ts", "kit/**/*.js", "icons/*.js"]
 }

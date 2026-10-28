@@ -5,7 +5,8 @@
 // 3. The published code imports only its own files (relative paths): no engine, no other site, no bare names. A page
 //    hands each part the module api it shows.
 // 4. The gallery pages carry no inline script or style (the Worker's page policy allows none).
-// 5. The Worker's tests pass (node --test 'worker/test/*.test.mjs').
+// 5. No emoji or pictograph characters in the published files: icons are SVG (icons/lucide.js), never a text glyph.
+// 6. The Worker's tests pass (node --test 'worker/test/*.test.mjs').
 // Exits 1 on any failure.
 
 import fs from 'node:fs';
@@ -44,6 +45,15 @@ for (const f of files.filter(f => f.endsWith('.html'))) {
   const html = fs.readFileSync(path.join(ROOT, f), 'utf8');
   if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) fail(`${f}: an inline <script> (the page policy allows none; use a file)`);
   if (/<style[\s>]|\sstyle="/i.test(html)) fail(`${f}: inline style (the page policy allows none; use the page's CSS file)`);
+}
+
+// icons are drawn, not typed: no emoji, dingbat, box or arrow-symbol, braille or enclosed-letter characters (plain
+// punctuation such as ‹ › … × − “ ” is text, not an icon, and stays)
+const PICTOGRAPH = /[\u{2190}-\u{21FF}\u{2300}-\u{23FF}\u{2460}-\u{24FF}\u{25A0}-\u{27BF}\u{2800}-\u{28FF}\u{2B00}-\u{2BFF}\u{1F000}-\u{1FAFF}\u{2261}\u{FE0F}]/u;
+for (const f of files.filter(f => /\.(js|css|html)$/.test(f))) {
+  const text = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/(^|[^:'"\\])\/\/.*$/gm, '$1');
+  const hit = text.split('\n').findIndex(l => PICTOGRAPH.test(l));
+  if (hit >= 0) fail(`${f}:${hit + 1}: an emoji or pictograph character (${text.split('\n')[hit].match(PICTOGRAPH)?.[0]}): draw an icon from icons/lucide.js instead`);
 }
 
 try { execFileSync(process.execPath, ['--test', 'worker/test/*.test.mjs'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] }); }

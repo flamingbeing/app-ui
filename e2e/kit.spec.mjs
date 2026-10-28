@@ -547,14 +547,22 @@ test('the sync chip shows each state in its word, with a count where there is on
   const page = await sized(390);
   await page.goto(KIT);
   const chip = page.locator('#status');
-  await expect(chip).toHaveText('Saved');
+  const word = chip.locator('.ui-chip-text');
+  await expect(word).toHaveText('Saved');
   await expect(chip).toHaveAttribute('role', 'status');
+  await expect(chip.locator('svg.ui-icon')).toHaveCount(1);
   for (const [state, text] of [['pending', 'Sending… (3)'], ['offline', 'Offline, kept on this device (2)'], ['attention', 'Needs you'],
     ['unknown', 'Connecting…'], ['at-risk', 'Not saved on this device yet (1)'], ['synced', 'Saved']]) {
     await page.locator('#sync-pick').selectOption(state);
-    await expect(chip).toHaveText(text);
+    await expect(word).toHaveText(text);
     await expect(chip).toHaveAttribute('data-state', state);
+    const count = text.match(/\((\d+)\)$/)?.[1] ?? '';
+    await expect(chip.locator('.ui-chip-badge')).toHaveText(count);
   }
+  // colour by state: saved is green, offline amber, attention red (the theme's --ok, --warn, --danger)
+  const colourOf = async (/** @type {string} */ state) => { await page.locator('#sync-pick').selectOption(state); return chip.evaluate(e => getComputedStyle(e).color); };
+  const [ok, warn, bad] = [await colourOf('synced'), await colourOf('offline'), await colourOf('attention')];
+  expect(new Set([ok, warn, bad]).size, 'three different colours').toBe(3);
   await page.locator('#sync-pick').selectOption('attention');
   expect(await AxeBuilder(page)).toEqual([]);
 });
@@ -587,3 +595,20 @@ for (const path of ['', 'shell/', 'dense/', 'settings/', 'parts/']) {
     expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   });
 }
+
+test('buttons are centred and one height, rounder than list cards; theme-color follows the page; icons are svg', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(KIT);
+  const b = await page.locator('button:visible').first().evaluate(e => {
+    const s = getComputedStyle(e);
+    return { display: s.display, align: s.alignItems, justify: s.justifyContent, radius: parseFloat(s.borderTopLeftRadius), h: e.getBoundingClientRect().height };
+  });
+  expect(b.display).toMatch(/flex/);
+  expect([b.align, b.justify]).toEqual(['center', 'center']);
+  expect(b.h).toBeGreaterThanOrEqual(44);
+  const metas = await page.locator('meta[name="theme-color"]').evaluateAll(ms => ms.map(m => [m.getAttribute('media'), m.getAttribute('content')]));
+  expect(metas.map(m => m[0])).toEqual(['(prefers-color-scheme: light)', '(prefers-color-scheme: dark)']);
+  expect(metas.every(m => /^#[0-9a-f]{6}$/i.test(m[1] ?? ''))).toBe(true);
+  await page.goto("/ui/0.0.0-dev/kit/shell/?edge=always");
+  expect(await page.locator('.ui-tabbar .ui-tab svg.ui-icon').count()).toBeGreaterThanOrEqual(4);
+});

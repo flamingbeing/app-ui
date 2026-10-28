@@ -35,12 +35,12 @@ for (const width of [390, 820, 1280]) {
         const tabbar = await page.locator('.ui-tabbar').boundingBox();
         if (want.tabbar === 'edge') expect(tabbar.width).toBe(width);
         else expect(tabbar.width).toBeLessThan(width);
-        expect(await style(page, '.ui-list', 'border-top-left-radius')).toMatch(id === 'c' || id === 'd' ? /^0px$/ : /^[1-9]/);   // flush, or a card
+        expect(await style(page, '.ui-list', 'border-top-left-radius')).toMatch(id === 'c' ? /^0px$/ : /^[1-9]/);   // C flush, the rest cards (D's rows are inset cards since rc.14)
         if (id === 'c') expect(await style(page, '.ui-bar', 'backdrop-filter')).toBe('none');
         if (want.header === 'slim') {   // no large title on show: the bar names the page from the start
           expect(await style(page, '.ui-bar-title', 'opacity')).toBe('1');
           expect((await title.boundingBox()).height).toBeLessThanOrEqual(1);
-          expect(await style(page, '.ui-list', 'background-color')).toBe(await style(page, 'body', 'background-color'));
+          expect(await style(page, '.ui-list', 'background-color'), 'D lists are cards on the page: the surface, not the page colour').not.toBe(await style(page, 'body', 'background-color'));
         }
         await expect(title).toBeVisible();
         await settled(page);
