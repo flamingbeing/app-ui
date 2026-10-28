@@ -49,6 +49,14 @@
   .glass body:has(> .ui-shell)::before { content: none; }
   .ui-shell { display: grid; grid-template-columns: var(--shell-side) minmax(0, 1fr); height: 100dvh; overflow: hidden; }
   .ui-shell .ui-bar, .ui-shell .ui-tabbar, .ui-shell .ui-phone-search, .ui-shell .ui-back { display: none; }
+  /* a single-pane shell (screens, no panes): the screens have no pane head, so the bar stays, above them beside the
+     side bar, and the page scrolls */
+  .ui-shell:not(:has(> .ui-panes)) { grid-template-rows: auto 1fr; height: auto; min-height: 100dvh; overflow: visible; }
+  .ui-shell:not(:has(> .ui-panes)) > .ui-bar { display: flex; grid-column: 2; grid-row: 1; }
+  .ui-shell:not(:has(> .ui-panes)) > .ui-sidebar { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 0; height: 100dvh;
+    align-self: start; overflow: auto; }
+  .ui-shell:not(:has(> .ui-panes)) > .ui-screens { grid-column: 2; grid-row: 2; min-width: 0; }
+  .ui-shell:not(:has(> .ui-panes)) > .ui-screens > .ui-screen { max-width: 46rem; margin-inline: auto; }
 
   .ui-sidebar { display: flex; }
 

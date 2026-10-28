@@ -36,3 +36,26 @@ export function shrinkingTabBar(bar, { scroller = window } = {}) {
   });
   return () => { l.stop(); bar.classList.remove('is-minimised'); };
 }
+
+/**
+ * The room the floating tab bar takes at the bottom of the screen, from its top to the bottom edge, as
+ * --ui-tabbar-room on the page (0 while it is hidden): tabbar.css gives each screen that much room under its last row.
+ * startGestures() starts it; an app that builds its own parts calls it once.
+ * @param {HTMLElement} bar  nav.ui-tabbar
+ * @returns {() => void} stop
+ */
+export function tabBarRoom(bar) {
+  const html = document.documentElement;
+  const set = () => {
+    // (a fixed element has no offsetParent, so its display says whether it shows)
+    const r = !bar.hidden && getComputedStyle(bar).display !== 'none' ? bar.getBoundingClientRect() : null;
+    html.style.setProperty('--ui-tabbar-room', r && r.height ? `${Math.max(0, Math.round(innerHeight - r.top))}px` : '0px');
+  };
+  const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(set) : null;
+  ro?.observe(bar);
+  const mo = new MutationObserver(set);
+  mo.observe(bar, { attributes: true, attributeFilter: ['hidden', 'class'] });
+  addEventListener('resize', set);
+  set();
+  return () => { ro?.disconnect(); mo.disconnect(); removeEventListener('resize', set); html.style.removeProperty('--ui-tabbar-room'); };
+}

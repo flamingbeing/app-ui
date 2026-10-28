@@ -28,3 +28,5 @@
 /* toasts (ui.css) sit above a showing tab bar or action bar, however many are stacked: they grow upwards from there */
 :root:has(:is(.ui-tabbar, .ui-action-bar):not([hidden])) .toasts {
   --ui-toast-bottom-kit: calc(var(--tap) + var(--pad) * 2 + env(safe-area-inset-bottom, 0px)); }
+/* each screen keeps room under its last row for a showing tab bar (tab-bar.js tabBarRoom sets the room; 0 while hidden) */
+:root:has(.ui-tabbar:not([hidden])) .ui-screen::after { content: ""; display: block; height: var(--ui-tabbar-room, 0px); }

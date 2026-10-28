@@ -11,7 +11,7 @@
 //                                                           pushed ones; a sideways swipe moves between them on a phone
 // Styles: ui/gestures.css, loaded with <link> after ui.css.
 import { largeTitle } from './large-title.js';
-import { shrinkingTabBar } from './tab-bar.js';
+import { shrinkingTabBar, tabBarRoom } from './tab-bar.js';
 import { holdMenus } from './hold-menu.js';
 import { detentSheet } from './detent-sheet.js';
 import { screenStack } from './screens.js';
@@ -67,6 +67,7 @@ export function startGestures(root = document, { onPrevMissing } = {}) {
   if (screens) stops.push(screens.stop);
   if (back) stops.push(() => { back.remove(); host?.classList.remove('has-bar-back'); });
   const tabBar = /** @type {HTMLElement | null} */ (root.querySelector('nav.ui-tabbar'));
+  if (tabBar) stops.push(tabBarRoom(tabBar));
   const tabs = tabBar && host && screens && tabBar.querySelector('[data-tab-page]') ? tabPages(tabBar, { screens, host, root, onPrevMissing }) : null;
   if (tabs) stops.push(tabs.stop);
   const selects = new Map();

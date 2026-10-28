@@ -14,4 +14,5 @@ export function detentSheet(sheet: HTMLDialogElement): {
     setDetent: (d: string) => void;
     stop: () => void;
 };
+export function sheetsSettled(): Promise<void>;
 export function topDetent(ds: string[]): string;

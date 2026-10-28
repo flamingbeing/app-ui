@@ -10,6 +10,13 @@
   padding: var(--gap) var(--pad); background: var(--list-bg, var(--surface)); box-sizing: border-box; }
 .ui-row + .ui-row { background: linear-gradient(var(--list-sep), var(--list-sep)) right top / calc(100% - var(--pad)) var(--border) no-repeat,
   var(--list-bg, var(--surface)); }
+.ui-list > li { list-style: none; }
+.ui-list > li + li > .ui-row { background: linear-gradient(var(--list-sep), var(--list-sep)) right top / calc(100% - var(--pad)) var(--border) no-repeat,
+  var(--list-bg, var(--surface)); }
+/* a row that is a link or a button looks like the other rows */
+a.ui-row, a.ui-row:visited { color: inherit; text-decoration: none; }
+button.ui-row { width: 100%; margin: 0; border: 0; border-radius: 0; box-shadow: none; justify-content: flex-start; text-align: start;
+  color: inherit; font: inherit; font-weight: inherit; }
 .ui-row-main { flex: 1; min-width: 0; font-weight: var(--row-weight); }
 .ui-row-sub { display: block; color: var(--muted); font-size: .85rem; font-weight: 400; }
 .ui-list.is-editing .ui-row { cursor: pointer; }

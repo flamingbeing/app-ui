@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-rc.26
+- Sheets: a sheet opened, or a page pushed, while another sheet's close is still stepping back is no longer undone by
+  that late step (the sheet waits for it to land before it takes its history entry). `sheetsSettled()` from `@core/ui`
+  resolves once every step back has landed: an app's router waits on it before it pushes a page.
+- Tab bar room: `tabBarRoom(bar)` (started by `startGestures()`) sets `--ui-tabbar-room`, the room a showing tab bar
+  takes at the bottom; each `.ui-screen` keeps that much room under its last row, so nothing sits under the bar.
+- Lists: rows in list items (`.ui-list > li > .ui-row`) get the line between them; a row that is a link or a button
+  looks like the other rows (no underline, no button chrome, full width).
+- Shell: a single-pane shell (`.ui-shell` with `.ui-screens` and no `.ui-panes`) keeps its bar from 600 px, above the
+  screens beside the side bar, and the page scrolls; the screen is at most 46rem wide, centred.
+
 ## 1.0.0-rc.24
 - Look E, "Workspace": flat and compact, like a desktop notes app. A slim bar, flush lists on the page background, menus
   as bottom sheets, no glass, a filled search box; the sync chip shows only its icon when all is synced.
