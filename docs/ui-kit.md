@@ -44,6 +44,10 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   `<span class="ui-tab-icon" aria-hidden="true">` before the label puts an icon above it. Buttons in `.ui-bar` are
   plain link-coloured text (`.ui-primary` bold; on the band, the band's text colour); `.ui-bar-menu` in the bar's
   lead is a side-bar button, hidden while Back shows.
+- **Centre action.** Add `ui-tab-action` to a tab in the middle of the bar (`<button class="ui-tab ui-tab-action">`
+  or a link, with a `.ui-tab-icon` and its label) for the app's main action: a raised 44 px accent circle, the label
+  read by screen readers only, never shown as the current tab. Floating and edge bars, every look; a bar without it
+  is unchanged.
 - **Sheets.** From 840 px a sheet is a centred dialog. Give it `data-wide="panel"` and it docks to the right edge at
   full height instead (a form beside the list).
 

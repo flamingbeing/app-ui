@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.31
+- Tab bar: an optional centre action, `.ui-tab.ui-tab-action` (a button or a link with a `.ui-tab-icon` and its
+  label): a raised 44 px circle in the accent colour, the label for screen readers only, never marked as the current
+  tab; in floating and edge bars and every look, light and dark. The shell gallery's New uses it. Bars without one
+  are unchanged.
+
 ## 1.0.0-rc.30
 - Swipe between tabs feels like iOS's paging: let go, the pages glide on with a spring that starts at the finger's
   speed and lands without overshoot (`springPath`, about a third of a second) instead of a fixed 280 ms curve; the

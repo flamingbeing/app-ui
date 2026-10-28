@@ -66,6 +66,7 @@ drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeInten
 | Part | What is tested | axe |
 | --- | --- | --- |
 | Plain tabs and bar buttons | looks A to D: `<button class="ui-tab">` has no border and no fill but the current tab's `--tab-active`, its icon above the label; bar buttons have no border or fill, the link colour (the band's text colour in B), New bold | yes |
+| Centre action | looks A, B (edge) light and C, B dark: `.ui-tab-action` (New) is a 44 px accent circle in the on-accent colour, raised above the other icons, its label for screen readers only, a 44 px target | yes |
 | Tap a tab | shows its page, marks both bars, names the bar; New opens the sheet and is no page | |
 | Swipe | left goes to the next page, past New; right comes back; a `ui-tab` event each time; nothing past the ends; a short slow move goes back with nothing left moved | |
 | Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it | |
