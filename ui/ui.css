@@ -44,10 +44,14 @@ dialog::backdrop { background: var(--backdrop); }
 dialog.modal p { margin: 0 0 var(--pad); }
 
 /* toasts */
-.toasts { position: fixed; inset: auto var(--pad) calc(var(--pad) + env(safe-area-inset-bottom, 0px)) var(--pad); display: grid; gap: var(--gap); justify-items: center; pointer-events: none; z-index: 10; }
+/* --ui-toast-bottom (set by the app, e.g. on :root) wins: the room an app's own tab bar takes. Otherwise the kit's
+   offset: the page bottom, or over the kit tab bar / action bar (gestures/tabbar.css, shell/shell.css) */
+.toasts { --ui-toast-bottom-kit: calc(var(--pad) + env(safe-area-inset-bottom, 0px));
+  position: fixed; inset: auto var(--pad) var(--ui-toast-bottom, var(--ui-toast-bottom-kit)) var(--pad); display: grid; gap: var(--gap); justify-items: center; pointer-events: none; z-index: 10; }
 .toast { pointer-events: auto; display: flex; gap: var(--gap); align-items: center; max-width: 30rem; padding: var(--gap) var(--pad);
   background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: var(--pill-r); }
-.toast button { min-width: var(--tap); padding: 0; border: 0; background: none; }
+/* Dismiss and the action are targets: never under 24 px (WCAG 2.5.8), the toast stays one tap high */
+.toast button { min-width: var(--tap); min-height: max(24px, calc(var(--tap) - var(--gap) * 2)); padding: 0; border: 0; background: none; }
 .toast .toast-action { padding: 0 var(--gap); color: var(--link); font-weight: 600; }
 
 /* hover cards (hover-card.js): a preview by a link, mouse and trackpad only; in the top layer over any sheet */

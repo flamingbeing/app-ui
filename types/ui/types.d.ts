@@ -6,6 +6,10 @@ export interface SyncStatus { state: string; count: number }
 /** One side of a held save, as sync.describe(key) gives it. */
 export interface Side { value: unknown; when?: string; by?: string; device?: string }
 
+
+/** conflictSheet's per-field words: label for the field path, format for its value */
+export interface ConflictField { label?: string; format?: (value: unknown) => string }
+
 export interface Conflict {
   key: string;
   mine: Side;

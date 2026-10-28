@@ -38,7 +38,7 @@
 @media (min-width: 600px) {
   .ui-detail-actions { margin-inline: 0; }
   /* no tab bar beside the panes: toasts go back to the bottom (gestures/tabbar.css lifts them over it) */
-  :root:has(.ui-shell .ui-tabbar):not(:has(.ui-action-bar:not([hidden]))) .toasts { bottom: var(--pad); }
+  :root:has(.ui-shell .ui-tabbar):not(:has(.ui-action-bar:not([hidden]))) .toasts { --ui-toast-bottom-kit: var(--pad); }
   /* no detail pane (a list-only shell, shell.js): the list takes its room */
   .ui-panes:not(:has(> .ui-pane-detail)) { grid-template-columns: minmax(0, 1fr); }
   :root { --shell-side: 11rem; --shell-list: 19rem; }
