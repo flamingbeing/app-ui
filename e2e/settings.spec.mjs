@@ -8,7 +8,7 @@ const get = (page, key) => page.evaluate(k => window.kit.settings.get(k), key);
 const row = (page, label) => page.locator('.ui-setting', { hasText: label });
 
 for (const width of [390, 1280]) {
-  for (const look of ['a', 'b', 'c', 'd']) {
+  for (const look of ['a', 'b', 'c', 'd', 'e']) {
     test(`at ${width} px look ${look}: grouped rows, one level-1 heading, axe clean, nothing wider than the screen`, async ({ sized }) => {
       const page = await sized(width);
       await page.goto(`${PAGE}?look=${look}`);

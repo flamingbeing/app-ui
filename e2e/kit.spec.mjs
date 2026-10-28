@@ -382,6 +382,27 @@ test('a page without the markup is left alone', async ({ phone }) => {
   await expect(page.locator('.ui-menu-layer')).toHaveCount(0);
 });
 
+test('an icon Select keeps its icon and name while off and says Done while on', async ({ phone }) => {
+  const page = await phone();
+  await page.goto('/test/plain.html');
+  const r = await page.evaluate(async () => {
+    const { selectMode, icon } = await import('@core/ui');
+    document.body.insertAdjacentHTML('beforeend', '<button type="button" data-edit-for="#l" aria-label="Select"></button><ul id="l" class="ui-list" data-select><li class="ui-row">One</li></ul>');
+    const b = /** @type {HTMLElement} */ (document.querySelector('[data-edit-for]'));
+    b.append(icon([['path', { d: 'M20 6 9 17l-5-5' }]]));
+    const m = selectMode(/** @type {HTMLElement} */ (document.getElementById('l')));
+    const read = () => ({ text: b.textContent, svg: !!b.querySelector('svg'), name: b.getAttribute('aria-label'), pressed: b.getAttribute('aria-pressed') });
+    m.setEditing(true);
+    const on = read();
+    m.setEditing(false);
+    const off = read();
+    m.stop();
+    return { on, off };
+  });
+  expect(r.on).toEqual({ text: 'Done', svg: false, name: null, pressed: 'true' });
+  expect(r.off).toEqual({ text: '', svg: true, name: 'Select', pressed: 'false' });
+});
+
 // an open sheet or hold menu holds the page still: a wheel (or finger) on the backdrop doesn't scroll what is behind it
 for (const width of [390, 1280]) {
   test(`at ${width} px an open sheet or hold menu keeps the page behind it still`, async ({ sized }) => {
@@ -500,6 +521,42 @@ test('at 390 px a push overlaps the screens; the sheet drags by transform only; 
   expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height);
 });
 
+// closing is animated too: the sheet slides down to the bottom edge before it shuts; the hold menu's copy fades out,
+// inert and unnamed, and is gone within 400 ms; Still closes both at once
+test('at 390 px a sheet slides down as it closes; a closed menu fades out, inert; Still closes at once', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(`${KIT}&look=e`);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  await page.click('#open-sheet');
+  const sheet = page.locator('#sheet');
+  await settled(page);
+  const top = (await sheet.boundingBox()).y;
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(90);
+  const mid = await sheet.evaluate(n => ({ open: n.open, y: n.getBoundingClientRect().y }));
+  expect(mid.open).toBe(true);
+  expect(mid.y).toBeGreaterThan(top + 4);
+  await expect.poll(() => sheet.evaluate(n => n.open)).toBe(false);
+
+  await page.locator('#plants .ui-row').nth(1).click({ button: 'right' });
+  await expect(page.locator('.ui-menu[role="menu"]')).toBeVisible();
+  await settled(page);
+  await page.keyboard.press('Escape');
+  const ghost = await page.evaluate(() => {
+    const g = document.querySelector('.ui-menu-layer.is-leaving');
+    return g && { inert: g.inert, hidden: g.getAttribute('aria-hidden'), roles: g.querySelectorAll('[role]').length };
+  });
+  expect(ghost).toEqual({ inert: true, hidden: 'true', roles: 0 });
+  await expect(page.locator('[role="menu"]')).toHaveCount(0);
+  await expect(page.locator('.is-leaving')).toHaveCount(0, { timeout: 600 });
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.click('#open-sheet');
+  await expect(sheet).toBeVisible();
+  await page.keyboard.press('Escape');
+  expect(await sheet.evaluate(n => n.open)).toBe(false);
+});
+
 // R3 (owner 27 Oct): only a floating tab bar shrinks to the current tab; one along the edge (looks B, C) keeps them all
 test('at 390 px an edge tab bar keeps every tab when scrolled', async ({ sized }) => {
   const page = await sized(390);
@@ -601,6 +658,22 @@ test('the sync chip shows each state in its word, with a count where there is on
   expect(new Set([ok, warn, bad]).size, 'three different colours').toBe(3);
   await page.locator('#sync-pick').selectOption('attention');
   expect(await AxeBuilder(page)).toEqual([]);
+});
+
+// look E keeps the bar quiet: synced is the icon alone (the word still read out), any other state shows its word; the
+// search box is filled, with no line round it
+test('look E: the synced chip is its icon (word read out), other states show the word; the search box has no line', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(`${KIT}&look=e`);
+  const chip = page.locator('#status'), word = chip.locator('.ui-chip-text');
+  await page.locator('#sync-pick').selectOption('synced');
+  expect((await word.boundingBox())?.width ?? 0).toBeLessThanOrEqual(1);
+  await expect(word).toHaveText('Saved');   // (in the page for a reader, only out of sight)
+  await page.locator('#sync-pick').selectOption('offline');
+  expect((await word.boundingBox())?.width).toBeGreaterThan(20);
+  await page.goto('/ui/0.0.0-dev/kit/shell/?look=e');
+  const search = page.locator('.ui-search').first();
+  expect(await search.evaluate(e => getComputedStyle(e).borderTopColor)).toBe('rgba(0, 0, 0, 0)');
 });
 
 for (const path of ['', 'shell/', 'dense/', 'settings/', 'parts/']) {

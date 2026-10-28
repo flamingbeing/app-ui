@@ -32,6 +32,12 @@
 .ui-menu-head { margin: 0 0 4px; padding: 0 var(--pad) 4px; color: var(--muted); font-size: .85rem; font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* the sheet covers the bottom: the tab bar along the edge would show beside it, under the veil, as a stray stripe */
-:root:has(.ui-menu.is-sheet) .ui-tabbar { visibility: hidden; }
+:root:has(.ui-menu-layer:not(.is-leaving) .ui-menu.is-sheet) .ui-tabbar { visibility: hidden; }
 [data-hold-menu] { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 [data-hold-menu].is-holding { transform: scale(.98); transition: transform var(--d-quick) var(--spring); }
+/* a closed menu on its way out (hold-menu.js moves it to a layer of its own): a sheet sinks, a popover fades and
+   shrinks, the veil fades; quicker than the way in */
+.ui-menu-layer.is-leaving { pointer-events: none; }
+.ui-menu-layer.is-leaving .ui-menu-veil { animation: ui-fade-out calc(var(--d-quick) * .7) ease-in forwards; }
+.ui-menu-layer.is-leaving .ui-menu { animation: ui-shrink calc(var(--d-quick) * .6) ease-in forwards; }
+.ui-menu-layer.is-leaving .ui-menu.is-sheet { animation: ui-sink calc(var(--d-quick) * .7) cubic-bezier(.4, 0, 1, 1) forwards; }

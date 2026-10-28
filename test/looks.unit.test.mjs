@@ -7,7 +7,7 @@ import { verdict, median, MEMORY_FLOOR, SLOW_FRAME_MS, PROBE_FRAMES } from '../t
 import { placeSheetMenu } from '../ui/hold-menu.js';
 
 test('every look: a unique id, a name, every variant picked from VARIANTS, the same token keys', () => {
-  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd']);
+  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd', 'e']);
   assert.equal(new Set(LOOK_IDS).size, LOOKS.length);
   const keys = Object.keys(LOOKS[0].tokens).sort();
   for (const look of LOOKS) {
@@ -46,6 +46,14 @@ test('look D "Slim": the bar always shows the name, lists as inset cards, an edg
   assert.equal(d.tokens['card-r'], 'var(--radius-l)', 'rows rounded like cards');
   assert.equal(d.tokens['list-inset'], 'var(--gap)', 'and inset from the screen edges');
   assert.equal(d.tokens['list-bg'], 'var(--surface)');
+});
+
+test('look E "Workspace": flat (no glass), slim bar, flush lists on the page, menus as sheets', () => {
+  const e = lookOf('e');
+  assert.equal(e.name, 'Workspace');
+  assert.deepEqual(e.variants, { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge' });
+  assert.equal(e.tokens['list-inset'], '0', 'flush with the screen edges');
+  assert.equal(e.tokens['list-bg'], 'transparent', 'rows on the page, no card');
 });
 
 test('glass guard: little memory turns glass down at once; slow frames on the first scroll do; fast ones keep it', () => {

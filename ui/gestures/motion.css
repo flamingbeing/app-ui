@@ -4,6 +4,9 @@
 @keyframes ui-fade { from { opacity: 0; } }
 @keyframes ui-pop { from { opacity: 0; transform: scale(.9); } }
 @keyframes ui-rise { from { transform: translateY(100%); } }
+@keyframes ui-fade-out { to { opacity: 0; } }
+@keyframes ui-shrink { to { opacity: 0; transform: scale(.94); } }
+@keyframes ui-sink { to { transform: translateY(100%); } }
 
 /* Still (this device) or the device's Reduce Motion: things appear and go, nothing slides, springs or lifts */
 :root[data-motion="still"] :is(.ui-menu, .ui-menu-veil, dialog.ui-sheet[open], .ui-menu-preview, .ui-bar, .ui-bar-title, .ui-tabbar, dialog.ui-sheet, [data-hold-menu]) {

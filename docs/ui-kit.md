@@ -132,7 +132,7 @@ A look is data, not a fork. Each one is a file in `theme/looks/` with:
   weight, the radii of controls, pills, menus and sheets, the tick size, the active tab's background, and the glass
   tint (how much of the accent colour the glass takes).
 
-The four looks so far:
+The five looks so far:
 
 | Look | Name | In short |
 | --- | --- | --- |
@@ -140,8 +140,9 @@ The four looks so far:
 | B | Colour band | The title on a band of the accent, solid bars, bottom-sheet menus, square ticks, a tab bar along the edge |
 | C | Dense and quiet | Flush lists, small titles, glass only on the floating pills |
 | D | Slim | A slim bar always showing the name, lists as cards inset from the edges, an icon tab bar along the edge, no band or glass |
+| E | Workspace | Flat and compact like a desktop notes app: a slim bar, flush lists on the page, menus as bottom sheets, a filled search box, the sync chip as its icon alone when all is synced |
 
-The app picks its own look with `applyTheme({ look: 'b' })`. A device's own pick wins. Without either, the look is A.
+The app picks its own look with `applyTheme({ look: 'b' })`, and may name a ground (`surface: 'ink'`: white, or charcoal in dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
 
 ### Density
 

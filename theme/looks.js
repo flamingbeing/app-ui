@@ -6,6 +6,7 @@ import a from './looks/a.js';
 import b from './looks/b.js';
 import c from './looks/c.js';
 import d from './looks/d.js';
+import e from './looks/e.js';
 
 /**
  * header: band (the large title on a band of the accent) | plain (on the page) | slim (no large title: the bar always
@@ -24,7 +25,7 @@ import d from './looks/d.js';
  */
 
 /** @type {readonly Look[]} */
-export const LOOKS = Object.freeze([a, b, c, d]);
+export const LOOKS = Object.freeze([a, b, c, d, e]);
 export const LOOK_IDS = Object.freeze(LOOKS.map(l => l.id));
 // what each variant may be, first = what a look that names none gets
 export const VARIANTS = Object.freeze({

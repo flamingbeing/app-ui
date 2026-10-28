@@ -24,6 +24,7 @@ export const SURFACES = Object.freeze({
     dark: { bg: '#1d1915', surface: '#26211b', text: '#e8dfcf', muted: '#b5a993' },
   },
   navy: { label: 'Navy night', light: { bg: '#eef2f8' }, dark: { bg: '#0a1628', surface: '#10223b' } },
+  ink: { label: 'Ink', light: { bg: '#ffffff', surface: '#f6f6f6' }, dark: { bg: '#1e1e1e', surface: '#262626' } },
   black: { label: 'Black', light: { bg: '#f4f4f4' }, dark: { bg: '#000000', surface: '#121212' } },
 });
 
@@ -36,5 +37,6 @@ export const PRESETS = Object.freeze([
   { id: 'navy', name: 'Navy', desc: 'Deep navy in dark mode', accent: '#4a7fd0', surface: 'navy', shadow: false },
   { id: 'black', name: 'Black', desc: 'Black pages in dark mode, grey cards', surface: 'black', shadow: false },
   { id: 'contrast', name: 'High contrast', desc: 'Strong lines, clear text', border: 2, shadow: false, strong: true },
+  { id: 'violet', name: 'Violet', desc: 'Violet on white or charcoal, flat, small corners', accent: '#7c5cd6', surface: 'ink', round: 1, shadow: false },
   { id: 'eye', name: 'Eye comfort', desc: 'Warm sepia, more space between lines', accent: '#8a6a4a', surface: 'sepia', shadow: false, leading: 1.65 },
 ]);

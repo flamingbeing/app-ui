@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.24
+- Look E, "Workspace": flat and compact, like a desktop notes app. A slim bar, flush lists on the page background, menus
+  as bottom sheets, no glass, a filled search box; the sync chip shows only its icon when all is synced.
+- Preset "Violet" (violet on white or charcoal, flat, small corners) and the ground `ink`. An app may name a ground
+  of its own: `applyTheme({ surface: 'ink' })` (a device's own preset still wins).
+- Closing is animated: a sheet slides down from where it is (also after a drag, or on Esc) and fades on a wide screen;
+  a hold menu fades or sinks away (its copy on the way out is inert and has no roles or ids). Still closes at once.
+- Select mode: an icon `[data-edit-for]` button keeps its icon (and aria-label) while off; it says Done while on.
+
 ## 1.0.0-rc.23
 - Data grid: a cell holding one field (an editable cell, such as a name box in a rota) is reachable from the keyboard:
   Enter or F2 goes into the field (its text selected), Esc in it comes back to the cell; arrows in the field stay in

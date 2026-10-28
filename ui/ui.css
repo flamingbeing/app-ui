@@ -15,6 +15,11 @@
 :is(.ui-chip, .chip):is([data-state="offline"], [data-state="at-risk"]) { color: var(--warn); }
 :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: ui-spin 1.2s linear infinite; }
 :is(.ui-chip, .chip)[data-state="unknown"] .ui-icon { opacity: .6; }
+/* look E: a quiet chip with no box; once all is saved only its icon shows, muted (the word stays for screen readers) */
+:root[data-look="e"] :is(.ui-chip, .chip)[data-state] { border-color: transparent; padding-inline: .35rem; }
+:root[data-look="e"] :is(.ui-chip, .chip)[data-state="synced"] { color: var(--muted); }
+:root[data-look="e"] :is(.ui-chip, .chip)[data-state="synced"] .ui-chip-text { position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @keyframes ui-spin { to { transform: rotate(1turn); } }
 @media (prefers-reduced-motion: reduce) { :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; } }
 :root[data-motion="still"] :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; }

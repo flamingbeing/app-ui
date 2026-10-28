@@ -254,7 +254,7 @@ test.describe('shell at 1280 px: desktop details', () => {
     await page.keyboard.press('Escape');
   });
 
-  for (const look of ['a', 'b', 'c', 'd']) {
+  for (const look of ['a', 'b', 'c', 'd', 'e']) {
     test(`look ${look.toUpperCase()}: a line between rows in the list pane`, async ({ sized }) => {
       const page = await sized(1280);
       await page.goto(`${SHELL}&look=${look}`);
