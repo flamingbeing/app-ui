@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.30
+- Swipe between tabs feels like iOS's paging: let go, the pages glide on with a spring that starts at the finger's
+  speed and lands without overshoot (`springPath`, about a third of a second) instead of a fixed 280 ms curve; the
+  page goes when the drag plus its throw passes half the width (`pageStep`; was a third, or a flick, even when the
+  finger turned back); at either end the page stretches like iOS's rubber band (`rubber`; was a third of the travel).
+  The pages beside are laid out as the finger lands, so the first move only moves them (no first-frame hitch).
+- The bar's title cross-fades to the coming page's large title at halfway, during the drag and the glide (it used to
+  change at the end); bar parts marked `data-swipe-fade` fade out with the swipe and back in on the new page.
+
 ## 1.0.0-rc.29
 - Content parts (`ui/gestures/content.css`, loaded by `gestures.css`): grouped sections (`.ui-section`,
   `.ui-section-head`, `.ui-section-foot`), row extras (`.ui-row-lead` icon tile with `data-tone="grey|danger"`,
