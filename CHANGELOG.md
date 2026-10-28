@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.25
+- The current side bar link uses `--link`, as the current tab does, which the palette keeps 4.5:1 on its tint (the raw
+  accent fell to 3.6:1 there for Violet); a test reads every preset in light and dark. The e2e axe helper takes
+  `{ within, only }`.
+
 ## 1.0.0-rc.24
 - Look E, "Workspace": flat and compact, like a desktop notes app. A slim bar, flush lists on the page background, menus
   as bottom sheets, no glass, a filled search box; the sync chip shows only its icon when all is synced.

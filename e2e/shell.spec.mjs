@@ -210,6 +210,17 @@ test('at 390 px the shrunk tab bar keeps the current tab, and Tab reaches it', a
   await expect(page.locator('#home')).toBeHidden();
 });
 
+test('at 1280 px the current side bar link is readable in every preset, light and dark', async ({ sized }) => {
+  const { PRESETS } = await import('../theme/presets.js');
+  const page = await load(sized, 1280);
+  for (const { id } of PRESETS) for (const theme of ['light', 'dark']) {
+    await page.evaluate(c => { localStorage.setItem('core-theme', JSON.stringify(c)); }, { preset: id, theme });
+    await page.reload();
+    await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
+    expect(await AxeBuilder(page, { within: '.ui-sidebar', only: ['color-contrast'] }), `${id}, ${theme}`).toEqual([]);
+  }
+});
+
 // the owner's desktop review: an empty detail shows no actions; right-click opens the menu at the pointer, no lift;
 // rows in the list pane have a line between them in every look
 test.describe('shell at 1280 px: desktop details', () => {
