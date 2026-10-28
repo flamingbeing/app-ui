@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.15
+- Kit gallery, installed: opens the newest version. The manifest's `id` and `start_url` are `/ui/kit/` (the Worker 302s
+  it to the newest gallery) and its scope is `/ui/`, so one home-screen app follows every release instead of staying on
+  the version it was installed from.
+
 ## 1.0.0-rc.14
 - Icons: `icons/lucide.js` (Lucide, ISC; `icon(nodes)` and one named export per icon, so only the icons an app imports
   ship; `icon` is also exported from `@core/ui`). The kit's text glyphs are gone (toast close, settings info, gallery

@@ -581,6 +581,8 @@ for (const path of ['', 'shell/', 'dense/', 'settings/', 'parts/']) {
     expect(res.headers()['content-type']).toBe('application/manifest+json');
     const manifest = await res.json();
     expect(manifest.display).toBe('standalone');
+    // installed, it starts at the fixed /ui/kit/ (a 302 to the newest gallery), one app id across versions
+    expect([manifest.id, manifest.start_url, manifest.scope]).toEqual(['/ui/kit/', '/ui/kit/', '/ui/']);
     for (const icon of manifest.icons) expect((await request.get(new URL(icon.src, href).href)).status()).toBe(200);
     expect(manifest.icons.map(i => i.sizes)).toEqual(expect.arrayContaining(['192x192', '512x512']));
     expect(await page.evaluate(() => {
