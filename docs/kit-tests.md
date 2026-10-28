@@ -44,11 +44,29 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Keyboard | Ctrl/Cmd+K focuses the search; typing filters; Esc clears, then leaves; arrows and Enter work the list | |
 | Pointer | right-click opens the row menu; Ctrl/Cmd-click adds; Shift-click takes a range; the detail summarises a multi-selection; Esc leaves select mode | |
 | Sheets | a side panel at 1280 px, a bottom sheet below; Back and Esc close it | open |
-| Tab bar | 390 px: the picked section (`?tab=`) is marked in both bars; shrunk on scroll, its tab stays and Tab reaches it | |
+| Tab bar | 390 px: the picked section (`?tab=`) is marked in both bars and its page shows; shrunk on scroll, its tab stays and Tab reaches it | |
 | Delete | removing from the detail shows an Undo toast; Undo puts the row back | |
 | Resize | the layout follows the width when the window crosses a size class | |
 | Other pages | `startGestures()` on a page without the shell markup starts nothing | |
-| Desktop details | 1280 px: the detail shows Water and Delete only with a row open, and empties when that row is deleted; right-click opens the menu with its corner at the pointer, the row not lifted; looks A, B, C have a line between rows in the list pane | |
+| Desktop details | 1280 px: the detail shows Water and Delete only with a row open, and empties when that row is deleted; right-click opens the menu with its corner at the pointer, the row not lifted; looks A to D have a line between rows in the list pane | |
+
+## Tab pages and swipe
+
+`/kit/shell/` is also tested by `e2e/tabs.spec.mjs` (ui/tab-pages.js, plain tabs and bar buttons, the phone's
+drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeIntent`, `pageStep`) are in
+`test/gestures.unit.test.mjs`.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Plain tabs and bar buttons | looks A to D: `<button class="ui-tab">` has no border and no fill but the current tab's `--tab-active`, its icon above the label; bar buttons have no border or fill, the link colour (the band's text colour in B), New bold | yes |
+| Tap a tab | shows its page, marks both bars, names the bar; New opens the sheet and is no page | |
+| Swipe | left goes to the next page, past New; right comes back; a `ui-tab` event each time; nothing past the ends; a short slow move goes back with nothing left moved | |
+| Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it | |
+| No swipe | a mostly vertical move, a start within 24 px of either edge, the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
+| Reduce Motion | the swipe changes the tab with nothing moved | |
+| Scroll and Back | each page keeps its scroll; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
+| Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
+| Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 
 ## Settings screen gallery
 
@@ -57,23 +75,24 @@ stand-in for `@core/settings` on the page.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
-| Page | 390 and 1280 px, looks A, B, C: the groups in order with the theme switch in "This device", one level-1 heading, controls 24 px or more, nothing wider than the screen | yes |
+| Page | 390 and 1280 px, looks A to D: the groups in order with the theme switch in "This device", one level-1 heading, controls 24 px or more, nothing wider than the screen | yes |
 | Rows | a switch (the whole row's label flips it), a picker and a number field save to the settings; kept after reload | |
 | Refused | a value the option refuses shows why in the status line, the field goes back to the value in force | |
 | Profile | picking one shows its defaults; a change by hand shows the note; picking another clears it | |
 | Followed | a change made elsewhere shows at once | |
 | Settings file | Export downloads the account options only, under the app's file name; Import says "Imported: N changes, M left out", "Nothing to change", or why the file isn't one | |
 | Switch | Space flips it, named by its row; Less motion (`data-motion="still"`) takes its slide away | |
+| About | the last group: the Version row shows the update api's version; Check for updates says "newest", then "Updated."; the About row opens the About sheet (name, version); closing it retries the owed update | sheet open |
 
 ### Looks, density and the glass guard (`e2e/looks.spec.mjs`)
 
 | Part | What is tested | axe |
 | --- | --- | --- |
-| Looks A, B, C | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
+| Looks A, B, C, D | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; D's bar title showing from the start, no large title on show, lists on the page background; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
 | Look B's menu | under 840 px the hold menu from touch or Shift+F10 is a bottom sheet (a mouse's right-click opens at the pointer) on the bottom edge, named in its head (no lifted copy) with the tab bar hidden; from 840 px it opens beside the row | menu open |
 | Dark | 390 and 1280 px, each look: the gallery and the shell are clean; look B's band takes white text; menus, sheets and the action bar are solid (no blur, no see-through) | gallery, shell |
 | Ticks | square in B, round in A and C | |
-| Wide bar | 1280 px, looks A, B, C, gallery and dense page: the top bar is full width, its title centred and its start in line with the large title's words; an edge tab bar keeps its tabs together in the middle | |
+| Wide bar | 1280 px, looks A to D, gallery and dense page: the top bar is full width, its title centred and its start in line with the large title's words; an edge tab bar keeps its tabs together in the middle | |
 | Density | rows 60 / 50 / 44 px; taps never under 44; a link's `?look=` is a preview, a pick is kept after reload | |
 | Glass guard | little memory turns glass off, kept, with the reason in Settings; Solid and "Glass, even here" still win | yes |
 
@@ -81,9 +100,9 @@ stand-in for `@core/settings` on the page.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
-| Both dense screens | in looks A, B, C at 390, 820 and 1280 px: every target 24 px or more (a radio or checkbox measured by its label), nothing wider than the screen; screenshots kept (`dense-<screen>-<look>-<width>.png`) | yes |
+| Both dense screens | in looks A to D at 390, 820 and 1280 px: every target 24 px or more (a radio or checkbox measured by its label), nothing wider than the screen; screenshots kept (`dense-<screen>-<look>-<width>.png`) | yes |
 | Sizes | extra-dense is 32 / 24 px; unticking it gives the density's own sizes; Comfortable gets 44 / 36 px | |
-| Readable, lined up | looks A, B, C at 390 px: no text under 12 px, stepper fields 32 px tall, the screen's left edge matches the controls', the collapsed bar title centred, an unset key time reads "Not set" in normal weight | |
+| Readable, lined up | looks A to D at 390 px: no text under 12 px, stepper fields 32 px tall, the screen's left edge matches the controls', the collapsed bar title centred, an unset key time reads "Not set" in normal weight | |
 | Segmented | arrows pick and move focus; a second tap clears a clearable one, Space does not; a plain one keeps its pick | |
 | Stepper | − and + step by the step, stay in min/max, an empty box starts at `data-start`; buttons out of the Tab order | |
 | Toolbar | one Tab stop; arrows wrap, Home, End; Tab leaves it | |

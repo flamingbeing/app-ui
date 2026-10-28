@@ -1,4 +1,4 @@
-// @core/theme's looks (A tinted glass, B colour band, C dense and quiet) on the /kit/ gallery at phone, tablet and
+// @core/theme's looks (A tinted glass, B colour band, C dense and quiet, D slim) on the /kit/ gallery at phone, tablet and
 // laptop widths: axe, the variants each look names, screenshots kept for the PR; the densities' row heights; the look
 // and density switchers; the glass guard on a device with little memory. The list is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
@@ -14,6 +14,7 @@ const LOOKS = {
   a: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', glassClass: true },
   b: { header: 'band', menu: 'sheet', glass: 'none', tick: 'square', tabbar: 'edge', glassClass: false },
   c: { header: 'plain', menu: 'popover', glass: 'pill', tick: 'round', tabbar: 'edge', glassClass: true },
+  d: { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge', glassClass: false },
 };
 
 for (const width of [390, 820, 1280]) {
@@ -34,8 +35,13 @@ for (const width of [390, 820, 1280]) {
         const tabbar = await page.locator('.ui-tabbar').boundingBox();
         if (want.tabbar === 'edge') expect(tabbar.width).toBe(width);
         else expect(tabbar.width).toBeLessThan(width);
-        expect(await style(page, '.ui-list', 'border-top-left-radius')).toMatch(id === 'c' ? /^0px$/ : /^[1-9]/);   // flush, or a card
+        expect(await style(page, '.ui-list', 'border-top-left-radius')).toMatch(id === 'c' || id === 'd' ? /^0px$/ : /^[1-9]/);   // flush, or a card
         if (id === 'c') expect(await style(page, '.ui-bar', 'backdrop-filter')).toBe('none');
+        if (want.header === 'slim') {   // no large title on show: the bar names the page from the start
+          expect(await style(page, '.ui-bar-title', 'opacity')).toBe('1');
+          expect((await title.boundingBox()).height).toBeLessThanOrEqual(1);
+          expect(await style(page, '.ui-list', 'background-color')).toBe(await style(page, 'body', 'background-color'));
+        }
         await expect(title).toBeVisible();
         await settled(page);
         expect(await AxeBuilder(page), `look ${id} at ${width}`).toEqual([]);
@@ -82,7 +88,7 @@ for (const width of [390, 1280]) {
   test(`at ${width} px dark: each look's gallery and shell are clean (axe); B's band takes white text; menus and sheets are solid`, async ({ sized }) => {
     const page = await sized(width);
     await page.emulateMedia({ colorScheme: 'dark' });
-    for (const id of ['a', 'b', 'c']) {
+    for (const id of ['a', 'b', 'c', 'd']) {
       for (const url of [`${KIT}&look=${id}`, `${SHELL}&look=${id}`]) {
         await page.goto(url);
         await settled(page);
@@ -160,7 +166,7 @@ test('glass guard: little memory turns glass down, kept on this device; Solid an
 
 // the owner's desktop review: on a laptop the top bar runs the full width with its ends lined up with the content, and
 // an edge tab bar keeps its tabs together in the middle
-for (const look of ['a', 'b', 'c']) {
+for (const look of ['a', 'b', 'c', 'd']) {
   test(`at 1280 px look ${look.toUpperCase()}: the bar is full width, its title centred; tabs stay together`, async ({ sized }) => {
     const page = await sized(1280);
     for (const path of ['', 'dense/']) {

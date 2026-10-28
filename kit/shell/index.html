@@ -24,7 +24,7 @@
        Tests: docs/kit-tests.md. Rules for where things go: docs/ui-kit.md. -->
   <div class="ui-shell">
     <header class="ui-bar">
-      <span class="kit-bar-side" data-bar-lead></span>
+      <span class="kit-bar-side" data-bar-lead><button type="button" class="ui-bar-menu" aria-label="Sections" aria-controls="side">☰</button></span>
       <h2 class="ui-bar-title" aria-hidden="true">Plants</h2>
       <span class="kit-bar-side kit-end">
         <button type="button" data-edit-for="#plants">Select</button>
@@ -32,14 +32,14 @@
       </span>
     </header>
 
-    <nav class="ui-sidebar" aria-label="Sections">
+    <nav class="ui-sidebar" id="side" aria-label="Sections">
       <p class="ui-sidebar-name">Plant shelf</p>
       <label class="ui-search"><span class="kit-sr">Search plants</span>
         <input type="search" data-shell-search placeholder="Search" autocomplete="off"><kbd>Ctrl K</kbd></label>
-      <a class="ui-side-link" href="./" data-tab="plants" aria-current="page">Plants <span class="small" id="count-side">12</span></a>
-      <a class="ui-side-link" href="./" data-tab="rooms">Rooms</a>
-      <a class="ui-side-link" href="./" data-tab="jobs">Jobs</a>
-      <a class="ui-side-link" href="./" data-tab="settings">Settings</a>
+      <a class="ui-side-link" href="./" data-tab-page="#home" aria-current="page">Plants <span class="small" id="count-side">12</span></a>
+      <a class="ui-side-link" href="./" data-tab-page="#rooms">Rooms</a>
+      <a class="ui-side-link" href="./" data-tab-page="#jobs">Jobs</a>
+      <a class="ui-side-link" href="./" data-tab-page="#settings">Settings</a>
     </nav>
 
     <main class="ui-screens ui-panes">
@@ -114,13 +114,44 @@
           <p class="kit-lede" data-multi-names></p>
         </div>
       </section>
+
+      <!-- the other tabs' pages: a swipe on a phone moves between them (ui/tab-pages.js) -->
+      <section class="ui-screen ui-tab-page" id="rooms" aria-labelledby="rooms-title" hidden>
+        <h1 class="ui-large-title" id="rooms-title">Rooms</h1>
+        <ul class="ui-list" aria-label="Rooms">
+          <li class="ui-row"><span class="ui-row-main">Kitchen<span class="ui-row-sub">Basil, Mint</span></span></li>
+          <li class="ui-row"><span class="ui-row-main">Living room<span class="ui-row-sub">Fig</span></span></li>
+          <li class="ui-row"><span class="ui-row-main">Balcony<span class="ui-row-sub">Lavender, Rosemary</span></span></li>
+          <li class="ui-row"><span class="ui-row-main">Bedroom<span class="ui-row-sub">Orchid</span></span></li>
+        </ul>
+      </section>
+      <section class="ui-screen ui-tab-page" id="jobs" aria-labelledby="jobs-title" hidden>
+        <h1 class="ui-large-title" id="jobs-title">Jobs</h1>
+        <div class="kit-chips" id="job-chips" role="group" aria-label="Show">
+          <button type="button">Today</button><button type="button">This week</button><button type="button">Watering</button>
+          <button type="button">Feeding</button><button type="button">Repotting</button><button type="button">Pruning</button>
+        </div>
+        <ul class="ui-list" aria-label="Jobs">
+          <li class="ui-row"><span class="ui-row-main">Water the basil<span class="ui-row-sub">Today</span></span></li>
+          <li class="ui-row"><span class="ui-row-main">Soak the orchid<span class="ui-row-sub">Friday</span></span></li>
+          <li class="ui-row"><span class="ui-row-main">Repot the fig<span class="ui-row-sub">Next month</span></span></li>
+        </ul>
+      </section>
+      <section class="ui-screen ui-tab-page" id="settings" aria-labelledby="settings-title" hidden>
+        <h1 class="ui-large-title" id="settings-title">Settings</h1>
+        <ul class="ui-list" aria-label="Shelf">
+          <li class="ui-row"><label class="ui-row-main" for="shelf-name">Shelf name</label>
+            <input id="shelf-name" value="Plant shelf" autocomplete="off"></li>
+        </ul>
+      </section>
     </main>
 
     <nav class="ui-tabbar" data-minimise aria-label="Sections">
-      <a class="ui-tab" href="./" data-tab="plants" aria-current="page">Plants</a>
-      <a class="ui-tab" href="./" data-tab="rooms">Rooms</a>
-      <a class="ui-tab" href="./" data-tab="jobs">Jobs</a>
-      <a class="ui-tab" href="./" data-tab="settings">Settings</a>
+      <button type="button" class="ui-tab" data-tab-page="#home" aria-current="page"><span class="ui-tab-icon" aria-hidden="true">✿</span>Plants</button>
+      <button type="button" class="ui-tab" data-tab-page="#rooms"><span class="ui-tab-icon" aria-hidden="true">⌂</span>Rooms</button>
+      <button type="button" class="ui-tab" data-open-sheet="#sheet"><span class="ui-tab-icon" aria-hidden="true">+</span>New</button>
+      <button type="button" class="ui-tab" data-tab-page="#jobs"><span class="ui-tab-icon" aria-hidden="true">✓</span>Jobs</button>
+      <button type="button" class="ui-tab" data-tab-page="#settings"><span class="ui-tab-icon" aria-hidden="true">≡</span>Settings</button>
     </nav>
   </div>
 

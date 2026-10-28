@@ -27,6 +27,20 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   so the screen stack's history entries (`{ uiScreens }`, `{ uiSheet }`) are unchanged.
 - `shell.open(row)` selects a row (`aria-current="true"`) and fills the detail. Several rows ticked show a summary
   (`.ui-detail-multi`) instead of one item (`.ui-detail-one`).
+- **Tab pages.** A tab bar button (or side link) with `data-tab-page="#id"` shows that `.ui-screen` of the
+  `.ui-screens` host as the bottom screen; the one with `aria-current="page"` starts. In the shell, give the extra
+  pages `class="ui-screen ui-tab-page" hidden` beside the panes (from 600 px a tab page takes both columns). A tab
+  without `data-tab-page` (one that opens a sheet) is not a page. Each page keeps its scroll; tapping the current tab
+  over a pushed screen goes back to it; the host sends `ui-tab` (`detail.page`, `detail.tab`). `startGestures()`
+  starts it (`kit.tabs`: `go`, `current`); `tabPages()` is exported for a page without the rest.
+- **Swipe between tabs** (phones, under 600 px): a sideways swipe on the page moves to the next or previous tab page,
+  the pages following the finger. Not on a pushed screen, in a field, editor, sideways scroller, dialog, sheet or
+  open menu, in select mode, with text selected, or within 24 px of either edge (Back); a mostly vertical move
+  scrolls. Less motion switches without the slide. Turn it off with `data-swipe="off"` on the tab bar.
+- **Tab icons and bar buttons.** `<button class="ui-tab">` looks like a link tab (no border or fill); a
+  `<span class="ui-tab-icon" aria-hidden="true">` before the label puts an icon above it. Buttons in `.ui-bar` are
+  plain link-coloured text (`.ui-primary` bold; on the band, the band's text colour); `.ui-bar-menu` in the bar's
+  lead is a side-bar button, hidden while Back shows.
 - **Sheets.** From 840 px a sheet is a centred dialog. Give it `data-wide="panel"` and it docks to the right edge at
   full height instead (a form beside the list).
 
@@ -88,6 +102,10 @@ settingsScreen(el, { settings, file: 'plants-settings.json', sections: [
 - The settings file (Export, Import) comes last; `file: false` leaves it out.
 - A refused value (its clean says no, or an account option while signed out) shows the reason in the status line and
   the control goes back to the value in force. Changes made elsewhere show at once.
+- **About.** Pass `about: { name, update }` (the `@core/update` api, or `null` for "dev") and an About group comes
+  last: a Version row, Check for updates (its answer under it) and an About row that opens `aboutSheet` (the name,
+  the version and the outside code from the import map; `licences` and `importMap` pass through). This is where the
+  version goes: not as a line over the app. `updatePrompt` stays exported for older apps; new ones use this row.
 
 ## Looks, density and the glass guard (`@core/theme`)
 
@@ -103,24 +121,25 @@ A look is data, not a fork. Each one is a file in `theme/looks/` with:
 
   | Variant | Values |
   | --- | --- |
-  | `header` | `plain` (the large title sits on the page) · `band` (the title sits on a band of the accent colour) |
+  | `header` | `plain` (the large title sits on the page) · `band` (the title sits on a band of the accent colour) · `slim` (no large title: the bar always shows the name) |
   | `menu` | `popover` (the hold menu opens beside its row) · `sheet` (it opens from the bottom on phones, under 840 px) |
   | `glass` | `bars` (all floating chrome) · `pill` (only the floating pills: the action bar, toasts and a floating tab bar) · `none` |
   | `tick` | `round` · `square` (the ticks in select mode) |
   | `tabbar` | `float` (a pill over the content) · `edge` (full width along the bottom) |
 
 - **tokens**: custom properties that `palette-css.js` puts on `:root`. Every look sets the same keys: the heading font,
-  the title size, weight and tracking, the bar line, list card radius, inset, edge, separator and shadow, the row
+  the title size, weight and tracking, the bar line, list card radius, inset, background, edge, separator and shadow, the row
   weight, the radii of controls, pills, menus and sheets, the tick size, the active tab's background, and the glass
   tint (how much of the accent colour the glass takes).
 
-The three looks so far:
+The four looks so far:
 
 | Look | Name | In short |
 | --- | --- | --- |
 | A | Tinted glass | Glass bars with a hint of the accent, a floating tab bar, card lists, round ticks |
 | B | Colour band | The title on a band of the accent, solid bars, bottom-sheet menus, square ticks, a tab bar along the edge |
 | C | Dense and quiet | Flush lists, small titles, glass only on the floating pills |
+| D | Slim | A slim bar always showing the name, flat lists on the page background, an icon tab bar along the edge, no band or glass |
 
 The app picks its own look with `applyTheme({ look: 'b' })`. A device's own pick wins. Without either, the look is A.
 
