@@ -1,5 +1,5 @@
 // Repo checks for mistakes tests don't catch. Run before merging: node tools/check.mjs
-// 1. wrangler.jsonc keeps preview links and the workers.dev address off, and routes only core.anawj.com/ui/*.
+// 1. wrangler.jsonc keeps preview links and the workers.dev address off, and routes only core.anawj.com/ui/*, /kit and /kit/*.
 // 2. The package.json version is in versions.lock.json and matches the published files (tools/build-ui.mjs --check):
 //    a released version never changes, so a change to ui/, theme/, settings/, kit/ or icons/ needs a new version.
 // 3. The published code imports only its own files (relative paths): no engine, no other site, no bare names. A page
@@ -22,7 +22,7 @@ const w = fs.readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8').replace(/^\
 if (!/"preview_urls"\s*:\s*false/.test(w)) fail('wrangler.jsonc: "preview_urls" should be false (no preview links)');
 if (!/"workers_dev"\s*:\s*false/.test(w)) fail('wrangler.jsonc: "workers_dev" should be false (real addresses only)');
 const patterns = [...w.matchAll(/"pattern"\s*:\s*"([^"]+)"/g)].map(m => m[1]);
-if (patterns.join() !== 'core.anawj.com/ui/*') fail(`wrangler.jsonc: the only route should be core.anawj.com/ui/* (the rest of core.anawj.com is app-sync's), not ${patterns.join(', ') || 'none'}`);
+if (patterns.join() !== 'core.anawj.com/ui/*,core.anawj.com/kit,core.anawj.com/kit/*') fail(`wrangler.jsonc: the only routes should be core.anawj.com/ui/*, /kit and /kit/* (the rest of core.anawj.com is app-sync's), not ${patterns.join(', ') || 'none'}`);
 if (/custom_domain/.test(w)) fail('wrangler.jsonc: no custom domain (core.anawj.com is app-sync\'s custom domain)');
 
 try { execFileSync(process.execPath, ['tools/build-ui.mjs', '--check'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] }); }

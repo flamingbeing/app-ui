@@ -19,5 +19,10 @@
   "keep_vars": true,
   // a route, not a custom domain: core.anawj.com itself is app-sync's Worker (its custom domain, /sync/ and /update/).
   // A route's Worker runs before the custom domain's, so /ui/ addresses come here and nothing else does.
-  "routes": [{ "pattern": "core.anawj.com/ui/*", "zone_name": "anawj.com" }]
+  // core.anawj.com/kit and /kit/* redirect to the newest gallery (exact patterns: /kitchen is not ours)
+  "routes": [
+    { "pattern": "core.anawj.com/ui/*", "zone_name": "anawj.com" },
+    { "pattern": "core.anawj.com/kit", "zone_name": "anawj.com" },
+    { "pattern": "core.anawj.com/kit/*", "zone_name": "anawj.com" }
+  ]
 }
