@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.18
+- Prose (`ui/prose.css`, opt-in: link it, put `ui-prose` on the box): rendered Markdown in an Obsidian-like reading
+  style. A readable line length (`--measure`, 42rem), a heading scale, hanging list markers, task lists with the box in
+  the bullet's place (ticked ones muted and struck through), code on a neutral wash (`--code-bg`, never the accent),
+  an accent bar on quotes, hairline tables that scroll sideways, `kbd`. The parts gallery shows a sample.
+- Icon buttons: `.ui-icon-btn` (square, `--button-h`, no box until hovered; `aria-pressed="true"` turns it the accent).
 ## 1.0.0-rc.17
 - Hold menu, iPhone (no `navigator.vibrate`): the haptic fires before the lift's click is armed to be swallowed, and a
   click inside `.ui-haptic` is never the one swallowed, so the haptic ticks and lifting no longer opens the row.
