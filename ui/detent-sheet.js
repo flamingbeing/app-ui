@@ -10,6 +10,33 @@
 import { SLOP, listeners, velocity, still } from './gesture.js';
 
 const WIDE = '(min-width: 840px)';
+
+// A close's history.back() lands later (WebKit: much later). A sheet opened, or a page pushed, before it lands would be
+// undone by it: the step lands on the newer entry. So the steps on their way are counted; a sheet opened meanwhile
+// pushes its entry once they have landed, and sheets ignore the popstates they make. An app's router waits on
+// sheetsSettled() before it pushes a page.
+let backs = 0;
+/** @type {Promise<void> | null} */
+let backing = null;
+/** @type {(() => void) | null} */
+let landed = null;
+/** @type {ReturnType<typeof setTimeout> | undefined} */
+let lost;
+const done = () => { backs = 0; clearTimeout(lost); backing = null; const r = landed; landed = null; r?.(); };
+let ours = false;   // the popstate being handled is one of the steps
+if (typeof window !== 'undefined') window.addEventListener('popstate', () => {
+  ours = backs > 0;
+  if (ours && --backs === 0) done();
+  setTimeout(() => { ours = false; });
+}, true);
+function back() {
+  if (!backing) backing = new Promise(r => { landed = r; });
+  backs++;
+  clearTimeout(lost); lost = setTimeout(done, 1000);   // never landed (no history here)
+  try { history.back(); } catch { done(); }
+}
+/** Resolves once every sheet's step back has landed: push a page after it. @returns {Promise<void>} */
+export const sheetsSettled = () => backing || Promise.resolve();
 // how much taller than the screen the sheet is made for a move on a phone, hidden below the bottom edge: room for
 // the pull past full height and the spring's overshoot
 const SPARE = 48;
@@ -65,12 +92,20 @@ export function detentSheet(sheet) {
     grab?.setAttribute('aria-expanded', String(d === top));
     setBodyPan();
   }
+  // its own entry, once the steps back on their way have landed
+  function push() {
+    const go = () => {
+      if (pushed || !sheet.open || leaving) return;
+      try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
+    };
+    if (backing) backing.then(go); else go();
+  }
   /** @param {HTMLElement | null} [from] */
   function open(from = null) {
     if (leaving) {   // opened again while sliding away: it comes back
       stay();
       if (from) opener = from;
-      if (!pushed) try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
+      if (!pushed) push();
       return;
     }
     if (sheet.open) return;
@@ -78,7 +113,7 @@ export function detentSheet(sheet) {
     sheet.showModal();
     setDetent(ds[0]);
     rest = sheet.getBoundingClientRect().height;   // pre-sized now, so a drag's first frame needs no layout
-    try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
+    push();
   }
   // Close: on a phone the sheet slides down from wherever it is (mid-drag too) and the backdrop fades, then it closes;
   // a centred dialog fades. Still: at once.
@@ -105,7 +140,7 @@ export function detentSheet(sheet) {
     const end = () => { if (leaving === a && sheet.open) sheet.close(); };
     a.finished.then(end, end);
     // its history entry goes now, not at the end: what the app does next (a push, say) is not undone by it
-    if (pushed) { pushed = false; try { history.back(); } catch { /* none */ } }
+    if (pushed) { pushed = false; back(); }
   };
   // Esc: the same slide (the browser would close it at once)
   l.on(sheet, 'cancel', (/** @type {Event} */ e) => { if (!still() && e.cancelable) { e.preventDefault(); close(); } });
@@ -161,10 +196,10 @@ export function detentSheet(sheet) {
     stay();
     setDetent(ds[0]);
     html.classList.remove('ui-sheet-large-open');
-    if (pushed) { pushed = false; try { history.back(); } catch { /* none */ } }
+    if (pushed) { pushed = false; back(); }
     opener?.focus();
   });
-  l.on(window, 'popstate', () => { if (sheet.open && history.state?.uiSheet !== key) { pushed = false; close(); } });
+  l.on(window, 'popstate', () => { if (!ours && sheet.open && history.state?.uiSheet !== key) { pushed = false; close(); } });
   if (grab && ds.length > 1) {
     grab.setAttribute('role', 'button');
     grab.tabIndex = 0;

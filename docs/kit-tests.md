@@ -16,13 +16,14 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Hold menu | Delete removes the row with an Undo toast (no confirm); Undo puts it back in place | |
 | Hold menu | its Select starts select mode with that row ticked; no hold menu while selecting | |
 | Hold menu | a menu for a row near the bottom of the screen stays fully on screen | |
-| Closing | 390 px: a sheet slides down to the bottom edge before it shuts (Esc); a closed hold menu fades out, inert, with no roles or ids, gone within 600 ms; Still closes both at once | |
+| Closing | 390 px: a sheet opened, or a page pushed after `sheetsSettled()`, as another sheet closes stays (its late step back is not taken for Back); a sheet slides down to the bottom edge before it shuts (Esc); a closed hold menu fades out, inert, with no roles or ids, gone within 600 ms; Still closes both at once | |
 | Select toggle | an icon `[data-edit-for]` button keeps its icon and name while off and says Done while on | |
 | Look E chip and search | look E: the synced chip shows only its icon (the word stays for screen readers), other states show the word; the shell search box has no outline until focused | |
 | Side bar contrast | 1280 px: the current side bar link passes colour contrast (axe) in every preset, light and dark, default look | |
 | Select mode | Select/Done; listbox + aria-selected; tap ticks (doesn't open); drag down the ticks takes a range; action bar replaces the tab bar; `data-needs` enables buttons; Esc leaves | selecting |
 | Sheet | opens at medium; drag up to large, down to medium, down to close (phone); Enter on the grabber cycles; Back closes it; centred dialog from 840 px, bottom edge below | open |
 | Components | 390 px: a pushed screen's Back shows in the bar (the screen's own is hidden), names the screen under it and pops; Select all stays on one line; look A's serif on the page title only; selects 44 px high, checkboxes 20 px or more; select mode's count in the text colour, off buttons faded, Delete red; the sheet's Done has no border and its chip row runs edge to edge; look C's action bar runs along the bottom edge | |
+| Single pane | `test/single-pane.html`, 390 then 1280 px: rows that are links or buttons in list items look like rows (no underline or button chrome, full width, a line between them); the tab bar's room (`--ui-tabbar-room`) keeps the last line above it; from 600 px no tab bar, no room, and the bar stays beside the side bar | yes |
 | Sheet | a drag from a field or a sideways scroller neither moves the sheet nor scrolls the body; the same drag from the body does | |
 | Screens | push twice, Back pops with focus on the pusher; bar title follows; edge swipe (forced on) follows the finger, goes back past a third; a short swipe springs back; the tab bar doesn't move | pushed |
 | Motion | 390 px: a push slides the new screen in over the old one (the old one's content stays put, out of the flow), Back returns to the same place; menus and bars take `--d-quick` (340 ms); a sheet's drag keeps one box height (transform only) and settles back to its own height on the bottom edge | |
