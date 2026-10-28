@@ -2,6 +2,8 @@
 // from the release tags by tools/build-ui.mjs, bound as ASSETS) and the list of versions. Files only. The rest of
 // core.anawj.com (/sync/, /update/) is app-sync's Worker; this route runs first for /ui/ addresses only.
 // wrangler.jsonc: "run_worker_first" sends every request here.
+// core.anawj.com/kit and /kit/… (routes too) is the one fixed link to the newest gallery: a 302 to /ui/<latest>/kit/…,
+// "latest" read from the same versions.json the build writes, so no version is typed by hand per release.
 
 const NOINDEX = 'noindex, nofollow';
 // x.y.z with an optional pre-release (1.0.0-rc.1), the same shape as tools/semver.mjs VERSION_RE
@@ -10,6 +12,7 @@ const SEMVER = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
 // Files by type (the gallery's manifest and icons too: it is installable), and the gallery's folders (/kit/, /kit/shell/, …: their index.html; without the "/", a redirect).
 const VERSIONED = new RegExp(String.raw`^/ui/${SEMVER}/(?:(?:ui|theme|settings|kit|icons)/[\w./-]*\.(?:js|css|html|svg|png|webmanifest|d\.ts)|kit(?:/[\w-]+)*/?)$`);
 const LISTING = '/ui/versions.json';
+const NEWEST_KIT = /^\/kit(\/(?:[\w-]+\/)*)?$/;
 const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8',
   svg: 'image/svg+xml', png: 'image/png', webmanifest: 'application/manifest+json', json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
 // public code, no cookies or credentials, so any app origin may import it (and <link> its CSS)
@@ -27,6 +30,8 @@ export default {
   async fetch(request, env) {
     if (request.method !== 'GET' && request.method !== 'HEAD') return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     const url = new URL(request.url);
+    const kit = NEWEST_KIT.exec(url.pathname);
+    if (kit) return newestKit(env, url, kit[1] || '/');
     if ((url.pathname !== LISTING && !VERSIONED.test(url.pathname)) || url.pathname.includes('..')) return notFound();   // no folder listings, no other files
 
     // a folder (address ending in "/") serves its index.html; without the "/", the browser is sent to it (as GitHub
@@ -54,3 +59,11 @@ export default {
 const asset = (env, url, file) => env.ASSETS.fetch(new Request(new URL('/' + file, url), { method: 'GET' }));
 const redirect = (url, path) => Response.redirect(new URL(path + url.search, url).toString(), 301);
 const notFound = () => new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': NOINDEX } });
+
+// a short-lived redirect (the target moves with each release); no listing yet or a broken one: 404, not a loop
+async function newestKit(env, url, rest) {
+  const res = await asset(env, url, LISTING.slice(1));
+  const latest = res.status === 200 ? (await res.json().catch(() => null))?.latest : null;
+  if (typeof latest !== 'string' || !new RegExp(`^${SEMVER}$`).test(latest)) return notFound();
+  return new Response(null, { status: 302, headers: { Location: new URL(`/ui/${latest}/kit${rest}${url.search}`, url).toString(), 'Cache-Control': 'public, max-age=60', 'X-Robots-Tag': NOINDEX } });
+}

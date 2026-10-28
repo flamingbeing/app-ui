@@ -69,3 +69,20 @@ test('only GET and HEAD', async () => {
   assert.equal((await get('/ui/1.0.0/ui/index.js', 'POST')).status, 405);
   assert.equal((await get('/ui/1.0.0/ui/index.js', 'HEAD')).status, 200);
 });
+
+test('/kit and /kit/…: a 302 to the newest gallery, kept only a minute; the version comes from versions.json', async () => {
+  for (const [from, to] of [['/kit', '/ui/1.0.0/kit/'], ['/kit/', '/ui/1.0.0/kit/'], ['/kit/shell/', '/ui/1.0.0/kit/shell/'], ['/kit?x=1', '/ui/1.0.0/kit/?x=1']]) {
+    const r = await get(from);
+    assert.equal(r.status, 302, from);
+    assert.equal(r.headers.get('Location'), BASE + to, from);
+    assert.equal(r.headers.get('Cache-Control'), 'public, max-age=60');
+  }
+  assert.equal((await get('/kit', 'HEAD')).status, 302);
+  for (const p of ['/kitchen', '/kit/../x', '/kit/a.js', '/kit//']) assert.equal((await get(p)).status, 404, p);
+  const next = { ASSETS: { fetch: async () => new Response('{"latest":"2.1.0-rc.2"}') } };
+  assert.equal((await worker.fetch(new Request(BASE + '/kit'), next)).headers.get('Location'), BASE + '/ui/2.1.0-rc.2/kit/');
+  for (const body of ['', 'nope', '{"latest":"../x"}', '{}']) {
+    const bad = { ASSETS: { fetch: async () => new Response(body) } };
+    assert.equal((await worker.fetch(new Request(BASE + '/kit'), bad)).status, 404, body);
+  }
+});
