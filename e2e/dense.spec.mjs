@@ -23,7 +23,7 @@ const targets = page => page.evaluate(() => {
 
 for (const width of [390, 820, 1280]) {
   test.describe(`at ${width} px`, () => {
-    for (const look of ['a', 'b', 'c', 'd']) {
+    for (const look of ['a', 'b', 'c', 'd', 'e']) {
       for (const screen of ['readings', 'log', 'grid']) {
         test(`look ${look.toUpperCase()}, ${screen}: clean (axe), targets 24 px or more, fits; screenshot kept`, async ({ sized }, info) => {
           const page = await sized(width);
@@ -153,7 +153,7 @@ test('look B: the colour band stays one colour as the title scrolls under the ba
 
 test('readable and lined up: no text under 12 px, stepper fields 32 px, one left edge, the bar title centred, unset times quiet', async ({ sized }) => {
   const page = await sized(390);
-  for (const look of ['a', 'b', 'c', 'd']) {
+  for (const look of ['a', 'b', 'c', 'd', 'e']) {
     await page.goto(`${DENSE}?look=${look}`);
     await settled(page);
     const tiny = await page.evaluate(() => [...document.querySelectorAll('#readings *')]

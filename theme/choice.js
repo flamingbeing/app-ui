@@ -5,7 +5,7 @@
 // constructed stylesheet (palette-css.js; constructed, so the Content-Security-Policy needs no inline style). Nothing
 // chosen, an unknown value or no storage: the defaults, so a new option stays off until picked. v0's stored
 // { theme, layout } reads as it did.
-import { THEMES, LAYOUTS, DENSITIES, cleanChoice } from './schema.js';
+import { THEMES, LAYOUTS, DENSITIES, SURFACE_IDS, cleanChoice } from './schema.js';
 import { paletteCss, accentOf, palettes } from './palette-css.js';
 import { cleanHex } from './colour.js';
 import { lookOf, LOOK_IDS } from './looks.js';
@@ -100,11 +100,13 @@ function show(c) {
  * Shows this device's choice; call once, as early as the page can (the starter's boot.js, before first paint).
  * Starts the glass guard too (guard.js): its verdict, once found, shows the choice again.
  * @param {import('./palette-css.js').AppTheme} [appTheme]  the app's own defaults: accent, its colour (hex); look,
- *   the look a device that picked none gets (looks.js ids; none: A)
+ *   the look a device that picked none gets (looks.js ids; none: A); surface, the ground a device that picked none
+ *   gets (schema.js SURFACE_IDS; none: theme.css's)
  */
 export function applyTheme(appTheme = {}) {
   const accent = cleanHex(appTheme.accent);
-  app = { ...(accent ? { accent } : {}), ...(LOOK_IDS.includes(appTheme.look ?? '') ? { look: appTheme.look } : {}) };
+  app = { ...(accent ? { accent } : {}), ...(LOOK_IDS.includes(appTheme.look ?? '') ? { look: appTheme.look } : {}),
+    ...(appTheme.surface && SURFACE_IDS.includes(appTheme.surface) ? { surface: appTheme.surface } : {}) };
   show(shown ?? themeChoice());
   if (!stopGuard) stopGuard = startGuard(() => show(shown ?? themeChoice()));
 }

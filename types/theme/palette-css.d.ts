@@ -25,9 +25,11 @@ export function accentOf(choice: Partial<Choice>, app?: AppTheme): string;
 export type Choice = import("./schema.js").Choice;
 export type Palette = import("./colour.js").Palette;
 /**
- * the app's own defaults (config): accent colour, look id
+ * the app's own defaults (config): accent colour,
+ * look id, ground (SURFACES id)
  */
 export type AppTheme = {
     accent?: string;
     look?: string;
+    surface?: string;
 };

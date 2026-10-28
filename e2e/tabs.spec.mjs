@@ -34,7 +34,7 @@ async function swipe(page, x0, x1, y = 420) {
   await settled(page);
 }
 
-for (const look of ['a', 'b', 'c', 'd']) {
+for (const look of ['a', 'b', 'c', 'd', 'e']) {
   test(`look ${look}: <button> tabs and bar buttons have no border or fill; bar buttons are link-coloured, New bold`, async ({ sized }) => {
     const page = await load(sized, `&look=${look}`);
     const tabs = await page.locator('nav.ui-tabbar button.ui-tab').evaluateAll(els => els.map(e => {
