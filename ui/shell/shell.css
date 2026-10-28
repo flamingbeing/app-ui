@@ -26,7 +26,8 @@
 .ui-sidebar .ui-search { margin-bottom: var(--pad); }
 .ui-side-link { display: flex; align-items: center; justify-content: space-between; min-height: var(--tap);
   padding: 0 var(--pad); border-radius: var(--radius); color: var(--text); text-decoration: none; }
-.ui-side-link[aria-current="page"] { background: var(--selection); color: var(--accent); font-weight: 600; }
+/* --link, as the current tab: it is kept 4.5:1 on the selection tint (colour.js pairs); the raw accent fell to 3.6 (Violet) */
+.ui-side-link[aria-current="page"] { background: var(--selection); color: var(--link); font-weight: 600; }
 .ui-side-link:hover { background: color-mix(in srgb, var(--selection) 60%, transparent); }
 @media (max-width: 599.98px) {
   .ui-shell.is-drawer-open::before { content: ''; position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / .35); }
