@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.25
+## 1.0.0-rc.26
 - The current side bar link uses `--link`, as the current tab does, which the palette keeps 4.5:1 on its tint (the raw
   accent fell to 3.6:1 there for Violet); a test reads every preset in light and dark. The e2e axe helper takes
   `{ within, only }`.
