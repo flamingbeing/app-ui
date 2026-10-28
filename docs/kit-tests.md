@@ -19,6 +19,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Closing | 390 px: a sheet slides down to the bottom edge before it shuts (Esc); a closed hold menu fades out, inert, with no roles or ids, gone within 600 ms; Still closes both at once | |
 | Select toggle | an icon `[data-edit-for]` button keeps its icon and name while off and says Done while on | |
 | Look E chip and search | look E: the synced chip shows only its icon (the word stays for screen readers), other states show the word; the shell search box has no outline until focused | |
+| Side bar contrast | 1280 px: the current side bar link passes colour contrast (axe) in every preset, light and dark, default look | |
 | Select mode | Select/Done; listbox + aria-selected; tap ticks (doesn't open); drag down the ticks takes a range; action bar replaces the tab bar; `data-needs` enables buttons; Esc leaves | selecting |
 | Sheet | opens at medium; drag up to large, down to medium, down to close (phone); Enter on the grabber cycles; Back closes it; centred dialog from 840 px, bottom edge below | open |
 | Components | 390 px: a pushed screen's Back shows in the bar (the screen's own is hidden), names the screen under it and pops; Select all stays on one line; look A's serif on the page title only; selects 44 px high, checkboxes 20 px or more; select mode's count in the text colour, off buttons faded, Delete red; the sheet's Done has no border and its chip row runs edge to edge; look C's action bar runs along the bottom edge | |
