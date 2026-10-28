@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.24
+- Theme switch: `themeSwitch` / `lookSwitch` lay themselves out (`theme/theme.css`, zero specificity): one row per
+  setting, its name at the start and its control at the end, two to a row when there is room. Before, a page without
+  its own `.theme-switch` rules (any app that does not load the gallery CSS) got the labels and pickers run together.
+
 ## 1.0.0-rc.23
 - Data grid: a cell holding one field (an editable cell, such as a name box in a rota) is reachable from the keyboard:
   Enter or F2 goes into the field (its text selected), Esc in it comes back to the cell; arrows in the field stay in
