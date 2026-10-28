@@ -9,7 +9,7 @@ import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
 import { dragRange, needs, TICKS } from '../ui/select-mode.js';
 import { swipeGoesBack, edgeBackOn, EDGE } from '../ui/screens.js';
-import { swipeIntent, pageStep, swipeEdge } from '../ui/tab-pages.js';
+import { swipeIntent, pageStep, swipeEdge, rubber, springPath } from '../ui/tab-pages.js';
 
 test('the port rules: hold 500 ms within 10 px; ticks and screen edge are finger-sized', () => {
   assert.equal(HOLD_MS, 500);
@@ -150,12 +150,37 @@ test('tab swipe: no start within 24 px of an edge, or an eighth of the width on 
   assert.equal(swipeEdge(430), 53.75);
 });
 
-test('tab swipe: past a third of the width or a flick goes to the next or previous page, if there is one', () => {
-  assert.equal(pageStep(-150, 0, 400, true, true), 1);
-  assert.equal(pageStep(150, 0, 400, true, true), -1);
+test('tab swipe: past half the width with its throw (a slow drag or a flick) goes to the next or previous page, if there is one', () => {
+  assert.equal(pageStep(-210, 0, 400, true, true), 1, 'past half');
+  assert.equal(pageStep(210, 0, 400, true, true), -1);
+  assert.equal(pageStep(-150, 0, 400, true, true), 0, 'short of half, slow: back (as iOS)');
   assert.equal(pageStep(-60, -0.8, 400, true, true), 1, 'a flick');
+  assert.equal(pageStep(-20, -1.2, 400, true, true), 1, 'a quick short flick');
   assert.equal(pageStep(-60, 0, 400, true, true), 0, 'too short, too slow');
-  assert.equal(pageStep(-200, 0, 400, true, false), 0, 'no next page');
-  assert.equal(pageStep(200, 0, 400, false, true), 0, 'no previous page');
-  assert.equal(pageStep(-200, 0.8, 400, true, true), 1, 'far enough, though the finger turned back at the end');
+  assert.equal(pageStep(-300, 0, 400, true, false), 0, 'no next page');
+  assert.equal(pageStep(300, 0, 400, false, true), 0, 'no previous page');
+  assert.equal(pageStep(-250, 0.5, 400, true, true), 0, 'the finger turned back at the end: back');
+});
+
+test('rubber band: gives less and less where there is no page, never past the width', () => {
+  assert.equal(rubber(0, 400), 0);
+  assert.ok(rubber(100, 400) < 100 && rubber(100, 400) > 40);
+  assert.ok(rubber(-100, 400) === -rubber(100, 400));
+  assert.ok(rubber(800, 400) - rubber(400, 400) < rubber(400, 400) - rubber(0, 400));
+  assert.ok(rubber(1e6, 400) < 400);
+});
+
+test('spring glide: starts where let go, lands exactly, never passes the target, keeps the finger’s speed', () => {
+  const going = springPath(-120, -400, -1.5);
+  assert.equal(going[0], -120);
+  assert.equal(going.at(-1), -400);
+  assert.ok(going.every(x => x >= -400 && x <= -120), 'no overshoot, even from a hard flick');
+  assert.ok(going.length > 8 && going.length < 50, `about a quarter to half a second (${going.length} frames)`);
+  const slow = springPath(-120, -400, 0), fast = springPath(-120, -400, -1);
+  assert.ok(fast[1] - fast[0] < slow[1] - slow[0], 'a flick moves further on its first frame');
+  const back = springPath(80, 0, 0);
+  assert.ok(back.every((x, i) => i === 0 || x <= back[i - 1]), 'back to rest without bouncing');
+  const away = springPath(-50, 0, -0.5);
+  assert.ok(away[1] < -50, 'a finger still moving away carries the page on a little before it turns');
+  assert.deepEqual(springPath(0, 0, 0), [0, 0]);
 });

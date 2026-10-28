@@ -4,7 +4,12 @@
 // its own scroll; tapping the current tab with a screen pushed over it goes back to the page. The host sends "ui-tab"
 // (detail.page, detail.tab) after each change.
 // On a phone (< 600 px) a sideways swipe on the content moves to the next or previous page, the pages following the
-// finger (a pager); past a third of the width or a flick, it goes. Never on a pushed screen, in a field, editor,
+// finger (a pager) and, let go, glide on as iOS's paging does: a spring that starts at the finger's speed and settles
+// without overshoot (springPath), to the next page if the finger's throw would carry it past half the width
+// (pageStep), else back. Where there is no page the page stretches like iOS's rubber band (rubber). The pages beside
+// are laid out at touchstart, so the first move has nothing to build. The bar's title cross-fades to the coming page's
+// (its .ui-large-title) as the page passes halfway; anything in the bar marked data-swipe-fade fades out with the
+// swipe and back in on the new page. Never on a pushed screen, in a field, editor,
 // sideways scroller, dialog, sheet or open menu, in select mode, with text selected, or within swipeEdge() px of either edge (the larger of EDGE and an eighth of the width)
 // (the system's Back gestures and screens.js's edge swipe). A mostly vertical move scrolls instead. Less motion: the
 // swipe switches without the slide. Off: data-swipe="off" on the tab bar (or <html>), or { swipe: false }.
@@ -22,17 +27,46 @@ export function swipeIntent(mx, my) {
   return Math.abs(mx) > Math.abs(my) * 1.3 ? 'x' : 'y';
 }
 
-/** Where a let-go swipe goes (pure): 1 the next page, -1 the previous one, 0 back to this one.
+/** How far ahead a let-go swipe's speed is projected, in ms (iOS's paging: the throw counts, not just the drag). */
+export const THROW_MS = 200;
+
+/** Where a let-go swipe goes (pure): 1 the next page, -1 the previous one, 0 back to this one. Like iOS's paging,
+ * the page goes when where it is plus its throw (v x THROW_MS) is past half the width: a slow drag past half, or a
+ * flick; a finger that turns back at the end takes it back.
  * @param {number} dx  finger travel, negative = to the left @param {number} v  px/ms, signed like dx
  * @param {number} width @param {boolean} hasPrev @param {boolean} hasNext */
 export function pageStep(dx, v, width, hasPrev, hasNext) {
-  if (dx < 0 && hasNext && swipeGoesBack(-dx, -v, width)) return 1;
-  if (dx > 0 && hasPrev && swipeGoesBack(dx, v, width)) return -1;
+  const end = dx + v * THROW_MS;
+  if (dx < 0 && hasNext && end < -width / 2) return 1;
+  if (dx > 0 && hasPrev && end > width / 2) return -1;
   return 0;
 }
 
-/** How much of a finger's travel shows where there is no page that way (the page gives a little, then holds). */
-const RUBBER = 3;
+/** iOS's rubber band (pure): how far a page shows when pulled d px where there is no page, for a width w. It gives
+ * less and less, never more than w. @param {number} d @param {number} w */
+export const rubber = (d, w) => Math.sign(d) * (1 - 1 / (Math.abs(d) * 0.55 / w + 1)) * w;
+
+/** How quickly the let-go glide settles: the spring's response in s (iOS's paging feel). */
+export const SPRING_S = 0.3;
+
+/** A critically damped spring's path (pure), one position per 60 Hz frame from `from` to `to`, starting at v px/ms
+ * (the finger's speed, so the page doesn't jerk when let go). The speed is capped so it lands without passing `to`
+ * (no page waits beyond it). The last position is exactly `to`.
+ * @param {number} from @param {number} to @param {number} v @param {number} [response] */
+export function springPath(from, to, v, response = SPRING_S) {
+  const w = 2 * Math.PI / response, a = from - to;
+  // toward `to` faster than w|a| would pass it; cap there (the fastest start that still lands without overshoot)
+  const v0 = Math.sign(v) === -Math.sign(a) ? -Math.sign(a) * Math.min(Math.abs(v * 1000), w * Math.abs(a)) : v * 1000;
+  const b = v0 + w * a;
+  const out = [from];
+  for (let i = 1; i <= 90; i++) {
+    const t = i / 60, x = (a + b * t) * Math.exp(-w * t);
+    if (Math.abs(x) < 1) break;   // the last pixel is not seen; crawling to it is
+    out.push(to + x);
+  }
+  out.push(to);
+  return out;
+}
 
 /** How far from either edge a tab swipe may not start (pure): the system's Back gesture zone, wider on wide phones.
  * @param {number} width */
@@ -115,7 +149,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   const on = () => swipe && innerWidth < TABLET_MIN && bar.dataset.swipe !== 'off' && html.dataset.swipe !== 'off';
   /** @type {number | null} */
   let x0 = null;
-  let y0 = 0, dx = 0, w = 0, busy = false;
+  let y0 = 0, dx = 0, raw = 0, w = 0, busy = false;
   /** @type {'x' | 'y' | null} */
   let dir = null;
   /** @type {[number, number][]} */
@@ -124,26 +158,46 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   let prev = null;
   /** @type {HTMLElement | null} */
   let next = null;
+  // the bar's title cross-fades to the coming page's at halfway; its data-swipe-fade parts fade out (filter, so the
+  // bar's own opacity rules stand)
+  const fades = () => /** @type {HTMLElement[]} */ ([...root.querySelectorAll('.ui-bar [data-swipe-fade]')]);
+  const small = /** @type {HTMLElement | null} */ (root.querySelector('.ui-bar .ui-bar-title'));
+  let own = '';
+  /** the page coming in with the page at x, or null @param {number} x */
+  const coming = x => x > 0 ? prev : x < 0 ? next : null;
+  /** how far the page at x has gone, 0 to 1 (0 where no page comes) @param {number} x */
+  const gone = x => coming(x) ? Math.min(1, Math.abs(x) / w) : 0;
+  /** the bar's title for the page at x @param {number} x */
+  const titleAt = x => gone(x) >= .5 ? coming(x)?.querySelector('.ui-large-title')?.textContent ?? own : own;
+  /** @param {number} x */
+  const titleShows = x => Math.abs(1 - 2 * gone(x));
+  /** @param {number} x */
+  const fadeShows = x => Math.max(0, 1 - 2 * gone(x));
   const place = () => {
     current.style.transform = `translateX(${dx}px)`;
     if (prev) prev.style.transform = `translateX(${dx - w}px)`;
     if (next) next.style.transform = `translateX(${dx + w}px)`;
+    if (small) { small.textContent = titleAt(dx); small.style.filter = `opacity(${titleShows(dx)})`; }
+    for (const f of fades()) f.style.filter = `opacity(${fadeShows(dx)})`;
   };
-  function begin() {
+  // the pages beside are laid out as the finger lands, out of sight, so the first move only moves them
+  function prepare() {
     const all = stops(), i = all.indexOf(current);
     prev = all[i - 1] ?? null; next = all[i + 1] ?? null;
     w = host.clientWidth || innerWidth;
+    own = small?.textContent ?? '';
     if (still()) return;
     host.classList.add('is-paging');
-    for (const n of [prev, next]) {
+    for (const [n, off] of /** @type {[HTMLElement | null, number][]} */ ([[prev, -w], [next, w]])) {
       if (!n) continue;
       n.hidden = false;
       n.classList.add('is-beside');
       n.style.top = `${scrollY - (ys.get(n) ?? 0)}px`;   // where it will be once shown at its own scroll
+      n.style.transform = `translateX(${off}px)`;
     }
   }
   function unpage() {
-    host.classList.remove('is-paging');
+    host.classList.remove('is-paging', 'is-moving');
     current.style.transform = '';
     for (const n of [prev, next]) {
       if (!n) continue;
@@ -151,6 +205,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       n.style.transform = ''; n.style.top = '';
       if (n !== current) n.hidden = true;
     }
+    for (const f of fades()) f.style.filter = '';
+    if (small) small.style.filter = '';
   }
   l.on(document, 'touchstart', (/** @type {TouchEvent} */ e) => {
     x0 = null;
@@ -162,7 +218,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     if (html.classList.contains('ui-menu-open') || document.querySelector('dialog[open]') || host.querySelector('.is-editing')) return;
     const sel = getSelection();
     if (sel && !sel.isCollapsed) return;
-    x0 = t.clientX; y0 = t.clientY; dx = 0; dir = null; hist = [[e.timeStamp, t.clientX]];
+    x0 = t.clientX; y0 = t.clientY; dx = raw = 0; dir = null; hist = [[e.timeStamp, t.clientX]];
+    prepare();
   }, { passive: true });
   l.on(document, 'touchmove', (/** @type {TouchEvent} */ e) => {
     if (x0 === null) return;
@@ -170,12 +227,13 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     if (!dir) {
       dir = swipeIntent(mx, t.clientY - y0);
       if (!dir) return;
-      if (dir === 'y') { x0 = null; return; }   // a scroll: leave it to the page
-      begin();
+      if (dir === 'y') { x0 = null; unpage(); return; }   // a scroll: leave it to the page
+      host.classList.add('is-moving');
     }
     if (e.cancelable) e.preventDefault();
-    // no page that way: the page gives a little, then holds
-    dx = (mx < 0 && !next) || (mx > 0 && !prev) ? mx / RUBBER : mx;
+    raw = mx;
+    // no page that way: the page stretches, less and less (iOS's rubber band)
+    dx = (mx < 0 && !next) || (mx > 0 && !prev) ? rubber(mx, w) : mx;
     hist.push([e.timeStamp, t.clientX]);
     if (hist.length > 5) hist.shift();
     if (!still()) place();
@@ -183,24 +241,38 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   const end = async (/** @type {Event} */ e) => {
     if (x0 === null) return;
     x0 = null;
-    if (dir !== 'x') return;
-    const step = pageStep(dx, velocity(hist), w, !!prev, !!next);
+    if (dir !== 'x') { unpage(); return; }
+    if (small) small.textContent = own;   // the landing (go) names the bar; still or back, it keeps its own
+    const v = velocity(hist);
+    const step = pageStep(dx, v, w, !!prev, !!next);
     const to = step === 1 ? next : step === -1 ? prev : null;
-    // a right swipe on the first page (nothing before it; dx was eased to a third): tell the app (it opens a drawer)
-    const missing = e.type === 'touchend' && !prev && dx > 0 && swipeGoesBack(dx * RUBBER, velocity(hist), w);
-    if (still() || !host.classList.contains('is-paging')) { if (to) go(to); else if (missing) onPrevMissing?.(); return; }
+    // a right swipe on the first page (nothing before it): tell the app (it opens a drawer)
+    const missing = e.type === 'touchend' && !prev && raw > 0 && swipeGoesBack(raw, v, w);
+    if (still() || !host.classList.contains('is-paging')) { unpage(); if (to) go(to); else if (missing) onPrevMissing?.(); return; }
     busy = true;
-    const last = step === 1 ? -w : step === -1 ? w : 0;
-    const glide = (/** @type {HTMLElement} */ el, /** @type {number} */ off) => el.animate(
-      [{ transform: `translateX(${dx + off}px)` }, { transform: `translateX(${last + off}px)` }],
-      { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' }).finished.catch(() => {});
-    /** @type {[HTMLElement, number][]} */
-    const moving = [];
-    for (const [el, off] of /** @type {[HTMLElement | null, number][]} */ ([[current, 0], [prev, -w], [next, w]])) if (el) moving.push([el, off]);
-    await Promise.all(moving.map(([el, off]) => glide(el, off)));
+    // the glide: a spring from where the finger left the page, at its speed (none from a stretched end), one frame each
+    const stretched = dx !== raw;
+    const path = springPath(dx, step === 1 ? -w : step === -1 ? w : 0, stretched ? 0 : v);
+    const timing = { duration: (path.length - 1) * 1000 / 60, easing: 'linear', fill: /** @type {const} */ ('forwards') };
+    /** @type {Animation[]} */
+    const runs = [];
+    for (const [el, off] of /** @type {[HTMLElement | null, number][]} */ ([[current, 0], [prev, -w], [next, w]])) {
+      if (el) runs.push(el.animate(path.map(x => ({ transform: `translateX(${x + off}px)` })), timing));
+    }
+    for (const f of fades()) runs.push(f.animate(path.map(x => ({ filter: `opacity(${fadeShows(x)})` })), timing));
+    if (small) {
+      runs.push(small.animate(path.map(x => ({ filter: `opacity(${titleShows(x)})` })), timing));
+      // the title's words change where the glide passes halfway (unseen: it is faded out there)
+      const half = path.findIndex(x => titleAt(x) !== titleAt(path[0]));
+      if (half >= 0) setTimeout(() => { small.textContent = titleAt(path[half]); }, half * 1000 / 60);
+      else small.textContent = titleAt(path[0]);
+    }
+    await Promise.all(runs.map(a => a.finished.catch(() => {})));
     unpage();
     if (to) go(to); else if (missing) onPrevMissing?.();
-    for (const [el] of moving) el.getAnimations().forEach(a => a.cancel());
+    for (const a of runs) a.cancel();
+    // the new page's bar parts come in
+    if (to) for (const f of fades()) f.animate([{ filter: 'opacity(0)' }, { filter: 'opacity(1)' }], { duration: 200, easing: 'ease-out' });
     busy = false;
   };
   l.on(document, 'touchend', end, { passive: true });

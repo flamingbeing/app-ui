@@ -34,7 +34,10 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   over a pushed screen goes back to it; the host sends `ui-tab` (`detail.page`, `detail.tab`). `startGestures()`
   starts it (`kit.tabs`: `go`, `current`); `tabPages()` is exported for a page without the rest.
 - **Swipe between tabs** (phones, under 600 px): a sideways swipe on the page moves to the next or previous tab page,
-  the pages following the finger. Not on a pushed screen, in a field, editor, sideways scroller, dialog, sheet or
+  the pages following the finger. Let go, they glide on as iOS's paging does: a spring that starts at the finger's
+  speed and settles without overshoot, to the next page when the drag plus its throw passes half the width, else
+  back; at either end the page stretches like iOS's rubber band. The bar's title cross-fades to the new page's large
+  title at halfway; mark other bar parts that belong to one page `data-swipe-fade` to fade them with it. Not on a pushed screen, in a field, editor, sideways scroller, dialog, sheet or
   open menu, in select mode, with text selected, or within 24 px of either edge (Back); a mostly vertical move
   scrolls. Less motion switches without the slide. Turn it off with `data-swipe="off"` on the tab bar.
 - **Tab icons and bar buttons.** `<button class="ui-tab">` looks like a link tab (no border or fill); a

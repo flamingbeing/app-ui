@@ -130,6 +130,82 @@ test('swipe: the page follows the finger, the next one beside it', async ({ size
   expect(await shown(page)).toEqual(['home']);
 });
 
+// every frame's page positions and bar title from now on, until read @param {import('@playwright/test').Page} page
+async function frames(page) {
+  await page.evaluate(() => {
+    window.__frames = [];
+    const x = id => { const e = document.getElementById(id); return e.hidden ? null : Math.round(e.getBoundingClientRect().x); };
+    const f = () => {
+      const t = document.querySelector('.ui-bar-title');
+      window.__frames.push({ home: x('home'), rooms: x('rooms'), title: t.textContent, show: Number(/opacity\(([\d.e-]+)\)/.exec(getComputedStyle(t).filter)?.[1] ?? 1) });
+      requestAnimationFrame(f);
+    };
+    requestAnimationFrame(f);
+  });
+  return async () => page.evaluate(() => window.__frames);
+}
+
+test('swipe: let go, the pages glide on at the finger’s speed and land without a jump; the bar title cross-fades', async ({ sized }) => {
+  const page = await load(sized);
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  const read = await frames(page);
+  await send('touchStart', 300, 420);
+  for (const x of [290, 270, 240, 200, 150, 120]) { await send('touchMove', x, 420); await page.waitForTimeout(16); }
+  await send('touchEnd', 0, 0);
+  await expect.poll(() => shown(page)).toEqual(['rooms']);
+  await settled(page);
+  await page.waitForTimeout(100);
+  const all = await read();
+  const moving = all.filter(f => f.home !== null && f.home < 0);
+  expect(moving.length).toBeGreaterThan(8);
+  for (const f of moving) expect(Math.abs(f.rooms - f.home - 390), 'side by side every frame').toBeLessThanOrEqual(1);
+  for (let i = 1; i < moving.length; i++) expect(moving[i].home, 'only ever onward').toBeLessThanOrEqual(moving[i - 1].home);
+  const glide = moving.slice(moving.findIndex(f => f.home < -180));
+  expect(glide.length * 1000 / 60, 'a third of a second or so, not a crawl').toBeLessThan(500);
+  const landed = all.findIndex(f => f.home === null);
+  expect(Math.abs(all[landed - 1].rooms), 'lands where the glide ended: no jump').toBeLessThanOrEqual(2);
+  for (const f of all.slice(landed)) expect(f.rooms).toBe(0);
+  // the title: Plants fading out, Rooms fading in after halfway, never both at full
+  expect(all.find(f => f.home !== null && f.home > -195 && f.home < -150)?.title).toBe('Plants');
+  const later = all.find(f => f.home !== null && f.home < -250);
+  expect(later?.title).toBe('Rooms');
+  expect(later?.show).toBeGreaterThan(0);
+  expect(later?.show).toBeLessThan(1);
+  expect(all.at(-1)).toMatchObject({ title: 'Rooms', show: 1 });
+});
+
+test('swipe: let go short of half, the page springs back and keeps its title; at an end it stretches, less and less', async ({ sized }) => {
+  const page = await load(sized);
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  await page.evaluate(() => document.querySelector('.ui-bar').insertAdjacentHTML('beforeend', '<span id="fader" data-swipe-fade>x</span>'));
+  const read = await frames(page);
+  await send('touchStart', 300, 420);
+  for (const x of [290, 270, 240, 200, 160]) await send('touchMove', x, 420);
+  for (let i = 0; i < 6; i++) { await page.waitForTimeout(40); await send('touchMove', 160 + (i % 2), 420); }   // held
+  expect(Number(await page.locator('#fader').evaluate(e => /opacity\(([\d.]+)/.exec(e.style.filter)?.[1]))).toBeLessThan(.4);
+  await send('touchEnd', 0, 0);
+  await settled(page);
+  expect(await shown(page)).toEqual(['home']);
+  const back = (await read()).filter(f => f.rooms !== null);
+  expect(back.at(-1)?.home ?? 0).toBeGreaterThan(-3);
+  expect(back.every(f => f.title === 'Plants')).toBe(true);
+  expect(await page.locator('#fader').evaluate(e => e.style.filter)).toBe('');
+  // nothing before the first page: the pull stretches and gives less the further it goes
+  const at = async x => { await send('touchMove', x, 420); return page.locator('#home').evaluate(e => Math.round(e.getBoundingClientRect().x)); };
+  await send('touchStart', 80, 420);
+  await at(95);
+  const a = await at(180), b = await at(280), c = await at(380);
+  expect(a).toBeGreaterThan(30);
+  expect(a).toBeLessThan(100);
+  expect(b - a).toBeLessThan(a);
+  expect(c - b).toBeLessThan(b - a);
+  await send('touchEnd', 0, 0);
+  await settled(page);
+  expect(await page.locator('#home').evaluate(e => [e.style.transform, Math.round(e.getBoundingClientRect().x)])).toEqual(['', 0]);
+});
+
 test('swipe does nothing: a vertical scroll, the back edge, a sideways scroller, a field, a pushed screen, swipe off', async ({ sized }) => {
   const page = await load(sized);
   // mostly vertical

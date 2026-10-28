@@ -9,6 +9,8 @@
 .ui-screens.is-swiping .ui-screen.is-top { position: relative; z-index: 2; box-shadow: -8px 0 24px rgb(0 0 0 / .12); }
 /* tab pages mid-swipe (tab-pages.js): the pages beside the current one sit at its sides, out of the flow */
 .ui-screens.is-paging > .ui-screen.is-beside { position: absolute; inset: 0 0 auto; }
+/* once the finger moves them, the pages get their own layers, so each frame only moves them */
+.ui-screens.is-moving > .ui-screen:not([hidden]) { will-change: transform; }
 /* a tapped tab's page slides in (tab-pages.js): clipped, so its start offset can't widen the page */
 .ui-screens.is-sliding { overflow-x: clip; }
 /* while a push or pop slides, the two screens overlap (as in the swipe) instead of one sitting below the other: the
