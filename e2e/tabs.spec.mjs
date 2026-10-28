@@ -233,6 +233,20 @@ test('a tab page keeps its scroll; tapping the current tab over a pushed screen 
   expect(await page.evaluate(() => [window.kit.screens.depth(), history.state?.uiScreens ?? 0])).toEqual([0, 0]);
 });
 
+test('a tab left from a pushed screen comes back at its own scroll, not the pushed screen\'s', async ({ sized }) => {
+  const page = await load(sized);
+  await page.evaluate(() => scrollTo(0, 200));
+  await page.locator('#plants .ui-row', { hasText: 'Fern' }).dispatchEvent('click');
+  await expect.poll(() => page.evaluate(() => window.kit.screens.depth())).toBe(1);
+  await page.evaluate(() => { document.body.style.minHeight = '4000px'; scrollTo(0, 900); });
+  await page.locator('nav.ui-tabbar .ui-tab', { hasText: 'Jobs' }).dispatchEvent('click');
+  await expect.poll(() => shown(page)).toEqual(['jobs']);
+  await page.locator('nav.ui-tabbar .ui-tab', { hasText: 'Plants' }).dispatchEvent('click');
+  await expect.poll(() => shown(page)).toEqual(['home']);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(150);
+  expect(await page.evaluate(() => scrollY)).toBeLessThan(400);
+});
+
 test('the side-bar button opens the side bar as a drawer on a phone; a link goes there and closes it, Esc closes', async ({ sized }) => {
   const page = await load(sized, '&look=d');
   const menu = page.getByRole('button', { name: 'Sections' });

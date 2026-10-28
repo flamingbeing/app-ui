@@ -69,7 +69,7 @@ drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeInten
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
 | Reduce Motion | the swipe changes the tab with nothing moved | |
 | Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
-| Scroll and Back | each page keeps its scroll; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
+| Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 
@@ -109,7 +109,7 @@ stand-in for `@core/settings` on the page.
 | Sizes | extra-dense is 32 / 24 px; unticking it gives the density's own sizes; Comfortable gets 44 / 36 px | |
 | Readable, lined up | looks A to D at 390 px: no text under 12 px, stepper fields 32 px tall, the screen's left edge matches the controls', the collapsed bar title centred, an unset key time reads "Not set" in normal weight | |
 | Segmented | arrows pick and move focus; a second tap clears a clearable one, Space does not; a plain one keeps its pick | |
-| Stepper | − and + step by the step, stay in min/max, an empty box starts at `data-start`; buttons out of the Tab order | |
+| Stepper | − and + step by the step, stay in min/max, an empty box starts at `data-start`; buttons out of the Tab order; (unit) a typed value finer than the step moves by one step | |
 | Toolbar | one Tab stop; arrows wrap, Home, End; Tab leaves it | |
 | Undo | clearing the boxes and setting a key time show an Undo toast, never a dialog | |
 | Look B's band | the bar keeps the band's colour once the title has scrolled under it | |
@@ -137,6 +137,7 @@ stand-in for `@core/settings` on the page.
 | Drag to reorder | dragging the grip with a finger moves the row to the new place; axe | |
 | Share out | Copy and Share (no share sheet) copy and say so; (unit) a closed share sheet is not an error | |
 | Back closes the dialog | Back closes the newest dialog first, then the one under it; the page stays (unit: dismissAll, reset) | |
+| Conflict sheet | per-field picks survive a queue change while the sheet is open, and Keep these choices sends them all | |
 | Screen history (unit) | go pushes, Back returns, a deep link gets its parent trail | |
 | Hide mode | a tap hides a button or card; the main button and inputs stay; kept after reload; Show all (unit: the saved list is cleaned) | |
 | Settings rows | ⓘ opens the rest of the help (axe with it open); Reset this page puts the section's rows back and Undo returns them | |

@@ -43,7 +43,7 @@ export const SLIDE_MS = 280;
 
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
- * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number }, host: HTMLElement,
+ * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean, onPrevMissing?: () => void }} o  screens: the page's screen stack; host: its
  *   .ui-screens; root: where the tabs and side links are (default the page); onPrevMissing: a right swipe on the
  *   first page (nothing before it)
@@ -78,7 +78,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const page = typeof target === 'string' ? find(target) : target;
     if (!page || page.parentElement !== host) return;
     if (page === current) { if (screens.depth() > 0) void screens.base(page); return; }
-    ys.set(current, scrollY);
+    ys.set(current, screens.depth() > 0 && screens.baseY ? screens.baseY() : scrollY);   // a pushed screen's scroll isn't the tab's
     const order = stops();
     const dir = Math.sign(order.indexOf(page) - order.indexOf(current));
     current = page;

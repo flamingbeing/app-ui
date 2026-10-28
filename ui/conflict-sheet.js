@@ -15,12 +15,11 @@ function sideBox(title, side, words) {
 /**
  * @param {import('./types').SyncApi} sync
  * @param {import('./types').Conflict} c
+ * @param {Record<string, import('./types').Pick>} picks  kept by the caller, so a redraw keeps the choices made
  */
-function fieldPicks(sync, c) {
-  /** @type {Record<string, import('./types').Pick>} */
-  const picks = {};
+function fieldPicks(sync, c, picks) {
   const keep = button('Keep these choices', () => sync.resolve(c.key, picks));
-  keep.disabled = true;
+  keep.disabled = c.fields.some(x => !picks[x.path]);
   const rows = c.fields.map(f => {
     /** @param {import('./types').Pick} which */
     const pick = which => () => { picks[f.path] = which; keep.disabled = c.fields.some(x => !picks[x.path]); };
@@ -48,15 +47,23 @@ export function conflictSheet(host, { sync, text = asWords, idPrefix = '' }) {
     el('form', { method: 'dialog' }, el('button', {}, 'Close')));
   host.append(open, sheet);
 
+  /** @type {Map<string, Record<string, import('./types').Pick>>} per-field choices, kept across redraws */
+  const chosen = new Map();
+  /** @param {string} key */
+  const picksOf = key => { let p = chosen.get(key); if (!p) chosen.set(key, p = {}); return p; };
   /** @param {import('./types').Conflict} c */
   const item = c => el('li', {},
     el('div', { class: 'ui-sides sides' },
       sideBox('Yours', c.mine, c.deleted.mine ? '(deleted)' : text(c.mine.value)),
       sideBox('Other device', c.theirs, c.deleted.theirs ? '(deleted)' : text(c.theirs.value))),
     el('div', { class: 'ui-inline row' }, button('Keep mine', () => sync.resolve(c.key, 'mine')), button('Keep theirs', () => sync.resolve(c.key, 'theirs'))),
-    ...(c.fields.length > 1 ? fieldPicks(sync, c) : []));
+    ...(c.fields.length > 1 ? fieldPicks(sync, c, picksOf(c.key)) : []));
   const held = () => sync.conflicts().map(c => sync.describe(c.key)).filter(d => d !== null);
-  const drawList = () => list.replaceChildren(...held().map(item));
+  const drawList = () => {
+    const now = held();
+    for (const k of chosen.keys()) if (!now.some(c => c.key === k)) chosen.delete(k);
+    list.replaceChildren(...now.map(item));
+  };
   const draw = () => {
     const n = sync.conflicts().length;
     open.hidden = !n;

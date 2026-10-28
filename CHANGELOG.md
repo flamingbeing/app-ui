@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.18
+- Tab pages: a tab left while a screen was pushed over it comes back at the tab's own scroll, not the pushed screen's
+  (`screens.baseY()`).
+- Conflict sheet: per-field Mine / Theirs picks survive the list redrawing on a queue change while the sheet is open.
+- Stepper: a typed value finer than the step moves by exactly one step (2.5 + 1 is 3.5, was 4).
+- Hide mode: an icon button named only by its `title` can be hidden (the whitespace around its icon is not a name).
+
 ## 1.0.0-rc.17
 - Hold menu, iPhone (no `navigator.vibrate`): the haptic fires before the lift's click is armed to be swallowed, and a
   click inside `.ui-haptic` is never the one swallowed, so the haptic ticks and lifting no longer opens the row.
