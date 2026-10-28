@@ -12,6 +12,7 @@ export { refusedList } from './refused-list.js';
 export { toaster } from './toast.js';
 export { alertModal, confirmModal } from './modal.js';
 export { emptyState } from './empty-state.js';
+export { hoverCard, placeCard } from './hover-card.js';
 // reference parts any app can import (a named export you don't import isn't bundled)
 export { undoToast } from './undo-toast.js';
 export { loadState } from './load-state.js';

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.20
+- Hover cards: `hoverCard(root, selector, fill)` from `@core/ui` (styles in `ui/ui.css`, `.ui-hover-card`). Rest the
+  mouse on a matching link for a moment and a small card shows what `fill(link)` returns (a note's preview, say); it
+  goes when the mouse leaves (with a moment to move onto it), on Esc, scroll or a click. Mouse only (touch and pen
+  taps are unchanged); in the top layer, so it shows over a modal sheet. `placeCard()` is the placement (below the
+  link, above it when there is no room, inside the window). The parts gallery's prose link has one.
+
 ## 1.0.0-rc.19
 - Tab pages: a tab left while a screen was pushed over it comes back at the tab's own scroll, not the pushed screen's
   (`screens.baseY()`).

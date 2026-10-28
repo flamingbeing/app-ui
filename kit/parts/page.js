@@ -1,7 +1,7 @@
 // The reference parts gallery: the undo toast, the loading and error states and the About sheet, on made-up data.
 // ?look= and ?density= preview as on the other gallery pages (preview.js). The fake update api and import map stand in for an app's.
 import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, createTransients,
-  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey } from '../../ui/index.js';
+  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard } from '../../ui/index.js';
 import { icon, gripVertical } from '../../icons/lucide.js';
 import { galleryPreview } from '../preview.js';
 
@@ -132,3 +132,11 @@ hidePage.addEventListener('click', e => {
 hideOn.addEventListener('change', drawHidden);
 $('hide-all').addEventListener('click', () => { hidden = []; drawHidden(); });
 drawHidden();
+
+// hover cards: rest the mouse on the prose sample's link for a preview of the note it points to
+hoverCard($('prose'), 'a.note-link', a => {
+  const card = document.createElement('div');
+  card.className = 'ui-prose';
+  card.innerHTML = `<h3>${a.dataset.note}</h3><p>Morning, before the heat. Tomatoes and peppers daily; herbs every other day.</p>`;
+  return card;
+});
