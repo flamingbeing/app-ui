@@ -88,6 +88,23 @@ test('idPrefix: two of a part on one page get their own ids, and the bare ids st
   expect(ids).toEqual(['status', 'second-status', 'second-version', 'second-check-update', 'second-update-msg']);
 });
 
+test('update prompt: a failed check or version load says so, with no unhandled rejection', async ({ sized }) => {
+  const page = await load(sized, 390);
+  const r = await page.evaluate(async () => {
+    const { updatePrompt } = await import('@core/ui');
+    const unhandled = [];
+    addEventListener('unhandledrejection', e => unhandled.push(String(e.reason)));
+    const host = document.createElement('div');
+    document.body.append(host);
+    const offline = async () => { throw new Error('offline'); };
+    updatePrompt(host, { update: { versionLabel: offline, checkNow: offline, retryUpdate: () => {} }, idPrefix: 'failing-' });
+    /** @type {HTMLButtonElement} */ (host.querySelector('#failing-check-update')).click();
+    await new Promise(r => setTimeout(r, 100));
+    return { version: host.querySelector('#failing-version').textContent, answer: host.querySelector('#failing-update-msg').textContent, unhandled };
+  });
+  expect(r).toEqual({ version: 'not installed yet', answer: 'Could not check. Try again when online.', unhandled: [] });
+});
+
 test('a tab page opened on a phone (no .ui-tab-page class) is still the one showing after the window grows, and back', async ({ sized }) => {
   const page = await load(sized, 390);
   await page.locator('.ui-tabbar .ui-tab', { hasText: 'Settings' }).click();

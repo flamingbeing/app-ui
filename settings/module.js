@@ -122,6 +122,8 @@ export function settings(options) {
       const apply = async (values, more = {}) => {
         /** @type {Record<string, unknown>} */
         const patch = {};
+        // signed out, an account part would throw in commit(): check first, so the device values stay as they are too
+        if (!uid() && ('profile' in more || Object.keys(values).some(k => spec(k).scope !== 'device'))) throw fail('sign in first (account options belong to an account)');
         let touchedDevice = false;
         for (const [key, v] of Object.entries(values)) {
           if (spec(key).scope === 'device') {

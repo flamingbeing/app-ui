@@ -226,6 +226,19 @@ test.describe('shell at 1280 px: desktop details', () => {
     await expect(actions).toBeHidden();
   });
 
+  test('Select all, while a search hides rows, takes only the shown rows; its label follows them', async ({ sized }) => {
+    const page = await load(sized, 1280);
+    await page.locator('[data-shell-search]:visible').fill('basil');
+    await page.locator('[data-edit-for="#plants"]:visible').click();
+    const all = page.locator('[data-select-all="#plants"]:visible');
+    await all.click();
+    expect(await ticked(page)).toEqual(['Basil']);
+    await expect(all).toHaveText('Deselect all');
+    await all.click();
+    expect(await ticked(page)).toEqual([]);
+    await expect(all).toHaveText('Select all');
+  });
+
   test('right-click: the menu opens with its corner at the pointer, the row not lifted', async ({ sized }) => {
     const page = await load(sized, 1280);
     const box = await row(page, 'Jade').boundingBox();

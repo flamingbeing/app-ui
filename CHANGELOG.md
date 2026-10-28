@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-rc.17
+- Hold menu, iPhone (no `navigator.vibrate`): the haptic fires before the lift's click is armed to be swallowed, and a
+  click inside `.ui-haptic` is never the one swallowed, so the haptic ticks and lifting no longer opens the row.
+- Select mode: Select all, its Select all / Deselect all label and a drag down the ticks take only the rows a search
+  leaves shown.
+- Update prompt: a failed check says "Could not check. Try again when online." and a failed version load "not installed
+  yet" (as the settings screen and About sheet do), with no unhandled rejection.
+- Settings: signed out, a change with an account part (a profile, an import) throws before touching any device value, so
+  storage and the screen keep agreeing.
+- Worker: `/kit/<folder>` and `/ui/kit/<folder>` without the trailing "/" 302 to the newest gallery's folder (was 404).
+
 ## 1.0.0-rc.16
 - Tab swipe: no start within max(24 px, an eighth of the width) of either edge (`swipeEdge`); the sideways test is
   looser (1.3:1, about 37°). A right swipe on the first page calls `onPrevMissing` (`startGestures(root, { onPrevMissing })`
