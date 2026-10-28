@@ -12,19 +12,24 @@ function sideBox(title, side, words) {
   return el('div', {}, el('h3', {}, title), el('p', {}, `“${words}”`), el('p', { class: 'ui-small small' }, meta || 'time and author unknown'));
 }
 
+/** @param {import('./types').Side} side @param {(v: unknown) => string} format */
+const sideWords = (side, format) => `“${format(side.value)}”${side.when ? ` (${side.when})` : ''}`;
+
 /**
  * @param {import('./types').SyncApi} sync
  * @param {import('./types').Conflict} c
  * @param {Record<string, import('./types').Pick>} picks  kept by the caller, so a redraw keeps the choices made
+ * @param {Record<string, import('./types').ConflictField>} fields
  */
-function fieldPicks(sync, c, picks) {
+function fieldPicks(sync, c, picks, fields) {
   const keep = button('Keep these choices', () => sync.resolve(c.key, picks));
   keep.disabled = c.fields.some(x => !picks[x.path]);
   const rows = c.fields.map(f => {
     /** @param {import('./types').Pick} which */
     const pick = which => () => { picks[f.path] = which; keep.disabled = c.fields.some(x => !picks[x.path]); };
+    const { label = f.path, format = asWords } = fields[f.path] ?? {};
     return el('div', { class: 'ui-inline row' },
-      el('p', { class: 'ui-small small' }, `${f.path}: yours “${f.mine.value}” (${f.mine.when}) · theirs “${f.theirs.value}” (${f.theirs.when})`),
+      el('p', { class: 'ui-small small' }, `${label}: yours ${sideWords(f.mine, format)} · theirs ${sideWords(f.theirs, format)}`),
       button('Mine', pick('mine')), button('Theirs', pick('theirs')));
   });
   return [el('div', {}, ...rows), keep];
@@ -32,12 +37,15 @@ function fieldPicks(sync, c, picks) {
 
 /**
  * @param {HTMLElement} host  the button and the sheet are added here
- * @param {{ sync: import('./types').SyncApi, text?: (value: unknown) => string, idPrefix?: string }} o
+ * @param {{ sync: import('./types').SyncApi, text?: (value: unknown) => string, idPrefix?: string,
+ *   fields?: Record<string, import('./types').ConflictField> }} o
  *   idPrefix: put before each of the part's ids (two on one page, or ids the app already uses)
  *   text: one side's record in words (default: as JSON)
+ *   fields: per field path, the words shown for it in the per-field picks (label, default the path) and its value in
+ *   words (format, default as JSON), e.g. { 'shift.start': { label: 'Start time', format: v => hhmm(v) } }
  * @returns {() => void} stop: unsubscribes and removes both
  */
-export function conflictSheet(host, { sync, text = asWords, idPrefix = '' }) {
+export function conflictSheet(host, { sync, text = asWords, idPrefix = '', fields = {} }) {
   const open = el('button', { id: `${idPrefix}attention`, type: 'button', class: 'ui-attention attention' });
   const list = el('ul', { id: `${idPrefix}conflict-list`, class: 'ui-conflict-list' });
   const sheet = el('dialog', { id: `${idPrefix}conflicts`, 'aria-labelledby': `${idPrefix}conflicts-title` },
@@ -57,7 +65,7 @@ export function conflictSheet(host, { sync, text = asWords, idPrefix = '' }) {
       sideBox('Yours', c.mine, c.deleted.mine ? '(deleted)' : text(c.mine.value)),
       sideBox('Other device', c.theirs, c.deleted.theirs ? '(deleted)' : text(c.theirs.value))),
     el('div', { class: 'ui-inline row' }, button('Keep mine', () => sync.resolve(c.key, 'mine')), button('Keep theirs', () => sync.resolve(c.key, 'theirs'))),
-    ...(c.fields.length > 1 ? fieldPicks(sync, c, picksOf(c.key)) : []));
+    ...(c.fields.length > 1 ? fieldPicks(sync, c, picksOf(c.key), fields) : []));
   const held = () => sync.conflicts().map(c => sync.describe(c.key)).filter(d => d !== null);
   const drawList = () => {
     const now = held();

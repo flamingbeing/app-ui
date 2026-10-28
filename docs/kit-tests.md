@@ -138,6 +138,8 @@ stand-in for `@core/settings` on the page.
 | Share out | Copy and Share (no share sheet) copy and say so; (unit) a closed share sheet is not an error | |
 | Back closes the dialog | Back closes the newest dialog first, then the one under it; the page stays (unit: dismissAll, reset) | |
 | Conflict sheet | per-field picks survive a queue change while the sheet is open, and Keep these choices sends them all | |
+| Conflict sheet | `fields` gives a field its label and value format; others keep the path and JSON; no "(undefined)" when a side has no time | |
+| Toast | Dismiss and the action are 24 px or more (axe target-size); `--ui-toast-bottom` and `toaster(host, { bottom })` set the room below (an app's own tab bar) | |
 | Screen history (unit) | go pushes, Back returns, a deep link gets its parent trail | |
 | Hide mode | a tap hides a button or card; the main button and inputs stay; kept after reload; Show all (unit: the saved list is cleaned) | |
 | Settings rows | ⓘ opens the rest of the help (axe with it open); Reset this page puts the section's rows back and Undo returns them | |

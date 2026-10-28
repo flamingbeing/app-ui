@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.21
+- Toasts: Dismiss and the action button are never under 24 px high (axe target-size, WCAG 2.5.8). The room below the
+  toasts is a custom property: set `--ui-toast-bottom` (on `:root`, say) or pass `toaster(host, { bottom })` when the
+  app has its own tab bar; otherwise the kit's offset as before (page bottom, over a kit tab bar or action bar).
+- Conflict sheet: `fields` option, per field path `{ label, format }`, for the per-field picks (default: the path and
+  the value as JSON, as before). A side with no time no longer reads "(undefined)".
+
 ## 1.0.0-rc.20
 - Hover cards: `hoverCard(root, selector, fill)` from `@core/ui` (styles in `ui/ui.css`, `.ui-hover-card`). Rest the
   mouse on a matching link for a moment and a small card shows what `fill(link)` returns (a note's preview, say); it

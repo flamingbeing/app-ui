@@ -203,3 +203,46 @@ test('conflict sheet: per-field picks survive a queue change while the sheet is 
   await sheet.getByRole('button', { name: 'Keep these choices' }).click();
   expect(await page.evaluate(() => window.resolved)).toEqual([['k1', { a: 'mine', b: 'theirs' }]]);
 });
+
+test('conflict sheet: per-field labels and formatters; the field path and JSON stay the default', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(PARTS);
+  await page.evaluate(async () => {
+    const { conflictSheet } = await import('/ui/0.0.0-dev/ui/conflict-sheet.js');
+    const side = (v, when) => ({ value: v, when });
+    const c = { key: 'k2', mine: side({}), theirs: side({}), deleted: {},
+      fields: [{ path: 'shift.start', mine: side(480, '10:00'), theirs: side(540) }, { path: 'note', mine: side('a'), theirs: side('b') }] };
+    conflictSheet(document.body, { idPrefix: 'f-', fields: { 'shift.start': { label: 'Start', format: v => `${v / 60}:00` } },
+      sync: { conflicts: () => [c], describe: () => c, resolve: () => {}, queue: { onChange: () => () => {} } } });
+  });
+  await page.locator('#f-attention').click();
+  const sheet = page.locator('#f-conflicts');
+  await expect(sheet.getByText('Start: yours “8:00” (10:00) · theirs “9:00”', { exact: true })).toBeVisible();
+  await expect(sheet.getByText('note: yours “a” · theirs “b”', { exact: true })).toBeVisible();
+});
+
+test('toast: Dismiss and the action are at least 24 px (axe target-size); --ui-toast-bottom and the bottom option lift it', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto('/test/plain.html');
+  await expect(page.locator('#signed-out')).toBeVisible();
+  await page.evaluate(async () => {
+    const { toaster } = await import('@core/ui');
+    window.t = toaster(document.body);
+    window.t.show('Saved', { action: { label: 'Undo', run: () => {} } });
+  });
+  const toast = page.locator('.toast', { hasText: 'Saved' });
+  await expect(toast).toBeVisible();
+  for (const b of await toast.getByRole('button').all()) expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(24);
+  expect((await AxeBuilder(page)).filter(v => v.startsWith('target-size')), 'axe target-size with a toast').toEqual([]);
+  const bottom = async () => { const r = await page.locator('.toasts').first().boundingBox(); return 844 - (r.y + r.height); };
+  // an app's own tab bar (not the kit's): the app names its height
+  await page.evaluate(() => document.documentElement.style.setProperty('--ui-toast-bottom', '80px'));
+  expect(Math.round(await bottom())).toBe(80);
+  await page.evaluate(async () => {
+    document.documentElement.style.removeProperty('--ui-toast-bottom');
+    window.t.stop();
+    const { toaster } = await import('@core/ui');
+    toaster(document.body, { bottom: '64px' }).show('Moved');
+  });
+  expect(Math.round(await bottom())).toBe(64);
+});
