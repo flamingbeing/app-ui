@@ -195,6 +195,8 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
   `.ui-row-chevron`. `data-tone="action|danger"` colours the row's words; `data-align="center"` centres them.
 - **Cards and stats:** `.ui-card` (`-title`, `-text`, `-actions`); `.ui-stats` of `.ui-stat` (`-value`, `-label`).
 - **Badges:** `.ui-badge`, `data-tone="accent|ok|warn|danger"`.
+- **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-wide` (full width),
+  `data-size="small"` (32 px), `.ui-buttons` (a stack of buttons with the list's inset).
 - **Empty and loading:** `.ui-empty` (`-icon`, `-title`, `-text`); `.ui-skeleton` with `data-shape="line|short|thumb"`.
 
 ## Layout parts and extra-dense

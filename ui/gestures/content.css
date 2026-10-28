@@ -60,3 +60,7 @@
   :root:not([data-motion="still"]) .ui-skeleton { animation: ui-skeleton 1.4s ease-in-out infinite alternate; }
 }
 @keyframes ui-skeleton { to { opacity: .45; } }
+/* ---------- button sizes (with theme.css's button, .ui-fill and .ui-plain) ---------- */
+:where(.ui-wide) { display: flex; width: 100%; }
+:where(button, a, .button)[data-size="small"] { min-height: 32px; padding-inline: .75rem; font-size: .875rem; }
+.ui-buttons { display: flex; flex-direction: column; gap: var(--gap); margin: var(--pad) var(--list-inset); }

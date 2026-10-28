@@ -6,7 +6,8 @@
   `.ui-row-thumb`, `.ui-row-trail`, `.ui-row-value`, `.ui-row-chevron`; `.ui-row[data-tone="action|danger"]`,
   `.ui-row[data-align="center"]`), cards (`.ui-card`, `-title`, `-text`, `-actions`), stat tiles (`.ui-stats`,
   `.ui-stat`, `-value`, `-label`), badges (`.ui-badge[data-tone="accent|ok|warn|danger"]`), an empty state
-  (`.ui-empty`, `-icon`, `-title`, `-text`) and skeleton rows (`.ui-skeleton[data-shape="line|short|thumb"]`). For
+  (`.ui-empty`, `-icon`, `-title`, `-text`) and skeleton rows (`.ui-skeleton[data-shape="line|short|thumb"]`); button sizes (`.ui-wide` full width,
+  `[data-size="small"]` 32 px) and `.ui-buttons` (a stack of buttons). For
   apps moving off the old home kit, whose screens had these parts and the kit did not.
 
 ## 1.0.0-rc.26
