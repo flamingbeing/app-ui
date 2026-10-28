@@ -71,14 +71,17 @@ export function detentSheet(sheet) {
     opener = from ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     sheet.showModal();
     setDetent(ds[0]);
+    rest = sheet.getBoundingClientRect().height;   // pre-sized now, so a drag's first frame needs no layout
     try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
   }
   const close = () => { if (sheet.open) sheet.close(); };
   /** @type {Animation | null} */
   let glider = null;
+  // the sheet's height at rest (0 = unknown: measure at drag start); keeps begin() free of a forced layout
+  let rest = 0;
   // the sheet's own height and place again (inline styles off), without a transition
   function unstyle() {
-    glider?.cancel(); glider = null;
+    glider?.cancel(); glider = null; rest = 0;
     const was = sheet.classList.contains('is-dragging');
     sheet.classList.add('is-dragging');
     sheet.style.transform = ''; sheet.style.height = ''; sheet.style.maxHeight = '';
@@ -110,7 +113,7 @@ export function detentSheet(sheet) {
     try { a = sheet.animate(frames, { duration: ms, easing: cs.getPropertyValue('--spring-snappy').trim() || 'ease-out' }); }
     catch { a = sheet.animate(frames, { duration: ms, easing: 'cubic-bezier(.2,.8,.2,1)' }); }   // (no linear() easing)
     glider = a;
-    a.finished.then(() => { if (glider === a) { unstyle(); sheet.classList.remove('is-dragging'); } }, () => {});
+    a.finished.then(() => { if (glider === a) { unstyle(); sheet.classList.remove('is-dragging'); rest = sheet.getBoundingClientRect().height; } }, () => {});
   }
   function cycle() { glide(ds[(ds.indexOf(sheet.getAttribute('data-detent') || ds[0]) + 1) % ds.length], shown()); }
 
@@ -166,7 +169,7 @@ export function detentSheet(sheet) {
   function begin() {
     live = true;
     try { if (from && typeof id === 'number') from.setPointerCapture(id); } catch { /* gone */ }
-    h0 = h = shown();
+    h0 = h = !glider && rest > 0 && !wide.matches ? rest : shown();
     glider?.cancel(); glider = null;
     sheet.classList.add('is-dragging');
     if (wide.matches) { sheet.style.transform = ''; sheet.style.height = ''; sheet.style.maxHeight = ''; h0 = h = shown(); }

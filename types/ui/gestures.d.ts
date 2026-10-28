@@ -1,10 +1,13 @@
 /**
  * @param {ParentNode} [root]
+ * @param {{ onPrevMissing?: () => void }} [o]  onPrevMissing: a right swipe on the first tab page (an app opens its drawer)
  * @returns {{ title: ReturnType<typeof largeTitle> | null, menus: ReturnType<typeof holdMenus> | null,
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root?: ParentNode): {
+export function startGestures(root?: ParentNode, { onPrevMissing }?: {
+    onPrevMissing?: () => void;
+}): {
     title: ReturnType<typeof largeTitle> | null;
     menus: ReturnType<typeof holdMenus> | null;
     sheets: Map<string, ReturnType<typeof detentSheet>>;

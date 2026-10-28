@@ -53,7 +53,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 ## Tab pages and swipe
 
 `/kit/shell/` is also tested by `e2e/tabs.spec.mjs` (ui/tab-pages.js, plain tabs and bar buttons, the phone's
-drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeIntent`, `pageStep`) are in
+drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeIntent`, `pageStep`, `swipeEdge`) are in
 `test/gestures.unit.test.mjs`.
 
 | Part | What is tested | axe |
@@ -62,7 +62,9 @@ drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeInten
 | Tap a tab | shows its page, marks both bars, names the bar; New opens the sheet and is no page | |
 | Swipe | left goes to the next page, past New; right comes back; a `ui-tab` event each time; nothing past the ends; a short slow move goes back with nothing left moved | |
 | Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it | |
-| No swipe | a mostly vertical move, a start within 24 px of either edge, the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
+| No swipe | a mostly vertical move, a start within max(24 px, an eighth of the width) of either edge, the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
+| First page | a right swipe past a third (or a flick) fires `onPrevMissing` once (an app opens its drawer); a short move does not | |
+| No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
 | Reduce Motion | the swipe changes the tab with nothing moved | |
 | Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
 | Scroll and Back | each page keeps its scroll; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |

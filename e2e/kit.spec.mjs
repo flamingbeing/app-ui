@@ -170,6 +170,27 @@ for (const width of [390, 820, 1280]) {
       await expect(page.locator('.ui-menu')).toHaveCount(0);
     });
 
+    test('sheet: the first drag has no long frame (transform only, no layout at the start)', async ({ sized }) => {
+      test.skip(width >= 840, 'a centred dialog changes its height');
+      const page = await sized(width);
+      await page.goto(KIT);
+      await page.click('#open-sheet');
+      await settled(page);
+      await page.evaluate(() => {
+        const gaps = []; let last = performance.now(), on = true;
+        const tick = t => { gaps.push(t - last); last = t; if (on) requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+        window.__frames = () => { on = false; return gaps; };
+      });
+      const g = await centre(page.locator('.ui-sheet-grabber'));
+      await (await finger(page)).drag(g.x, g.y, g.x, g.y - 250, { steps: 20, ms: 16 });
+      await settled(page);
+      const gaps = await page.evaluate(() => window.__frames());
+      expect(gaps.length, 'frames seen').toBeGreaterThan(10);
+      expect(Math.max(...gaps.slice(0, 8)), 'worst of the first frames (ms)').toBeLessThan(80);
+      expect(await page.locator('#sheet').evaluate(s => s.style.willChange || getComputedStyle(s).willChange)).not.toBe('transform');   // off again once still
+    });
+
     test('sheet: opens at medium; dragged up to large, down to medium, down again to close; Back closes it', async ({ sized }) => {
       const page = await sized(width);
       await page.goto(KIT);

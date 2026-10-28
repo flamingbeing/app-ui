@@ -13,7 +13,8 @@ if (tab && document.getElementById(tab)?.classList.contains('ui-tab-page')) {
 }
 
 const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
-const kit = startGestures();
+let prevMissing = 0;   // the swipe hook: an app would open its drawer here
+const kit = startGestures(document, { onPrevMissing: () => { prevMissing++; document.documentElement.dataset.prevMissing = String(prevMissing); } });
 const toasts = toaster(document.body);
 const list = $('plants');
 const shell = adaptiveShell(/** @type {HTMLElement} */ (document.querySelector('.ui-shell')), { screens: kit.screens });
