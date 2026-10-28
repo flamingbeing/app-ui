@@ -95,6 +95,10 @@ button[hidden] { display: none; }   /* (the rule above would otherwise show a hi
 /* two kinds of button: plain (the default) and filled (the accent); a link-style one has no box at all */
 :where(.ui-fill) { background: var(--fill); color: var(--on-fill); border-color: var(--fill); }
 :where(.ui-plain) { background: none; border-color: transparent; color: var(--link); }
+/* an icon-only button (a toolbar's Close, Read, More): square, no box until hovered or pressed; give it an aria-label */
+.ui-icon-btn { min-width: var(--button-h); padding: 0; background: none; border-color: transparent; color: var(--muted); }
+.ui-icon-btn:hover { background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--text); }
+.ui-icon-btn[aria-pressed="true"] { color: var(--accent); }
 /* form controls a finger can hit, in the theme's colours (zero specificity: a page's own rules win). A select draws
    its own chevron (two gradients, no image) with room so the words never run under it. */
 select { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border-radius: var(--radius-input); -webkit-appearance: none;

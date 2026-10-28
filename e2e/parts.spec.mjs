@@ -134,3 +134,27 @@ for (const width of [390, 1280]) {
     });
   });
 }
+
+for (const width of [390, 1280]) {
+  test(`prose at ${width} px: task boxes sit on their line, code is not the accent, the measure holds`, async ({ sized }) => {
+    const page = await sized(width);
+    await page.goto(PARTS);
+    const prose = page.locator('#prose');
+    const task = prose.locator('li').filter({ has: page.locator('input[type=checkbox]') }).first();
+    expect(await task.evaluate(li => getComputedStyle(li).listStyleType)).toBe('none');
+    const box = await task.locator('input').boundingBox(), li = await task.boundingBox();
+    expect(box && li && box.y >= li.y - 1 && box.y + box.height <= li.y + li.height + 1, 'the box is on the row').toBe(true);
+    expect(box && li && box.x < li.x, 'the box hangs left of the words').toBe(true);
+    const [pre, accent] = await page.evaluate(() => {
+      const probe = document.createElement('i'); probe.style.color = 'var(--accent)'; document.body.append(probe);
+      const a = getComputedStyle(probe).color; probe.remove();
+      return [getComputedStyle(document.querySelector('#prose pre')).backgroundColor, a];
+    });
+    expect(pre).not.toBe(accent);
+    const w = await prose.evaluate(el => el.getBoundingClientRect().width);
+    expect(w).toBeLessThanOrEqual(42 * 16 + 1);
+    const btn = await page.locator('#icon-close').boundingBox();
+    expect(btn && Math.abs(btn.width - btn.height) < 2).toBe(true);
+    expect(await AxeBuilder(page)).toEqual([]);
+  });
+}

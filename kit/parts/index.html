@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="../../ui/ui.css">
   <link rel="stylesheet" href="../../theme/glass.css">
   <link rel="stylesheet" href="../../ui/gestures.css">
+  <link rel="stylesheet" href="../../ui/prose.css">
   <link rel="stylesheet" href="page.css">
   <script type="module" src="page.js"></script>
 </head>
@@ -29,6 +30,28 @@
 
   <main>
     <h1 class="ui-large-title">Parts</h1>
+
+    <section aria-labelledby="prose-title">
+      <h2 id="prose-title">Prose</h2>
+      <article id="prose" class="ui-prose">
+        <h1>Garden plan</h1>
+        <p>Water the <strong>tomatoes</strong> early, see <a href="#prose">the watering note</a> and <code>pH 6.5</code>.</p>
+        <h2>This week</h2>
+        <ul>
+          <li><input type="checkbox" checked disabled aria-label="Mulch the beds"> Mulch the beds</li>
+          <li><input type="checkbox" disabled aria-label="Stake the beans"> Stake the beans</li>
+        </ul>
+        <ol><li>Seeds in</li><li>Labels on<ul><li>one per row</li></ul></li></ol>
+        <blockquote><p>Plant in the cool of the day.</p></blockquote>
+        <pre><code>basil   2 cm deep
+mint    in a pot</code></pre>
+        <table><thead><tr><th>Plant</th><th>Sun</th></tr></thead><tbody><tr><td>Basil</td><td>Full</td></tr><tr><td>Mint</td><td>Part</td></tr></tbody></table>
+        <hr>
+        <p><kbd>Ctrl</kbd> + <kbd>O</kbd> opens a note.</p>
+      </article>
+      <p class="small">Icon buttons: <button type="button" class="ui-icon-btn" aria-label="Close" id="icon-close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        <button type="button" class="ui-icon-btn" aria-label="Read view" aria-pressed="true"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></button></p>
+    </section>
 
     <section aria-labelledby="undo-title">
       <h2 id="undo-title">Undo toast</h2>
