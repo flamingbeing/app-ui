@@ -73,6 +73,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Swipe | left goes to the next page, past New; right comes back; a `ui-tab` event each time; nothing past the ends; a short slow move goes back with nothing left moved | |
 | Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it; in WebKit too, frame by frame, and the glide never goes back or faster than a fast finger | |
 | Glide | let go past half (or with a throw), every frame the pages sit side by side and only move onward, the glide takes under 500 ms and the new page lands where it ended (no jump); the bar title is Plants before halfway, Rooms partly faded in after, fully shown at the end | |
+| Tab lights at let-go | the swipe's new tab has `aria-current` at the let-go while the pages still glide, not only when they land; a let-go that springs back keeps the tab it had | |
 | Spring back | let go short of half and slow, the page springs back, the title stays, a `data-swipe-fade` part fades with the drag and is cleared after; at the first page a pull stretches less and less and springs back to 0 | |
 | No swipe | a mostly vertical move, a start within 28 px of either edge at 390 px (Android's Back; max 32), the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
 | First page | with `drawer=off`, a right swipe past a third of the finger's own travel (or a flick) fires `onPrevMissing` once; a short move does not | |
