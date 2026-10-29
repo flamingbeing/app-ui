@@ -3,7 +3,7 @@
 // it once locally).
 // Chromium runs every spec (the finger tests drive touch through the DevTools protocol, which only Chromium has);
 // Firefox and WebKit run the gallery smoke spec (each gallery page starts, is clean and keeps to the page policy;
-// Firefox only in the nightly soak, not in Checks);
+// both in Full checks, not the quick Checks);
 // WebKit, the iPhone's engine, also runs the swipe-feel spec (a finger from page-sent touch events) and back-close.
 // The jank gate (jank.spec.mjs) times frames, so it runs alone, after the rest: its tests one at a time, Chromium then
 // WebKit, with no other browser busy beside it.

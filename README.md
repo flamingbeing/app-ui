@@ -49,7 +49,7 @@ holds the kit to them):
   on a part leaves it out. A sheet body's top pull stays the sheet's.
 - **Pressed at once**: `startGestures()` marks a touched button, tab, menu item or row `data-pressed` on the touch
   (no wait for `:active`), cleared on lift, scroll or cancel.
-- **The budget** (the jank gate, CI): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch,
+- **The budget** (the jank gate, in Full checks): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch,
   the plain look: CI has no GPU, so glass blur is drawn in software there), a tab swipe, a tab flick, a pull past a list's
   top and end, and a sheet dragged up, down and away keep every drag frame within 20 ms but one, no frame over 50 ms (drag or glide) and no
   task over 50 ms; a touched tab shows pressed within 50 ms. WebKit (the iPhone's engine) runs the same gestures
@@ -69,7 +69,10 @@ route `core.anawj.com/ui/*`, in front of app-sync's Worker on the same host.
 - `npm test`: Worker, UI core and tools unit tests. `npm run typecheck`. `node tools/check.mjs`.
 - `npx playwright test`: the real Worker in Node (`e2e/serve.mjs`) serves this checkout as `/ui/0.0.0-dev/`. Every spec
   in Chromium; `e2e/gallery.spec.mjs` (each gallery page starts clean: no page error, axe, no CSP report) also in
-  Firefox and WebKit. Checks runs every project but `firefox`, which runs in the nightly soak. The base config comes
+  Firefox and WebKit. The quick Checks on every PR run the Chromium phone project (8 shards) minus the tests tagged
+  `@full`; Full checks (`.github/workflows/full-checks.yml`: WebKit, Firefox, the jank gate, the `@full` axe runs) run
+  nightly with the soak and by hand (Actions, "Full checks", Run workflow, optional PR number or ref). The repo
+  variable `FULL_CHECKS_ON_PRS=true` makes PRs run them too. The base config comes
   from app-devkit: copy its `playwright/` folder to `.devkit/` once locally (CI's setup-browser does it).
   `PW_CHROMIUM=<path>` uses a Chromium already on the machine.
 - The jank gate (`e2e/jank.spec.mjs`, projects `jank` and `jank-webkit`) runs after the rest; alone:
