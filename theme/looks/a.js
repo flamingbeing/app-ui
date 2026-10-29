@@ -1,6 +1,7 @@
 // Look A, tinted glass: floating glass bars and a pill tab bar tinted with the accent, a serif large title on the
-// page, lists as soft inset cards, round ticks, menus that pop up beside the row. Data only (looks.js says what each
-// key means); corners scale from the theme's radii, so a Flat or Soft theme still shows through.
+// page (the design kit's --home-serif when its tokens.css names one), lists as soft inset cards, round ticks, menus
+// that pop up beside the row. Data only (looks.js says what each key means); corners scale from the theme's radii,
+// so a Flat or Soft theme still shows through.
 /** @type {import('../looks.js').Look} */
 export default {
   id: 'a',
@@ -8,7 +9,7 @@ export default {
   desc: 'Glass bars tinted with the colour, serif titles, soft cards',
   variants: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float' },
   tokens: {
-    'look-font-head': 'ui-serif, "Iowan Old Style", Georgia, "Times New Roman", serif',
+    'look-font-head': 'var(--home-serif, ui-serif), "Iowan Old Style", Georgia, "Times New Roman", serif',
     'title-size': '2.125rem', 'title-weight': '600', 'title-track': '-.01em',
     'bar-line': 'transparent',
     'card-r': 'calc(var(--radius-l) * 1.33)', 'list-inset': 'var(--pad)', 'list-bg': 'var(--surface)',

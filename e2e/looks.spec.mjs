@@ -195,3 +195,29 @@ for (const look of ['a', 'b', 'c', 'd', 'e']) {
     }
   });
 }
+
+test('?kit=ntf: the NTF kit\'s tokens and its app theme (wine on linen); ?kit=nuhs navy on white; home unchanged', async ({ sized }) => {
+  const page = await sized(390);
+  // the kits' tokens are other sites: answered here, so the test needs none of them up
+  const asked = [];
+  await page.context().route(/https:\/\/design\.(anantf|anawj)\.com\/v1\/tokens\.css/, route => {
+    asked.push(route.request().url());
+    return route.fulfill({ status: 200, contentType: 'text/css', body: ':root{--app-wine:#633d3c}' });
+  });
+  const ground = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--bg').trim());
+  const accent = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+  await page.goto(`${KIT}&kit=ntf`);
+  await expect(page.locator('html')).toHaveAttribute('data-kit', 'ntf');
+  await expect(page.locator('link[href$="/v1/tokens.css"]')).toHaveAttribute('href', 'https://design.anantf.com/v1/tokens.css');
+  expect(await ground()).toBe('#f1ede4');
+  expect(await accent()).toBe('#633d3c');
+  await page.screenshot({ path: test.info().outputPath('kit-ntf-390.png') });
+  await page.goto(`${KIT}&kit=nuhs`);
+  await expect(page.locator('html')).toHaveAttribute('data-kit', 'nuhs');
+  expect(await ground()).toBe('#ffffff');
+  expect(await accent()).toBe('#002f6c');
+  await page.goto(KIT);
+  await expect(page.locator('html')).not.toHaveAttribute('data-kit', /./);
+  await expect(page.locator('link[href$="/v1/tokens.css"]')).toHaveAttribute('href', 'https://design.flamingbeing.com/v1/tokens.css');
+  expect(asked.length).toBe(2);
+});

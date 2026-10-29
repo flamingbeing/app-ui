@@ -149,7 +149,9 @@ The five looks so far:
 | D | Slim | A slim bar always showing the name, lists as cards inset from the edges, an icon tab bar along the edge, no band or glass |
 | E | Workspace | Flat and compact like a desktop notes app: a slim bar, flush lists on the page, menus as bottom sheets, a filled search box, the sync chip as its icon alone when all is synced |
 
-The app picks its own look with `applyTheme({ look: 'b' })`, and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
+The app picks its own look with `applyTheme({ look: 'b' })`, and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey; `'linen'`: warm paper with soft ink, its own warm dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
+
+A design kit is the origin of the page's `/v1/tokens.css` (fonts and `--home-*` tokens, read before any script). A kit may set `--home-serif`; look A's head and the serif font preset then use it. In the gallery, `?kit=home|nuhs|ntf` previews a kit's tokens with its app theme.
 
 ### Density
 
