@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.60
+- The update prompt tries the owed reload once when it mounts. On a slow phone the app can finish starting after a
+  field was already left (or removed), so the `focusout` it listens for never came and the take-over reload stayed
+  owed until the next hide/show.
+
 ## 1.0.0-rc.59
 - The refused list's heading is a section head (`.ui-section` / `.ui-section-head`), the small grey words over a
   list, not a browser-default h2 bigger than the screen's own headings.
