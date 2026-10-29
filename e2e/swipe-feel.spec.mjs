@@ -125,3 +125,41 @@ test('the drawer: a right swipe on the first page pulls it out under the finger;
   await expect(page.locator('.ui-shell')).not.toHaveClass(/is-drawer-(open|moving)/);
   await expect(page.locator('nav.ui-sidebar')).toBeHidden();
 });
+
+test('Back closes the drawer (pulled out or opened by its button) and nothing more; while it is open the page behind is inert', async ({ sized }) => {
+  const page = await load(sized);
+  const shell = page.locator('.ui-shell');
+  const inert = () => page.evaluate(() => ['main.ui-screens', 'nav.ui-tabbar', 'header.ui-bar'].map(s => document.querySelector(s).inert));
+  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, line(60, 200, 8));
+  await expect(shell).toHaveClass(/is-drawer-open/);
+  expect(await inert(), 'the page behind is inert').toEqual([true, true, true]);
+  expect(await page.evaluate(() => document.querySelector('nav.ui-sidebar').inert)).toBe(false);
+  await page.goBack();
+  await expect(shell).not.toHaveClass(/is-drawer-(open|moving)/);
+  expect(await page.evaluate(() => window.__shown()), 'still on the first page').toEqual(['home']);
+  expect(await inert()).toEqual([false, false, false]);
+  // a side link: the drawer's entry goes, the new page's comes in its place; Back then goes to the first page
+  await page.getByRole('button', { name: 'Sections' }).click();
+  await expect(shell).toHaveClass(/is-drawer-open/);
+  await page.locator('.ui-side-link', { hasText: 'Jobs' }).click();
+  await expect(shell).not.toHaveClass(/is-drawer-(open|moving)/);
+  await expect.poll(() => page.evaluate(() => history.state?.uiTabBack ?? null)).toBe(1);
+  expect(await page.evaluate(() => [window.__shown(), history.state?.uiDrawer ?? null])).toEqual([['jobs'], null]);
+  await page.goBack();
+  await expect.poll(() => page.evaluate(() => window.__shown())).toEqual(['home']);
+});
+
+test('a sheet closed by Esc (Chrome’s Back on Android asks a dialog to close the same way) steps back once, not twice', async ({ sized }) => {
+  const page = await load(sized);
+  await page.locator('nav.ui-tabbar .ui-tab', { hasText: 'Jobs' }).click();
+  await expect.poll(() => page.evaluate(() => history.state?.uiTabBack ?? null)).toBe(1);
+  const length = await page.evaluate(() => history.length);
+  await page.locator('nav.ui-tabbar [data-open-sheet="#sheet"]').click();
+  await expect(page.locator('#sheet')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => history.state?.uiSheet ?? null)).toBe('sheet');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sheet')).toBeHidden();
+  await expect.poll(() => page.evaluate(() => history.state?.uiSheet ?? null)).toBe(null);
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => [window.__shown(), history.state?.uiTabBack ?? null, history.length]), 'the tab’s entry stays').toEqual([['jobs'], 1, length + 1]);
+});

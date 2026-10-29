@@ -1,11 +1,20 @@
 # Changelog
 
-## 1.0.0-rc.45
+## 1.0.0-rc.46
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
   half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
 - Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module.
 - Gallery: the iOS look is its default, and `/kit/ios/` shows the iOS parts together.
+
+## 1.0.0-rc.45
+- Drawer: Android's Back closes the phone's drawer (it is a history entry while open, as a sheet is), and the page
+  behind it (bar, pages, tab bar) is `inert`, so Tab and TalkBack stay in the drawer. A side link's page takes the
+  drawer's place in history.
+- `ui/steps.js` (`stepsSettled`): the counted steps back that sheets used, shared with the drawer; `tabBack` waits
+  for them before it adds or takes away its entry, so a step on its way can't undo a tab change.
+  `sheetsSettled` stays (same promise).
+- Checked: a sheet closed by Esc, the close request Chrome sends a modal dialog for Android's Back, steps back once.
 
 ## 1.0.0-rc.44
 - Tab pages: a swipe lights its new tab the moment the finger lets go, as Android's tab bars do, not when the
