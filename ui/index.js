@@ -25,7 +25,7 @@ export { gripDrag, moveIn } from './drag-list.js';
 export { shareText, copyText } from './share.js';
 export { createTransients } from './transients.js';
 export { createNavigation } from './navigation.js';
-export { tabBack } from './tab-back.js';
+export { tabBack, CLOSE_MS } from './tab-back.js';
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from './hide-mode.js';
 // gestures (ui/gestures.css): each part starts only where its markup is; startGestures() starts them all
 export { startGestures } from './gestures.js';
