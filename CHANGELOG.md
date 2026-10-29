@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.55
+- Press feedback: inside something that scrolls a press shows after `PRESS_DELAY` (100 ms), so a scroll never
+  flashes a row; on fixed bars and sheets it stays at once (`inScroller`). An earlier press's quick-tap mark no
+  longer sticks when the next press comes within 80 ms.
+- The Android look: Material's ripple, from the finger to the farthest corner, fading after the lift.
+
 ## 1.0.0-rc.54
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
