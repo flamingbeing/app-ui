@@ -7,7 +7,7 @@ export default {
   id: 'a',
   name: 'Tinted glass',
   desc: 'Glass bars tinted with the colour, serif titles, soft cards',
-  variants: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float' },
+  variants: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', family: 'core' },
   tokens: {
     'look-font-head': 'var(--home-serif, ui-serif), "Iowan Old Style", Georgia, "Times New Roman", serif',
     'title-size': '2.125rem', 'title-weight': '600', 'title-track': '-.01em',

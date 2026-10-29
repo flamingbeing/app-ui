@@ -133,13 +133,17 @@ A look is data, not a fork. Each one is a file in `theme/looks/` with:
   | `glass` | `bars` (all floating chrome) · `pill` (only the floating pills: the action bar, toasts and a floating tab bar) · `none` |
   | `tick` | `round` · `square` (the ticks in select mode) |
   | `tabbar` | `float` (a pill over the content) · `edge` (full width along the bottom) |
+  | `family` | `core` (every look but M) · `android` (look M: `ui/gestures/android.css` restyles every part as Material 3) |
 
 - **tokens**: custom properties that `palette-css.js` puts on `:root`. Every look sets the same keys: the heading font,
   the title size, weight and tracking, the bar line, list card radius, inset, background, edge, separator and shadow, the row
   weight, the radii of controls, pills, menus and sheets, the tick size, the active tab's background, and the glass
   tint (how much of the accent colour the glass takes).
 
-The five looks so far:
+- **palette** (optional): `'m3'` makes the page colours Material 3 colour roles from the accent as the seed
+  (`theme/m3.js`: tonal palettes, Android's tonal spot scheme, light and dark), each role also as an `--m3-*` token.
+
+The looks so far:
 
 | Look | Name | In short |
 | --- | --- | --- |
@@ -148,8 +152,9 @@ The five looks so far:
 | C | Dense and quiet | Flush lists, small titles, glass only on the floating pills |
 | D | Slim | A slim bar always showing the name, lists as cards inset from the edges, an icon tab bar along the edge, no band or glass |
 | E | Workspace | Flat and compact like a desktop notes app: a slim bar, flush lists on the page, menus as bottom sheets, a filled search box, the sync chip as its icon alone when all is synced |
+| M | Android | Material 3 Expressive as Android 16 draws it: tonal colour roles from the accent, solid tonal surfaces (no glass), Roboto where the phone has it (Inter otherwise; no font is hosted), a top app bar that takes its tone on scroll, lists in rounded groups with 2 px gaps, a navigation bar with a pill on the current tab, Material's switch, sheet handle, menus and action button |
 
-The app picks its own look with `applyTheme({ look: 'b' })`, and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey; `'linen'`: warm paper with soft ink, its own warm dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
+The app picks its own look with `applyTheme({ look: 'b' })` (an app opts into the Android look with `applyTheme({ look: 'm' })`; nothing else changes), and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey; `'linen'`: warm paper with soft ink, its own warm dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
 
 A design kit is the origin of the page's `/v1/tokens.css` (fonts and `--home-*` tokens, read before any script). A kit may set `--home-serif`; look A's head and the serif font preset then use it. In the gallery, `?kit=home|nuhs|ntf` previews a kit's tokens with its app theme.
 
@@ -204,6 +209,10 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
   `.ui-row-input` (a value typed into the row) or `.ui-row-chevron`. `data-tone="action|danger"` colours the row's words; `data-align="center"` centres them.
 - **Cards and stats:** `.ui-card` (`-title`, `-text`, `-actions`); `.ui-stats` of `.ui-stat` (`-value`, `-label`).
 - **Badges:** `.ui-badge`, `data-tone="accent|ok|warn|danger"`.
+- **Action button** (`ui/gestures/fab.css`): `<button class="ui-fab" aria-label="…">` with an icon, and a
+  `.ui-fab-label` for the wide kind; the screen's one main action, fixed at the bottom end above a showing tab bar; `.is-small`
+  drops the words; it steps aside while a sheet or menu is open, and the page gets room under it. Look M draws it as
+  Material's rounded square (`.is-large`: 96 px).
 - **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-tint` (accent-tinted), `.ui-wide` (full width),
   `data-size="small"` (32 px), `.ui-buttons` (a stack of buttons with the list's inset).
 - **Filter chips:** `.ui-chips` holding `button.ui-chip` with `aria-pressed` (ticked when on), a full tap tall;

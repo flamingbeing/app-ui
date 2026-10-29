@@ -1,0 +1,25 @@
+/* @core/ui gestures, the floating action button. One part of
+   ui/gestures.css (which loads them all, in order); link it alone
+   for just this part, after theme.css and ui.css. */
+/* ---------- floating action button ---------- */
+/* <button class="ui-fab" aria-label="Add"><svg …/></button>: the screen's one main action, floating at the bottom end
+   above a showing tab bar (tab-bar.js tabBarRoom) and the home indicator. With a .ui-fab-label inside it is the wide
+   kind (icon and words); .is-small leaves only the icon (an app adds it while the list scrolls down). Every look shows
+   it: an accent circle here, Material's rounded square in the Android look (android.css). */
+.ui-fab { position: fixed; z-index: 6; inset-inline-end: calc(var(--pad) + env(safe-area-inset-right, 0px));
+  bottom: calc(max(var(--ui-tabbar-room, 0px), env(safe-area-inset-bottom, 0px)) + var(--pad));
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px; box-sizing: border-box;
+  min-width: 56px; height: 56px; padding: 0 16px; border: 0; border-radius: 28px;
+  background: var(--fill); color: var(--on-fill); font-weight: 600;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--fill) 30%, transparent), 0 1px 3px rgb(0 0 0 / .2);
+  transition: transform var(--d-quick) var(--spring-snappy), opacity var(--d-quick) var(--spring); }
+.ui-fab[hidden] { display: none; }
+.ui-fab > svg { flex: none; width: 24px; height: 24px; }
+.ui-fab:not(:has(.ui-fab-label)) { padding: 0; }
+.ui-fab.is-small .ui-fab-label { display: none; }
+.ui-fab.is-small { padding: 0; }
+.ui-fab:not(:disabled):is(:active, [data-pressed]) { transform: scale(.95); }
+/* a sheet or menu over the page: the button steps aside */
+:root:has(dialog.ui-sheet[open], .ui-menu-layer.is-open) .ui-fab { opacity: 0; transform: scale(.6); pointer-events: none; }
+/* room under the page's end, so the button never hides the last row */
+main:has(.ui-fab:not([hidden]))::after { content: ""; display: block; height: 80px; }

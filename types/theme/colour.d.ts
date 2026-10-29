@@ -58,6 +58,21 @@ export function cleanHex(c: unknown): string | null;
 export function mix(a: string, b: string, t: number): string;
 export function luminance(h: string): number;
 export function contrast(a: string, b: string): number;
+export namespace STATUS {
+    namespace light {
+        let danger: string;
+        let ok: string;
+        let warn: string;
+    }
+    namespace dark {
+        let danger_1: string;
+        export { danger_1 as danger };
+        let ok_1: string;
+        export { ok_1 as ok };
+        let warn_1: string;
+        export { warn_1 as warn };
+    }
+}
 export function pairs(strong: boolean): [string, string[], number][];
 export const BACKDROP: 0.4;
 /**
