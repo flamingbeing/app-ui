@@ -70,15 +70,25 @@ export function afterGesture(fn: () => void, { maxWait }?: {
     maxWait?: number;
 }): () => void;
 /**
- * Marks the control a finger (or pen) lands on pressed at once (data-pressed; theme.css styles it), without the
- * browser's wait to see whether the touch is a scroll; a scroll, a move past SLOP or the lift clears it, after one
- * painted frame at least. A mouse keeps the browser's own :active.
+ * Whether el sits in something that scrolls now (an overflowing auto or scroll box, or the page); a fixed or sticky
+ * box (a bar, a sheet, the tab bar) does not scroll with it.
+ * @param {Element} el
+ */
+export function inScroller(el: Element): boolean;
+/**
+ * Marks the control a finger (or pen) lands on pressed (data-pressed; theme.css styles it), without the browser's
+ * wait to see whether the touch is a scroll: at once, or after PRESS_DELAY inside something that scrolls (a scroll
+ * that starts by then never shows it; a tap lifted sooner shows it at the lift). A scroll, a move past SLOP or the
+ * lift clears it, after one painted frame at least. In the Android look a ripple grows from the finger. A mouse
+ * keeps the browser's own :active.
  * @param {ParentNode & EventTarget} [root]
  * @returns {() => void} stop
  */
 export function pressFeedback(root?: ParentNode & EventTarget): () => void;
 /** What shows pressed: buttons, tabs, menu items, rows that open something, and anything marked data-press. */
 export const PRESSABLE: "button, [role=\"button\"], .ui-tab, .ui-menu-item, a.ui-row, .ui-row[tabindex], .ui-row[data-push], summary, [data-press]";
+/** How long a press inside something that scrolls waits before it shows (Android's tap timeout): the touch may be a scroll. */
+export const PRESS_DELAY: 100;
 /**
  * at: where it is now; stop: stops it there (a finger caught it) and gives that place; done: true once it lands,
  * false if stopped first. A landed glide holds its last frame until stop() (set the resting styles, then stop).

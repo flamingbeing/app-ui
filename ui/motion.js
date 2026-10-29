@@ -228,36 +228,95 @@ function flush() {
 /** What shows pressed: buttons, tabs, menu items, rows that open something, and anything marked data-press. */
 export const PRESSABLE = 'button, [role="button"], .ui-tab, .ui-menu-item, a.ui-row, .ui-row[tabindex], .ui-row[data-push], summary, [data-press]';
 
+/** How long a press inside something that scrolls waits before it shows (Android's tap timeout): the touch may be a scroll. */
+export const PRESS_DELAY = 100;
+const RIPPLE_OUT = 150;
+
 /**
- * Marks the control a finger (or pen) lands on pressed at once (data-pressed; theme.css styles it), without the
- * browser's wait to see whether the touch is a scroll; a scroll, a move past SLOP or the lift clears it, after one
- * painted frame at least. A mouse keeps the browser's own :active.
+ * Whether el sits in something that scrolls now (an overflowing auto or scroll box, or the page); a fixed or sticky
+ * box (a bar, a sheet, the tab bar) does not scroll with it.
+ * @param {Element} el
+ */
+export function inScroller(el) {
+  for (let n = /** @type {Element | null} */ (el); n && n !== document.documentElement; n = n.parentElement) {
+    const s = getComputedStyle(n);
+    if (s.position === 'fixed' || s.position === 'sticky') return false;
+    if (/auto|scroll/.test(s.overflowY) && n.scrollHeight > n.clientHeight) return true;
+    if (/auto|scroll/.test(s.overflowX) && n.scrollWidth > n.clientWidth) return true;
+  }
+  const d = document.scrollingElement || document.documentElement;
+  return d.scrollHeight > d.clientHeight;
+}
+
+/**
+ * The Android look's ripple (android.css): a circle grows from where the finger landed to el's farthest corner.
+ * @param {HTMLElement} el @param {number} x @param {number} y
+ */
+function ripple(el, x, y) {
+  if (document.documentElement.dataset.family !== 'android') return;
+  const r = el.getBoundingClientRect(), px = x - r.left, py = y - r.top;
+  el.style.setProperty('--ui-ripple-x', `${Math.round(px)}px`);
+  el.style.setProperty('--ui-ripple-y', `${Math.round(py)}px`);
+  el.style.setProperty('--ui-ripple-max', `${Math.ceil(Math.hypot(Math.max(px, r.width - px), Math.max(py, r.height - py)))}px`);
+  el.setAttribute('data-ripple', 'in');
+}
+/** The ripple fades out (RIPPLE_OUT), then goes. @param {Element} el */
+function unripple(el) {
+  if (!el.hasAttribute('data-ripple')) return;
+  el.setAttribute('data-ripple', 'out');
+  setTimeout(() => {
+    if (el.getAttribute('data-ripple') !== 'out') return;   // pressed again meanwhile
+    el.removeAttribute('data-ripple');
+    for (const k of ['x', 'y', 'max']) /** @type {HTMLElement} */ (el).style.removeProperty(`--ui-ripple-${k}`);
+  }, RIPPLE_OUT);
+}
+
+/**
+ * Marks the control a finger (or pen) lands on pressed (data-pressed; theme.css styles it), without the browser's
+ * wait to see whether the touch is a scroll: at once, or after PRESS_DELAY inside something that scrolls (a scroll
+ * that starts by then never shows it; a tap lifted sooner shows it at the lift). A scroll, a move past SLOP or the
+ * lift clears it, after one painted frame at least. In the Android look a ripple grows from the finger. A mouse
+ * keeps the browser's own :active.
  * @param {ParentNode & EventTarget} [root]
  * @returns {() => void} stop
  */
 export function pressFeedback(root = document) {
   const l = listeners();
-  /** @type {Element | null} */
+  /** @type {HTMLElement | null} */
   let on = null;
-  let x0 = 0, y0 = 0, t0 = 0;
+  let x0 = 0, y0 = 0, shownAt = 0;   // shownAt: when the pressed mark went on (0: not yet)
   /** @type {ReturnType<typeof setTimeout> | undefined} */
   let timer;
+  /** @type {ReturnType<typeof setTimeout> | undefined} */
+  let wait;
+  const show = (/** @type {HTMLElement} */ el) => {
+    el.setAttribute('data-pressed', '');
+    shownAt = performance.now();
+    ripple(el, x0, y0);
+  };
+  const unpress = (/** @type {Element} */ el) => { el.removeAttribute('data-pressed'); unripple(el); };
   const clear = (/** @type {boolean} */ now) => {
     const el = on;
     on = null;
     if (!el) return;
-    clearTimeout(timer);
-    const left = now ? 0 : 80 - (performance.now() - t0);   // a quick tap still shows
-    if (left <= 0) el.removeAttribute('data-pressed');
-    else timer = setTimeout(() => { if (on !== el) el.removeAttribute('data-pressed'); }, left);
+    clearTimeout(wait);   // (not timer: an earlier press's unpress, which checks on itself)
+    if (!shownAt) {
+      if (now) return;   // a scroll or a part's gesture before the delay ran out: never shown
+      show(el);          // a quick tap in a scroller still shows
+    }
+    const left = now ? 0 : 80 - (performance.now() - shownAt);   // a quick tap still shows
+    shownAt = 0;
+    if (left <= 0) unpress(el);
+    else timer = setTimeout(() => { if (on !== el) unpress(el); }, left);
   };
   l.on(root, 'pointerdown', (/** @type {PointerEvent} */ e) => {
     if (e.pointerType === 'mouse' || !e.isPrimary) return;
     clear(true);
-    const t = /** @type {Element | null} */ (e.target instanceof Element ? e.target.closest(PRESSABLE) : null);
+    const t = /** @type {HTMLElement | null} */ (e.target instanceof Element ? e.target.closest(PRESSABLE) : null);
     if (!t || t.matches(':disabled, [aria-disabled="true"]')) return;
-    on = t; x0 = e.clientX; y0 = e.clientY; t0 = performance.now();
-    t.setAttribute('data-pressed', '');
+    on = t; x0 = e.clientX; y0 = e.clientY; shownAt = 0;
+    if (inScroller(t)) wait = setTimeout(() => { if (on === t) show(t); }, PRESS_DELAY);
+    else show(t);
   }, { capture: true, passive: true });
   l.on(root, 'pointermove', (/** @type {PointerEvent} */ e) => {
     if (on && e.isPrimary && Math.hypot(e.clientX - x0, e.clientY - y0) > SLOP) clear(true);
