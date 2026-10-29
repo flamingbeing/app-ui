@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.38
+- `cardPager(stage, { card, start, onShow })`, exported from `@core/ui` (`ui/card-pager.js`): one card at a time, a
+  sideways swipe for the next or the previous (a flashcard deck, a review queue). The card beside follows the finger;
+  the let-go glides on `glide` (a finger catches it); `onShow` waits until it lands (`afterGesture`); arrow keys go
+  too. Leaves fields, sideways scrollers and the screen's edges alone; `refresh()` after the queue changes.
+- The tab pager never starts on `[data-swipe-own]` (a card deck's own swipe).
+- Gallery: a card deck on the shell's Jobs page; the jank gate swipes it on and back.
+
 ## 1.0.0-rc.37
 Responsiveness (README, "Responsiveness rules"):
 - `ui/motion.js`, exported from `@core/ui`: `glide` (a critically damped spring from the finger's let-go speed, run

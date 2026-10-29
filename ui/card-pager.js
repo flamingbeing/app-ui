@@ -2,10 +2,12 @@
 // review queue). The card beside comes in with the finger 1:1, and the let-go hands the finger's speed to a spring
 // (motion.js glide, transform only, run by the compositor); a finger on the glide catches it. The cards beside are
 // laid out before the finger moves (three slots: previous, this, next), and the app's own work on a new card
-// (onShow: a save, a fetch) waits until the glide has landed (afterGesture). The stage is marked data-no-gesture, so
-// a tab swipe never starts on it. Nothing runs on import.
+// (onShow: a save, a fetch) waits until the glide has landed (afterGesture). The stage is marked data-swipe-own, so
+// a tab swipe never starts on it; as the tab pager, it leaves fields, sideways scrollers and the screen's edges
+// (the system's Back) alone. Nothing runs on import.
 import { drag, glide, afterGesture } from './motion.js';
-import { pageStep } from './tab-pages.js';
+import { noGesture } from './gesture.js';
+import { pageStep, swipeEdge } from './tab-pages.js';
 
 /**
  * @typedef {{ index: () => number, go: (step: 1 | -1) => boolean, refresh: () => void, stop: () => void }} CardPager
@@ -17,14 +19,18 @@ import { pageStep } from './tab-pages.js';
  * @param {HTMLElement} stage  the box the cards fill (`.ui-cards`)
  * @param {{ card: (i: number) => HTMLElement | null, start?: number, onShow?: (i: number) => void, mouse?: boolean }} o
  *   card(i): the card at i, or null when there is none (the deck's ends; i may go below 0 for a deck with history);
- *   onShow(i): a card is shown, once its glide has landed
+ *   onShow(i): a card is shown (the first one too, and again after refresh()), once its glide has landed
  * @returns {CardPager}
  */
 export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
   stage.classList.add('ui-cards');
-  stage.setAttribute('data-no-gesture', '');
-  if (!stage.hasAttribute('tabindex')) stage.tabIndex = 0;
+  stage.setAttribute('data-swipe-own', '');
+  const tabbed = !stage.hasAttribute('tabindex');
+  if (tabbed) stage.tabIndex = 0;
   let i = start;
+  /** the card onShow was last told of @type {number | null} */
+  let told = null;
+  let on = true;
   /** previous, this, next @type {HTMLElement[]} */
   const slots = [-1, 0, 1].map(() => {
     const s = document.createElement('div');
@@ -44,6 +50,12 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
     const c = card(at);
     shown[k] = c;
     slots[k].replaceChildren(...(c ? [c] : []));
+    slots[k].scrollTop = 0;
+  };
+  // onShow, once the fingers lift and the glides land, once per card shown
+  const tell = () => {
+    const at = i;
+    afterGesture(() => { if (on && at === i && at !== told) { told = at; onShow?.(at); } });
   };
   const rest = () => {
     slots.forEach((s, k) => {
@@ -64,8 +76,7 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
     i += step;
     if (step > 0) { slots.push(/** @type {HTMLElement} */ (slots.shift())); shown.push(shown.shift() ?? null); fill(2, i + 1); }
     else { slots.unshift(/** @type {HTMLElement} */ (slots.pop())); shown.unshift(shown.pop() ?? null); fill(0, i - 1); }
-    const at = i;
-    afterGesture(() => { if (at === i) onShow?.(i); });
+    tell();
   };
 
   /** @param {number} from @param {number} step @param {number} v */
@@ -96,6 +107,10 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
 
   const off = drag(stage, {
     axis: 'x', mouse,
+    filter(e) {
+      const edge = swipeEdge(innerWidth);
+      return e.clientX > edge && e.clientX < innerWidth - edge && !noGesture(e.target, { inDialog: true });
+    },
     start() {
       w = stage.clientWidth || 1;   // measured at the touch, before any move
       const from = catchIt();
@@ -106,7 +121,9 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
     bounds: () => [has(2) ? -w : 0, has(0) ? w : 0],
     end(x, v) {
       if (!x && !v) { rest(); return; }
-      fly(x, pageStep(x, v, w, has(0), has(2)), v);
+      // past the deck's end (stretched): spring back with no speed, as the tab pager
+      const stretched = x < (has(2) ? -w : 0) || x > (has(0) ? w : 0);
+      fly(x, pageStep(x, v, w, has(0), has(2)), stretched ? 0 : v);
     },
   });
 
@@ -129,8 +146,19 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
       fly(from, step, 0);
       return true;
     },
-    refresh() { catchIt(); fill(0, i - 1); fill(1, i); fill(2, i + 1); rest(); },
-    stop() { off(); stage.removeEventListener('keydown', key); moving?.stop(); },
+    refresh() {
+      catchIt();
+      fill(1, i);
+      if (!shown[1]) { const c = card(i - 1); if (c) { i--; shown[1] = c; slots[1].replaceChildren(c); } }   // the queue shrank
+      fill(0, i - 1); fill(2, i + 1); rest();
+      told = null; tell();
+    },
+    stop() {
+      on = false; off(); stage.removeEventListener('keydown', key); moving?.stop();
+      for (const s of slots) s.remove();
+      stage.classList.remove('ui-cards'); stage.removeAttribute('data-swipe-own');
+      if (tabbed) stage.removeAttribute('tabindex');
+    },
   };
   api.refresh();
   return api;

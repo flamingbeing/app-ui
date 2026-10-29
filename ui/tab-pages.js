@@ -13,11 +13,11 @@
 // pans sideways and every sideways move stays the pager's; the pages beside are laid out at the first move that
 // looks sideways (a scroll never pays for them). The bar's title cross-fades to the coming page's (its
 // .ui-large-title) as the page passes halfway; anything in the bar marked data-swipe-fade fades out with the swipe
-// and back in on the new page. Never on a pushed screen, in a field, editor, sideways scroller, dialog, sheet or open
-// menu, in select mode, with text selected, or within swipeEdge() px of either edge (the system's Back gestures and
-// screens.js's edge swipe). A mostly vertical move scrolls instead. Less motion doesn't stop it: the pages move with
-// the finger (direct touch, as iOS's paging with Reduce Motion). Off: data-swipe="off" on the tab bar (or <html>), or
-// { swipe: false }.
+// and back in on the new page. Never on a pushed screen, in a field, editor, sideways scroller, card deck
+// ([data-swipe-own]), dialog, sheet or open menu, in select mode, with text selected, or within swipeEdge() px of
+// either edge (the system's Back gestures and screens.js's edge swipe). A mostly vertical move scrolls instead. Less
+// motion doesn't stop it: the pages move with the finger (direct touch, as iOS's paging with Reduce Motion). Off:
+// data-swipe="off" on the tab bar (or <html>), or { swipe: false }.
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
 // page motion), at every width. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
 // { slide: false }.
@@ -267,6 +267,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       const edge = swipeEdge(innerWidth);
       if (t.clientX <= edge || t.clientX >= innerWidth - edge) return;
       if (!current.contains(/** @type {Node} */ (e.target)) || noGesture(e.target)) return;
+      if (/** @type {Element} */ (e.target).closest('[data-swipe-own]')) return;   // a card deck's own swipe
       if (html.classList.contains('ui-menu-open') || document.querySelector('dialog[open]') || host.querySelector('.is-editing')) return;
       const sel = getSelection();
       if (sel && !sel.isCollapsed) return;
