@@ -24,6 +24,9 @@ export interface RefusedJob { key: string; code?: string; error?: string; record
 
 export interface SyncApi {
   status$(cb: (st: SyncStatus) => void): () => void;
+  /** the sync button's tap: wake the watchdog, then send what waits (app-sync's nudge and flush) */
+  nudge?(event?: string): unknown;
+  flush?(): Promise<unknown>;
   conflicts(): { key: string }[];
   describe(key: string): Conflict | null;
   resolve(key: string, choice: Pick | Record<string, Pick>): Promise<unknown>;
