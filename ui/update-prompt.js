@@ -30,6 +30,7 @@ export function updatePrompt(host, { update, idPrefix = '' }) {
   const retry = () => setTimeout(() => update.retryUpdate(), 0);
   document.addEventListener('focusout', retry);
   document.addEventListener('close', retry, true);   // a dialog closing ('close' doesn't bubble, so on the way down)
+  retry();   // the reload may have become allowed before these listeners existed (a slow start: the field was left, or removed, first)
   return () => {
     document.removeEventListener('focusout', retry);
     document.removeEventListener('close', retry, true);
