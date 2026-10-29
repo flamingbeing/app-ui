@@ -6,7 +6,12 @@ import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
 const DENSE = '/ui/0.0.0-dev/kit/dense/';
-const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
+// (two frames first: an element added a moment ago has no animation yet)
+const settled = page => page.evaluate(async () => {
+  const frame = () => new Promise(res => { requestAnimationFrame(() => res()); setTimeout(res, 100); });
+  await frame(); await frame();
+  await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {})));
+});
 
 // every target on the shown screen, measured where the finger lands (a radio or checkbox: its label); links inside
 // running text are exempt (WCAG 2.5.8's inline exception), as are the hidden ones

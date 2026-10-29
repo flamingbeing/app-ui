@@ -433,6 +433,30 @@ test('a tab page keeps its scroll; tapping the current tab over a pushed screen 
   expect(await page.evaluate(() => [window.kit.screens.depth(), history.state?.uiScreens ?? 0])).toEqual([0, 0]);
 });
 
+test('a tab change never flashes the bar\'s tinted (collapsed) state: between two scrolled pages it stays; to a page at the top it just clears', async ({ sized }) => {
+  const page = await load(sized);
+  const bar = page.locator('.ui-bar');
+  const tab = name => page.locator('nav.ui-tabbar .ui-tab', { hasText: name }).dispatchEvent('click');
+  await page.evaluate(() => { document.body.style.minHeight = '4000px'; scrollTo(0, 300); });
+  await tab('Rooms');
+  await expect.poll(() => shown(page)).toEqual(['rooms']);
+  await settled(page);
+  await page.evaluate(() => scrollTo(0, 300));
+  await expect(bar).toHaveClass(/is-collapsed/);
+  // every state the bar takes on each class change (repeats dropped)
+  await page.evaluate(() => {
+    const b = document.querySelector('.ui-bar'), log = window.barLog = [];
+    const note = () => { const c = b.classList.contains('is-collapsed'); if (log[log.length - 1] !== c) log.push(c); };
+    note();
+    new MutationObserver(note).observe(b, { attributes: true, attributeFilter: ['class'] });
+  });
+  const states = async () => { await settled(page); await page.waitForTimeout(150); return page.evaluate(() => window.barLog.splice(0, window.barLog.length - 1).concat(window.barLog)); };
+  await tab('Plants');   // scrolled too: tinted all the way
+  expect(await states()).toEqual([true]);
+  await tab('Jobs');     // at the top: clears once
+  expect(await states()).toEqual([true, false]);
+});
+
 test('a tab left from a pushed screen comes back at its own scroll, not the pushed screen\'s', async ({ sized }) => {
   const page = await load(sized);
   await page.evaluate(() => scrollTo(0, 200));

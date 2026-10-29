@@ -19,6 +19,19 @@ Responsiveness (README, "Responsiveness rules"):
   (Chromium) and in WebKit, within the budget; it runs alone after the other browser tests.
 - The parts gallery gains "Follow the finger", a `drag` and `glide` demo with a save held by `afterGesture`.
 
+## 1.0.0-rc.36
+- The bar no longer flashes on a tab change: its tinted (collapsed) state stays until the new page's title says
+  otherwise (it was cleared, then tinted again a frame later between two scrolled pages), and a title beside the
+  screen (a page sliding in from the side) no longer counts as scrolled under the bar.
+- `data-hold-select` on a select list (`.ui-list[data-select]`): a finger's hold on a row (and Android's long press)
+  starts select mode with that row ticked instead of opening its menu; a right-click and the keys still open it.
+
+## 1.0.0-rc.35
+- A `linen` ground (`applyTheme({ surface: 'linen' })`): warm paper with soft ink in light, its own warm dark.
+- Look A's head and the serif font preset use the kit's `--home-serif` when it sets one (no change for kits without it).
+- Gallery: `?kit=home|nuhs|ntf` previews a design kit's `/v1/tokens.css` with its app theme; the gallery's CSP allows
+  the three kit origins.
+
 ## 1.0.0-rc.34
 Swipe feel changes for every app that moves to it:
 - Tab pages follow the finger 1:1 from the first move (8 px to tell sideways from up and down), with the next page

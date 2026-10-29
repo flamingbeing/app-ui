@@ -25,6 +25,12 @@ export const SURFACES = Object.freeze({
     light: { bg: '#efe6d2', surface: '#faf4e6', text: '#3b352c', muted: '#6b6152' },
     dark: { bg: '#1d1915', surface: '#26211b', text: '#e8dfcf', muted: '#b5a993' },
   },
+  // (warm linen paper with soft ink, as the NTF kit's app screens; the dark is that kit's own)
+  linen: {
+    label: 'Linen',
+    light: { bg: '#f1ede4', surface: '#fbfaf6', text: '#272722', muted: '#55534d' },
+    dark: { bg: '#151412', surface: '#22201d', text: '#ece7dd', muted: '#aaa497' },
+  },
   navy: { label: 'Navy night', light: { bg: '#eef2f8' }, dark: { bg: '#0a1628', surface: '#10223b' } },
   ink: { label: 'Ink', light: { bg: '#ffffff', surface: '#f6f6f6' }, dark: { bg: '#1e1e1e', surface: '#262626' } },
   black: { label: 'Black', light: { bg: '#f4f4f4' }, dark: { bg: '#000000', surface: '#121212' } },

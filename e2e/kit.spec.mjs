@@ -26,7 +26,12 @@ async function finger(page) {
 }
 const centre = async loc => { const b = await loc.boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, b }; };
 const depth = page => page.evaluate(() => window.kit.screens.depth());
-const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
+// (two frames first: an element added a moment ago has no animation yet)
+const settled = page => page.evaluate(async () => {
+  const frame = () => new Promise(res => { requestAnimationFrame(() => res()); setTimeout(res, 100); });
+  await frame(); await frame();
+  await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {})));
+});
 
 for (const width of [390, 820, 1280]) {
   test.describe(`at ${width} px`, () => {
@@ -183,6 +188,28 @@ for (const width of [390, 820, 1280]) {
       await page.waitForTimeout(650);
       await f.up();
       await expect(page.locator('.ui-menu')).toHaveCount(0);
+    });
+
+    test('data-hold-select: a finger\'s hold starts select mode with that row ticked (no menu, the lift ticks nothing more); a right-click still opens the menu', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(KIT);
+      await page.evaluate(() => { document.getElementById('plants').dataset.holdSelect = ''; });
+      const row = page.locator('.ui-row', { hasText: 'Fern' });
+      const f = await finger(page);
+      const { x, y } = await centre(row);
+      await f.down(x, y);
+      await page.waitForTimeout(650);
+      await f.up();
+      await page.waitForTimeout(150);
+      await expect(page.locator('.ui-menu')).toHaveCount(0);
+      await expect(page.locator('#plants')).toHaveClass(/is-editing/);
+      await expect(row).toHaveAttribute('aria-selected', 'true');
+      expect(await depth(page)).toBe(0);
+      expect(await page.locator('#plants .ui-row[aria-selected=true]').count()).toBe(1);
+      await page.keyboard.press('Escape');
+      await expect(page.locator('#plants')).not.toHaveClass(/is-editing/);
+      await row.click({ button: 'right' });
+      await expect(page.locator('.ui-menu[role=menu]')).toBeVisible();
     });
 
     test('sheet: the first drag has no long frame (transform only, no layout at the start)', async ({ sized }) => {
