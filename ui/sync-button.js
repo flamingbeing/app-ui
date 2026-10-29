@@ -48,7 +48,8 @@ export function syncButton(host, { sync, syncNow, labels = {}, idPrefix = '' }) 
     btn.dataset.state = look.shown;
     btn.setAttribute('aria-label', look.label);
     btn.title = look.label;
-    badge.textContent = count && look.shown !== 'attention' ? String(count) : '';
+    // (the count is the badge's CSS content, not text: text inside the button would have to appear in its label word for word)
+    if (count && look.shown !== 'attention') badge.dataset.count = String(count); else delete badge.dataset.count;
     if (drawn !== look.shown) {   // (a new icon only on a change, so the lift keeps going)
       drawn = look.shown;
       btn.replaceChildren(icon(ICONS[/** @type {keyof typeof ICONS} */ (look.shown)] || cloud), badge);
