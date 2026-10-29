@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.46
+- Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed
+  (`theme/m3.js`, tonal spot, light and dark, each role also as `--m3-*`), solid tonal surfaces (no glass), the Roboto
+  stack (Inter otherwise; no font hosted), a top app bar that takes its tone on scroll, lists in rounded groups, a
+  navigation bar with a pill on the current tab, Material's switch, sheet handle, menus, chips and action button.
+  An app opts in with `applyTheme({ look: 'm' })`; the default stays look A.
+- New variant `family` (`core` · `android`, `data-family` on `<html>`); `ui/gestures/android.css` restyles every part
+  under `[data-family="android"]`, moves by transform and opacity only.
+- New part `.ui-fab` (`ui/gestures/fab.css`), the screen's one main action, in every look.
+
 ## 1.0.0-rc.45
 - Drawer: Android's Back closes the phone's drawer (it is a history entry while open, as a sheet is), and the page
   behind it (bar, pages, tab bar) is `inert`, so Tab and TalkBack stay in the drawer. A side link's page takes the
