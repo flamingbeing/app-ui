@@ -69,5 +69,5 @@ export type ThemeLinkOptions = {
     /**
      * what the person is told
      */
-    messages?: Partial<Record<"older" | "newer" | "missing" | "broken", string>> | undefined;
+    messages?: Partial<Record<"missing" | "older" | "newer" | "broken", string>> | undefined;
 };
