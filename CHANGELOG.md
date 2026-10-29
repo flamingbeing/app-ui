@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.51
+- Sync button: the count is the badge's CSS content (`data-count`), not text, so the button's name is its label alone
+  (axe `label-content-name-mismatch` with a count showing). Looks unchanged.
+
 ## 1.0.0-rc.50
 - Press Back again to close: the first Back on the first tab stays in the app and shows a toast, "Press Back again
   to close"; a second Back within 2 s (`CLOSE_MS`) leaves. Before, one Back let the browser close an installed app,
