@@ -1,6 +1,6 @@
 // The jank gate (README, "Responsiveness rules"): a tab swipe, a pull past a list's ends and a sheet drag, start to
-// landing, on a phone whose CPU is slowed 4x (Chromium, through the DevTools protocol, with a real touch path), must keep every frame on time; a
-// touched button must show pressed in the first frame. WebKit (the iPhone's engine) runs the same gestures unslowed,
+// landing, on a phone whose CPU is slowed 4x (Chromium, through the DevTools protocol, with a real touch path), must
+// keep every frame on time; a touched button must show pressed in the first frame. WebKit (the iPhone's engine) runs the same gestures unslowed,
 // from touch and pointer events sent in the page, as the second check: there the page's own work is held (each touch's
 // moves' handlers within half a frame, the touch down's and the lift's within one, pressed set by the touch itself), not
 // its frames, which CI's WebKit draws in software at 3x (one repaint of the glass tab bar alone takes ~85 ms there, whatever the page does). A failure here is slow work
