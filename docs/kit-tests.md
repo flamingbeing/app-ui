@@ -97,8 +97,8 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 cancelled. The budget is README, "Responsiveness rules".
 
 `e2e/jank.spec.mjs` on `/kit/shell/?edge=always` at 390 px, Chromium with the CPU slowed 4x and DevTools protocol
-touch (a move every 16 ms), then WebKit unslowed with page-sent touch and pointer events; one test at a time, after
-every other spec. Each gesture is judged from the first move: drag frames (to the lift) and the glide's frames (to the
+touch (a move every 16 ms) on the plain look (no GPU in CI: glass blur drawn in software drops frames at random),
+then WebKit unslowed with the glass, page-sent touch and pointer events; one test at a time, after every other spec. Each gesture is judged from the first move: drag frames (to the lift) and the glide's frames (to the
 frame it lands in), and long tasks over both.
 
 | Part | What is tested | axe |

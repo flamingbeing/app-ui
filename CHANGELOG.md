@@ -11,8 +11,8 @@ Responsiveness (README, "Responsiveness rules"):
 - The tab pager, the phone drawer, the detent sheet (drag, detents and close) and the edge swipe back now glide on
   `glide`, so each let-go is a compositor animation a finger can catch; Reduce Motion still never stops a
   finger-driven move or its glide.
-- The tab pager lays the pages beside out at the touch, not at the first sideways move, so the first move only moves
-  them; a touch that turns out a scroll puts them away once it's done.
+- The tab pager lays the pages beside out (and promotes their layers) at the touch, not at the first sideways move,
+  so the first move only moves them; a touch that turns out a scroll puts them away once it's done.
 - Pressed at once: `startGestures()` (option `press`, on by default) marks a touched control `data-pressed` on the
   touch; the theme, tab bar and glass buttons show it like `:active`.
 - CI's jank gate (`e2e/jank.spec.mjs`): a tab swipe and flick and a sheet drag on a phone with the CPU slowed 4x

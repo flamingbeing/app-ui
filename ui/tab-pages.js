@@ -191,7 +191,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     readyY = scrollY;
     own = small?.textContent ?? '';
     faders = fades();
-    host.classList.add('is-paging');
+    host.classList.add('is-paging', 'is-moving');   // (its layers made now too, not at the first move)
     for (const [n, off] of /** @type {[HTMLElement | null, number][]} */ ([[prev, -w], [next, w]])) {
       if (!n) continue;
       n.hidden = false;
@@ -252,7 +252,6 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       dx = x;
     }
     prepare();
-    host.classList.add('is-moving');
     // the finger travel that puts the page where it is (more than that, on a rubber band)
     raw = (dx < 0 && !next) || (dx > 0 && !prev) ? unrubber(dx, w) : dx;
     place();
@@ -294,7 +293,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       if (dir === 'y') { x0 = null; putAway(); return; }   // a scroll: leave it to the page
       const d = mx > 0 && !prev ? drawer?.() ?? null : null;
       if (d) { pulling = d; unpage(); }   // the first page, swiped right: the drawer comes out instead
-      else { prepare(); host.classList.add('is-moving'); }
+      else prepare();
     }
     if (e.cancelable) e.preventDefault();
     raw = mx;

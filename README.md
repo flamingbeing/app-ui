@@ -44,11 +44,12 @@ holds the kit to them):
   and scroll are passive unless they must cancel.
 - **Pressed at once**: `startGestures()` marks a touched button, tab, menu item or row `data-pressed` on the touch
   (no wait for `:active`), cleared on lift, scroll or cancel.
-- **The budget** (the jank gate, CI): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch),
-  a tab swipe, a tab flick and a sheet dragged up, down and away keep every drag frame within 20 ms but one, no frame
-  over 50 ms (drag or glide) and no task over 50 ms; a touched tab shows pressed within 50 ms. WebKit (the iPhone's
-  engine) runs the same gestures unslowed. It runs alone after the other browser tests, one test at a time, with no
-  retries; a failure is a slow frame to fix, never a number to loosen.
+- **The budget** (the jank gate, CI): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch,
+  the plain look: CI has no GPU, so glass blur is drawn in software there), a tab swipe, a tab flick and a sheet
+  dragged up, down and away keep every drag frame within 20 ms but one, no frame over 50 ms (drag or glide) and no
+  task over 50 ms; a touched tab shows pressed within 50 ms. WebKit (the iPhone's engine) runs the same gestures
+  unslowed, with the glass. It runs alone after the other browser tests, one test at a time, with no retries; a
+  failure is a slow frame to fix, never a number to loosen.
 
 ## Releases
 

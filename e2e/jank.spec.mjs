@@ -18,6 +18,10 @@ async function load(sized, browserName) {
   const page = await sized(390);
   if (process.env.JANK_DEBUG) page.on('console', m => console.log('  page:', m.text()));
   await page.goto(SHELL);
+  // the plain look under the slowed CPU: with no GPU here, the glass's backdrop blur is drawn in software, between the
+  // page's frames, and drops one at random (a phone's GPU draws it); the page's own work is what the gate holds.
+  // WebKit keeps the glass
+  if (browserName === 'chromium') await page.evaluate(() => document.documentElement.classList.remove('glass'));
   await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
   await page.evaluate(() => {
     // every frame (rAF to rAF, [start, end]) and every long task ([start, end]) from start() to stop(), split at the
