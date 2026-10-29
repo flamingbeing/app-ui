@@ -3,6 +3,7 @@
 // keeps it), moving between the other tabs only changes its address, and going to the first tab by a tap takes the
 // entry away again. tabPages uses it; an app with its own router calls went() after each tab change it makes.
 // Nothing runs on import.
+import { stepping, stepsSettled } from './steps.js';
 
 /**
  * @param {{ history: History, events: Pick<Window, 'addEventListener' | 'removeEventListener'>, onFirst: () => void }} o
@@ -15,6 +16,8 @@ export function tabBack({ history, events, onFirst }) {
   let was = away();
   /** @param {boolean} first @param {string} [url] */
   function went(first, url) {
+    // a sheet's or the drawer's step back still on its way would land on the entry pushed here and undo it
+    if (stepping()) { void stepsSettled().then(() => went(first, url)); return; }
     if (!first && !away()) history.pushState({ ...(history.state || {}), uiTabBack: 1 }, '', url);
     else if (first && away()) history.back();   // the first tab's own entry is under this one
     else if (url !== undefined) history.replaceState(history.state, '', url);
