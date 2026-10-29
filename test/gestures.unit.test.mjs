@@ -3,7 +3,7 @@
 // node --test app/test/gestures.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HOLD_MS, SLOP, velocity, still, haptic, releaseVelocity, unrubber, pathAt } from '../ui/gesture.js';
+import { HOLD_MS, SLOP, velocity, still, haptic, releaseVelocity, unrubber, pathAt, claim, release, captured, PRIORITY } from '../ui/gesture.js';
 import { placeMenu, placeAtPointer } from '../ui/hold-menu.js';
 import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
@@ -215,4 +215,22 @@ test('keyboardState: open only while typing and over KEYBOARD_MIN shorter; lift 
   assert.deepEqual(keyboardState({ base: 844, inner: 500, height: 500, top: 0, editing: true }), { open: true, lift: 0 });
   assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 844 - KEYBOARD_MIN, top: 0, editing: true }), { open: false, lift: 0 });
   assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 500, top: 20, editing: true }), { open: true, lift: 324 });
+});
+
+test('the arbiter: the first claim owns the touch, a lower one stands down, a higher one takes it over', () => {
+  assert.equal(captured(), null);
+  assert.equal(claim('tabs'), true);
+  assert.equal(claim('tabs'), true, 'its own again');
+  assert.equal(claim('bounce'), false, 'lower');
+  assert.equal(claim('tabs'), true);
+  assert.equal(claim('sheet'), true, 'higher takes it');
+  assert.equal(captured(), 'sheet');
+  assert.equal(claim('drawer'), false);
+  release('tabs');
+  assert.equal(captured(), 'sheet', 'only the owner gives it back');
+  release('sheet');
+  assert.equal(captured(), null);
+  assert.ok(PRIORITY.sheet > PRIORITY.drawer && PRIORITY.drawer > PRIORITY.back && PRIORITY.back > PRIORITY.tabs
+    && PRIORITY.tabs > PRIORITY.cards && PRIORITY.cards > PRIORITY.drag && PRIORITY.drag > PRIORITY.select
+    && PRIORITY.select > PRIORITY.hold && PRIORITY.hold > PRIORITY.bounce);
 });

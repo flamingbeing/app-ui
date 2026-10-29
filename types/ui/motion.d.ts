@@ -41,15 +41,16 @@ export function tracker(): {
  * finger has clearly gone along the axis (8 px, swipeIntent); a move the other way is left to the page. start() may
  * give the place the drag starts from (a caught glide's); past bounds() the move stretches (rubber band). end() gets
  * the place and the let-go speed (px/ms, 0 when the browser cancelled the touch); a drag that moved swallows the
- * click that follows.
+ * click that follows. name: the arbiter's (gesture.js claim), claimed as the drag starts; refused, it is the page's.
  * @param {HTMLElement} el
- * @param {{ axis?: 'x' | 'y', mouse?: boolean, filter?: (e: PointerEvent) => boolean, start?: (e: PointerEvent) => number | void,
+ * @param {{ axis?: 'x' | 'y', mouse?: boolean, name?: keyof typeof import('./gesture.js').PRIORITY, filter?: (e: PointerEvent) => boolean, start?: (e: PointerEvent) => number | void,
  *   move: (x: number, e: PointerEvent) => void, end: (x: number, v: number) => void, bounds?: () => [number, number] }} o
  * @returns {() => void} stop
  */
-export function drag(el: HTMLElement, { axis, mouse, filter, start, move, end, bounds }: {
+export function drag(el: HTMLElement, { axis, mouse, name, filter, start, move, end, bounds }: {
     axis?: "x" | "y";
     mouse?: boolean;
+    name?: keyof typeof import("./gesture.js").PRIORITY;
     filter?: (e: PointerEvent) => boolean;
     start?: (e: PointerEvent) => number | void;
     move: (x: number, e: PointerEvent) => void;

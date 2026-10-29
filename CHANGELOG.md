@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.52
+- One gesture owns a touch: `claim(name)`, `release`, `captured`, `onCaptured`, `PRIORITY` in `ui/gesture.js`. The
+  sheet, drawer, Back edge, tab swipe, card pager, row drag, select drag, hold menu and bounce all claim before they
+  move; the higher one wins and the others stand down (a press shade clears, a hold stops, a half tab swipe goes
+  back). Same feel as before when only one part wants the touch.
+
 ## 1.0.0-rc.51
 - Sync button: the count is the badge's CSS content (`data-count`), not text, so the button's name is its label alone
   (axe `label-content-name-mismatch` with a count showing). Looks unchanged.

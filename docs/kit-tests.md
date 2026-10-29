@@ -95,6 +95,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Drawer and Back | the drawer open (pulled out, or by its button) is a history entry: Back closes it and stays on the page; the bar, pages and tab bar are `inert` while it is open; a side link's page takes the drawer's place in history, so Back then goes to the first page; also in WebKit | |
 | Sheet, Esc and Back | a sheet closed by Esc (the close request Chrome's Back sends a modal dialog on Android) steps back once: the tab's entry under it stays; also in WebKit | |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
+| One owner | a tab swipe started on a pressed row takes the touch (`captured()` is `tabs`): the press shade clears, no hold menu after 650 ms; once the finger lifts the touch is free (`null`); Chromium and WebKit (`swipe-feel`); `claim` order in `test/gestures.unit.test.mjs` | |
 
 ## Keyboard
 

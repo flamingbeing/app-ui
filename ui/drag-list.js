@@ -1,7 +1,7 @@
 // Drag a row of a list by its grip (a finger or a mouse). The row follows the pointer, with a tick (gesture.js haptic)
 // as it picks up and as it passes each row; on release, onDrop(from, to) gets its old and new index among the list's
 // rows. A cancelled drag (the browser took the touch) puts the row back. Style: ui/ui.css, "drag-reorder".
-import { haptic } from './gesture.js';
+import { claim, haptic } from './gesture.js';
 
 /**
  * Start the drag from a grip's pointerdown.
@@ -13,7 +13,7 @@ export function gripDrag(e, list, onDrop) {
   e.preventDefault();
   const grip = /** @type {HTMLElement} */ (e.currentTarget || e.target);
   const row = /** @type {HTMLElement | null} */ (grip.closest('li'));
-  if (!row) return;
+  if (!row || !claim('drag')) return;
   const rows = /** @type {HTMLElement[]} */ ([...list.children]), y0 = e.clientY;
   // where a drop at y would put the row (its new index)
   const slot = (/** @type {number} */ y) => rows.filter(r => r !== row && y > r.getBoundingClientRect().top + r.getBoundingClientRect().height / 2).length;

@@ -7,7 +7,7 @@
 // near the screen's edges. [data-select-toolbar="#list"] (the bottom action bar) replaces the tab bar; its
 // [data-needs="2-4"] buttons follow the count; [data-select-count="#list"] says how many (a live region);
 // [data-select-all="#list"] ticks all or none. The list sends "ui-select" events (detail.count, detail.rows).
-import { haptic, listeners } from './gesture.js';
+import { claim, haptic, listeners } from './gesture.js';
 
 /** where the ticks are: a finger starting this far (px) from the list's left edge drags the range */
 export const TICKS = 56;
@@ -173,6 +173,7 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
     if (from < 0) return;
     const t = e.touches[0];
     if (!dragged && Math.abs(t.clientY - lastY) < 6) return;
+    if (!dragged && !claim('select')) { from = -1; return; }   // another part has this touch
     dragged = true; lastY = t.clientY;
     if (e.cancelable) e.preventDefault();
     applyAt(t.clientY);
