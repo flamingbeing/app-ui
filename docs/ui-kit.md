@@ -88,6 +88,15 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
 - `startGestures` ticks every switch (`input[role=switch]`, `input[switch]`) and segmented control a person changes
   (`toggleTicks`; `{ ticks: false }` leaves it out).
 
+## Press feedback (`ui/motion.js` `pressFeedback`)
+
+- A finger on a button, tab, menu item or opening row marks it `data-pressed` without the browser's wait: at once
+  on a fixed or sticky box (a bar, the tab bar, a sheet), after `PRESS_DELAY` (100 ms, Android's tap timeout) inside
+  something that scrolls (`inScroller`), so a scroll that starts by then never flashes a row. A tap lifted sooner
+  shows it at the lift; it stays one painted frame at least (80 ms).
+- The Android look (`data-family="android"`) adds Material's ripple: a circle grows from where the finger landed to
+  the control's farthest corner (225 ms), and fades after the lift (150 ms). Motion Still: no growth, no fade.
+
 ## One gesture owns a touch (`ui/gesture.js` `claim`)
 
 - Every touch part asks `claim(name)` once its drag is sure (past the slop, in its direction); the part with the

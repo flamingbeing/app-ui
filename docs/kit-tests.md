@@ -109,6 +109,17 @@ at 390 px, in Chromium and WebKit, with the keyboard played (no browser here sho
 | Resizes content | a tapped field in the sheet, then the page 344 px shorter: `html.ui-keyboard-open`, `--ui-keyboard-h` 0, the tab bar hidden, the sheet inside the space above; the page tall again: closed, the tab bar back | |
 | Visible part only | a field and the visual viewport 344 px shorter: `--ui-keyboard-h` 344px and the sheet's bottom on the keyboard's top; a blur: closed, 0 | |
 
+## Press feedback
+
+`ui/motion.js` `pressFeedback` on `/kit/shell/` at 390 px, in Chromium and WebKit (`e2e/press.spec.mjs`), with
+page-sent touch pointer events.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| In a scroller | a row in the scrolling page (`inScroller`): not pressed at 40 ms, pressed by 160 ms; a move past the slop at 40 ms: never; a tap lifted at 30 ms: shown at the lift, then cleared | |
+| On a fixed bar | a tab on the tab bar (`inScroller` false): pressed at once; cleared after the lift | |
+| Ripple | look M: `data-ripple="in"` from the finger (`--ui-ripple-x` 30 px), to the farthest corner, a radial gradient; after the lift `out`, then gone with its properties; the plain look: none | |
+
 ## Haptics
 
 `ui/gesture.js` `haptic`, the theme's `haptics`: `cleanChoice` in Node (`test/theme.unit.test.mjs`).

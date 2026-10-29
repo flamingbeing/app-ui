@@ -43,7 +43,7 @@ export { cardPager } from './card-pager.js';
 export { still, haptic, HAPTIC_PATTERNS, toggleTicks, claim, release, captured, onCaptured, PRIORITY } from './gesture.js';
 // motion (motion.js): the shared finger physics: a pointer drag glued to the finger, the spring a let-go glides on,
 // work held until the finger lifts, the instant pressed state
-export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from './motion.js';
+export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, PRESS_DELAY, inScroller, rubber } from './motion.js';
 // the rubber band at a scroll's ends (bounce.js): startGestures() starts it
 export { bounce } from './bounce.js';
 // the adaptive shell (ui/shell/shell.css): phone tab bar, tablet and laptop side bar with list and detail

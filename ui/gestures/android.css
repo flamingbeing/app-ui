@@ -181,3 +181,16 @@
    does (gestures.js sets the screen's transform; a scale here is static, so no extra work per frame) ---------- */
 [data-family="android"] .ui-screens.is-swiping .ui-screen.is-top,
 [data-family="android"] .ui-screen:is(.is-entering, .is-leaving) { box-shadow: none; border-radius: 28px; overflow: clip; }
+
+/* ---------- ripple (ui/motion.js pressFeedback): a circle grows from the finger over what it presses ---------- */
+@property --ui-ripple-k { syntax: '<number>'; inherits: false; initial-value: 0; }
+@property --ui-ripple-a { syntax: '<percentage>'; inherits: false; initial-value: 12%; }
+[data-family="android"] [data-ripple] { background-repeat: no-repeat;
+  background-image: radial-gradient(circle at var(--ui-ripple-x) var(--ui-ripple-y),
+    color-mix(in srgb, currentColor var(--ui-ripple-a), transparent) calc(var(--ui-ripple-max) * var(--ui-ripple-k)),
+    transparent calc(var(--ui-ripple-max) * var(--ui-ripple-k) + .5px)); }
+[data-family="android"] [data-ripple="in"] { animation: ui-ripple-in 225ms cubic-bezier(.2, 0, 0, 1) forwards; }
+[data-family="android"] [data-ripple="out"] { --ui-ripple-k: 1; animation: ui-ripple-out 150ms linear forwards; }
+:root[data-motion="still"][data-family="android"] [data-ripple] { --ui-ripple-k: 1; animation: none; }
+@keyframes ui-ripple-in { from { --ui-ripple-k: 0; } to { --ui-ripple-k: 1; } }
+@keyframes ui-ripple-out { from { --ui-ripple-a: 12%; } to { --ui-ripple-a: 0%; } }
