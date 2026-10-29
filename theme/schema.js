@@ -19,10 +19,12 @@ export const LAYOUTS = DENSITIES;
 export const MATERIALS = Object.freeze(['glass', 'solid', 'always']);
 // motion: follow the device's Reduce Motion, or Still (no springs, slides or lifts) on this device whatever it says
 export const MOTIONS = Object.freeze(['auto', 'still']);
+// haptics: the taps gestures give (ui/gesture.js haptic), on by default, or off on this device
+export const HAPTICS = Object.freeze(['on', 'off']);
 
 /**
  * @typedef {{ theme: string, dark: string, preset: string, accent: string, surface: string, look: string,
- *   density: string, material: string, motion: string }} Choice
+ *   density: string, material: string, motion: string, haptics: string }} Choice
  * look: '' = the app's default look (applyTheme({ look })), else one of looks.js
  * accent: '' = the preset's (or the app's) colour, else a six-digit hex
  */
@@ -43,5 +45,6 @@ export function cleanChoice(raw) {
     density: oneOf(DENSITIES, r.density ?? (r.layout === 'compact' ? 'compact' : undefined)),
     material: oneOf(MATERIALS, r.material),
     motion: oneOf(MOTIONS, r.motion),
+    haptics: oneOf(HAPTICS, r.haptics),
   };
 }

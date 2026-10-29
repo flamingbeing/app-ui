@@ -7,7 +7,7 @@
 // detent's height again once still. From 840 px wide it is a centred dialog: a drag changes its height.
 // Each open sheet is a history entry, so Back (Android's, the browser's, the edge swipe) closes it. Done and any
 // [data-close] close it; [data-open-sheet="#id"] buttons open it and get focus back.
-import { SLOP, listeners, still } from './gesture.js';
+import { SLOP, haptic, listeners, still } from './gesture.js';
 import { glide as springGlide, tracker } from './motion.js';
 import { ourStep, stepBack as back, stepping, stepsSettled } from './steps.js';
 
@@ -201,6 +201,8 @@ export function detentSheet(sheet) {
   let y0 = null;
   // h0: how much showed at the start; box: the sheet's height for a phone drag; h: how much shows now
   let x0 = 0, h0 = 0, box = 0, h = 0, dy = 0, live = false, moved = false, from0 = ds[0];
+  // aimed: where a let-go would land now (a haptic when it changes)
+  let aimed = ds[0];
   const last = tracker();
   /** @type {number | string | null} */
   let id = null;
@@ -223,6 +225,7 @@ export function detentSheet(sheet) {
   }
   function begin() {
     live = true;
+    aimed = from0;
     try { if (from && typeof id === 'number') from.setPointerCapture(id); } catch { /* gone */ }
     // a finger on the settling sheet catches it where it is
     h0 = h = glider ? glider.stop() : rest > 0 && !wide.matches ? rest : shown();
@@ -244,6 +247,9 @@ export function detentSheet(sheet) {
       begin();
     }
     if (Math.abs(dy) > 4) moved = true;
+    // a let-go here (held still) would now land somewhere else: past the close line, or on another height
+    const aim = settle(ds, from0, dy, 0);
+    if (aim !== aimed) { aimed = aim; haptic('threshold'); }
     const maxH = innerHeight - 12;
     if (wide.matches) {   // a centred dialog: change the height
       const want = h0 - dy * 2;

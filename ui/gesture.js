@@ -39,13 +39,20 @@ export function noGesture(target, { inDialog = false } = {}) {
 
 /** @type {HTMLLabelElement | null} */
 let tickLabel = null;
+// the five kinds, as navigator.vibrate patterns (ms on, off, on): tick (a step: a row ticked, a switch flipped, a row
+// passing a slot), threshold (a drag crossing where its let-go would land somewhere else), long (a touch and hold
+// taking hold), confirm and reject (a done or a refused action, for apps)
+export const HAPTIC_PATTERNS = Object.freeze({ tick: 8, threshold: 12, long: 20, confirm: [10, 40, 10], reject: [20, 60, 20] });
 /**
- * A light tap: navigator.vibrate where there is one (Android); on iPhone (iOS 18 and later) toggling a hidden
- * <input switch> through its label gives the system's own haptic, the only one a web page can reach there.
+ * A haptic of one kind, unless Haptics is Off on this device (the theme switch: data-haptics="off" on <html>):
+ * navigator.vibrate where there is one (Android); on iPhone (iOS 18 and later) toggling a hidden <input switch>
+ * through its label gives the system's own tap, the only one a web page can reach there (one tap for every kind).
+ * @param {keyof typeof HAPTIC_PATTERNS} [kind]
  */
-export function haptic() {
+export function haptic(kind = 'tick') {
+  if (typeof document !== 'undefined' && document.documentElement.dataset.haptics === 'off') return;
   if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-    try { navigator.vibrate(10); } catch { /* not allowed now (no user gesture yet) */ }
+    try { navigator.vibrate(HAPTIC_PATTERNS[kind] ?? HAPTIC_PATTERNS.tick); } catch { /* not allowed now (no user gesture yet) */ }
     return;
   }
   if (typeof document === 'undefined') return;
@@ -61,6 +68,20 @@ export function haptic() {
     document.body.append(tickLabel);
   }
   tickLabel.click();
+}
+
+const TOGGLES = 'input[type=checkbox][role=switch], input[type=checkbox][switch], .ui-segmented input[type=radio]';
+/**
+ * A tick when a switch flips or a segmented control picks (a change from the person, under root).
+ * @param {ParentNode & EventTarget} [root] @returns {() => void} stop
+ */
+export function toggleTicks(root = document) {
+  const f = (/** @type {Event} */ e) => {
+    const t = /** @type {Element} */ (e.target);
+    if (e.isTrusted && t.matches?.(TOGGLES) && !t.closest('.ui-haptic')) haptic('tick');
+  };
+  root.addEventListener('change', f);
+  return () => root.removeEventListener('change', f);
 }
 
 /**

@@ -50,6 +50,10 @@ syncChip($('sync-host'), { sync: /** @type {any} */ (fakeSync) });
 const stillBox = /** @type {HTMLInputElement} */ ($('still'));
 stillBox.checked = themeChoice().motion === 'still';
 stillBox.addEventListener('change', () => chooseTheme({ motion: stillBox.checked ? 'still' : 'auto' }));
+// Haptics: this device only, on until turned off
+const hapticsBox = /** @type {HTMLInputElement} */ ($('haptics'));
+hapticsBox.checked = themeChoice().haptics !== 'off';
+hapticsBox.addEventListener('change', () => chooseTheme({ haptics: hapticsBox.checked ? 'on' : 'off' }));
 
 // the demo sheet's Open the sheet and Push a screen: the demo sheet goes first (its Back step landed), then what they
 // open hands focus back to the bar's button when it closes

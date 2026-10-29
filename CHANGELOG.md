@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.48
+## 1.0.0-rc.49
 - Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
   words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
   state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
@@ -12,6 +12,15 @@
 - In a band's bar (look B) the sync chip takes the band's white text (the state colours failed contrast on it).
 - Gallery: four more made-up plants, so the list scrolls at tablet height; the dense page's controls are one card
   with a switch.
+- Gallery: the Haptics switch is in the Demo controls sheet with Less motion.
+
+## 1.0.0-rc.48
+- Haptics: `haptic(kind)` with five kinds (`tick`, `threshold`, `long`, `confirm`, `reject`; `HAPTIC_PATTERNS`),
+  `haptic()` is a tick. The hold menu takes hold with a long; a sheet dragged past its close line or onto another
+  height and the drawer past half give a threshold; a dragged row (`gripDrag`) ticks as it picks up and passes each
+  row; `startGestures` ticks switches and segmented controls (`toggleTicks`; `{ ticks: false }` leaves it out).
+- Theme: Haptics (`haptics: 'on' | 'off'`, on by default), a per-device choice like Motion, in `themeSwitch`;
+  `html[data-haptics="off"]` and `haptic()` gives nothing. The gallery has a Haptics switch.
 
 ## 1.0.0-rc.47
 - Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):
