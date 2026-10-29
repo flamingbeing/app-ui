@@ -3,6 +3,8 @@
 ## 1.0.0-rc.59
 - The refused list's heading is a section head (`.ui-section` / `.ui-section-head`), the small grey words over a
   list, not a browser-default h2 bigger than the screen's own headings.
+- The iOS look no longer fills a select that is a row's value (a list row, the theme switch's rows): muted words
+  and the chevron, as in the other looks and iOS Settings.
 
 ## 1.0.0-rc.58
 - No swipe pulls the side bar out as a drawer any more: on the first tab page a right swipe stretches the page and
