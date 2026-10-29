@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.52
+## 1.0.0-rc.53
 - Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
   words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
   state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
@@ -14,6 +14,12 @@
   with a switch.
 - Gallery: the Haptics switch is in the Demo controls sheet with Less motion.
 
+
+## 1.0.0-rc.52
+- One gesture owns a touch: `claim(name)`, `release`, `captured`, `onCaptured`, `PRIORITY` in `ui/gesture.js`. The
+  sheet, drawer, Back edge, tab swipe, card pager, row drag, select drag, hold menu and bounce all claim before they
+  move; the higher one wins and the others stand down (a press shade clears, a hold stops, a half tab swipe goes
+  back). Same feel as before when only one part wants the touch.
 
 ## 1.0.0-rc.51
 - Sync button: the count is the badge's CSS content (`data-count`), not text, so the button's name is its label alone

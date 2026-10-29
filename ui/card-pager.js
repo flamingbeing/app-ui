@@ -109,7 +109,7 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true, fill: 
   };
 
   const off = drag(stage, {
-    axis: 'x', mouse,
+    axis: 'x', mouse, name: 'cards',
     filter(e) {
       const edge = swipeEdge(innerWidth);
       return e.clientX > edge && e.clientX < innerWidth - edge && !noGesture(e.target, { inDialog: true });
