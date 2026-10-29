@@ -116,6 +116,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     });
   }
   // Back on another page goes to the first page (the address is the first page's already)
+  // (the pages keep their own scroll: the browser's would land a page at the scroll it had when the entry was added)
+  if (backToFirst) try { history.scrollRestoration = 'manual'; } catch { /* none */ }
   const back = backToFirst ? tabBack({ history, events: window, onFirst: () => { const first = stops()[0]; if (first) go(first); } }) : null;
   /** @type {Animation | null} */
   let sliding = null;
