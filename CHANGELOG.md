@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.35
+- The bar no longer flashes on a tab change: its tinted (collapsed) state stays until the new page's title says
+  otherwise (it was cleared, then tinted again a frame later between two scrolled pages), and a title beside the
+  screen (a page sliding in from the side) no longer counts as scrolled under the bar.
+- `data-hold-select` on a select list (`.ui-list[data-select]`): a finger's hold on a row (and Android's long press)
+  starts select mode with that row ticked instead of opening its menu; a right-click and the keys still open it.
+
 ## 1.0.0-rc.34
 Swipe feel changes for every app that moves to it:
 - Tab pages follow the finger 1:1 from the first move (8 px to tell sideways from up and down), with the next page

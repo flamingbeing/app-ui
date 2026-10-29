@@ -4,6 +4,9 @@
 // context-menu key and Shift+F10. A pick sends a "ui-menu" event (detail.action) from the element.
 // A hold is HOLD_MS without moving more than SLOP; the click that comes with lifting the finger is swallowed (it
 // neither opens the row nor presses a menu item); no hold from fields, dialogs, sideways scrollers or select mode.
+// In a select list marked data-hold-select (.ui-list[data-select][data-hold-select]) a finger's hold (and Android's own
+// long press) starts select mode with the row ticked instead, as a phone's own lists do ("ui-edit", detail.row, to the
+// list); a mouse's right-click and the keys still open the row's menu.
 import { HOLD_MS, SLOP, still, noGesture, haptic, listeners } from './gesture.js';
 
 /**
@@ -70,6 +73,14 @@ export function holdMenus(root = document) {
   let menuFor = null;
   let swallowClick = false;
 
+  /** @param {HTMLElement} el @returns {HTMLElement | null}  the select list a finger's hold starts select mode in */
+  const selectsOnHold = el => /** @type {HTMLElement | null} */ (el.closest('.ui-list[data-select][data-hold-select]'));
+  /** a finger's hold on el: select mode with el ticked, or el's menu @param {HTMLElement} el @param {{ x: number, y: number } | null} at */
+  const held = (el, at) => {
+    const list = selectsOnHold(el);
+    if (list) list.dispatchEvent(new CustomEvent('ui-edit', { detail: { row: el } }));
+    else open(el, at);
+  };
   /** @param {EventTarget | null} t @returns {HTMLElement | null} */
   const holdable = t => {
     const el = t instanceof Element ? /** @type {HTMLElement | null} */ (t.closest('[data-hold-menu]')) : null;
@@ -229,7 +240,7 @@ export function holdMenus(root = document) {
       cancel();
       haptic();   // first: on iPhone it clicks a hidden label, which must not use up swallowClick
       swallowClick = true;
-      open(target, at);
+      held(target, at);
     }, HOLD_MS);
   }, { passive: true });
   l.on(document, 'pointermove', (/** @type {PointerEvent} */ e) => {
@@ -250,11 +261,15 @@ export function holdMenus(root = document) {
   });
   // right-click, Android's own long press, the context-menu key: this menu instead of the browser's
   l.on(document, 'contextmenu', (/** @type {MouseEvent} */ e) => {
+    // a mouse (not Android's long press, which also sends this): the menu at the pointer
+    const mouse = 'pointerType' in e ? /** @type {PointerEvent} */ (e).pointerType === 'mouse' : matchMedia('(pointer: fine)').matches;
+    const t = /** @type {Element | null} */ (e.target instanceof Element ? e.target : null);
+    // Android's long press on a row the hold has already put in select mode: no browser menu either
+    if (!mouse && t?.closest('.is-editing[data-hold-select] [data-hold-menu]')) { e.preventDefault(); return; }
     const el = holdable(e.target);
     if (!el) return;
     e.preventDefault();
-    // a mouse (not Android's long press, which also sends this): the menu at the pointer
-    const mouse = 'pointerType' in e ? /** @type {PointerEvent} */ (e).pointerType === 'mouse' : matchMedia('(pointer: fine)').matches;
+    if (!mouse && e.clientX && selectsOnHold(el)) { if (!el.closest('.is-editing')) { cancel(); swallowClick = true; held(el, null); } return; }
     if (menuFor !== el) { cancel(); open(el, e.clientX ? { x: e.clientX, y: e.clientY } : null, !e.clientX, mouse && !!e.clientX); }
   });
   l.on(document, 'keydown', (/** @type {KeyboardEvent} */ e) => {

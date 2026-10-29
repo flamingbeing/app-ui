@@ -15,6 +15,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Hold menu | right-click, Shift+F10, the context-menu key; arrows, End, wrap; Esc gives focus back to the row | |
 | Hold menu | Delete removes the row with an Undo toast (no confirm); Undo puts it back in place | |
 | Hold menu | its Select starts select mode with that row ticked; no hold menu while selecting | |
+| Hold to select | `data-hold-select` on the list: a finger's hold starts select mode with that row ticked, no menu, the lift ticks nothing more; a right-click still opens the menu | |
 | Hold menu | a menu for a row near the bottom of the screen stays fully on screen | |
 | Closing | 390 px: a sheet opened, or a page pushed after `sheetsSettled()`, as another sheet closes stays (its late step back is not taken for Back); a sheet slides down to the bottom edge before it shuts (Esc); a closed hold menu fades out, inert, with no roles or ids, gone within 600 ms; Still closes both at once | |
 | Select toggle | an icon `[data-edit-for]` button keeps its icon and name while off and says Done while on | |
@@ -82,6 +83,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
 | Reduce Motion | the pages still follow the finger, the next one beside, and glide on (rc.30 switched with nothing moved); also in WebKit | |
 | Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
+| Bar on a tab change | between two scrolled pages the bar stays tinted (collapsed) all the way; to a page at the top it clears once (no flash) | |
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
