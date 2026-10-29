@@ -11,7 +11,7 @@
 // sticky ones (the bars, an action bar) stay where they are.
 // Nothing runs on import: bounce() adds the listeners; startGestures() calls it ({ bounce: false } leaves it out).
 import { glide, tracker } from './motion.js';
-import { rubber, unrubber, swipeIntent, still, listeners } from './gesture.js';
+import { rubber, unrubber, swipeIntent, still, listeners, claim } from './gesture.js';
 
 /** a fling's speed (px/ms) is capped here, so its bounce goes at most about 90 px past the end */
 const MAX_V = 5;
@@ -151,6 +151,7 @@ export function bounce(root = document) {
     } else if (d > 0 && top && posOf(box) <= 0) raw = d;
     else if (d < 0 && posOf(box) >= maxOf(box) - 1) raw = d;
     else return;
+    if (!claim('bounce')) { id = null; raw = 0; return; }   // another part has this touch
     if (!cur || cur.box !== box || cur.run) take(box, partsOf(/** @type {Element} */ (target), box));
     show(rubber(raw, span));
   }, { passive: true });

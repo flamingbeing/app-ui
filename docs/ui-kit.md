@@ -88,6 +88,16 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
 - `startGestures` ticks every switch (`input[role=switch]`, `input[switch]`) and segmented control a person changes
   (`toggleTicks`; `{ ticks: false }` leaves it out).
 
+## One gesture owns a touch (`ui/gesture.js` `claim`)
+
+- Every touch part asks `claim(name)` once its drag is sure (past the slop, in its direction); the part with the
+  higher `PRIORITY` wins: sheet 60, drawer 50, Back edge 45, tab swipe 40, row swipe actions 35, card pager 30, row
+  drag 25, select drag 20, hold 15, bounce 10. A claim refused means the part lets go of this touch. (Tab swipe meets
+  the card pager or row swipe actions only when a flick catches a gliding page on a deck or list: the page keeps it.)
+- A win sends `ui-gesture-captured` (`onCaptured(won)`): the parts that had started stand down, so a press shade
+  clears, a hold timer stops and a half-done tab swipe springs back. The touch is free again once every finger lifts.
+- New touch parts claim before they move anything, with a name in `PRIORITY` (or their own, lowest).
+
 ## Placement rules
 
 Where each thing goes, on every size.

@@ -1,11 +1,18 @@
 # Changelog
 
-## 1.0.0-rc.52
+## 1.0.0-rc.53
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
   half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
 - Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module.
 - Gallery: the iOS look is its default, and `/kit/ios/` shows the iOS parts together.
+  Row swipe actions claim the touch as `rows` (arbiter priority 35).
+
+## 1.0.0-rc.52
+- One gesture owns a touch: `claim(name)`, `release`, `captured`, `onCaptured`, `PRIORITY` in `ui/gesture.js`. The
+  sheet, drawer, Back edge, tab swipe, card pager, row drag, select drag, hold menu and bounce all claim before they
+  move; the higher one wins and the others stand down (a press shade clears, a hold stops, a half tab swipe goes
+  back). Same feel as before when only one part wants the touch.
 
 ## 1.0.0-rc.51
 - Sync button: the count is the badge's CSS content (`data-count`), not text, so the button's name is its label alone

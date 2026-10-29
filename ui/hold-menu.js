@@ -7,7 +7,7 @@
 // In a select list marked data-hold-select (.ui-list[data-select][data-hold-select]) a finger's hold (and Android's own
 // long press) starts select mode with the row ticked instead, as a phone's own lists do ("ui-edit", detail.row, to the
 // list); a mouse's right-click and the keys still open the row's menu.
-import { HOLD_MS, SLOP, still, noGesture, haptic, listeners } from './gesture.js';
+import { HOLD_MS, SLOP, still, noGesture, haptic, listeners, claim, onCaptured } from './gesture.js';
 
 /**
  * Where the preview and the menu go (pure): the preview stays put and the menu goes under it, or above if there is no
@@ -238,6 +238,7 @@ export function holdMenus(root = document) {
     timer = window.setTimeout(() => {
       const target = /** @type {HTMLElement} */ (holding), at = start;
       cancel();
+      if (!claim('hold')) return;   // another part has this touch
       haptic('long');   // first: on iPhone it clicks a hidden label, which must not use up swallowClick
       swallowClick = true;
       held(target, at);
@@ -248,6 +249,8 @@ export function holdMenus(root = document) {
   }, { passive: true });
   l.on(document, 'pointerup', () => { if (timer) cancel(); }, { passive: true });
   l.on(document, 'pointercancel', cancel, { passive: true });
+  // another part took the touch (a swipe, a drag): no hold
+  const standDown = onCaptured(name => { if (timer && name !== 'hold') cancel(); });
   l.on(window, 'scroll', () => { if (timer) cancel(); }, { passive: true });
   // lifting the finger after a hold: no mouse events, so focus stays in the menu and the row doesn't open
   l.on(document, 'touchend', (/** @type {TouchEvent} */ e) => { if (swallowClick && e.cancelable) e.preventDefault(); }, { passive: false });
@@ -278,5 +281,5 @@ export function holdMenus(root = document) {
     if (el) { e.preventDefault(); open(el, null, true); }
   });
   l.on(window, 'resize', () => close(true));
-  return { open, close, stop() { cancel(); close(true); l.stop(); layer?.remove(); layer = null; } };
+  return { open, close, stop() { cancel(); close(true); l.stop(); standDown(); layer?.remove(); layer = null; } };
 }

@@ -26,6 +26,18 @@ export function haptic(kind?: keyof typeof HAPTIC_PATTERNS): void;
  */
 export function toggleTicks(root?: ParentNode & EventTarget): () => void;
 /**
+ * Claims this touch for a part. @param {keyof typeof PRIORITY} name
+ * @returns {boolean}  true: the part has it (it had it already, or nobody or a lower part did); false: stand down
+ */
+export function claim(name: keyof typeof PRIORITY): boolean;
+/** Gives the touch back early (a part that stood down by itself). @param {keyof typeof PRIORITY} name */
+export function release(name: keyof typeof PRIORITY): void;
+/**
+ * Runs won(name) each time a part captures a touch (another part's win is a stand-down).
+ * @param {(name: string) => void} won @returns {() => void} stop
+ */
+export function onCaptured(won: (name: string) => void): () => void;
+/**
  * Adds listeners and gives back one function that removes them all.
  * @returns {{ on: (t: EventTarget, type: string, fn: (e: any) => void, opts?: AddEventListenerOptions | boolean) => void, stop: () => void }}
  */
@@ -65,6 +77,19 @@ export const HAPTIC_PATTERNS: Readonly<{
     confirm: number[];
     reject: number[];
 }>;
+export const PRIORITY: Readonly<{
+    sheet: 60;
+    drawer: 50;
+    back: 45;
+    tabs: 40;
+    rows: 35;
+    cards: 30;
+    drag: 25;
+    select: 20;
+    hold: 15;
+    bounce: 10;
+}>;
+export function captured(): string | null;
 /** How far ahead a let-go swipe's speed is projected, in ms (iOS's paging: the throw counts, not just the drag). */
 export const THROW_MS: 200;
 export function rubber(d: number, w: number): number;

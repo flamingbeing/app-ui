@@ -1,7 +1,7 @@
 // What every gesture part shares: how long a hold is, how far a finger may wander, which places never start a
-// gesture, the device's Still choice, a light haptic tap, and the finger physics of the pager and the drawer (which
-// way a first move goes, a let-go speed, the spring glide, the rubber band). Not exported from @core/ui except still()
-// and haptic() (tab-pages.js passes the physics on).
+// gesture, the device's Still choice, haptics, which part owns a touch (the arbiter), and the finger physics of the
+// pager and the drawer (which way a first move goes, a let-go speed, the spring glide, the rubber band). Exported from
+// @core/ui: still(), haptic(), the arbiter (tab-pages.js passes the physics on).
 
 /** a hold: this long (ms) without moving more than SLOP (px) */
 export const HOLD_MS = 500;
@@ -82,6 +82,59 @@ export function toggleTicks(root = document) {
   };
   root.addEventListener('change', f);
   return () => root.removeEventListener('change', f);
+}
+
+// The arbiter: one part owns a touch. A part claims it once the touch is clearly its own (its place rules and the first
+// move's way have passed). A claim fails while a part of the same or a higher priority owns this touch; a higher one
+// takes it over. A win sends "ui-gesture-captured" (detail.name) on document: pressed states and hold timers clear,
+// and a part that held the touch stands down. The touch is over (nobody owns it) once the last finger lifts.
+// Higher first: a sheet's drag, the drawer, the edge swipe back, a card deck, the tab pages, a row drag, select-mode's
+// drag down the ticks, the hold menu, the rubber band.
+export const PRIORITY = Object.freeze({ sheet: 60, drawer: 50, back: 45, tabs: 40, rows: 35, cards: 30, drag: 25, select: 20, hold: 15, bounce: 10 });
+/** @type {string | null} */
+let owner = null;
+let watching = false;
+function watchEnds() {
+  if (watching || typeof document === 'undefined') return;
+  watching = true;
+  const over = () => { owner = null; };
+  // (after the parts' own end handlers, which may still ask who owns it)
+  const lifted = (/** @type {TouchEvent} */ e) => { if (!e.touches?.length) setTimeout(over); };
+  document.addEventListener('touchend', lifted, true);
+  document.addEventListener('touchcancel', lifted, true);
+  // a new touch starts with nobody owning it
+  document.addEventListener('touchstart', (/** @type {TouchEvent} */ e) => { if ((e.touches?.length ?? 1) <= 1) over(); }, true);
+  document.addEventListener('pointerdown', (/** @type {PointerEvent} */ e) => { if (e.isPrimary) over(); }, true);
+  const up = (/** @type {PointerEvent} */ e) => { if (e.pointerType === 'mouse') setTimeout(over); };
+  document.addEventListener('pointerup', up, true);
+  document.addEventListener('pointercancel', up, true);
+}
+/**
+ * Claims this touch for a part. @param {keyof typeof PRIORITY} name
+ * @returns {boolean}  true: the part has it (it had it already, or nobody or a lower part did); false: stand down
+ */
+export function claim(name) {
+  watchEnds();
+  if (owner === name) return true;
+  const rank = (/** @type {string} */ n) => PRIORITY[/** @type {keyof typeof PRIORITY} */ (n)] ?? 0;   // a name not in PRIORITY is lowest
+  if (owner && rank(owner) >= rank(name)) return false;
+  owner = name;
+  if (typeof document !== 'undefined') document.dispatchEvent(new CustomEvent('ui-gesture-captured', { detail: { name } }));
+  return true;
+}
+/** Gives the touch back early (a part that stood down by itself). @param {keyof typeof PRIORITY} name */
+export function release(name) { if (owner === name) owner = null; }
+/** Which part owns this touch, or null. @returns {string | null} */
+export const captured = () => owner;
+/**
+ * Runs won(name) each time a part captures a touch (another part's win is a stand-down).
+ * @param {(name: string) => void} won @returns {() => void} stop
+ */
+export function onCaptured(won) {
+  if (typeof document === 'undefined') return () => {};
+  const f = (/** @type {CustomEvent<{ name: string }>} */ e) => won(e.detail.name);
+  document.addEventListener('ui-gesture-captured', /** @type {EventListener} */ (f));
+  return () => document.removeEventListener('ui-gesture-captured', /** @type {EventListener} */ (f));
 }
 
 /**

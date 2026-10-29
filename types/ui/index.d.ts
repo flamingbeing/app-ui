@@ -35,7 +35,7 @@ export { detentSheet, sheetsSettled } from "./detent-sheet.js";
 export { watchKeyboard, keyboardState, KEYBOARD_MIN } from "./keyboard.js";
 export { tabPages, swipeIntent, pageStep } from "./tab-pages.js";
 export { swipeActions, swipeSettle, swipeShown, FULL_AT, ACTION_W } from "./swipe-actions.js";
-export { still, haptic, HAPTIC_PATTERNS, toggleTicks } from "./gesture.js";
+export { still, haptic, HAPTIC_PATTERNS, toggleTicks, claim, release, captured, onCaptured, PRIORITY } from "./gesture.js";
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from "./motion.js";
 export { adaptiveShell, sizeClass, matchesSearch } from "./shell/shell.js";
 export { startLayout, stepper, toolbar, clearableSegments, stepValue } from "./layout.js";

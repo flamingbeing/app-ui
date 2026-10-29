@@ -7,7 +7,7 @@
 // finishes it; only extra flourishes skip. afterGesture() holds an app's work (save, sync, re-render) until the
 // fingers lift and the glides land; pressFeedback() marks a touched control pressed at once.
 // Nothing runs on import: listeners are added by the first call that needs them.
-import { springPath, pathAt, releaseVelocity, swipeIntent, rubber, SPRING_S, SLOP, listeners } from './gesture.js';
+import { springPath, pathAt, releaseVelocity, swipeIntent, rubber, SPRING_S, SLOP, listeners, claim, onCaptured } from './gesture.js';
 
 export { rubber, unrubber, springPath, releaseVelocity, swipeIntent, THROW_MS, SPRING_S, still } from './gesture.js';
 
@@ -102,13 +102,13 @@ export function tracker() {
  * finger has clearly gone along the axis (8 px, swipeIntent); a move the other way is left to the page. start() may
  * give the place the drag starts from (a caught glide's); past bounds() the move stretches (rubber band). end() gets
  * the place and the let-go speed (px/ms, 0 when the browser cancelled the touch); a drag that moved swallows the
- * click that follows.
+ * click that follows. name: the arbiter's (gesture.js claim), claimed as the drag starts; refused, it is the page's.
  * @param {HTMLElement} el
- * @param {{ axis?: 'x' | 'y', mouse?: boolean, filter?: (e: PointerEvent) => boolean, start?: (e: PointerEvent) => number | void,
+ * @param {{ axis?: 'x' | 'y', mouse?: boolean, name?: keyof typeof import('./gesture.js').PRIORITY, filter?: (e: PointerEvent) => boolean, start?: (e: PointerEvent) => number | void,
  *   move: (x: number, e: PointerEvent) => void, end: (x: number, v: number) => void, bounds?: () => [number, number] }} o
  * @returns {() => void} stop
  */
-export function drag(el, { axis = 'x', mouse = false, filter, start, move, end, bounds }) {
+export function drag(el, { axis = 'x', mouse = false, name, filter, start, move, end, bounds }) {
   const l = listeners();
   const was = el.style.touchAction;
   el.style.touchAction = axis === 'x' ? 'pan-y' : 'pan-x';
@@ -135,7 +135,7 @@ export function drag(el, { axis = 'x', mouse = false, filter, start, move, end, 
     if (!live) {
       const way = swipeIntent(e.clientX - x0, e.clientY - y0);
       if (!way) return;
-      if (way !== axis) { id = null; finger(-1); end(base, 0); return; }   // the other way: the page's
+      if (way !== axis || (name && !claim(name))) { id = null; finger(-1); end(base, 0); return; }   // the other way (or taken): the page's
       live = true;
       try { el.setPointerCapture(e.pointerId); } catch { /* gone */ }
     }
@@ -264,5 +264,7 @@ export function pressFeedback(root = document) {
   }, { capture: true, passive: true });
   l.on(root, 'pointerup', () => clear(false), { capture: true, passive: true });
   l.on(root, 'pointercancel', () => clear(true), { capture: true, passive: true });
-  return () => { l.stop(); clear(true); };
+  // a part took the touch (a swipe, a drag, a hold): not a press
+  const standDown = onCaptured(() => { if (on) clear(true); });
+  return () => { l.stop(); standDown(); clear(true); };
 }

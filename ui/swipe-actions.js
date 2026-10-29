@@ -169,6 +169,7 @@ export function swipeActions(list, { lead, trail, onAction }) {
   }
 
   const stopDrag = drag(list, {
+    name: 'rows',
     filter: e => {
       const r = rowOf(e.target);
       if (!r || list.closest('.is-editing') || list.classList.contains('is-editing')) return false;

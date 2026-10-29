@@ -6,7 +6,7 @@
 // on Android the system's swipe would fire as well). html[data-edge-back="always"] turns it on everywhere (testing).
 // It starts within EDGE px of the left edge and only when the finger moves mostly sideways; past a third of the width
 // or a flick, it goes back.
-import { still, noGesture, listeners } from './gesture.js';
+import { still, noGesture, listeners, claim } from './gesture.js';
 import { glide, tracker } from './motion.js';
 
 export const EDGE = 24;
@@ -176,6 +176,7 @@ export function screenStack(host, { onChange } = {}) {
       if (!moving) {
         if (Math.abs(my) > Math.abs(mx) && Math.abs(my) > 8) { x0 = null; return; }   // vertical: let it scroll
         if (mx < 8) return;
+        if (!claim('back')) { x0 = null; return; }   // a part above has this touch
         moving = top();
         const under = stack[stack.length - 2].screen;
         under.hidden = false;
