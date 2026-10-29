@@ -169,6 +169,10 @@
     max-height: calc(100dvh - 12px - .5rem - env(safe-area-inset-bottom, 0px)); border: 0; border-radius: var(--sheet-r);
     box-shadow: 0 0 0 .5px rgb(0 0 0 / .06), 0 10px 40px rgb(0 0 0 / .18); }
   :root[data-look="ios"] dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - 12px - .5rem - env(safe-area-inset-bottom, 0px)); }
+  /* with the keyboard up, the sheet sits on its top, as iOS's do (sheet.css's lift) */
+  :root[data-look="ios"].ui-keyboard-open dialog.ui-sheet { bottom: var(--ui-keyboard-h, 0px);
+    max-height: calc(100dvh - var(--ui-keyboard-h, 0px) - 12px); }
+  :root[data-look="ios"].ui-keyboard-open dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - var(--ui-keyboard-h, 0px) - 12px); }
   :root[data-look="ios"] .ui-sheet-body { padding-bottom: var(--pad); }
 }
 :root[data-look="ios"] dialog.ui-sheet { background: var(--surface); }
