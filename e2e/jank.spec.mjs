@@ -216,20 +216,6 @@ test('a card swiped on and flicked back keeps every frame on time on a slow phon
   expect(await page.evaluate(() => window.__shown())).toEqual(['jobs']);
 });
 
-test('a row swiped open on its actions and flicked shut keeps every frame on time on a slow phone', async ({ sized, browserName }) => {
-  const page = await load(sized, browserName, '', '/ui/0.0.0-dev/kit/ios/');
-  const row = page.locator('#todo .ui-row').first();
-  const box = await row.boundingBox();
-  const y = Math.round(box.y + box.height / 2), right = Math.round(box.x + box.width - 40);
-  const tx = () => row.evaluate(r => new DOMMatrix(getComputedStyle(r).transform).m41);
-  // about two thirds of the two actions (Flag, Delete), so the spring has the rest to go
-  await gate(page, `row swipe (${browserName})`, () => page.__drag(path([right, y], [right - 100, y], 12)));
-  await expect.poll(tx).toBe(-148);
-  // a flick back from on the row: it closes
-  await gate(page, `row flick shut (${browserName})`, () => page.__drag(path([right - 160, y], [right - 60, y], 5)));
-  await expect.poll(tx).toBe(0);
-});
-
 test('a touched button shows pressed in the first frame on a slow phone', async ({ sized, browserName }) => {
   const page = await load(sized, browserName);
   const tab = page.locator('.ui-tabbar [data-tab-page="#jobs"]');

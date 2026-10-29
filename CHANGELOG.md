@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.55
+- Row swipe actions are gone (`swipeActions`, `ui/swipe-actions.js`, `ui/gestures/swipe.css`, the arbiter's `rows`):
+  not wanted. No app used them. `/kit/ios/` keeps its to-do list as plain rows.
+
 ## 1.0.0-rc.54
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with

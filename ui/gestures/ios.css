@@ -121,7 +121,7 @@
 /* ---------- fields and buttons in the content ---------- */
 :root[data-look="ios"] :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select) {
   border-color: transparent; background-color: var(--ios-fill-3); }
-:root[data-look="ios"] button:not(.ui-row, .ui-tab, .ui-sheet-grabber, .ui-switch, .ui-swipe-action) { border-color: transparent; font-weight: 500; }
+:root[data-look="ios"] button:not(.ui-row, .ui-tab, .ui-sheet-grabber, .ui-switch) { border-color: transparent; font-weight: 500; }
 :root[data-look="ios"] :where(.ui-fill) { background: var(--accent); color: var(--on-accent); }
 
 /* ---------- the switch: 51 by 31, iOS green when on; the knob stretches under a finger ---------- */
@@ -188,14 +188,6 @@
 :root[data-look="ios"] .ui-tab:has(.ui-tab-icon) { padding: 4px .75rem 3px; font-size: .625rem; }
 :root[data-look="ios"] .ui-tab[aria-current="page"] { color: var(--ios-link-on-fill); font-weight: 600; }
 :root[data-look="ios"] :is(.ui-tint, .ui-chips > button.ui-chip[aria-pressed="true"]) { color: var(--ios-link-on-fill); }
-
-/* ---------- swipe actions (swipe-actions.js): iOS's tints, at the strength that keeps the white words readable ---------- */
-:root[data-look="ios"] .ui-swipe-action { --act: var(--ios-blue-strong); font-size: var(--ios-subhead); font-weight: 600; }
-:root[data-look="ios"] .ui-swipe-action[data-tone="danger"] { --act: var(--ios-red-strong); }
-:root[data-look="ios"] .ui-swipe-action[data-tone="warn"] { --act: var(--ios-orange-strong); }
-:root[data-look="ios"] .ui-swipe-action[data-tone="grey"] { --act: var(--ios-gray-strong); }
-:root[data-look="ios"] .ui-swipe-action[data-tone="purple"] { --act: var(--ios-purple-strong); }
-:root[data-look="ios"] .ui-swipe-action[data-tone="ok"] { --act: var(--ios-green-strong); }
 
 /* Still or Reduce Motion: the switch, the thumb and the separators jump instead of sliding */
 :root[data-look="ios"][data-motion="still"] .ui-switch::before, :root[data-look="ios"][data-motion="still"] .ui-segmented::before { transition: none; }

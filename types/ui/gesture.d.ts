@@ -82,7 +82,6 @@ export const PRIORITY: Readonly<{
     drawer: 50;
     back: 45;
     tabs: 40;
-    rows: 35;
     cards: 30;
     drag: 25;
     select: 20;
