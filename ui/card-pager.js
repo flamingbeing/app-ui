@@ -17,13 +17,16 @@ import { pageStep, swipeEdge } from './tab-pages.js';
 
 /**
  * @param {HTMLElement} stage  the box the cards fill (`.ui-cards`)
- * @param {{ card: (i: number) => HTMLElement | null, start?: number, onShow?: (i: number) => void, mouse?: boolean }} o
+ * @param {{ card: (i: number) => HTMLElement | null, start?: number, onShow?: (i: number) => void, mouse?: boolean, fill?: boolean }} o
  *   card(i): the card at i, or null when there is none (the deck's ends; i may go below 0 for a deck with history);
- *   onShow(i): a card is shown (the first one too, and again after refresh()), once its glide has landed
+ *   onShow(i): a card is shown (the first one too, and again after refresh()), once its glide has landed;
+ *   fill: the stage reaches from where it starts on the page to the viewport's bottom, less a showing tab bar's room
+ *   and --pad (its bottom margin or gap), never under 16rem (`.ui-cards-fill`, motion.css)
  * @returns {CardPager}
  */
-export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
+export function cardPager(stage, { card, start = 0, onShow, mouse = true, fill: fills = false }) {
   stage.classList.add('ui-cards');
+  const fit = fills ? fillHeight(stage) : null;
   stage.setAttribute('data-swipe-own', '');
   const tabbed = !stage.hasAttribute('tabindex');
   if (tabbed) stage.tabIndex = 0;
@@ -154,7 +157,7 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
       told = null; tell();
     },
     stop() {
-      on = false; off(); stage.removeEventListener('keydown', key); moving?.stop();
+      on = false; off(); stage.removeEventListener('keydown', key); moving?.stop(); fit?.();
       for (const s of slots) s.remove();
       stage.classList.remove('ui-cards'); stage.removeAttribute('data-swipe-own');
       if (tabbed) stage.removeAttribute('tabindex');
@@ -162,4 +165,27 @@ export function cardPager(stage, { card, start = 0, onShow, mouse = true }) {
   };
   api.refresh();
   return api;
+}
+
+// fill: the stage's top on the page (not the viewport, so a scroll moves nothing) as --ui-cards-top, read again when
+// what is above it or the window changes size; the height itself is CSS (it follows the tab bar's room and 100dvh).
+// Hidden (another tab), it waits: showing it again is a size change too.
+/** @param {HTMLElement} stage @returns {() => void} stop */
+function fillHeight(stage) {
+  stage.classList.add('ui-cards-fill');
+  let top = '';
+  const measure = () => {
+    if (!stage.getClientRects().length) return;
+    const t = `${Math.round(stage.getBoundingClientRect().top + scrollY)}px`;
+    if (t !== top) stage.style.setProperty('--ui-cards-top', top = t);
+  };
+  const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
+  ro?.observe(stage);
+  if (stage.parentElement) ro?.observe(stage.parentElement);
+  addEventListener('resize', measure);
+  measure();
+  return () => {
+    ro?.disconnect(); removeEventListener('resize', measure);
+    stage.classList.remove('ui-cards-fill'); stage.style.removeProperty('--ui-cards-top');
+  };
 }

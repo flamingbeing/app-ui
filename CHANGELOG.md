@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.40
+- `cardPager(stage, { fill: true })`: the stage reaches from where it starts on the page to the viewport's bottom
+  (`100dvh`), less a showing tab bar's room and `--pad`, never under 16rem (`.ui-cards-fill`; card-pager.js keeps
+  `--ui-cards-top` up to date as what is above it changes size). A whole card shows with no scroll of its own in the
+  common case; a taller one still scrolls in its slot. The swipe is unchanged (transform only).
+- Gallery: the Jobs page's deck fills. An app whose body adds its own tab-bar room (the starter's
+  `padding-bottom` on `body`) on top of the kit's (tabBarRoom) drops it, or a page that fits scrolls by that much.
+
 ## 1.0.0-rc.39
 - The bounce: `ui/bounce.js`, exported from `@core/ui` as `bounce`. A pull past a list's top or bottom stretches it
   (the same rubber band as the sheets and drags; the bars and fixed parts stay) and springs back on the compositor
