@@ -7,6 +7,7 @@ export const LABELS = Object.freeze({
   attention: 'Needs you',
   unknown: 'Connecting…',
   'at-risk': 'Not saved on this device yet',
+  syncNow: 'Sync now',   // the sync button's tap, after the state's word
   // the modals' and toasts' words (modal.js, toast.js), overridable the same way
   ok: 'OK',
   cancel: 'Cancel',

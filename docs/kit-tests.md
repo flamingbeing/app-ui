@@ -37,6 +37,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Page held still | 390 and 1280 px: a wheel over an open sheet or hold menu doesn't scroll the page (the menu's preview stays on its row); closed, it scrolls again | |
 | Home indicator | 390 px with a 34 px bottom inset: a full-height sheet's last row, look B's sheet menu and a toast on a page without a tab bar clear it | |
 | Sync chip | 390 px: the chip shows each made-up state in its word (`Saved`, `Sending… (3)`, …), its `data-state` set, a `status` role; axe clean with "Needs you" | |
+| Sync button | 390 px: the chip's tappable twin beside it: each made-up state its label (`Saved. Sync now`, `Sending… (3). Sync now`, …) as `aria-label` and `title`, its `data-state` (pending shows `syncing`); one colour in every state, a different cloud icon in each, a count badge where something waits, a dot on needs you; a tap calls the app's sync now and shows sending at least 700 ms, offline keeps its struck cloud; no lift under reduced motion or Still | yes |
 | Installable, no pull | each gallery page (settings too): `overscroll-behavior-y: none` (no pull-to-refresh); demo words with no developer notes; the manifest (standalone; `id` and `start_url` `/ui/kit/`, scope `/ui/`, so the installed app opens the newest gallery) and its 192 and 512 icons are served; the page cancels `beforeinstallprompt`; the service worker (scope `kit/`) controls the page after a reload | |
 
 ## Shell gallery
@@ -106,6 +107,19 @@ at 390 px, in Chromium and WebKit, with the keyboard played (no browser here sho
 | Resizes content | a tapped field in the sheet, then the page 344 px shorter: `html.ui-keyboard-open`, `--ui-keyboard-h` 0, the tab bar hidden, the sheet inside the space above; the page tall again: closed, the tab bar back | |
 | Visible part only | a field and the visual viewport 344 px shorter: `--ui-keyboard-h` 344px and the sheet's bottom on the keyboard's top; a blur: closed, 0 | |
 
+## Haptics
+
+`ui/gesture.js` `haptic`, the theme's `haptics`: `cleanChoice` in Node (`test/theme.unit.test.mjs`).
+`e2e/haptics.spec.mjs` on `/kit/`, `/kit/shell/` and `/kit/settings/` at 390 px, in Chromium and WebKit, with a
+stand-in `navigator.vibrate` that writes down each pattern.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Drawer | a finger pulling it out past half: one threshold (12); back under half: another; Haptics Off: none | |
+| Sheet | the grabber dragged down past the close line: a threshold; back up: another; the sheet stays | |
+| Hold, switch | a touch and hold: a long (20); the gallery's Haptics switch turned off: quiet; on again: a tick (8) | |
+| Kept | the theme switch's Haptics Off: `data-haptics="off"`, kept on the next page; `haptic()` then gives nothing | |
+
 ## Bounce
 
 `ui/bounce.js` in Node (`test/bounce.unit.test.mjs`): nothing runs on import; `rubberSlope` is the rubber band's
@@ -141,6 +155,7 @@ judged: each move's handlers within 8 ms, the touch down's and the lift's within
 | Sheet drag | the New sheet's grabber dragged up to large, down to medium, then down and away: the same budget each; the detents and the close land | |
 | Bounce pull | a pull past the list's top, then past its bottom, and the spring back: the same budget each | |
 | Pressed | a touch on the Jobs tab shows `data-pressed` within 50 ms; it clears on the lift | |
+| Sync tap | a tap on the shell bar's sync button: the icon's lift is a CSS animation (transform, opacity); every frame while it shows sending within 20 ms but one, none over 50 ms; one tap counted. WebKit: the tap's handlers within 16 ms | |
 | Android look | look M: the tab swipe (its navigation pill moving) and the sheet dragged up to large, the same budget each | |
 
 ## Settings screen gallery

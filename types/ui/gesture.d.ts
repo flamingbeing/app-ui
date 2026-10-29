@@ -14,10 +14,17 @@ export function noGesture(target: EventTarget | null, { inDialog }?: {
     inDialog?: boolean;
 }): boolean;
 /**
- * A light tap: navigator.vibrate where there is one (Android); on iPhone (iOS 18 and later) toggling a hidden
- * <input switch> through its label gives the system's own haptic, the only one a web page can reach there.
+ * A haptic of one kind, unless Haptics is Off on this device (the theme switch: data-haptics="off" on <html>):
+ * navigator.vibrate where there is one (Android); on iPhone (iOS 18 and later) toggling a hidden <input switch>
+ * through its label gives the system's own tap, the only one a web page can reach there (one tap for every kind).
+ * @param {keyof typeof HAPTIC_PATTERNS} [kind]
  */
-export function haptic(): void;
+export function haptic(kind?: keyof typeof HAPTIC_PATTERNS): void;
+/**
+ * A tick when a switch flips or a segmented control picks (a change from the person, under root).
+ * @param {ParentNode & EventTarget} [root] @returns {() => void} stop
+ */
+export function toggleTicks(root?: ParentNode & EventTarget): () => void;
 /**
  * Adds listeners and gives back one function that removes them all.
  * @returns {{ on: (t: EventTarget, type: string, fn: (e: any) => void, opts?: AddEventListenerOptions | boolean) => void, stop: () => void }}
@@ -51,6 +58,13 @@ export function velocity(samples: [number, number][]): number;
 /** a hold: this long (ms) without moving more than SLOP (px) */
 export const HOLD_MS: 500;
 export const SLOP: 10;
+export const HAPTIC_PATTERNS: Readonly<{
+    tick: 8;
+    threshold: 12;
+    long: 20;
+    confirm: number[];
+    reject: number[];
+}>;
 /** How far ahead a let-go swipe's speed is projected, in ms (iOS's paging: the throw counts, not just the drag). */
 export const THROW_MS: 200;
 export function rubber(d: number, w: number): number;

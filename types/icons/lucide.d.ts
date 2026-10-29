@@ -17,6 +17,10 @@ export function icon(nodes: IconNodes, o?: {
 /** @type {IconNodes} */ export const info: IconNodes;
 /** @type {IconNodes} */ export const refreshCw: IconNodes;
 /** @type {IconNodes} */ export const cloudOff: IconNodes;
+/** @type {IconNodes} */ export const cloud: IconNodes;
+/** @type {IconNodes} */ export const cloudCheck: IconNodes;
+/** @type {IconNodes} */ export const cloudUpload: IconNodes;
+/** @type {IconNodes} */ export const cloudAlert: IconNodes;
 /** @type {IconNodes} */ export const triangleAlert: IconNodes;
 /** @type {IconNodes} */ export const loaderCircle: IconNodes;
 /** @type {IconNodes} */ export const gripVertical: IconNodes;

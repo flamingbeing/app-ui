@@ -4,13 +4,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseChoice, chooseTheme, themeChoice, applyTheme, THEMES, DENSITIES } from '../theme/choice.js';
 import { LOOKS } from '../theme/looks.js';
-import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS } from '../theme/schema.js';
+import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS } from '../theme/schema.js';
 import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, BACKDROP } from '../theme/colour.js';
 import { palettes, paletteCss, shapeTokens, accentOf, glassTokens, DEFAULT_ACCENT } from '../theme/palette-css.js';
 import { PRESETS, SURFACES } from '../theme/presets.js';
 import { GRID, HUES, SHADES, gridIndex, snap } from '../theme/grid.js';
 
-const DEFAULTS = { theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '', look: '', density: 'regular', material: 'glass', motion: 'auto' };
+const DEFAULTS = { theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '', look: '', density: 'regular', material: 'glass', motion: 'auto', haptics: 'on' };
 // what show() puts on <html> for look A (the default), besides the marks a choice sets
 const LOOK_A = { look: 'a', header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', family: 'core' };
 
@@ -31,7 +31,7 @@ test("v0's stored { theme, layout } still reads as it did", () => {
 });
 
 test('a stored choice is kept, hex lower-cased', () => {
-  const all = { theme: 'light', dark: 'oled', preset: 'paper', accent: '#ABCDEF', surface: 'sepia', look: 'c', density: 'compact', material: 'solid', motion: 'still' };
+  const all = { theme: 'light', dark: 'oled', preset: 'paper', accent: '#ABCDEF', surface: 'sepia', look: 'c', density: 'compact', material: 'solid', motion: 'still', haptics: 'off' };
   assert.deepEqual(parseChoice(JSON.stringify(all)), { ...all, accent: '#abcdef' });
 });
 
@@ -249,6 +249,14 @@ test('Still is off until picked on this device; unknown motion reads as auto', (
   assert.equal(cleanChoice({ motion: 'still' }).motion, 'still');
   assert.equal(cleanChoice({ motion: 'slow' }).motion, 'auto');
   assert.equal(parseChoice(JSON.stringify({ theme: 'dark' })).motion, 'auto', 'older choices get auto');
+});
+
+test('Haptics is on until turned off on this device; unknown haptics reads as on', () => {
+  assert.equal(HAPTICS[0], 'on');
+  assert.equal(cleanChoice({}).haptics, 'on');
+  assert.equal(cleanChoice({ haptics: 'off' }).haptics, 'off');
+  assert.equal(cleanChoice({ haptics: 'loud' }).haptics, 'on');
+  assert.equal(parseChoice(JSON.stringify({ theme: 'dark' })).haptics, 'on', 'older choices get on');
 });
 
 test('theme-color meta: one per scheme with the page ground; a chosen light or dark sets both the same', () => {

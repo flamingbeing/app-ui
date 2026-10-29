@@ -5,6 +5,7 @@ export { LABELS } from './labels.js';
 export { plural } from './dom.js';
 export { icon } from '../icons/lucide.js';
 export { syncChip } from './sync-chip.js';
+export { syncButton } from './sync-button.js';
 export { signInSheet } from './sign-in-sheet.js';
 export { conflictSheet } from './conflict-sheet.js';
 export { updatePrompt } from './update-prompt.js';
@@ -39,7 +40,7 @@ export { screenStack } from './screens.js';
 export { selectMode } from './select-mode.js';
 export { tabPages, swipeIntent, pageStep } from './tab-pages.js';
 export { cardPager } from './card-pager.js';
-export { still, haptic } from './gesture.js';
+export { still, haptic, HAPTIC_PATTERNS, toggleTicks } from './gesture.js';
 // motion (motion.js): the shared finger physics: a pointer drag glued to the finger, the spring a let-go glides on,
 // work held until the finger lifts, the instant pressed state
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from './motion.js';

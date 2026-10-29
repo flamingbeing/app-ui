@@ -238,7 +238,7 @@ export function holdMenus(root = document) {
     timer = window.setTimeout(() => {
       const target = /** @type {HTMLElement} */ (holding), at = start;
       cancel();
-      haptic();   // first: on iPhone it clicks a hidden label, which must not use up swallowClick
+      haptic('long');   // first: on iPhone it clicks a hidden label, which must not use up swallowClick
       swallowClick = true;
       held(target, at);
     }, HOLD_MS);

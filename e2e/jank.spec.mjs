@@ -253,3 +253,40 @@ test('a touched button shows pressed in the first frame on a slow phone', async 
   await page.__lift(x, y);
   await expect(tab).not.toHaveAttribute('data-pressed');
 });
+
+test('a tap on the bar\'s sync button lifts its icon with every frame on time on a slow phone', async ({ sized, browserName }) => {
+  const page = await load(sized, browserName);
+  const btn = page.locator('#sync-btn');
+  await expect(btn).toHaveAttribute('data-state', 'synced');
+  const b = await btn.boundingBox();
+  const x = b.x + b.width / 2, y = b.y + b.height / 2;
+  if (page.__webkit) {
+    // the tap's handlers quick (this browser's frames are software drawing here)
+    const ms = await page.evaluate(([x, y]) => {
+      const t0 = performance.now();
+      const t = window.__fire('down', x, y); window.__fire('up', x, y, t); /** @type {HTMLElement} */ (t.closest('button')).click();
+      return Math.round((performance.now() - t0) * 10) / 10;
+    }, [x, y]);
+    console.log(`jank sync tap (webkit): ${ms} ms`);
+    expect(ms, `the tap's handlers within ${BUDGET.ends} ms`).toBeLessThanOrEqual(BUDGET.ends);
+    await expect(btn).toHaveAttribute('data-state', 'syncing');
+  } else {
+    // from a quiet page (the load's own work done), every frame while the icon lifts
+    await page.evaluate(async () => { await window.__settled(); await window.__frame(); await window.__frame(); });
+    await page.evaluate(() => {
+      window.__spin = []; let last = 0; const t0 = performance.now();
+      const tick = t => { if (last) window.__spin.push(t - last); last = t; if (t - t0 < 900) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    });
+    await page.__touch(x, y); await page.__lift(x, y);
+    await expect(btn).toHaveAttribute('data-state', 'syncing');
+    // the lift is a CSS transform and opacity animation: the compositor draws it, whatever the page is doing
+    expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('ui-sync-lift');
+    await expect(btn).toHaveAttribute('data-state', 'synced', { timeout: 3000 });
+    const frames = await page.evaluate(() => window.__spin);
+    console.log(`jank sync tap: ${frames.length} frames, worst ${Math.round(Math.max(...frames))} ms`);
+    expect(frames.filter(f => f > BUDGET.frame).length, 'late frames').toBeLessThanOrEqual(BUDGET.late);
+    expect(Math.max(...frames), 'worst frame').toBeLessThanOrEqual(BUDGET.worst);
+  }
+  expect(await page.evaluate(() => window.syncTaps)).toBe(1);
+});
