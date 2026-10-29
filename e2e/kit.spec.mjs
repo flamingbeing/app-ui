@@ -1,7 +1,7 @@
 // The /kit/ gallery: every @core/ui gesture part with a real (emulated) finger, at phone, tablet and laptop widths,
 // signed out, made-up plants. The list of what is covered is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
-import { test, expect } from './fixtures.mjs';
+import { test, expect, iosGap } from './fixtures.mjs';
 
 const KIT = '/ui/0.0.0-dev/kit/?edge=always';
 
@@ -256,7 +256,8 @@ for (const width of [390, 820, 1280]) {
         expect(b.y).toBeGreaterThan(8);
       } else {
         const b = await sheet.boundingBox();
-        expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height);   // on the bottom edge
+        // on the bottom edge (the iOS look, the gallery's own, floats it 8 px clear)
+        expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height - await iosGap(page));
       }
       // the grabber from the keyboard
       await page.locator('.ui-sheet-grabber').focus();
@@ -545,7 +546,7 @@ test('at 390 px a push overlaps the screens; the sheet drags by transform only; 
   await settled(page);
   expect(await sheet.evaluate(n => n.getAttribute('style') || '')).not.toMatch(/height|transform/);
   const b = await sheet.boundingBox();
-  expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height);
+  expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height - await iosGap(page));
 });
 
 // closing is animated too: the sheet slides down to the bottom edge before it shuts; the hold menu's copy fades out,

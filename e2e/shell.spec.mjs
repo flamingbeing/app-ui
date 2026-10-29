@@ -1,7 +1,7 @@
 // The /kit/shell/ gallery: the adaptive shell at phone (390), tablet (820) and laptop (1280) widths, signed out, made-up
 // plants. Keyboard and pointer (mouse) behaviour at each size; the list of what is covered is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
-import { test, expect } from './fixtures.mjs';
+import { test, expect, iosGap } from './fixtures.mjs';
 
 const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
 const SIZE = { 390: 'phone', 820: 'tablet', 1280: 'laptop' };
@@ -148,7 +148,7 @@ for (const width of [390, 820, 1280]) {
         expect(Math.round(b.height)).toBe(800);
         await expect(sheet.locator('.ui-sheet-grabber')).toBeHidden();
       } else {   // rises from the bottom edge
-        expect(Math.round(b.y + b.height)).toBe(await page.evaluate(() => innerHeight));
+        expect(Math.round(b.y + b.height)).toBe(await page.evaluate(() => innerHeight) - await iosGap(page));
       }
       expect(await AxeBuilder(page)).toEqual([]);
       await page.goBack();

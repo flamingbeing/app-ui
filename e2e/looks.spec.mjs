@@ -127,8 +127,9 @@ for (const width of [390, 1280]) {
 test('densities: rows 60, 50 and 44 px; taps never under 44; the switcher keeps a pick and drops the link\'s preview', async ({ sized }) => {
   const page = await sized(390);   // (the gallery loads no app bundle: not the phone fixture's APP_DIR check)
   const row = () => page.locator('#plants .ui-row').first().evaluate(e => e.getBoundingClientRect().height);
+  // in look A, whose rows are the densities' own (the iOS look, the gallery's own, keeps iOS's taller two-line rows)
   for (const [density, h] of [['comfortable', 60], ['regular', 50], ['compact', 44]]) {
-    await page.goto(`${KIT}&density=${density}`);
+    await page.goto(`${KIT}&look=a&density=${density}`);
     expect(await row(), density).toBeGreaterThanOrEqual(h);
     expect(await row(), density).toBeLessThan(h + 12);   // (two lines of text can make it taller, never much)
     const tap = await page.locator('#open-sheet').evaluate(e => e.getBoundingClientRect().height);
@@ -142,7 +143,7 @@ test('densities: rows 60, 50 and 44 px; taps never under 44; the switcher keeps 
   expect(new URL(page.url()).searchParams.get('look')).toBeNull();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
-  await expect(page.locator('html')).toHaveAttribute('data-look', 'a', '(the link\'s look B was a preview, not kept)');
+  await expect(page.locator('html')).toHaveAttribute('data-look', 'ios', '(the link\'s look B was a preview, not kept: the gallery\'s own)');
   await page.locator('#look-pick').selectOption('c');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-look', 'c');
