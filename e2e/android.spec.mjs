@@ -4,6 +4,7 @@
 // jank gate times them). The list is docs/kit-tests.md, "Android look".
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
+import { fromDemo } from './demo.mjs';
 
 const KIT = '/ui/0.0.0-dev/kit/?edge=always&look=m';
 const PARTS = '/ui/0.0.0-dev/kit/parts/?look=m';
@@ -52,7 +53,7 @@ for (const scheme of ['light', 'dark']) {
 test('Android look: the sheet has a 32 x 4 handle and 28 px corners; the hold menu has 16 px corners', async ({ sized }) => {
   const page = await sized(390);
   await page.goto(KIT);
-  await page.locator('#open-sheet').click();
+  await fromDemo(page, '#open-sheet');
   const sheet = page.locator('dialog.ui-sheet[open]').first();
   await expect(sheet).toBeVisible();
   await settled(page);

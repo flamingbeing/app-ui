@@ -9,6 +9,10 @@
 .ui-settings-part { margin: 0 calc(var(--list-inset) + var(--pad)); }
 /* an app's list card in a part lines up with the groups' cards (the list keeps its own inset) */
 .ui-settings-part:has(> .ui-list) { margin-inline: 0; }
+/* the theme switch is a card of its own: lined up with the groups' cards, a gap from the rows above it */
+.ui-settings-part:has(> .theme-switch) { margin-inline: var(--list-inset); }
+.ui-settings-part > .theme-switch { margin-top: var(--gap); }
+.ui-settings-title + .ui-settings-part > .theme-switch { margin-top: 0; }
 .ui-settings-status { margin: var(--pad) calc(var(--list-inset) + var(--pad)) 0; min-height: 1lh; }
 .ui-setting > label.ui-row-main { cursor: pointer; }
 .ui-setting select { flex: none; max-width: 55%; }

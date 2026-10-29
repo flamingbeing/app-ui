@@ -2,6 +2,7 @@
 // signed out, made-up plants. The list of what is covered is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
+import { openDemo, closeDemo, fromDemo } from './demo.mjs';
 
 const KIT = '/ui/0.0.0-dev/kit/?edge=always';
 
@@ -40,7 +41,7 @@ for (const width of [390, 820, 1280]) {
       await page.goto(KIT);
       await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
       expect(await page.evaluate(() => ({ menus: !!kit.menus, title: !!kit.title, screens: !!kit.screens, sheets: kit.sheets.size, selects: kit.selects.size })))
-        .toEqual({ menus: true, title: true, screens: true, sheets: 1, selects: 1 });
+        .toEqual({ menus: true, title: true, screens: true, sheets: 2, selects: 1 });   // (the demo's sheet and the made-up one)
       expect(await AxeBuilder(page)).toEqual([]);
     });
 
@@ -105,7 +106,7 @@ for (const width of [390, 820, 1280]) {
       await page.goto(KIT);
       const h = page.viewportSize().height;
       // a row scrolled to just above the bottom: a menu opened under it would run off the screen
-      const row = page.locator('.ui-row').nth(11);
+      const row = page.locator('#plants .ui-row').last();
       await row.evaluate((e, h) => scrollBy(0, e.getBoundingClientRect().top - (h - 130)), h);
       expect((await row.boundingBox()).y).toBeGreaterThan(h - 300);
       await row.click({ button: 'right' });
@@ -216,7 +217,7 @@ for (const width of [390, 820, 1280]) {
       test.skip(width >= 840, 'a centred dialog changes its height');
       const page = await sized(width);
       await page.goto(KIT);
-      await page.click('#open-sheet');
+      await fromDemo(page, '#open-sheet');
       await settled(page);
       await page.evaluate(() => {
         const gaps = []; let last = performance.now(), on = true;
@@ -224,7 +225,7 @@ for (const width of [390, 820, 1280]) {
         requestAnimationFrame(tick);
         window.__frames = () => { on = false; return gaps; };
       });
-      const g = await centre(page.locator('.ui-sheet-grabber'));
+      const g = await centre(page.locator('#sheet .ui-sheet-grabber'));
       await (await finger(page)).drag(g.x, g.y, g.x, g.y - 250, { steps: 20, ms: 16 });
       await settled(page);
       const gaps = await page.evaluate(() => window.__frames());
@@ -237,16 +238,16 @@ for (const width of [390, 820, 1280]) {
       const page = await sized(width);
       await page.goto(KIT);
       const sheet = page.locator('#sheet');
-      await page.click('#open-sheet');
+      await fromDemo(page, '#open-sheet');
       await expect(sheet).toHaveAttribute('data-detent', 'medium');
       await settled(page);
       expect(await AxeBuilder(page)).toEqual([]);
       const f = await finger(page);
-      const g = await centre(page.locator('.ui-sheet-grabber'));
+      const g = await centre(page.locator('#sheet .ui-sheet-grabber'));
       await f.drag(g.x, g.y, g.x, g.y - 250);
       await expect(sheet).toHaveAttribute('data-detent', 'large');
       await settled(page);
-      const g2 = await centre(page.locator('.ui-sheet-grabber'));
+      const g2 = await centre(page.locator('#sheet .ui-sheet-grabber'));
       await f.drag(g2.x, g2.y, g2.x, g2.y + 250);
       await expect(sheet).toHaveAttribute('data-detent', 'medium');
       await settled(page);
@@ -259,7 +260,7 @@ for (const width of [390, 820, 1280]) {
         expect(Math.round(b.y + b.height)).toBe(page.viewportSize().height);   // on the bottom edge
       }
       // the grabber from the keyboard
-      await page.locator('.ui-sheet-grabber').focus();
+      await page.locator('#sheet .ui-sheet-grabber').focus();
       await page.keyboard.press('Enter');
       await expect(sheet).toHaveAttribute('data-detent', 'large');
       await page.keyboard.press('Enter');
@@ -267,11 +268,11 @@ for (const width of [390, 820, 1280]) {
       // down to close (only the narrow sheet closes by dragging: the centred one changes height)
       if (width < 840) {
         await settled(page);
-        const g3 = await centre(page.locator('.ui-sheet-grabber'));
+        const g3 = await centre(page.locator('#sheet .ui-sheet-grabber'));
         await f.drag(g3.x, g3.y, g3.x, g3.y + 300);
         await expect(sheet).toBeHidden();
-        await expect(page.locator('#open-sheet')).toBeFocused();
-        await page.click('#open-sheet');
+        await expect(page.locator('#demo')).toBeFocused();
+        await fromDemo(page, '#open-sheet');
       }
       await page.goBack();
       await expect(sheet).toBeHidden();
@@ -281,7 +282,7 @@ for (const width of [390, 820, 1280]) {
     test('a field and a sideways scroller in the sheet keep the finger', async ({ sized }) => {
       const page = await sized(width);
       await page.goto(KIT);
-      await page.click('#open-sheet');
+      await fromDemo(page, '#open-sheet');
       const sheet = page.locator('#sheet');
       await settled(page);
       const f = await finger(page);
@@ -296,7 +297,7 @@ for (const width of [390, 820, 1280]) {
         await expect(sheet).toHaveAttribute('data-detent', 'medium');
       }
       // and from the body it does
-      const body = await centre(page.locator('.ui-sheet-body p').first());
+      const body = await centre(page.locator('#sheet .ui-sheet-body p').first());
       await f.drag(body.x, body.y, body.x, body.y - 200);
       await expect(sheet).toHaveAttribute('data-detent', 'large');
     });
@@ -304,7 +305,7 @@ for (const width of [390, 820, 1280]) {
     test('screens: push, Back pops with focus back on the pusher; the edge swipe goes back; the tab bar stays put', async ({ sized }) => {
       const page = await sized(width);
       await page.goto(KIT);
-      await page.click('#push');
+      await fromDemo(page, '#push');
       await expect.poll(() => depth(page)).toBe(1);
       await expect(page.locator('.ui-bar-title')).toHaveText('Details');
       await expect(page.locator('#select')).toBeHidden();
@@ -328,10 +329,10 @@ for (const width of [390, 820, 1280]) {
       await expect.poll(() => depth(page)).toBe(0);
       await expect(page.locator('#home')).toBeVisible();
       await expect(page.locator('#detail')).toBeHidden();
-      await expect(page.locator('#push')).toBeFocused();
+      await expect(page.locator('#home-title')).toBeFocused();   // (pushed from the bar, outside the screen: its title)
 
       // a short swipe springs back
-      await page.click('#push');
+      await fromDemo(page, '#push');
       await expect.poll(() => depth(page)).toBe(1);
       await settled(page);
       await f.drag(4, h / 2, 60, h / 2 + 2, { steps: 4, ms: 60 });
@@ -344,7 +345,7 @@ for (const width of [390, 820, 1280]) {
     test('no edge swipe of its own where the phone has its own Back (Android, browsers)', async ({ sized }) => {
       const page = await sized(width);
       await page.goto('/ui/0.0.0-dev/kit/');
-      await page.click('#push');
+      await fromDemo(page, '#push');
       await expect.poll(() => depth(page)).toBe(1);
       await settled(page);
       const f = await finger(page);
@@ -377,13 +378,15 @@ for (const width of [390, 820, 1280]) {
       const page = await sized(width);
       await page.goto(KIT);
       await expect(page.locator('#still')).not.toBeChecked();
+      await openDemo(page);
       await page.check('#still');
+      await closeDemo(page);
       await expect(page.locator('html')).toHaveAttribute('data-motion', 'still');
       await page.locator('.ui-row').first().click({ button: 'right' });
       await page.waitForTimeout(100);
       await expect(page.locator('.ui-menu-preview')).not.toHaveClass(/is-lifted/);
       await page.keyboard.press('Escape');
-      await page.click('#push');
+      await fromDemo(page, '#push');
       expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
       await page.reload();
       await expect(page.locator('#still')).toBeChecked();
@@ -396,7 +399,7 @@ test('the phone\'s own Reduce Motion counts as Still', async ({ sized }) => {
   const page = await sized(390);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(KIT);
-  await page.click('#push');
+  await fromDemo(page, '#push');
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
 });
 
@@ -437,7 +440,7 @@ for (const width of [390, 1280]) {
     await page.goto(KIT);
     await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
     const wheel = async () => { await page.mouse.move(width / 2, 40); await page.mouse.wheel(0, 600); await page.waitForTimeout(300); return page.evaluate(() => scrollY); };
-    await page.click('#open-sheet');
+    await fromDemo(page, '#open-sheet');
     await expect(page.locator('#sheet')).toHaveJSProperty('open', true);
     expect(await wheel()).toBe(0);
     await page.keyboard.press('Escape');
@@ -463,7 +466,7 @@ test('at 390 px the sheet and the sheet menu clear the home indicator', async ({
   await cdp.send('Emulation.setSafeAreaInsetsOverride', { insets: { top: 47, bottom: 34 } });
   await page.goto(`${KIT}&look=b`);   // look B: menus come up as a sheet
   await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   await page.locator('#sheet .ui-sheet-grabber').click();   // full height: the body's end is on screen
   await settled(page);
   const bodyEnd = await page.evaluate(() => { const b = document.querySelector('#sheet .ui-sheet-body'); b.scrollTop = b.scrollHeight;
@@ -528,11 +531,11 @@ test('at 390 px a push overlaps the screens; the sheet drags by transform only; 
   expect(await page.locator('.ui-bar').evaluate(n => getComputedStyle(n).transitionDuration)).toMatch(/^0\.34s/);
 
   await page.evaluate(() => scrollTo(0, 0));
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   const sheet = page.locator('#sheet');
   await settled(page);
   const f = await finger(page);
-  const g = await centre(page.locator('.ui-sheet-grabber'));
+  const g = await centre(page.locator('#sheet .ui-sheet-grabber'));
   await f.down(g.x, g.y);
   const heights = [];
   for (const d of [-40, 30, -80, 60, -120, 20, -10, -10, -10, -10]) {   // up and down, then still (no flick)
@@ -554,7 +557,7 @@ test('at 390 px a sheet slides down as it closes; a closed menu fades out, inert
   const page = await sized(390);
   await page.goto(`${KIT}&look=e`);
   await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   const sheet = page.locator('#sheet');
   await settled(page);
   const top = (await sheet.boundingBox()).y;
@@ -578,7 +581,7 @@ test('at 390 px a sheet slides down as it closes; a closed menu fades out, inert
   await expect(page.locator('.is-leaving')).toHaveCount(0, { timeout: 600 });
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   await expect(sheet).toBeVisible();
   await page.keyboard.press('Escape');
   expect(await sheet.evaluate(n => n.open)).toBe(false);
@@ -604,7 +607,7 @@ test('at 390 px: Back sits in the bar; Select all on one line; the sheet, contro
   await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
   const back = page.locator('.ui-bar .ui-bar-back');
   await expect(back).toBeHidden();
-  await page.click('#push');
+  await fromDemo(page, '#push');
   await expect(back).toBeVisible();
   await expect(back).toHaveText('Plants');
   await expect(page.locator('#detail > .ui-back')).toBeHidden();
@@ -624,8 +627,10 @@ test('at 390 px: Back sits in the bar; Select all on one line; the sheet, contro
   expect(await face('#sheet-title')).not.toMatch(/Georgia/);
 
   // controls a finger can hit
+  await openDemo(page);
   for (const sel of ['#look-pick', '#density-pick']) expect((await page.locator(sel).boundingBox()).height).toBeGreaterThanOrEqual(44);
   expect((await page.locator('#still').boundingBox()).width).toBeGreaterThanOrEqual(20);
+  await closeDemo(page);
 
   // select mode: Select all on one line; the count in the text colour; an off button faded, Delete red
   await page.click('#select');
@@ -643,7 +648,7 @@ test('at 390 px: Back sits in the bar; Select all on one line; the sheet, contro
   await page.click('#select');
 
   // the sheet: Done is a word, not a pill; the chip row runs to the sheet's edges
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   await settled(page);
   const done = await page.locator('#sheet [data-close]').evaluate(e => getComputedStyle(e).borderTopStyle);
   expect(done).toBe('none');
@@ -671,6 +676,7 @@ test('the sync chip shows each state in its word, with a count where there is on
   await expect(word).toHaveText('Saved');
   await expect(chip).toHaveAttribute('role', 'status');
   await expect(chip.locator('svg.ui-icon')).toHaveCount(1);
+  await openDemo(page);
   for (const [state, text] of [['pending', 'Sending… (3)'], ['offline', 'Offline, kept on this device (2)'], ['attention', 'Needs you'],
     ['unknown', 'Connecting…'], ['at-risk', 'Not saved on this device yet (1)'], ['synced', 'Saved']]) {
     await page.locator('#sync-pick').selectOption(state);
@@ -687,37 +693,77 @@ test('the sync chip shows each state in its word, with a count where there is on
   expect(await AxeBuilder(page)).toEqual([]);
 });
 
+// the owner's review (29 Oct): the first screen reads like an app, the list straight under its title; every demo
+// control sits in one sheet from the bar's Demo controls button
+test('the list sits under the title; the demo controls are in one sheet from the bar, each reachable; axe clean light and dark', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(KIT);
+  const [title, list] = [await page.locator('#home-title').boundingBox(), await page.locator('#plants').boundingBox()];
+  expect(list.y - (title.y + title.height)).toBeLessThan(24);
+  const controls = ['#open-sheet', '#push', '#still', '#look-pick', '#density-pick', '#sync-pick'];
+  for (const sel of controls) await expect(page.locator(`#home ${sel}`), sel).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Demo controls' })).toBeVisible();
+  await openDemo(page);
+  for (const sel of [...controls, 'a[href="shell/"]', 'a[href="dense/"]', 'a[href="settings/"]']) {
+    const c = page.locator(`#demo-sheet ${sel}`);
+    await c.scrollIntoViewIfNeeded();
+    await expect(c, sel).toBeInViewport();
+  }
+  await settled(page);
+  expect(await AxeBuilder(page)).toEqual([]);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await settled(page);
+  expect(await AxeBuilder(page)).toEqual([]);
+  await closeDemo(page);
+  await expect(page.locator('#demo')).toBeFocused();
+  // Open the sheet: the demo sheet goes, the made-up one comes, and its close gives focus back to the bar button
+  await fromDemo(page, '#open-sheet');
+  await expect(page.locator('#demo-sheet')).toBeHidden();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#sheet')).toBeHidden();
+  await expect(page.locator('#demo')).toBeFocused();
+  // Push a screen: one screen in, Back takes it off
+  await fromDemo(page, '#push');
+  await expect.poll(() => depth(page)).toBe(1);
+  await page.goBack();
+  await expect.poll(() => depth(page)).toBe(0);
+});
+
 // the sync chip's tappable twin: one colour, the state in the cloud's shape; a tap syncs now and shows sending at least
 // 700 ms; still under reduced motion
 test('the sync button shows each state in its icon, a tap syncs now and lifts; still under reduced motion; axe clean', async ({ sized }) => {
   const page = await sized(390);
   await page.goto(KIT);
   const btn = page.locator('#sync-btn');
+  // the state picker is in the Demo controls sheet; the bar button is behind it while it is open
+  const demo = page.locator('#demo-sheet');
+  const pick = async (/** @type {string} */ state) => { if (!await demo.isVisible()) await openDemo(page); await page.locator('#sync-pick').selectOption(state); };
+  const tap = async () => { if (await demo.isVisible()) await closeDemo(page); await btn.tap(); };
   await expect(btn).toHaveAttribute('data-state', 'synced');
   await expect(btn).toHaveAttribute('aria-label', 'Saved. Sync now');
   await expect(btn.locator('svg.ui-icon')).toHaveCount(1);
   for (const [state, shown, label] of [['pending', 'syncing', 'Sending… (3). Sync now'], ['offline', 'offline', 'Offline, kept on this device (2). Sync now'],
     ['attention', 'attention', 'Needs you. Sync now'], ['at-risk', 'at-risk', 'Not saved on this device yet (1). Sync now'], ['unknown', 'unknown', 'Connecting…']]) {
-    await page.locator('#sync-pick').selectOption(state);
+    await pick(state);
     await expect(btn).toHaveAttribute('data-state', shown);
     await expect(btn).toHaveAttribute('aria-label', label);
     await expect(btn).toHaveAttribute('title', label);
   }
   // one colour whatever the state (the bar's); each state its own icon; a count of what waits
-  const lookOf = async (/** @type {string} */ state) => { await page.locator('#sync-pick').selectOption(state); return btn.evaluate(e => [getComputedStyle(e).color, e.querySelector('svg')?.innerHTML]); };
+  const lookOf = async (/** @type {string} */ state) => { await pick(state); return btn.evaluate(e => [getComputedStyle(e).color, e.querySelector('svg')?.innerHTML]); };
   const looks = [await lookOf('synced'), await lookOf('pending'), await lookOf('offline'), await lookOf('attention'), await lookOf('unknown')];
   expect(new Set(looks.map(l => l[0])).size, 'one colour').toBe(1);
   expect(new Set(looks.map(l => l[1])).size, 'five icons').toBe(5);
-  await page.locator('#sync-pick').selectOption('pending');
+  await pick('pending');
   await expect(btn.locator('.ui-sync-badge')).toHaveAttribute('data-count', '3');
   await expect(btn.locator('.ui-sync-badge')).toBeVisible();
   expect(await AxeBuilder(page), 'clean with the count showing').toEqual([]);
-  await page.locator('#sync-pick').selectOption('attention');
+  await pick('attention');
   expect(await btn.evaluate(e => getComputedStyle(e, '::after').content), 'attention has its dot').not.toBe('none');
   expect(await AxeBuilder(page)).toEqual([]);
   // a tap: syncs now, shows sending at least 700 ms even when the sync answers at once, then shows the state again
-  await page.locator('#sync-pick').selectOption('synced');
-  await btn.tap();
+  await pick('synced');
+  await tap();
   expect(await page.evaluate(() => /** @type {any} */ (window).syncTaps)).toBe(1);
   await expect(btn).toHaveAttribute('data-state', 'syncing');
   expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('ui-sync-lift');
@@ -725,12 +771,12 @@ test('the sync button shows each state in its icon, a tap syncs now and lifts; s
   await expect(btn).toHaveAttribute('data-state', 'syncing');
   await expect(btn).toHaveAttribute('data-state', 'synced', { timeout: 2000 });
   // offline: a tap retries but the struck cloud stays (it is not sending)
-  await page.locator('#sync-pick').selectOption('offline');
-  await btn.tap();
+  await pick('offline');
+  await tap();
   await expect(btn).toHaveAttribute('data-state', 'offline');
   expect(await page.evaluate(() => /** @type {any} */ (window).syncTaps)).toBe(2);
   // no lift under reduced motion, nor with Still picked
-  await page.locator('#sync-pick').selectOption('pending');
+  await pick('pending');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('none');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -744,6 +790,7 @@ test('look E: the synced chip is its icon (word read out), other states show the
   const page = await sized(390);
   await page.goto(`${KIT}&look=e`);
   const chip = page.locator('#status'), word = chip.locator('.ui-chip-text');
+  await openDemo(page);
   await page.locator('#sync-pick').selectOption('synced');
   expect((await word.boundingBox())?.width ?? 0).toBeLessThanOrEqual(1);
   await expect(word).toHaveText('Saved');   // (in the page for a reader, only out of sight)
@@ -815,7 +862,7 @@ test('at 390 px a sheet opened, or a page pushed, as another sheet closes is not
     document.body.append(d);
     /** @type {any} */ (window).two = detentSheet(d);
   });
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   await settled(page);
   await page.evaluate(() => { document.querySelector('#sheet [data-close]').click(); window.two.open(); });
   await page.waitForTimeout(800);
@@ -826,7 +873,7 @@ test('at 390 px a sheet opened, or a page pushed, as another sheet closes is not
   await expect(page).toHaveURL(/\/ui\/0\.0\.0-dev\/kit\//);
 
   // a page pushed after sheetsSettled() stays
-  await page.click('#open-sheet');
+  await fromDemo(page, '#open-sheet');
   await settled(page);
   await page.evaluate(async () => {
     const { sheetsSettled } = await import('../ui/index.js');

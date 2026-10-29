@@ -2,6 +2,7 @@
 // and none with Haptics Off. navigator.vibrate is a stand-in that writes down each pattern (WebKit has none of its
 // own); fingers are page-made touch and pointer events. The list is docs/kit-tests.md, "Haptics".
 import { test, expect } from './fixtures.mjs';
+import { openDemo } from './demo.mjs';
 
 const KIT = '/ui/0.0.0-dev/kit/';
 const SHELL = '/ui/0.0.0-dev/kit/shell/';
@@ -83,6 +84,8 @@ test('touch and hold gives a long; a switch turned on ticks, turned off is quiet
   expect(await buzzes(page)).toEqual([20]);
   await page.keyboard.press('Escape');
   await expect(page.locator('.ui-menu')).toHaveCount(0);
+  await openDemo(page);
+  await buzzes(page);
   const box = page.locator('#haptics');
   await expect(box).toBeChecked();
   await box.tap();
