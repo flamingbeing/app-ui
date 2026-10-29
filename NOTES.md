@@ -19,3 +19,7 @@ Lasting rules, owner preferences and lessons (never task chatter), and how to te
   and a busy machine's headless frames run 40–80 ms, which turned flicks into drags (flaky). WebKit with emulated
   Reduce Motion paints a move a frame late, so read positions with `expect.poll`.
 - CDP touch moves arrive every 35–50 ms in headless Chromium; a test reading the page right after a move polls.
+- Jank gate (`e2e/jank.spec.mjs`): rAF frame times are the main thread's, so during a compositor glide a late rAF is
+  not a dropped frame on screen; the gate holds drag frames (the page draws them) to 20 ms but one and glide frames
+  only to 50 ms. Send the CDP touch moves on Node timers, not a page `evaluate` per move (that work itself dropped
+  frames at 4x). Run it alone: next to other workers its frames drop at random.

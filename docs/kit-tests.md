@@ -82,11 +82,32 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Sideways scroller | the Jobs chips still scroll sideways under the pager's `touch-action: pan-y` | |
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
 | Reduce Motion | the pages still follow the finger, the next one beside, and glide on (rc.30 switched with nothing moved); also in WebKit | |
+| Pressed at once | a touch on a button or tab marks it `data-pressed` at once (jank gate); the tab bar, buttons and glass buttons show it as they show `:active` | |
 | Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
 | Bar on a tab change | between two scrolled pages the bar stays tinted (collapsed) all the way; to a page at the top it clears once (no flash) | |
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
+
+## Motion and the jank gate
+
+`ui/motion.js` in Node (`test/motion.unit.test.mjs`): `glide` hands each part the spring path as linear keyframes,
+`stop()` gives where it is and cancels, `done` says whether it landed; `spring` lands on its end, onward only;
+`tracker` reads the let-go speed; `afterGesture` holds work while a glide moves, runs each job once, and can be
+cancelled. The budget is README, "Responsiveness rules".
+
+`e2e/jank.spec.mjs` on `/kit/shell/?edge=always` at 390 px, Chromium with the CPU slowed 4x and DevTools protocol
+touch (a move every 16 ms) on the plain look (no GPU in CI: glass blur drawn in software drops frames at random),
+then WebKit unslowed with the glass, page-sent touch and pointer events (a move every 16 ms); one test at a time, after
+every other spec. In Chromium each gesture is judged from the first move: drag frames (to the lift) and the glide's
+frames (to the frame it lands in), and long tasks over both. In WebKit (software drawing in CI) the page's own work is
+judged: each move's handlers within 8 ms, the touch down's and the lift's within 16 ms, and pressed set by the touch.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Tab swipe | a swipe from Plants to Rooms and a quick flick back: drag frames within 20 ms but one, none over 50 ms, glide frames none over 50 ms, no task over 50 ms; the page lands | |
+| Sheet drag | the New sheet's grabber dragged up to large, down to medium, then down and away: the same budget each; the detents and the close land | |
+| Pressed | a touch on the Jobs tab shows `data-pressed` within 50 ms; it clears on the lift | |
 
 ## Settings screen gallery
 
@@ -154,6 +175,7 @@ stand-in for `@core/settings` on the page.
 | Drafts | typing is kept and a reload finds it again; Send clears it; axe | |
 | Drafts (unit) | a reload takes over a released slot, a held slot stays; blocked storage reads nothing and save throws | |
 | Drag to reorder | dragging the grip with a finger moves the row to the new place; axe | |
+| Follow the finger | the knob (`drag`, `glide`) goes with a finger and glides to the end it was let go nearer; a short move back glides back; the save (`afterGesture`) shows after each lift; axe | |
 | Share out | Copy and Share (no share sheet) copy and say so; (unit) a closed share sheet is not an error | |
 | Back closes the dialog | Back closes the newest dialog first, then the one under it; the page stays (unit: dismissAll, reset) | |
 | Conflict sheet | per-field picks survive a queue change while the sheet is open, and Keep these choices sends them all | |

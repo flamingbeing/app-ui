@@ -9,6 +9,8 @@
 //   select mode     .ui-list[data-select]                   tick rows, drag down the ticks, bottom action bar
 //   tab pages       nav.ui-tabbar [data-tab-page="#id"]     each tab shows one of the .ui-screens as the page under any
 //                                                           pushed ones; a sideways swipe moves between them on a phone
+//   pressed at once (every page)                            a touched button, row link or tab shows pressed at once
+//                                                           (motion.js pressFeedback; { press: false } leaves it out)
 // Styles: ui/gestures.css, loaded with <link> after ui.css.
 import { largeTitle } from './large-title.js';
 import { shrinkingTabBar, tabBarRoom } from './tab-bar.js';
@@ -17,23 +19,25 @@ import { detentSheet } from './detent-sheet.js';
 import { screenStack } from './screens.js';
 import { selectMode } from './select-mode.js';
 import { tabPages } from './tab-pages.js';
+import { pressFeedback } from './motion.js';
 
 /**
  * @param {ParentNode} [root]
- * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void }} [o]  drawer: the
+ * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, press?: boolean }} [o]  drawer: the
  *   drawer a right swipe on the first tab page pulls out with the finger (adaptiveShell(...).drawer); onPrevMissing
- *   (without a drawer): told after such a swipe
+ *   (without a drawer): told after such a swipe; press: false leaves out the instant pressed state
  * @returns {{ title: ReturnType<typeof largeTitle> | null, menus: ReturnType<typeof holdMenus> | null,
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root = document, { drawer, onPrevMissing } = {}) {
+export function startGestures(root = document, { drawer, onPrevMissing, press = true } = {}) {
   /** @type {(() => void)[]} */
   const stops = [];
   // iOS shows :active press states only when the page listens for touches
   const noop = () => {};
   document.addEventListener('touchstart', noop, { passive: true });
   stops.push(() => document.removeEventListener('touchstart', noop));
+  if (press) stops.push(pressFeedback(root === document ? document : /** @type {ParentNode & EventTarget} */ (root)));
 
   const bar = /** @type {HTMLElement | null} */ (root.querySelector('.ui-bar'));
   const title = bar && root.querySelector('.ui-large-title') ? largeTitle(bar) : null;

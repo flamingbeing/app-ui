@@ -6,7 +6,8 @@
 // on Android the system's swipe would fire as well). html[data-edge-back="always"] turns it on everywhere (testing).
 // It starts within EDGE px of the left edge and only when the finger moves mostly sideways; past a third of the width
 // or a flick, it goes back.
-import { still, noGesture, listeners, velocity } from './gesture.js';
+import { still, noGesture, listeners } from './gesture.js';
+import { glide, tracker } from './motion.js';
 
 export const EDGE = 24;
 
@@ -154,8 +155,7 @@ export function screenStack(host, { onChange } = {}) {
     /** @type {number | null} */
     let x0 = null;
     let y0 = 0, dx = 0, going = false;
-    /** @type {[number, number][]} */
-    let hist = [];
+    const hist = tracker();
     /** @type {HTMLElement | null} */
     let moving = null;
     /** @type {HTMLElement | null} */
@@ -168,7 +168,7 @@ export function screenStack(host, { onChange } = {}) {
       if (stack.length < 2 || going || e.touches.length > 1 || t.clientX > EDGE) return;
       if (!host.contains(on) && on !== document.body && on !== document.documentElement) return;
       if (noGesture(e.target) || document.documentElement.classList.contains('ui-menu-open')) return;
-      x0 = t.clientX; y0 = t.clientY; dx = 0; hist = [[e.timeStamp, t.clientX]]; moving = null;
+      x0 = t.clientX; y0 = t.clientY; dx = 0; hist.reset(e.timeStamp, t.clientX); moving = null;
     }, { passive: true });
     l.on(document, 'touchmove', (/** @type {TouchEvent} */ e) => {
       if (x0 === null) return;
@@ -185,31 +185,27 @@ export function screenStack(host, { onChange } = {}) {
       }
       if (e.cancelable) e.preventDefault();
       dx = Math.max(0, mx);
-      hist.push([e.timeStamp, t.clientX]);
-      if (hist.length > 5) hist.shift();
+      hist.add(e.timeStamp, t.clientX);
       moving.style.transform = `translateX(${dx}px)`;
       /** @type {HTMLElement} */ (shade).style.opacity = String(1 - dx / innerWidth);
     }, { passive: false });
-    const end = async () => {
+    const end = async (/** @type {TouchEvent} */ e) => {
       if (x0 === null) return;
       x0 = null;
       if (!moving) return;
       const m = moving;
       moving = null;
-      const done = swipeGoesBack(dx, velocity(hist), innerWidth);
+      const v = e.type === 'touchend' ? hist.speed(e.timeStamp) : 0;
+      const done = swipeGoesBack(dx, v, innerWidth);
       going = true;
       host.classList.remove('is-swiping');
       shade?.remove();
-      if (done) {
-        await slide(m, [{ transform: `translateX(${dx}px)` }, { transform: 'translateX(100%)' }]);
-        m.hidden = true;
-        m.style.transform = '';
-        pop(false);
-      } else {
-        await slide(m, [{ transform: `translateX(${dx}px)` }, { transform: 'none' }]);
-        m.style.transform = '';
-        stack[stack.length - 2].screen.hidden = true;
-      }
+      // the finger's let-go glides on at its speed (motion.js), with Less motion too: the screen was following it
+      const run = glide([[m, x => ({ transform: `translateX(${x}px)` })]], dx, done ? m.offsetWidth || innerWidth : 0, v);
+      await run.done;
+      m.style.transform = '';
+      if (done) { m.hidden = true; run.stop(); pop(false); }
+      else { run.stop(); stack[stack.length - 2].screen.hidden = true; }
       going = false;
     };
     l.on(document, 'touchend', end, { passive: true });

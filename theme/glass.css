@@ -64,7 +64,7 @@ html.glass {
 
 /* ---------- controls: in at once when pressed, a small spring back out ---------- */
 .glass button { transition: transform var(--d-quick) var(--spring-snappy); }
-.glass button:active { transform: scale(.96); transition-duration: min(60ms, var(--d-quick)); }
+.glass button:is(:active, [data-pressed]) { transform: scale(.96); transition-duration: min(60ms, var(--d-quick)); }
 
 /* ---------- a look with glass on its floating pills only (data-glass="pill", looks.js) ---------- */
 /* the bar is solid card colour too (menus, sheets, dialogs and the action bar always are); the toasts and a floating

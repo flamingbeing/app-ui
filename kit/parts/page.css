@@ -1,5 +1,8 @@
-/* The reference parts gallery: a list of rows, nothing else of its own. */
+/* The reference parts gallery: a list of rows and the follow-the-finger track. */
 main { padding: var(--pad); max-width: 40rem; margin: 0 auto; }
 .parts-list { list-style: none; margin: 0 0 var(--gap); padding: 0; }
 .parts-list li { display: flex; justify-content: space-between; align-items: center; min-height: var(--row); border-bottom: 1px solid var(--line); }
 section { margin-bottom: calc(var(--pad) * 2); }
+.motion-track { position: relative; height: calc(var(--row) + 8px); border-radius: 999px; background: var(--line); margin-bottom: var(--gap); }
+.motion-knob { position: absolute; top: 4px; left: 4px; width: 6rem; height: var(--row); display: grid; place-items: center;
+  border-radius: 999px; background: var(--accent); color: var(--on-accent); user-select: none; will-change: transform; }

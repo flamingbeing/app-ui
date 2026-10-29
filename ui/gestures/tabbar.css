@@ -27,8 +27,8 @@
   box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 28%, transparent); }
 .ui-tab-action svg.ui-tab-icon { padding: 9px; }
 .ui-tab-action .ui-tab-icon > svg { width: 26px; height: 26px; }   /* an <svg> inside a .ui-tab-icon span */
-.ui-tab.ui-tab-action:active { box-shadow: none; }   /* (the circle answers the press, not the whole tab) */
-.ui-tab-action:active .ui-tab-icon { transform: scale(.94); filter: brightness(.9); }
+.ui-tab.ui-tab-action:is(:active, [data-pressed]) { box-shadow: none; }   /* (the circle answers the press, not the whole tab) */
+.ui-tab-action:is(:active, [data-pressed]) .ui-tab-icon { transform: scale(.94); filter: brightness(.9); }
 /* a look with the tab bar along the bottom edge (data-tabbar="edge"); the tabs stay together in the middle on a wide screen */
 [data-tabbar="edge"] .ui-tabbar { left: 0; right: 0; bottom: 0; transform: none; max-width: none; justify-content: center;
   padding: 4px 4px calc(env(safe-area-inset-bottom, 0px) + 4px); border-width: var(--border) 0 0; border-radius: 0; }
@@ -36,7 +36,7 @@
 /* scrolled down, a floating tab bar shrinks to the current tab; one along the edge keeps every tab */
 :root:not([data-tabbar="edge"]) .ui-tabbar.is-minimised .ui-tab:not([aria-current="page"]) { display: none; }
 /* pressed: rows, tabs and menu items answer on the frame the finger lands */
-:is(.ui-tab, .ui-menu-item, a.ui-row, button.ui-row, .ui-row[tabindex], .ui-row[data-push]):active { box-shadow: inset 0 0 0 100vmax var(--press); }
+:is(.ui-tab, .ui-menu-item, a.ui-row, button.ui-row, .ui-row[tabindex], .ui-row[data-push]):is(:active, [data-pressed]) { box-shadow: inset 0 0 0 100vmax var(--press); }
 /* toasts (ui.css) sit above a showing tab bar or action bar, however many are stacked: they grow upwards from there */
 :root:has(:is(.ui-tabbar, .ui-action-bar):not([hidden])) .toasts {
   --ui-toast-bottom-kit: calc(var(--tap) + var(--pad) * 2 + env(safe-area-inset-bottom, 0px)); }
