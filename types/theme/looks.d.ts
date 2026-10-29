@@ -13,7 +13,10 @@
  * list-sep, list-shadow, row-weight, control-r, pill-r,
  * menu-r, sheet-r, tick-size, tab-active, glass-tint (how much accent the glass takes, a percentage)
  * palette: m3 (Material's colour roles from the accent as the seed, m3.js) | none (colour.js's palettes)
- * @typedef {{ id: string, name: string, desc: string, variants: Variants, tokens: Record<string, string>, palette?: 'm3' }} Look
+ * accent, surface (optional): the colour and the ground (presets.js SURFACES) the look falls back to when neither the
+ * device, its theme nor the app names one
+ * @typedef {{ id: string, name: string, desc: string, variants: Variants, tokens: Record<string, string>, palette?: 'm3',
+ *   accent?: string, surface?: string }} Look
  */
 /** @type {readonly Look[]} */
 export const LOOKS: readonly Look[];
@@ -34,6 +37,8 @@ export function lookOf(id?: string, appLook?: string): Look;
  * list-sep, list-shadow, row-weight, control-r, pill-r,
  * menu-r, sheet-r, tick-size, tab-active, glass-tint (how much accent the glass takes, a percentage)
  * palette: m3 (Material's colour roles from the accent as the seed, m3.js) | none (colour.js's palettes)
+ * accent, surface (optional): the colour and the ground (presets.js SURFACES) the look falls back to when neither the
+ * device, its theme nor the app names one
  */
 export type Variants = {
     header: "band" | "plain" | "slim";
@@ -59,4 +64,6 @@ export type Look = {
     variants: Variants;
     tokens: Record<string, string>;
     palette?: "m3";
+    accent?: string;
+    surface?: string;
 };

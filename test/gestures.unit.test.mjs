@@ -231,6 +231,7 @@ test('the arbiter: the first claim owns the touch, a lower one stands down, a hi
   release('sheet');
   assert.equal(captured(), null);
   assert.ok(PRIORITY.sheet > PRIORITY.drawer && PRIORITY.drawer > PRIORITY.back && PRIORITY.back > PRIORITY.tabs
-    && PRIORITY.tabs > PRIORITY.cards && PRIORITY.cards > PRIORITY.drag && PRIORITY.drag > PRIORITY.select
+    && PRIORITY.tabs > PRIORITY.rows
+    && PRIORITY.rows > PRIORITY.cards && PRIORITY.cards > PRIORITY.drag && PRIORITY.drag > PRIORITY.select
     && PRIORITY.select > PRIORITY.hold && PRIORITY.hold > PRIORITY.bounce);
 });

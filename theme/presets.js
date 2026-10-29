@@ -33,6 +33,8 @@ export const SURFACES = Object.freeze({
   },
   navy: { label: 'Navy night', light: { bg: '#eef2f8' }, dark: { bg: '#0a1628', surface: '#10223b' } },
   ink: { label: 'Ink', light: { bg: '#ffffff', surface: '#f6f6f6' }, dark: { bg: '#1e1e1e', surface: '#262626' } },
+  // (iOS's grouped lists: the grouped grey under white cards; black under charcoal cards in dark)
+  grouped: { label: 'Grouped', light: { bg: '#f2f2f7', surface: '#ffffff' }, dark: { bg: '#000000', surface: '#1c1c1e' } },
   black: { label: 'Black', light: { bg: '#f4f4f4' }, dark: { bg: '#000000', surface: '#121212' } },
 });
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.54
+- An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
+  and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
+  half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
+- Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module; it claims
+  the touch as `rows` (arbiter priority 35).
+- Gallery: the iOS look is its default, and `/kit/ios/` (linked from the demo controls' Other pages) shows the iOS
+  parts together.
+
 ## 1.0.0-rc.53
 - Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
   words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync

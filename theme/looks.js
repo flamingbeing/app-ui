@@ -8,6 +8,7 @@ import c from './looks/c.js';
 import d from './looks/d.js';
 import e from './looks/e.js';
 import m from './looks/m.js';
+import ios from './looks/ios.js';
 
 /**
  * header: band (the large title on a band of the accent) | plain (on the page) | slim (no large title: the bar always
@@ -24,11 +25,14 @@ import m from './looks/m.js';
  * list-sep, list-shadow, row-weight, control-r, pill-r,
  * menu-r, sheet-r, tick-size, tab-active, glass-tint (how much accent the glass takes, a percentage)
  * palette: m3 (Material's colour roles from the accent as the seed, m3.js) | none (colour.js's palettes)
- * @typedef {{ id: string, name: string, desc: string, variants: Variants, tokens: Record<string, string>, palette?: 'm3' }} Look
+ * accent, surface (optional): the colour and the ground (presets.js SURFACES) the look falls back to when neither the
+ * device, its theme nor the app names one
+ * @typedef {{ id: string, name: string, desc: string, variants: Variants, tokens: Record<string, string>, palette?: 'm3',
+ *   accent?: string, surface?: string }} Look
  */
 
 /** @type {readonly Look[]} */
-export const LOOKS = Object.freeze([a, b, c, d, e, m]);
+export const LOOKS = Object.freeze([a, b, c, d, e, m, ios]);
 export const LOOK_IDS = Object.freeze(LOOKS.map(l => l.id));
 // what each variant may be, first = what a look that names none gets
 export const VARIANTS = Object.freeze({

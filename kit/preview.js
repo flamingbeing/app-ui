@@ -1,7 +1,8 @@
 // What every gallery page reads from its address: ?look=a|b|c and ?density=comfortable|regular|compact show that look
 // or density on this page without keeping it (links and screenshots); ?edge=always|off forces the edge swipe on or
 // off; ?guard=again forgets the glass guard's verdict so it runs again; ?kit=home|nuhs|ntf shows the page on that design
-// kit (its tokens.css, with the colour and ground an app on it names). Applies the theme, then returns the choice shown.
+// kit (its tokens.css, with the colour and ground an app on it names). Applies the theme (the iOS look, as the gallery's
+// own), then returns the choice shown.
 import { applyTheme, previewTheme, themeChoice, keepGlassVerdict } from '../theme/index.js';
 
 // the design kits an app can be made on (app-starter's fill --kit), and the theme an app on each passes to applyTheme
@@ -24,7 +25,8 @@ function useKit(id) {
 export function galleryPreview() {
   const params = new URLSearchParams(location.search);
   if (params.get('guard') === 'again') keepGlassVerdict(null);
-  applyTheme(useKit(params.get('kit')));
+  // the gallery's own look is iOS (an app's default stays A); a kit's theme may name its own
+  applyTheme({ look: 'ios', ...useKit(params.get('kit')) });
   /** @type {Record<string, string>} */
   const preview = {};
   for (const k of ['look', 'density']) { const v = params.get(k); if (v) preview[k] = v; }

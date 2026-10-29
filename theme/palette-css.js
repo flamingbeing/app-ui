@@ -22,8 +22,11 @@ export const DEFAULT_ACCENT = '#3a6390';
 /** @param {Partial<Choice>} choice */
 const presetOf = choice => PRESETS.find(p => p.id === choice.preset) ?? PRESETS[0];
 
-/** @param {Partial<Choice>} choice @param {AppTheme} [app] @returns {string}  the accent picked: the choice's, the preset's or the app's */
-export const accentOf = (choice, app = {}) => cleanChoice(choice).accent || presetOf(cleanChoice(choice)).accent || app.accent || DEFAULT_ACCENT;
+/** @param {Partial<Choice>} choice @param {AppTheme} [app] @returns {string}  the accent picked: the choice's, the preset's, the app's or the look's */
+export const accentOf = (choice, app = {}) => {
+  const c = cleanChoice(choice);
+  return c.accent || presetOf(c).accent || app.accent || lookOf(c.look, app.look).accent || DEFAULT_ACCENT;
+};
 
 /**
  * The two palettes a choice shows: light, and dark (pure black when the dark style is OLED; a ground never tints OLED).
@@ -31,7 +34,7 @@ export const accentOf = (choice, app = {}) => cleanChoice(choice).accent || pres
  */
 export function palettes(choice, app = {}) {
   const c = cleanChoice(choice), preset = presetOf(c), accent = accentOf(c, app);
-  const ground = SURFACES[c.surface || preset.surface || app.surface || ''];
+  const ground = SURFACES[c.surface || preset.surface || app.surface || lookOf(c.look, app.look).surface || ''];
   const oled = c.dark === 'oled', strong = !!preset.strong;
   // (a look with Material's colour, the Android look: its roles from the accent as the seed; no ground, Material has its own)
   if (lookOf(c.look, app.look).palette === 'm3') return {

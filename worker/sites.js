@@ -11,12 +11,13 @@ const NOINDEX = 'noindex, nofollow';
 const SEMVER = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?`;
 // a released version's files never change: browsers and the CDN may keep them for a year. The list of versions can.
 // Files by type (the gallery's manifest and icons too: it is installable), and the gallery's folders (/kit/, /kit/shell/, …: their index.html; without the "/", a redirect).
-const VERSIONED = new RegExp(String.raw`^/ui/${SEMVER}/(?:(?:ui|theme|settings|kit|icons)/[\w./-]*\.(?:js|css|html|svg|png|webmanifest|d\.ts)|kit(?:/[\w-]+)*/?)$`);
+const VERSIONED = new RegExp(String.raw`^/ui/${SEMVER}/(?:(?:ui|theme|settings|kit|icons)/[\w./-]*\.(?:js|css|html|svg|png|webmanifest|woff2|d\.ts)|kit(?:/[\w-]+)*/?)$`);
 const LISTING = '/ui/versions.json';
 // the sub-folder with or without its "/" (/kit/shell and /kit/shell/ both reach /ui/<latest>/kit/shell/)
 const NEWEST_KIT = /^\/(?:ui\/)?kit((?:\/[\w-]+)*)\/?$/;
 const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=utf-8', html: 'text/html; charset=utf-8',
-  svg: 'image/svg+xml', png: 'image/png', webmanifest: 'application/manifest+json', json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
+  svg: 'image/svg+xml', png: 'image/png', webmanifest: 'application/manifest+json', woff2: 'font/woff2',
+  json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
 // public code, no cookies or credentials, so any app origin may import it (and <link> its CSS)
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Cross-Origin-Resource-Policy': 'cross-origin' };
 // the gallery pages: their own files, the design kits' tokens and fonts (?kit= shows each); nothing else

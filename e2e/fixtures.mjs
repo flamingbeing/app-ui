@@ -52,3 +52,7 @@ async function check(made) {
     expect(v, 'CSP violations').toEqual([]);
   }
 }
+
+/** how far a bottom sheet floats clear of the bottom edge, px: 8 in the iOS look (the gallery's own), else 0
+ * @param {import('@playwright/test').Page} page @returns {Promise<number>} */
+export const iosGap = page => page.evaluate(() => document.documentElement.dataset.look === 'ios' ? 8 : 0);

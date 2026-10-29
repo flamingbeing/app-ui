@@ -1,8 +1,9 @@
 // Add-on: fonts (ported from the logbook engine). Per device, off by default: one font for the interface (--font, which
 // --font-ui follows) and one for writing (--font-editor: an editor, a long text box), which follows the interface font
 // unless set. A choice is a stack from STACKS, a font installed on this device by name ('named': not every browser
-// allows it, Safari mostly doesn't), or a font file kept on this device only ('file', IndexedDB). The kit ships no font
-// files: an app that bundles some adds its own @font-face rules and passes its stacks (applyFonts' stacks).
+// allows it, Safari mostly doesn't), or a font file kept on this device only ('file', IndexedDB). The kit ships one font
+// file, Inter (theme/fonts/, for the iOS look); an app that bundles others adds its own @font-face rules and passes its
+// stacks (applyFonts' stacks).
 
 /** @typedef {{ fontUi?: unknown, fontUiName?: unknown, fontLog?: unknown, fontLogName?: unknown }} FontChoice */
 /** @typedef {{ name: string, data: ArrayBuffer }} FontFile */

@@ -16,15 +16,15 @@ const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
 export const BUDGET = { frame: 20, late: 1, worst: 50, task: 50, press: 50, handler: 8, ends: 16 };
 const SLOWER = 4;
 
-async function load(sized, browserName, query = '') {
+async function load(sized, browserName, query = '', at = SHELL) {
   const page = await sized(390);
   if (process.env.JANK_DEBUG) page.on('console', m => console.log('  page:', m.text()));
-  await page.goto(SHELL + query);
+  await page.goto(at + query);
   // the plain look under the slowed CPU: with no GPU here, the glass's backdrop blur is drawn in software, between the
   // page's frames, and drops one at random (a phone's GPU draws it); the page's own work is what the gate holds.
   // WebKit keeps the glass
   if (browserName === 'chromium') await page.evaluate(() => document.documentElement.classList.remove('glass'));
-  await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
+  await expect.poll(() => page.evaluate(() => !!(window.shell || window.kit))).toBe(true);
   await page.evaluate(() => {
     // every frame (rAF to rAF, [start, end]) and every long task ([start, end]) from start() to stop(), split at the
     // finger's first move, its lift and the frame the glide lands in
@@ -214,6 +214,20 @@ test('a card swiped on and flicked back keeps every frame on time on a slow phon
   await expect(deck).toHaveAttribute('data-shown', '0');
   // the tab page stayed put: a swipe on the deck is the deck's
   expect(await page.evaluate(() => window.__shown())).toEqual(['jobs']);
+});
+
+test('a row swiped open on its actions and flicked shut keeps every frame on time on a slow phone', async ({ sized, browserName }) => {
+  const page = await load(sized, browserName, '', '/ui/0.0.0-dev/kit/ios/');
+  const row = page.locator('#todo .ui-row').first();
+  const box = await row.boundingBox();
+  const y = Math.round(box.y + box.height / 2), right = Math.round(box.x + box.width - 40);
+  const tx = () => row.evaluate(r => new DOMMatrix(getComputedStyle(r).transform).m41);
+  // about two thirds of the two actions (Flag, Delete), so the spring has the rest to go
+  await gate(page, `row swipe (${browserName})`, () => page.__drag(path([right, y], [right - 100, y], 12)));
+  await expect.poll(tx).toBe(-148);
+  // a flick back from on the row: it closes
+  await gate(page, `row flick shut (${browserName})`, () => page.__drag(path([right - 160, y], [right - 60, y], 5)));
+  await expect.poll(tx).toBe(0);
 });
 
 test('a touched button shows pressed in the first frame on a slow phone', async ({ sized, browserName }) => {

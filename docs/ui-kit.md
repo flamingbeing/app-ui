@@ -91,9 +91,9 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
 ## One gesture owns a touch (`ui/gesture.js` `claim`)
 
 - Every touch part asks `claim(name)` once its drag is sure (past the slop, in its direction); the part with the
-  higher `PRIORITY` wins: sheet 60, drawer 50, Back edge 45, tab swipe 40, card pager 30, row drag 25, select drag
-  20, hold 15, bounce 10. A claim refused means the part lets go of this touch. (Tab swipe and card pager meet only
-  when a flick catches a gliding page on a deck: the page keeps it.)
+  higher `PRIORITY` wins: sheet 60, drawer 50, Back edge 45, tab swipe 40, row swipe actions 35, card pager 30, row
+  drag 25, select drag 20, hold 15, bounce 10. A claim refused means the part lets go of this touch. (Tab swipe meets
+  the card pager or row swipe actions only when a flick catches a gliding page on a deck or list: the page keeps it.)
 - A win sends `ui-gesture-captured` (`onCaptured(won)`): the parts that had started stand down, so a press shade
   clears, a hold timer stops and a half-done tab swipe springs back. The touch is free again once every finger lifts.
 - New touch parts claim before they move anything, with a name in `PRIORITY` (or their own, lowest).
@@ -177,7 +177,7 @@ A look is data, not a fork. Each one is a file in `theme/looks/` with:
 - **palette** (optional): `'m3'` makes the page colours Material 3 colour roles from the accent as the seed
   (`theme/m3.js`: tonal palettes, Android's tonal spot scheme, light and dark), each role also as an `--m3-*` token.
 
-The looks so far:
+The seven looks so far:
 
 | Look | Name | In short |
 | --- | --- | --- |
@@ -187,8 +187,11 @@ The looks so far:
 | D | Slim | A slim bar always showing the name, lists as cards inset from the edges, an icon tab bar along the edge, no band or glass |
 | E | Workspace | Flat and compact like a desktop notes app: a slim bar, flush lists on the page, menus as bottom sheets, a filled search box, the sync chip as its icon alone when all is synced |
 | M | Android | Material 3 Expressive as Android 16 draws it: tonal colour roles from the accent, solid tonal surfaces (no glass), Roboto where the phone has it (Inter otherwise; no font is hosted), a top app bar that takes its tone on scroll, lists in rounded groups with 2 px gaps, a navigation bar with a pill on the current tab, Material's switch, sheet handle, menus and action button |
+| iOS | iOS | As close to iOS 26 as the web allows: the system colours (light and dark), the grouped grey ground, inset grouped lists with icon tiles, the iOS switch and segmented control, a collapsing large title, glass bars, sheets with half and full detents, row swipe actions; Inter (shipped in `theme/fonts/`) stands in for SF Pro, after `-apple-system`. Its accent (`#007aff`) and grouped ground apply only when the app and device name none |
 
 The app picks its own look with `applyTheme({ look: 'b' })` (an app opts into the Android look with `applyTheme({ look: 'm' })`; nothing else changes), and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey; `'linen'`: warm paper with soft ink, its own warm dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
+
+**How an app opts in to the iOS look:** one line, `applyTheme({ look: 'ios' })`.
 
 A design kit is the origin of the page's `/v1/tokens.css` (fonts and `--home-*` tokens, read before any script). A kit may set `--home-serif`; look A's head and the serif font preset then use it. In the gallery, `?kit=home|nuhs|ntf` previews a kit's tokens with its app theme.
 
@@ -252,6 +255,16 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
 - **Filter chips:** `.ui-chips` holding `button.ui-chip` with `aria-pressed` (ticked when on), a full tap tall;
   scrolls sideways, or wraps with `data-wrap="on"`. A `.ui-chip` elsewhere stays the small status chip.
 - **Empty and loading:** `.ui-empty` (`-icon`, `-title`, `-text`); `.ui-skeleton` with `data-shape="line|short|thumb"`.
+
+## Row swipe actions (`ui/swipe-actions.js`, `ui/gestures/swipe.css`)
+
+`swipeActions(list, { lead, trail, onAction })` on the `.ui-row`s of a list, as iOS Mail: a row slid sideways shows
+its actions behind it (`lead(row)`: under its start, `trail(row)`: under its end, each `[{ id, label, tone, full }]`
+from the outer edge in; tone `danger|warn|grey|ok|purple`, else the accent). Let go past half of them and the row stays
+open; past `FULL_AT` (0.6) of the row's width the first action, if `full`, takes the row and runs on let-go. A tap on an
+action runs it; a tap elsewhere, a scroll or Escape closes. Transform only, on motion.js's drag and glide; the
+edge strip stays Back's. Returns `{ close, stop }`. Give each action another way in (a hold menu, the row's screen).
+In any look; the iOS look gives it iOS's colours. The gallery's `/kit/ios/` page shows it.
 
 ## Layout parts and extra-dense
 

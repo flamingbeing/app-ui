@@ -1,0 +1,15 @@
+/* The iOS gallery page's own bits; the look itself is ui/gestures/ios.css. */
+body { margin: 0; padding: 0 0 calc(var(--tap) + env(safe-area-inset-bottom, 0px)); }
+:root { --kit-w: 40rem; --kit-g: max(0px, calc((100vw - var(--kit-w)) / 2)); }
+body > main { padding-inline: var(--kit-g); }
+body > .ui-bar { padding-inline: calc(var(--kit-g) + var(--pad)); }
+/* both sides as wide, so the bar title sits in the middle */
+.kit-bar-side { flex: 1; display: flex; }
+.kit-bar-side:last-child { justify-content: flex-end; }
+.ui-bar .kit-home { text-decoration: none; }
+main > .ui-segmented, .ui-sheet-body > .ui-segmented { margin: var(--gap) var(--list-inset, var(--pad)); }
+.ui-segmented > legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.ui-sheet-body > .ui-section > p { margin-inline: var(--list-inset, var(--pad)); }
+#todo .ui-row[data-flagged]::after { content: ""; position: absolute; inset-block-start: .75rem; inset-inline-end: .75rem; width: .5rem;
+  height: .5rem; border-radius: 50%; background: var(--warn); }
+#todo .ui-row[data-done] .ui-row-main { color: var(--muted); }
