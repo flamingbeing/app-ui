@@ -18,6 +18,7 @@ export { holdMenus } from "./hold-menu.js";
 export { screenStack } from "./screens.js";
 export { selectMode } from "./select-mode.js";
 export { cardPager } from "./card-pager.js";
+export { bounce } from "./bounce.js";
 export { alertModal, confirmModal } from "./modal.js";
 export { hoverCard, placeCard } from "./hover-card.js";
 export { aboutSheet, packagesFromImportMap } from "./about-sheet.js";

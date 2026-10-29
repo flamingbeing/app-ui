@@ -40,6 +40,8 @@ export { still, haptic } from './gesture.js';
 // motion (motion.js): the shared finger physics: a pointer drag glued to the finger, the spring a let-go glides on,
 // work held until the finger lifts, the instant pressed state
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from './motion.js';
+// the rubber band at a scroll's ends (bounce.js): startGestures() starts it
+export { bounce } from './bounce.js';
 // the adaptive shell (ui/shell/shell.css): phone tab bar, tablet and laptop side bar with list and detail
 export { adaptiveShell, sizeClass, matchesSearch } from './shell/shell.js';
 // layout parts (ui/layout.css): grid, stack, split are CSS; toolbars, steppers, clearable segments start here

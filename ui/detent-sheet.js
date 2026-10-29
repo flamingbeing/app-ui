@@ -81,7 +81,10 @@ export function detentSheet(sheet) {
   function setBodyPan() {
     if (!body) return;
     const atTop = sheet.getAttribute('data-detent') === top;
-    body.style.touchAction = !atTop ? 'pan-x' : body.scrollTop <= 0 ? 'pan-x pan-down' : '';
+    // WebKit has no pan-down (it would ignore the value and keep the last one): there the sheet's touchmove alone takes
+    // a pull down at the top
+    const down = typeof CSS !== 'undefined' && CSS.supports?.('touch-action', 'pan-x pan-down') ? 'pan-x pan-down' : '';
+    body.style.touchAction = !atTop ? 'pan-x' : body.scrollTop <= 0 ? down : '';
     // a sideways scroller is a scroll container of its own, so it needs the same rule or an up-down finger on it
     // would scroll the body below full height
     body.querySelectorAll('.ui-scroll-x').forEach(x => { /** @type {HTMLElement} */ (x).style.touchAction = atTop ? '' : 'pan-x'; });

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-rc.39
+- The bounce: `ui/bounce.js`, exported from `@core/ui` as `bounce`. A pull past a list's top or bottom stretches it
+  (the same rubber band as the sheets and drags; the bars and fixed parts stay) and springs back on the compositor
+  with the finger's speed; a finger catches it on the way; a fling into an end bounces past it and back (not with
+  Less motion). Touch only. Works on the page's scroll and any element that scrolls up and down; a sheet body's top
+  pull stays the sheet's. The page keeps `overscroll-behavior: none`. `startGestures()` starts it (option `bounce`,
+  on by default); `data-no-bounce` leaves a part out. Nothing runs on import.
+- Known: a finger that turns back while stretched scrolls at once, so the content runs a little ahead of it until the
+  stretch is gone (touch moves can't be held back once the browser scrolls).
+- The jank gate adds a pull past the list's top and bottom.
+- Sheets: at full height, scrolled to the top, the body no longer stays stuck on sideways-only panning in WebKit
+  (Safari has no `pan-down`; there the sheet's own touch handling takes the pull down).
+
 ## 1.0.0-rc.38
 - `cardPager(stage, { card, start, onShow })`, exported from `@core/ui` (`ui/card-pager.js`): one card at a time, a
   sideways swipe for the next or the previous (a flashcard deck, a review queue). The card beside follows the finger;
