@@ -14,14 +14,17 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
- *   backToFirst?: boolean }} o
+ *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
+ *   labels?: Record<string, string> }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
  *   page); drawer: the drawer a right swipe on the first page pulls out (adaptiveShell().drawer); onPrevMissing
  *   (without a drawer): told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
- *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all
+ *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all;
+ *   backToClose (default on, with backToFirst): the first Back on the first page stays and shows the backAgain words
+ *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS
  * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void }}
  */
-export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, drawer, onPrevMissing, backToFirst }: {
+export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, drawer, onPrevMissing, backToFirst, backToClose, toasts, labels }: {
     screens: {
         base: (s: HTMLElement) => Promise<void>;
         depth: () => number;
@@ -34,6 +37,13 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
     drawer?: () => PullDrawer | null;
     onPrevMissing?: () => void;
     backToFirst?: boolean;
+    backToClose?: boolean;
+    toasts?: {
+        show: (message: string, o?: {
+            ms?: number;
+        }) => () => void;
+    };
+    labels?: Record<string, string>;
 }): {
     go: (page: string | HTMLElement) => void;
     current: () => HTMLElement;

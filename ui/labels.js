@@ -12,6 +12,8 @@ export const LABELS = Object.freeze({
   ok: 'OK',
   cancel: 'Cancel',
   dismiss: 'Dismiss',
+  // Back on the first tab, kept in the app (tab-pages.js)
+  backAgain: 'Press Back again to close',
   // the reference parts' words (undo-toast.js, load-state.js, about-sheet.js)
   undo: 'Undo',
   loading: 'Loading…',
