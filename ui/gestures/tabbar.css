@@ -42,3 +42,6 @@
   --ui-toast-bottom-kit: calc(var(--tap) + var(--pad) * 2 + env(safe-area-inset-bottom, 0px)); }
 /* each screen keeps room under its last row for a showing tab bar (tab-bar.js tabBarRoom sets the room; 0 while hidden) */
 :root:has(.ui-tabbar:not([hidden])) .ui-screen::after { content: ""; display: block; height: var(--ui-tabbar-room, 0px); }
+
+/* the keyboard up (ui/keyboard.js): the tab bar steps aside, as Android apps do it */
+.ui-keyboard-open .ui-tabbar { display: none; }

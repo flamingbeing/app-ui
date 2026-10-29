@@ -12,6 +12,9 @@
 //   bounce (every page)                                     a pull past a scroll's top or bottom stretches and springs
 //                                                           back; a fling into an end bounces (bounce.js; { bounce:
 //                                                           false } leaves it out, [data-no-bounce] for one place)
+//   keyboard (every page)                                   html.ui-keyboard-open while the on-screen keyboard is up:
+//                                                           the tab bar hides, sheets sit above it (keyboard.js;
+//                                                           { keyboard: false } leaves it out)
 //   pressed at once (every page)                            a touched button, row link or tab shows pressed at once
 //                                                           (motion.js pressFeedback; { press: false } leaves it out)
 // Styles: ui/gestures.css, loaded with <link> after ui.css.
@@ -24,18 +27,19 @@ import { selectMode } from './select-mode.js';
 import { tabPages } from './tab-pages.js';
 import { pressFeedback } from './motion.js';
 import { bounce as rubberBand } from './bounce.js';
+import { watchKeyboard } from './keyboard.js';
 
 /**
  * @param {ParentNode} [root]
- * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, press?: boolean, bounce?: boolean }} [o]  drawer: the
+ * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, press?: boolean, bounce?: boolean, keyboard?: boolean }} [o]  drawer: the
  *   drawer a right swipe on the first tab page pulls out with the finger (adaptiveShell(...).drawer); onPrevMissing
  *   (without a drawer): told after such a swipe; press: false leaves out the instant pressed state; bounce: false
- *   leaves out the rubber band at the scroll's ends
+ *   leaves out the rubber band at the scroll's ends; keyboard: false leaves out the keyboard watch
  * @returns {{ title: ReturnType<typeof largeTitle> | null, menus: ReturnType<typeof holdMenus> | null,
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root = document, { drawer, onPrevMissing, press = true, bounce = true } = {}) {
+export function startGestures(root = document, { drawer, onPrevMissing, press = true, bounce = true, keyboard = true } = {}) {
   /** @type {(() => void)[]} */
   const stops = [];
   // iOS shows :active press states only when the page listens for touches
@@ -45,6 +49,7 @@ export function startGestures(root = document, { drawer, onPrevMissing, press = 
   const at = root === document ? document : /** @type {ParentNode & EventTarget} */ (root);
   if (press) stops.push(pressFeedback(at));
   if (bounce) stops.push(rubberBand(at));
+  if (keyboard) stops.push(watchKeyboard());
 
   const bar = /** @type {HTMLElement | null} */ (root.querySelector('.ui-bar'));
   const title = bar && root.querySelector('.ui-large-title') ? largeTitle(bar) : null;
