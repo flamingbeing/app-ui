@@ -26,7 +26,12 @@ async function finger(page) {
 }
 const centre = async loc => { const b = await loc.boundingBox(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, b }; };
 const depth = page => page.evaluate(() => window.kit.screens.depth());
-const settled = page => page.evaluate(() => Promise.all(document.getAnimations().map(a => a.finished.catch(() => {}))));
+// (two frames first: an element added a moment ago has no animation yet)
+const settled = page => page.evaluate(async () => {
+  const frame = () => new Promise(res => { requestAnimationFrame(() => res()); setTimeout(res, 100); });
+  await frame(); await frame();
+  await Promise.all(document.getAnimations().map(a => a.finished.catch(() => {})));
+});
 
 for (const width of [390, 820, 1280]) {
   test.describe(`at ${width} px`, () => {
