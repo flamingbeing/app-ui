@@ -507,7 +507,7 @@ test('a tab page keeps its scroll; tapping the current tab over a pushed screen 
   expect(await page.evaluate(() => [window.kit.screens.depth(), history.state?.uiScreens ?? 0])).toEqual([0, 0]);
 });
 
-test('Back with tabs, as Android apps: tab changes add one entry at most; Back on another tab goes to the first, then leaves', async ({ sized }) => {
+test('Back with tabs, as Android apps: tab changes add one entry at most; Back on another tab goes to the first, then asks, then leaves', async ({ sized }) => {
   const page = await load(sized);
   const tab = name => page.locator('nav.ui-tabbar .ui-tab', { hasText: name }).dispatchEvent('click');
   const len = () => page.evaluate(() => history.length);
@@ -525,8 +525,10 @@ test('Back with tabs, as Android apps: tab changes add one entry at most; Back o
   await tab('Plants');
   await expect.poll(() => page.evaluate(() => !!history.state?.uiTabBack)).toBe(false);
   expect(await shown(page)).toEqual(['home']);
-  // and Back on the first tab leaves the page
+  // and Back on the first tab asks first (Press Back again to close, back-close.spec), then leaves the page
   const url = page.url();
+  await page.goBack();
+  await expect(page.locator('.toasts .toast', { hasText: 'Press Back again to close' })).toHaveCount(1);
   await page.goBack();
   await expect.poll(() => page.url()).not.toBe(url);
 });

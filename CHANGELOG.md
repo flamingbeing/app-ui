@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.50
+## 1.0.0-rc.51
 - Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
   words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
   state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
@@ -14,6 +14,17 @@
   with a switch.
 - Gallery: the Haptics switch is in the Demo controls sheet with Less motion.
 
+
+## 1.0.0-rc.50
+- Press Back again to close: the first Back on the first tab stays in the app and shows a toast, "Press Back again
+  to close"; a second Back within 2 s (`CLOSE_MS`) leaves. Before, one Back let the browser close an installed app,
+  so the next open was a cold start with the splash. `tabPages` does it by default (`{ backToClose: false }`: off;
+  `toasts`: the app's own toaster; `labels.backAgain`: own words). An app with its own router passes `onClose` to
+  `tabBack` (and `first` when it may start on another tab).
+- How: one more history entry, the guard, over the first tab's own (`uiTabGuard` in its state); Back lands below it
+  and opens the 2 s window, after which the guard comes back. Sheets, the drawer and pushed screens still close
+  first; a reload keeps the one guard. Chrome skips an entry added with no tap since until the next tap, so a Back
+  before any tap at all may still leave.
 ## 1.0.0-rc.49
 - `syncButton(host, { sync, syncNow?, labels?, idPrefix? })`: the sync chip's tappable twin for a header bar
   (`#sync-btn`). One colour, the bar's; the state is the cloud icon's shape: a tick (saved), an arrow up that lifts
