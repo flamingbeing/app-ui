@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.48
+- Haptics: `haptic(kind)` with five kinds (`tick`, `threshold`, `long`, `confirm`, `reject`; `HAPTIC_PATTERNS`),
+  `haptic()` is a tick. The hold menu takes hold with a long; a sheet dragged past its close line or onto another
+  height and the drawer past half give a threshold; a dragged row (`gripDrag`) ticks as it picks up and passes each
+  row; `startGestures` ticks switches and segmented controls (`toggleTicks`; `{ ticks: false }` leaves it out).
+- Theme: Haptics (`haptics: 'on' | 'off'`, on by default), a per-device choice like Motion, in `themeSwitch`;
+  `html[data-haptics="off"]` and `haptic()` gives nothing. The gallery has a Haptics switch.
+
 ## 1.0.0-rc.47
 - Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):
   while a field has focus and the visible page is over 150 px shorter than its tallest, `html.ui-keyboard-open` and
