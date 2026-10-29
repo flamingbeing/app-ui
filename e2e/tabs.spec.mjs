@@ -342,7 +342,6 @@ for (const width of [390, 1280]) {
     const r = await m();
     expect(r.floor - r.pad - r.bottom).toBeGreaterThanOrEqual(-1);
     expect(r.own, 'a short card has no scroll of its own').toBe(0);
-    // (on a phone the gallery's body adds its own tab-bar room below, so only the laptop's page fits exactly)
     if (width >= 600) expect(r.page, 'the page itself does not scroll (the side bar fits in 100dvh)').toBeLessThanOrEqual(0);
     // a card taller than the stage keeps the stage's height and scrolls in its slot
     await page.evaluate(() => { const c = document.querySelector('#job-cards .ui-card-slot:not([inert]) .ui-card-text'); c.textContent = 'A long tip. '.repeat(400); });
@@ -464,12 +463,12 @@ test('a tapped tab slides its page in from its side; Reduce Motion or data-slide
 
 test('a tab page keeps its scroll; tapping the current tab over a pushed screen goes back to it', async ({ sized }) => {
   const page = await load(sized);
-  await page.evaluate(() => scrollTo(0, 200));
+  await page.evaluate(() => scrollTo(0, 100));
   // (the scrolled tab bar is shrunk to its current tab; the others are still there to press)
   await page.locator('nav.ui-tabbar .ui-tab', { hasText: 'Rooms' }).dispatchEvent('click');
   await expect.poll(() => shown(page)).toEqual(['rooms']);
   await page.locator('nav.ui-tabbar .ui-tab', { hasText: 'Plants' }).click();
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(150);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(70);
   await page.evaluate(() => scrollTo(0, 0));
   await page.locator('#plants .ui-row', { hasText: 'Fern' }).click();
   await expect.poll(() => page.evaluate(() => window.kit.screens.depth())).toBe(1);
@@ -510,7 +509,7 @@ test('a tab change never flashes the bar\'s tinted (collapsed) state: between tw
 
 test('a tab left from a pushed screen comes back at its own scroll, not the pushed screen\'s', async ({ sized }) => {
   const page = await load(sized);
-  await page.evaluate(() => scrollTo(0, 200));
+  await page.evaluate(() => scrollTo(0, 100));
   await page.locator('#plants .ui-row', { hasText: 'Fern' }).dispatchEvent('click');
   await expect.poll(() => page.evaluate(() => window.kit.screens.depth())).toBe(1);
   await page.evaluate(() => { document.body.style.minHeight = '4000px'; scrollTo(0, 900); });
@@ -518,7 +517,7 @@ test('a tab left from a pushed screen comes back at its own scroll, not the push
   await expect.poll(() => shown(page)).toEqual(['jobs']);
   await page.locator('nav.ui-tabbar .ui-tab', { hasText: 'Plants' }).dispatchEvent('click');
   await expect.poll(() => shown(page)).toEqual(['home']);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(150);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(70);
   expect(await page.evaluate(() => scrollY)).toBeLessThan(400);
 });
 

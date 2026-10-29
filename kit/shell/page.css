@@ -4,9 +4,9 @@
 .kit-chips { display: flex; gap: var(--gap); overflow-x: auto; padding: 0 var(--pad) var(--gap); margin-bottom: var(--gap); }
 .kit-chips button { flex: none; }
 .kit-field { display: grid; gap: .25rem; margin-bottom: var(--pad); }
-body { margin: 0; padding-bottom: calc(var(--tap) * 2 + env(safe-area-inset-bottom, 0px)); }
+/* (the tab bar's room under the page is the kit's: .ui-screen::after in gestures/tabbar.css) */
+body { margin: 0; padding-bottom: 0; }
 @media (min-width: 600px) {
-  body { padding-bottom: 0; }
   .kit-lede { margin-inline: 0; }
 }
 #job-cards { margin: 0 var(--pad) var(--pad); min-height: 10rem; }
