@@ -21,10 +21,11 @@
 <body>
   <!-- The @core/ui gallery: every gesture part on made-up data, signed out. The test list is docs/kit-tests.md in the repo. -->
   <header class="ui-bar">
-    <span class="ui-bar-side" data-bar-lead></span>
+    <span class="ui-bar-side" data-bar-lead><span id="sync-host"></span></span>
     <h2 class="ui-bar-title" aria-hidden="true">Plants</h2>
     <span class="ui-bar-side ui-bar-end">
       <button type="button" data-select-all="#plants">Select all</button>
+      <button type="button" id="demo" class="ui-icon-btn" data-open-sheet="#demo-sheet" aria-label="Demo controls"></button>
       <button type="button" id="select" data-edit-for="#plants">Select</button>
     </span>
   </header>
@@ -32,19 +33,6 @@
   <main class="ui-screens">
     <section class="ui-screen" id="home" aria-labelledby="home-title">
       <h1 class="ui-large-title" id="home-title">Plants</h1>
-      <p class="kit-lede">Every part of the gesture kit, on made-up plants. Touch and hold a row (or right-click, or
-        Shift+F10) for its menu; Select ticks rows, and a drag down the ticks takes a range. <a href="shell/">The same list in the tablet and laptop shell</a>. <a href="dense/">Busy data-entry screens, extra-dense</a>. <a href="settings/">The settings screen</a>.</p>
-      <div class="kit-actions">
-        <button type="button" id="open-sheet" data-open-sheet="#sheet">Open the sheet</button>
-        <button type="button" id="push" data-push="#detail">Push a screen</button>
-        <label class="kit-still"><input type="checkbox" id="still"> Less motion</label>
-        <label class="kit-still"><input type="checkbox" role="switch" class="ui-switch" id="haptics" checked> Haptics</label>
-      </div>
-      <div class="kit-looks" id="kit-looks"></div>
-      <div class="kit-sync">
-        <span id="sync-host"></span>
-        <label>Try a state <select id="sync-pick"></select></label>
-      </div>
       <ul class="ui-list" id="plants" data-select aria-label="Plants">
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Basil">
           <span class="ui-row-main">Basil<span class="ui-row-sub">Kitchen window · water every 2 days</span></span>
@@ -70,14 +58,26 @@
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Orchid">
           <span class="ui-row-main">Orchid<span class="ui-row-sub">Bedroom · soak weekly</span></span>
         </li>
+        <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Parsley">
+          <span class="ui-row-main">Parsley<span class="ui-row-sub">Window box · keep it cut</span></span>
+        </li>
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Peace lily">
           <span class="ui-row-main">Peace lily<span class="ui-row-sub">Study · droops when thirsty</span></span>
+        </li>
+        <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Peperomia">
+          <span class="ui-row-main">Peperomia<span class="ui-row-sub">Shelf · water when dry</span></span>
         </li>
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Pothos">
           <span class="ui-row-main">Pothos<span class="ui-row-sub">Bookcase · trailing</span></span>
         </li>
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Rosemary">
           <span class="ui-row-main">Rosemary<span class="ui-row-sub">Balcony · dry between waterings</span></span>
+        </li>
+        <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Rubber plant">
+          <span class="ui-row-main">Rubber plant<span class="ui-row-sub">Hall · wipe the leaves</span></span>
+        </li>
+        <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Sage">
+          <span class="ui-row-main">Sage<span class="ui-row-sub">Window box · little water</span></span>
         </li>
         <li class="ui-row" data-hold-menu="#row-menu" tabindex="0" data-name="Snake plant">
           <span class="ui-row-main">Snake plant<span class="ui-row-sub">Corner · almost no water</span></span>
@@ -151,6 +151,40 @@
         <p>Repot when roots come out of the drainage holes, into a pot one size bigger, not more.</p>
         <p>Herbs on the kitchen window like to be picked often; it keeps them bushy.</p>
         <p>Bring balcony plants in before the first cold night, and check under the leaves for visitors.</p>
+    </div>
+  </dialog>
+  <!-- the gallery's own switches, behind the bar's button so the first screen is the app itself -->
+  <dialog class="ui-sheet" id="demo-sheet" data-detents="medium large" aria-labelledby="demo-title">
+    <div class="ui-sheet-grabber" aria-label="Expand or collapse"></div>
+    <div class="ui-sheet-head">
+      <h2 id="demo-title">Demo controls</h2>
+      <button type="button" data-close>Done</button>
+    </div>
+    <div class="ui-sheet-body kit-demo">
+      <p class="kit-lede">Every part of the gesture kit, on made-up plants. Touch and hold a row (or right-click, or
+        Shift+F10) for its menu; Select ticks rows, and a drag down the ticks takes a range.</p>
+      <h3 class="kit-group-title">Try</h3>
+      <ul class="ui-list kit-group">
+        <li class="ui-row"><button type="button" id="open-sheet" class="kit-go">Open the sheet</button></li>
+        <li class="ui-row"><button type="button" id="push" class="kit-go">Push a screen</button></li>
+      </ul>
+      <h3 class="kit-group-title">Other pages</h3>
+      <ul class="ui-list kit-group">
+        <li class="ui-row"><a class="kit-go" href="shell/">The same list in the tablet and laptop shell</a></li>
+        <li class="ui-row"><a class="kit-go" href="dense/">Busy data-entry screens, extra-dense</a></li>
+        <li class="ui-row"><a class="kit-go" href="settings/">The settings screen</a></li>
+        <li class="ui-row"><a class="kit-go" href="ios/">The iOS parts together</a></li>
+      </ul>
+      <h3 class="kit-group-title">This device</h3>
+      <div id="kit-looks"></div>
+      <ul class="ui-list kit-group">
+        <li class="ui-row"><label class="ui-row-main" for="still">Less motion</label><input type="checkbox" class="ui-switch" id="still"></li>
+        <li class="ui-row"><label class="ui-row-main" for="haptics">Haptics</label><input type="checkbox" role="switch" class="ui-switch" id="haptics" checked></li>
+      </ul>
+      <h3 class="kit-group-title">Sync chip</h3>
+      <ul class="ui-list kit-group">
+        <li class="ui-row"><label class="ui-row-main" for="sync-pick">Try a state</label><select id="sync-pick"></select></li>
+      </ul>
     </div>
   </dialog>
 </body>

@@ -11,10 +11,14 @@ body > .ui-bar { padding-inline: calc(var(--kit-g) + var(--pad)); }
 .ui-bar .kit-home { flex: 1; text-decoration: none; }
 /* the screens keep the page's edge (the title's and the controls'), not extra-dense's smaller --pad */
 :root { --kit-edge: var(--pad); }
-.kit-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap) var(--pad); margin: 0 var(--pad) var(--pad); }
-.kit-looks .theme-switch { display: flex; flex-wrap: wrap; gap: var(--gap) var(--pad); }
-.kit-check { display: inline-flex; align-items: center; gap: .4em; min-height: var(--tap-s); cursor: pointer; }
-.kit-check input { width: 1.1em; height: 1.1em; margin: 0; }
+/* the page's switches: one card of rows, like the settings screen (the theme switch's own card folded into it) */
+.kit-controls { display: flex; flex-direction: column; max-width: 32rem; margin: 0 var(--pad) var(--pad); overflow: hidden;
+  background: var(--list-bg, var(--surface)); border-block: var(--border) solid var(--list-edge); border-radius: var(--card-r);
+  box-shadow: var(--list-shadow); }
+.kit-looks .theme-switch { background: linear-gradient(var(--list-sep), var(--list-sep)) right top / calc(100% - var(--pad)) var(--border) no-repeat;
+  border: 0; border-radius: 0; box-shadow: none; }
+.kit-check { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); min-height: var(--row);
+  padding: 0 var(--pad); cursor: pointer; }
 .kit-screen { padding: 0 var(--kit-edge) var(--pad); }
 .kit-screen h2 { font-size: 1rem; margin: 0 0 var(--gap); }
 [data-dense="extra"].kit-screen h2 { font-size: 1em; }

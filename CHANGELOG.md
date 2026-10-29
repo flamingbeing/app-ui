@@ -1,12 +1,28 @@
 # Changelog
 
-## 1.0.0-rc.53
+## 1.0.0-rc.54
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
   half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
 - Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module.
-- Gallery: the iOS look is its default, and `/kit/ios/` shows the iOS parts together.
+- Gallery: the iOS look is its default, and `/kit/ios/` (linked from the demo controls' Other pages) shows the iOS
+  parts together.
   Row swipe actions claim the touch as `rows` (arbiter priority 35).
+
+## 1.0.0-rc.53
+- Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
+  words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
+  state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
+  sync chip sits in the bar on the home screen. Open the sheet and Push a screen close the demo sheet first.
+- `select` takes the kit's look: a filled field with no border line; in a row (`.ui-row`) or a theme-switch row it
+  is plain muted text at the row's end, as a settings value is.
+- The theme switch (`.theme-switch`) is a card of rows like a list, with lines between them; on the settings page it
+  lines up with the lists above it.
+- In a band's bar (look B) the sync chip takes the band's white text (the state colours failed contrast on it).
+- Gallery: four more made-up plants, so the list scrolls at tablet height; the dense page's controls are one card
+  with a switch.
+- Gallery: the Haptics switch is in the Demo controls sheet with Less motion.
+
 
 ## 1.0.0-rc.52
 - One gesture owns a touch: `claim(name)`, `release`, `captured`, `onCaptured`, `PRIORITY` in `ui/gesture.js`. The

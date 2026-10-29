@@ -4,8 +4,10 @@
 // list is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
+import { openDemo, closeDemo, fromDemo } from './demo.mjs';
 
 const KIT = '/ui/0.0.0-dev/kit/?edge=always';
+
 // two frames first: a transition (the bar title fading in) only exists once the style change has been rendered, so
 // asking for the animations straight after a click can find none yet and axe then reads a half-faded title
 const settled = page => page.evaluate(async () => {
@@ -113,7 +115,7 @@ for (const width of [390, 1280]) {
       expect(m.blur, `look ${id} menu`).toBe('none');
       expect(m.bg).not.toMatch(/rgba\(.*, 0\.\d+\)$/);
       await page.keyboard.press('Escape');
-      await page.click('#open-sheet');
+      await fromDemo(page, '#open-sheet');
       await settled(page);
       const sh = await solid(page, '#sheet');
       expect(sh.blur, `look ${id} sheet`).toBe('none');
@@ -135,18 +137,23 @@ test('densities: rows 60, 50 and 44 px; taps never under 44; the switcher keeps 
     await page.goto(`${KIT}&look=a&density=${density}`);
     expect(await row(), density).toBeGreaterThanOrEqual(h);
     expect(await row(), density).toBeLessThan(h + 12);   // (two lines of text can make it taller, never much)
+    const bar = await page.locator('#demo').evaluate(e => e.getBoundingClientRect().height);
+    expect(bar, `${density}: bar button tap height`).toBeGreaterThanOrEqual(44);
+    await openDemo(page);
     const tap = await page.locator('#open-sheet').evaluate(e => e.getBoundingClientRect().height);
     expect(tap, `${density}: tap height`).toBeGreaterThanOrEqual(44);
   }
   await page.goto(KIT);
   await expect(page.locator('html')).not.toHaveAttribute('data-density');
   await page.goto(`${KIT}&look=b`);
+  await openDemo(page);
   await page.locator('#density-pick').selectOption('compact');
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
   expect(new URL(page.url()).searchParams.get('look')).toBeNull();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-density', 'compact');
   await expect(page.locator('html')).toHaveAttribute('data-look', 'ios', '(the link\'s look B was a preview, not kept: the gallery\'s own)');
+  await openDemo(page);
   await page.locator('#look-pick').selectOption('c');
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-look', 'c');
