@@ -244,8 +244,8 @@ test('swipe: let go short of half, the page springs back and keeps its title; at
   expect(back.at(-1)?.home ?? 0).toBeGreaterThan(-3);
   expect(back.every(f => f.title === 'Plants')).toBe(true);
   expect(await page.locator('#fader').evaluate(e => e.style.filter)).toBe('');
-  // nothing before the first page (and no drawer there): the pull stretches and gives less the further it goes
-  await page.goto(`${SHELL}&drawer=off`);
+  // nothing before the first page : the pull stretches and gives less the further it goes
+  await page.goto(`${SHELL}`);
   await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
   const at = async x => { await send('touchMove', x, 420); return page.locator('#home').evaluate(e => Math.round(e.getBoundingClientRect().x)); };
   await send('touchStart', 80, 420);
@@ -406,51 +406,47 @@ test('a finger caught on the gliding pages stops them under it; let go still, th
   expect(await page.evaluate(() => window.kit.screens.depth()), 'no row opened under the tap').toBe(0);
 });
 
-test('a right swipe on the first page pulls the side bar out as a drawer with the finger; a left swipe or a tap on the shade puts it back', async ({ sized }) => {
+test('a right swipe on the first page never pulls the side bar out; its button opens it, a left swipe or a tap on the shade puts it back', async ({ sized }) => {
   const page = await load(sized);
   const cdp = await page.context().newCDPSession(page);
   const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
   const side = page.locator('nav.ui-sidebar'), menu = page.getByRole('button', { name: 'Sections' });
-  const state = () => page.evaluate(() => {
-    const s = document.querySelector('nav.ui-sidebar'), sh = document.querySelector('.ui-drawer-shade');
-    return { x: Math.round(s.getBoundingClientRect().x), w: Math.round(s.getBoundingClientRect().width),
-      shade: sh ? Number(getComputedStyle(sh).opacity) : 0, home: Math.round(document.getElementById('home').getBoundingClientRect().x) };
-  });
+  const sideX = () => page.evaluate(() => Math.round(document.querySelector('nav.ui-sidebar').getBoundingClientRect().x));
+  // a right swipe: the page stretches, no drawer; a left swipe straight after still changes page
   await send('touchStart', 60, 420);
   for (const x of [70, 90, 120, 160]) await send('touchMove', x, 420);
-  const mid = await state();
-  expect(mid.x, 'the drawer is out by the finger’s travel').toBe(-mid.w + 100);
-  expect(mid.shade).toBeGreaterThan(.2);
-  expect(mid.shade).toBeLessThan(.6);
-  expect(mid.home, 'the page stays put').toBe(0);
-  for (const x of [200, 240]) await send('touchMove', x, 420);
+  expect(await page.evaluate(() => Math.round(document.getElementById('home').getBoundingClientRect().x)), 'the page stretches').toBeGreaterThan(0);
+  await expect(page.locator('.ui-shell')).not.toHaveClass(/is-drawer-(open|moving)/);
   await send('touchEnd', 0, 0);
   await settled(page);
-  await expect(side).toBeVisible();
-  expect((await state()).x).toBe(0);
-  await expect(menu).toHaveAttribute('aria-expanded', 'true');
+  await expect(side).toBeHidden();
   expect(await shown(page)).toEqual(['home']);
-  // pushed back by a left swipe on the shade, following the finger
+  await (await finger(page)).drag(300, 420, 80, 420, { steps: 8, ms: 16 });
+  await settled(page);
+  expect(await shown(page)).not.toEqual(['home']);
+  await page.locator('nav.ui-tabbar .ui-tab').first().click();
+  await settled(page);
+  // the button opens it; pushed back by a left swipe on the shade, following the finger
+  await menu.click();
+  await settled(page);
+  await expect(side).toBeVisible();
+  await expect(menu).toHaveAttribute('aria-expanded', 'true');
   await send('touchStart', 340, 420);
   for (const x of [330, 310, 290]) await send('touchMove', x, 420);
-  expect((await state()).x).toBe(-50);
+  expect(await sideX()).toBe(-50);
   for (const x of [240, 160, 100]) await send('touchMove', x, 420);
   await send('touchEnd', 0, 0);
   await settled(page);
   await expect(side).toBeHidden();
   await expect(menu).toHaveAttribute('aria-expanded', 'false');
-  // a short slow pull goes back in; a quick one (short of half, but thrown) opens it; a tap on the shade closes it
-  await (await finger(page)).drag(60, 420, 100, 420, { steps: 8, ms: 30 });
+  // a tap on the shade closes it
+  await menu.click();
   await settled(page);
-  await expect(side).toBeHidden();
-  await (await finger(page)).drag(60, 420, 180, 420, { steps: 3, ms: 8 });
-  await settled(page);
-  await expect(side).toBeVisible();
   await page.touchscreen.tap(360, 300);
   await settled(page);
   await expect(side).toBeHidden();
   expect(await shown(page)).toEqual(['home']);
-  // Reduce Motion: the drawer still follows the finger; the button opens it at once
+  // Reduce Motion: the button opens it at once
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await menu.click();
   await expect(side).toBeVisible();
@@ -610,7 +606,7 @@ test('at 820 px the tab pages are the side bar\'s: a page takes both panes; no s
 });
 
 test('swipe: a start within 28 px of an edge (390 px) does nothing, that is Android’s Back; outside it works', async ({ sized }) => {
-  const page = await load(sized, '&drawer=off');
+  const page = await load(sized);
   await swipe(page, 26, 300 + 26);
   await swipe(page, 390 - 26, 60);
   expect(await shown(page)).toEqual(['home']);
@@ -618,8 +614,8 @@ test('swipe: a start within 28 px of an edge (390 px) does nothing, that is Andr
   expect(await shown(page)).toEqual(['rooms']);
 });
 
-test('swipe without a drawer: right on the first page fires onPrevMissing once; a short move does not; not on a later page', async ({ sized }) => {
-  const page = await load(sized, '&drawer=off');
+test('swipe: right on the first page fires onPrevMissing once; a short move does not; not on a later page', async ({ sized }) => {
+  const page = await load(sized);
   const fired = () => page.evaluate(() => document.documentElement.dataset.prevMissing || '0');
   await (await finger(page)).drag(200, 420, 230, 420, { steps: 10, ms: 40 });
   await settled(page);

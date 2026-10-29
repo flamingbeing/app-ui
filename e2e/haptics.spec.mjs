@@ -48,15 +48,21 @@ async function load(sized, url) {
 }
 const line = (x0, d, n, y = 420) => [[x0, y], ...Array.from({ length: n }, (_, i) => [x0 + d * (i + 1) / n, y])];
 
-test('the drawer pulled past half gives one threshold, back under half another; Haptics Off: none', async ({ sized }) => {
+test('the open drawer pushed back past half gives one threshold; Haptics Off: none', async ({ sized }) => {
   const page = await load(sized, SHELL);
+  const menu = page.getByRole('button', { name: 'Sections' });
   const w = await page.evaluate(() => document.querySelector('nav.ui-sidebar').offsetWidth || 288);
-  const out = line(40, w * 0.7, 10), back = line(40 + w * 0.7, -w * 0.5, 6).slice(1);
-  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, [...out, ...back]);
-  expect(await buzzes(page), 'out past half, then back under it').toEqual([12, 12]);
+  await menu.click();
+  await page.evaluate(() => window.__settled());
+  await buzzes(page);
+  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, line(370, -w * 0.7, 10));
+  expect(await buzzes(page), 'back past half').toEqual([12]);
   await expect(page.locator('.ui-shell')).not.toHaveClass(/is-drawer-open/);
   await page.evaluate(() => { document.documentElement.dataset.haptics = 'off'; });
-  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, line(40, w * 0.7, 10));
+  await menu.click();
+  await page.evaluate(() => window.__settled());
+  await buzzes(page);
+  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, line(370, -w * 0.7, 10));
   expect(await buzzes(page), 'Haptics Off').toEqual([]);
 });
 

@@ -6,7 +6,8 @@
  * @param {number} width @param {boolean} hasPrev @param {boolean} hasNext */
 export function pageStep(dx: number, v: number, width: number, hasPrev: boolean, hasNext: boolean): 1 | 0 | -1;
 /** A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
- * release(x, v) lets it go there at v px/ms, to open or closed.
+ * release(x, v) lets it go there at v px/ms, to open or closed. (No swipe pulls it any more: the drawer option is
+ * still taken, and ignored, so apps that pass it need no change.)
  * @typedef {{ pull: (x: number) => void, release: (x: number, v: number) => void }} PullDrawer */
 /** The pages' glide after a let-go: where to, and whether it was a right swipe with nothing before.
  * @typedef {{ run: import('./motion.js').Glide, to: HTMLElement | null, missing: boolean, timer: ReturnType<typeof setTimeout> | number }} Gliding */
@@ -17,14 +18,13 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
  *   labels?: Record<string, string> }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
- *   page); drawer: the drawer a right swipe on the first page pulls out (adaptiveShell().drawer); onPrevMissing
- *   (without a drawer): told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
+ *   page); drawer: ignored (a swipe no longer pulls the side bar out); onPrevMissing: told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
  *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all;
  *   backToClose (default on, with backToFirst): the first Back on the first page stays and shows the backAgain words
  *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS
  * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void }}
  */
-export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, drawer, onPrevMissing, backToFirst, backToClose, toasts, labels }: {
+export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, onPrevMissing, backToFirst, backToClose, toasts, labels }: {
     screens: {
         base: (s: HTMLElement) => Promise<void>;
         depth: () => number;
@@ -56,7 +56,8 @@ export function swipeEdge(width: number): number;
 export const SLIDE_MS: 280;
 /**
  * A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
- * release(x, v) lets it go there at v px/ms, to open or closed.
+ * release(x, v) lets it go there at v px/ms, to open or closed. (No swipe pulls it any more: the drawer option is
+ * still taken, and ignored, so apps that pass it need no change.)
  */
 export type PullDrawer = {
     pull: (x: number) => void;
