@@ -6,7 +6,7 @@ export function matchesSearch(text: string, query: string): boolean;
  *   render?: (row: HTMLElement, detail: HTMLElement) => void }} [opts]  screens: the page's screen stack (startGestures().screens)
  * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string,
  *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null, stop: () => void }}
- *   drawer: the side bar's drawer for tab-pages.js to pull out (null without a side bar)
+ *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more
  */
 export function adaptiveShell(shell: HTMLElement, { screens, render }?: {
     screens?: {

@@ -78,10 +78,10 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Tab lights at let-go | the swipe's new tab has `aria-current` at the let-go while the pages still glide, not only when they land; a let-go that springs back keeps the tab it had | |
 | Spring back | let go short of half and slow, the page springs back, the title stays, a `data-swipe-fade` part fades with the drag and is cleared after; at the first page a pull stretches less and less and springs back to 0 | |
 | No swipe | a mostly vertical move, a start within 28 px of either edge at 390 px (Android's Back; max 32), the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
-| First page | with `drawer=off`, a right swipe past a third of the finger's own travel (or a flick) fires `onPrevMissing` once; a short move does not | |
+| First page | a right swipe past a third of the finger's own travel (or a flick) fires `onPrevMissing` once; a short move does not | |
 | Quick flicks | three short flicks, each while the last still glides, go three pages (none lost to a glide); also in WebKit | |
 | Catch | a finger on the gliding pages holds them where they are, and a tap there opens nothing; let go still, they land on the nearer page; also in WebKit | |
-| Drawer pull | a right swipe on the first page pulls the side bar out by the finger's travel over a shade (opacity with it), the page stays; let go past half or with a flick it opens, a short slow pull goes back; a left swipe or a tap on the shade closes it; with Reduce Motion the button opens it with no animation; also in WebKit | |
+| Drawer swipe | a right swipe on the first page never pulls the side bar out (the page stretches, `onPrevMissing` fires) and a left swipe straight after still changes page; opened by its button, a left swipe on the shade pushes it back with the finger, a tap on the shade closes it; with Reduce Motion the button opens it with no animation; also in WebKit | |
 | Sideways scroller | the Jobs chips still scroll sideways under the pager's `touch-action: pan-y` | |
 | Card deck | the Jobs page's deck (`cardPager`) tells `onShow` of the first card; a swipe on it goes a card, never a tab; not from within the edge; ArrowRight and ArrowLeft go too | |
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
@@ -93,7 +93,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Back with tabs | leaving the first tab adds one history entry, the other tabs none; Back on another tab goes to the first, Back there leaves; a tap on the first tab takes the entry away | |
 | Press Back again to close | the first Back on the first tab stays (one guard entry, no entry added) with one toast, a second within 2 s leaves; after 2 s it asks again; Back on another tab goes to the first with no toast; a sheet and a pushed screen close first; a reload keeps one guard; Chromium and WebKit, Reduce Motion too (unit: the guard's entries, the window, a sheet open when it ends, started on another tab) | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
-| Drawer and Back | the drawer open (pulled out, or by its button) is a history entry: Back closes it and stays on the page; the bar, pages and tab bar are `inert` while it is open; a side link's page takes the drawer's place in history, so Back then goes to the first page; also in WebKit | |
+| Drawer and Back | the drawer open (by its button) is a history entry: Back closes it and stays on the page; the bar, pages and tab bar are `inert` while it is open; a side link's page takes the drawer's place in history, so Back then goes to the first page; also in WebKit | |
 | Sheet, Esc and Back | a sheet closed by Esc (the close request Chrome's Back sends a modal dialog on Android) steps back once: the tab's entry under it stays; also in WebKit | |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 | One owner | a tab swipe started on a pressed row takes the touch (`captured()` is `tabs`): the press shade clears, no hold menu after 650 ms; once the finger lifts the touch is free (`null`); Chromium and WebKit (`swipe-feel`); `claim` order in `test/gestures.unit.test.mjs` | |
@@ -138,7 +138,7 @@ stand-in `navigator.vibrate` that writes down each pattern.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
-| Drawer | a finger pulling it out past half: one threshold (12); back under half: another; Haptics Off: none | |
+| Drawer | the open drawer pushed back past half by a finger: one threshold (12); Haptics Off: none | |
 | Sheet | the grabber dragged down past the close line: a threshold; back up: another; the sheet stays | |
 | Hold, switch | a touch and hold: a long (20); the gallery's Haptics switch turned off: quiet; on again: a tick (8) | |
 | Kept | the theme switch's Haptics Off: `data-haptics="off"`, kept on the next page; `haptic()` then gives nothing | |

@@ -16,8 +16,8 @@
 //   Esc          on a phone's pushed detail, goes back (select mode, menus and dialogs keep their own Esc)
 //   side bar     a .ui-bar-menu button (in the bar's [data-bar-lead]) opens the side bar as a drawer on a phone
 //                (.ui-shell.is-drawer-open, over a .ui-drawer-shade); a side link, a tap on the shade, Esc or growing
-//                past phone width closes it. Open, it is a history entry (Back closes it) and the page behind is inert. It follows the finger: .drawer (returned) is what tab-pages.js pulls out
-//                on a right swipe from the first tab page; a left swipe on the drawer or the shade pushes it back
+//                past phone width closes it. Open, it is a history entry (Back closes it) and the page behind is inert. No swipe opens it (it took swipes meant to change
+//                page); a left swipe on the open drawer or the shade pushes it back with the finger
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
 import { claim, haptic, listeners, still, swipeIntent, THROW_MS } from '../gesture.js';
 import { glide as springGlide, tracker } from '../motion.js';
@@ -47,7 +47,7 @@ function defaultRender(row, detail) {
  *   render?: (row: HTMLElement, detail: HTMLElement) => void }} [opts]  screens: the page's screen stack (startGestures().screens)
  * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string,
  *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null, stop: () => void }}
- *   drawer: the side bar's drawer for tab-pages.js to pull out (null without a side bar)
+ *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more
  */
 export function adaptiveShell(shell, { screens = null, render = defaultRender } = {}) {
   const l = listeners();
@@ -137,8 +137,8 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   for (const s of searches) l.on(s, 'input', () => { for (const o of searches) if (o !== s) o.value = s.value; filter(s.value); });
   const visibleSearch = () => searches.find(s => s.getClientRects().length > 0) ?? null;
 
-  // the phone's drawer: the side bar over the page, on a shade. It follows the finger: a right swipe on the first tab
-  // page pulls it out (tab-pages.js, the drawer option), a left swipe on it or the shade pushes it back; let go, it
+  // the phone's drawer: the side bar over the page, on a shade. Its button opens it (no swipe does); a left swipe on
+  // it or the shade pushes it back with the finger; let go, it
   // glides open or shut at the finger's speed (the tab pages' spring). The menu button and the shade's tap glide it too.
   const side = /** @type {HTMLElement | null} */ (shell.querySelector('.ui-sidebar'));
   const menus = /** @type {HTMLElement[]} */ ([...shell.querySelectorAll('.ui-bar-menu')]);

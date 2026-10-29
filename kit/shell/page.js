@@ -13,11 +13,8 @@ if (tab && document.getElementById(tab)?.classList.contains('ui-tab-page')) {
 }
 
 const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
-let prevMissing = 0;   // the swipe hook without a drawer (?drawer=off): an app would do something of its own here
-// a right swipe on the first tab pulls the side bar out as a drawer, with the finger
-const pulls = new URLSearchParams(location.search).get('drawer') !== 'off';
+let prevMissing = 0;   // the swipe hook on the first tab (no swipe pulls the side bar out): an app would do something of its own here
 const kit = startGestures(document, {
-  drawer: pulls ? () => shell.drawer : undefined,
   onPrevMissing: () => { prevMissing++; document.documentElement.dataset.prevMissing = String(prevMissing); },
 });
 const toasts = toaster(document.body);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.58
+- No swipe pulls the side bar out as a drawer any more: on the first tab page a right swipe stretches the page and
+  tells `onPrevMissing`, as without a drawer. The pull claimed the whole touch from its first few pixels, so swipes
+  meant to change page were lost. The side-bar button still opens it; a left swipe or a tap on the shade closes it.
+  `startGestures`' `drawer` option is still taken and ignored, so apps that pass it need no change.
+
 ## 1.0.0-rc.57
 - Row swipe actions are gone (`swipeActions`, `ui/swipe-actions.js`, `ui/gestures/swipe.css`, the arbiter's `rows`):
   not wanted. No app used them. `/kit/ios/` keeps its to-do list as plain rows.

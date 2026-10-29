@@ -106,31 +106,28 @@ test('a finger caught on the gliding pages holds them; quick flicks one after an
   expect(await page.evaluate(() => window.__shown())).toEqual(['settings']);
 });
 
-test('the drawer: a right swipe on the first page pulls it out under the finger; a left swipe on the shade puts it back', async ({ sized }) => {
+test('the drawer: a right swipe on the first page never pulls it out; opened by its button, a left swipe on the shade puts it back', async ({ sized }) => {
   const page = await load(sized);
-  const side = () => page.evaluate(() => {
-    const s = document.querySelector('nav.ui-sidebar').getBoundingClientRect();
-    return { x: Math.round(s.x), w: Math.round(s.width), shown: s.width > 0 };
-  });
-  await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(60, 100, 8));
-  const mid = await side();
-  expect(mid.x, 'out by the finger’s travel').toBe(-mid.w + 100);
-  expect(await page.evaluate(() => window.__x('home')), 'the page stays').toBe(0);
-  await page.evaluate(async steps => { await window.__finger(steps, { start: false }); await window.__settled(); }, line(160, 80, 3));
-  expect((await side()).x).toBe(0);
+  const side = () => page.evaluate(() => Math.round(document.querySelector('nav.ui-sidebar').getBoundingClientRect().x));
+  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, line(60, 160, 8));
+  await expect(page.locator('.ui-shell')).not.toHaveClass(/is-drawer-(open|moving)/);
+  await expect(page.locator('nav.ui-sidebar')).toBeHidden();
+  await page.getByRole('button', { name: 'Sections' }).click();
+  await page.evaluate(() => window.__settled());
   await expect(page.locator('.ui-shell')).toHaveClass(/is-drawer-open/);
   await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(350, -40, 4));
-  expect((await side()).x, 'pushed back with the finger').toBe(-40);
+  expect(await side(), 'pushed back with the finger').toBe(-40);
   await page.evaluate(async steps => { await window.__finger(steps, { start: false }); await window.__settled(); }, line(310, -200, 4));
   await expect(page.locator('.ui-shell')).not.toHaveClass(/is-drawer-(open|moving)/);
   await expect(page.locator('nav.ui-sidebar')).toBeHidden();
 });
 
-test('Back closes the drawer (pulled out or opened by its button) and nothing more; while it is open the page behind is inert', async ({ sized }) => {
+test('Back closes the drawer and nothing more; while it is open the page behind is inert', async ({ sized }) => {
   const page = await load(sized);
   const shell = page.locator('.ui-shell');
   const inert = () => page.evaluate(() => ['main.ui-screens', 'nav.ui-tabbar', 'header.ui-bar'].map(s => document.querySelector(s).inert));
-  await page.evaluate(async steps => { await window.__finger(steps); await window.__settled(); }, line(60, 200, 8));
+  await page.getByRole('button', { name: 'Sections' }).click();
+  await page.evaluate(() => window.__settled());
   await expect(shell).toHaveClass(/is-drawer-open/);
   expect(await inert(), 'the page behind is inert').toEqual([true, true, true]);
   expect(await page.evaluate(() => document.querySelector('nav.ui-sidebar').inert)).toBe(false);
