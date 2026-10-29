@@ -241,7 +241,8 @@ test('swipe does nothing: a vertical scroll, the back edge, a sideways scroller,
   // mostly vertical
   await (await finger(page)).drag(200, 600, 150, 300);
   await settled(page);
-  expect(await shown(page)).toEqual(['home']);
+  // the page laid out beside at the touch is put away once the gesture settles (afterGesture: a timer after the lift)
+  await expect.poll(() => shown(page)).toEqual(['home']);
   // from within 24 px of either edge (the browser's own Back may take it: a spare history entry keeps the page)
   const tabbed = page.evaluate(() => new Promise(r => { addEventListener('ui-tab', () => r(true)); setTimeout(() => r(false), 3000); }));
   await page.evaluate(() => history.pushState({}, ''));
