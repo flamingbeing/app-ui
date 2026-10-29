@@ -94,6 +94,30 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Sheet, Esc and Back | a sheet closed by Esc (the close request Chrome's Back sends a modal dialog on Android) steps back once: the tab's entry under it stays; also in WebKit | |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 
+## Keyboard
+
+`ui/keyboard.js`: `keyboardState` in Node (`test/gestures.unit.test.mjs`). `e2e/keyboard.spec.mjs` on `/kit/shell/`
+at 390 px, in Chromium and WebKit, with the keyboard played (no browser here shows one): the viewport made shorter
+(`interactive-widget=resizes-content`) or a stand-in visual viewport (a browser without it).
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Resizes content | a tapped field in the sheet, then the page 344 px shorter: `html.ui-keyboard-open`, `--ui-keyboard-h` 0, the tab bar hidden, the sheet inside the space above; the page tall again: closed, the tab bar back | |
+| Visible part only | a field and the visual viewport 344 px shorter: `--ui-keyboard-h` 344px and the sheet's bottom on the keyboard's top; a blur: closed, 0 | |
+
+## Haptics
+
+`ui/gesture.js` `haptic`, the theme's `haptics`: `cleanChoice` in Node (`test/theme.unit.test.mjs`).
+`e2e/haptics.spec.mjs` on `/kit/`, `/kit/shell/` and `/kit/settings/` at 390 px, in Chromium and WebKit, with a
+stand-in `navigator.vibrate` that writes down each pattern.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Drawer | a finger pulling it out past half: one threshold (12); back under half: another; Haptics Off: none | |
+| Sheet | the grabber dragged down past the close line: a threshold; back up: another; the sheet stays | |
+| Hold, switch | a touch and hold: a long (20); the gallery's Haptics switch turned off: quiet; on again: a tick (8) | |
+| Kept | the theme switch's Haptics Off: `data-haptics="off"`, kept on the next page; `haptic()` then gives nothing | |
+
 ## Bounce
 
 `ui/bounce.js` in Node (`test/bounce.unit.test.mjs`): nothing runs on import; `rubberSlope` is the rubber band's
@@ -130,6 +154,7 @@ judged: each move's handlers within 8 ms, the touch down's and the lift's within
 | Bounce pull | a pull past the list's top, then past its bottom, and the spring back: the same budget each | |
 | Row swipe | `/kit/ios/`: a to-do row swiped open on Flag and Delete, then flicked shut from on it: the same budget each; it opens at -148 px and closes | |
 | Pressed | a touch on the Jobs tab shows `data-pressed` within 50 ms; it clears on the lift | |
+| Android look | look M: the tab swipe (its navigation pill moving) and the sheet dragged up to large, the same budget each | |
 
 ## iOS look (`e2e/ios.spec.mjs`, `kit/ios/`, `test/swipe.unit.test.mjs`)
 
@@ -160,7 +185,7 @@ stand-in for `@core/settings` on the page.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
-| Looks A, B, C, D, E | at 390, 820 and 1280 px: the look's `data-*` marks and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; D's bar title showing from the start, no large title on show, lists on the page background; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
+| Looks A, B, C, D, E, M | at 390, 820 and 1280 px: the look's `data-*` marks (`data-family` android for M, core for the rest) and glass class; band or plain title; floating or edge tab bar; card or flush list; C's glass only on pills; D's bar title showing from the start, no large title on show, lists on the page background; screenshots kept (`look-<id>-<width>[-select\|-menu].png`) | page, selecting, menu open |
 | Look B's menu | under 840 px the hold menu from touch or Shift+F10 is a bottom sheet (a mouse's right-click opens at the pointer) on the bottom edge, named in its head (no lifted copy) with the tab bar hidden; from 840 px it opens beside the row | menu open |
 | Dark | 390 and 1280 px, each look: the gallery and the shell are clean; look B's band takes white text; menus, sheets and the action bar are solid (no blur, no see-through) | gallery, shell |
 | Ticks | square in B, round in A and C | |
@@ -168,6 +193,17 @@ stand-in for `@core/settings` on the page.
 | Density | rows 60 / 50 / 44 px; taps never under 44; a link's `?look=` is a preview, a pick is kept after reload | |
 | Glass guard | little memory turns glass off, kept, with the reason in Settings; Solid and "Glass, even here" still win | yes |
 | Design kits | `?kit=ntf` swaps the page's `/v1/tokens.css` to `design.anantf.com` and sets wine on the linen ground; `?kit=nuhs` to `design.anawj.com`, navy on white; no `?kit` keeps the default kit | |
+
+### Android look (`e2e/android.spec.mjs`, `test/m3.unit.test.mjs`)
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Colour roles | (unit) each tone is its CIELAB L* and fits sRGB; hue kept, tertiary turned 60°, neutrals near grey; the baseline seed lands near Material's own colours; on-colours 4.5:1; the surface containers in order; the page palette passes the contrast floors light, dark and OLED for nine seeds; only look M gets `--m3-*` | |
+| Look M, light and dark | `data-family="android"`; the `--m3-*` roles set and the accent the primary; the Roboto stack first; no glass; an 80 px navigation bar with the pill on the current tab only, moved by opacity and transform; the top app bar's tone layer at opacity 0, then 1 once scrolled | page |
+| Sheet and menu | the sheet's handle 32 × 4 px, its corners 28 px | sheet |
+| Switch and action button | `/kit/parts/?look=m`: the switch 52 × 32 px, its thumb larger when on (transform), a click toggles it; the action button a 16 px rounded square in the primary container at the bottom end | switches, button |
+| Other looks | the default look keeps `data-family="core"`, no `--m3-*`, no Roboto Flex | |
+| Gallery smoke | `/kit/?look=m` and `/kit/parts/?look=m` in Chromium, Firefox and WebKit: no page error, axe, no CSP report | yes |
 
 ### Layout parts and extra-dense (`e2e/dense.spec.mjs`)
 
@@ -192,6 +228,7 @@ stand-in for `@core/settings` on the page.
 |---|---|---|
 | Glass guard, little memory | a phone that reports 2 GB shows Solid at once (verdict kept: memory); scrolling the gallery still gives frames | |
 | Glass guard, slow frames | no memory figure plus 30 ms of work per frame: glass shows until the first scroll, then Solid (verdict kept: frames), and stays so after a reload | |
+| Android look | look M on a 2 GB phone: solid from the start, scrolls (median frame attached), the top app bar collapses | |
 
 
 ### Reference parts (`e2e/parts.spec.mjs`, `test/ui-parts.unit.test.mjs`)
@@ -235,6 +272,7 @@ stand-in for `@core/settings` on the page.
 | No glyph icons | `tools/check.mjs` fails on an emoji, dingbat or pictograph character in a published file | |
 | Prose | 390 and 1280 px: a task row has no bullet and its box sits on the text line, left of the words; a code block is not the accent; the box keeps to `--measure`; icon buttons are square | yes |
 | Hover card | 1280 px with a mouse: resting on the prose link shows the card below it (`aria-describedby`), axe passes, moving away removes it; 390 px touch: a tap shows none | yes |
+| Action button | `/kit/parts/`, look A: 56 px tall at the bottom end, the page's end leaves room under it (`android.spec.mjs`) | |
 | Content parts | `/kit/parts/` gallery: sections, row extras, card, stats, badges, empty state and skeleton rows start clean under axe in every browser (`gallery.spec.mjs`) | |
 
 ### Add-ons (`test/addons.unit.test.mjs`)

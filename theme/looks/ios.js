@@ -11,7 +11,7 @@ export default {
   id: 'ios',
   name: 'iOS',
   desc: 'iOS 26: large titles, grouped lists, glass bars',
-  variants: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float' },
+  variants: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', family: 'core' },
   accent: '#007aff',
   surface: 'grouped',
   tokens: {

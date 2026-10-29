@@ -8,6 +8,7 @@ declare const _default: {
         glass: "bars";
         tick: "round";
         tabbar: "float";
+        family: "core";
     };
     accent: string;
     surface: string;

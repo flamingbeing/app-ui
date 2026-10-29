@@ -1,6 +1,7 @@
-// @core/theme's looks (A tinted glass, B colour band, C dense and quiet, D slim, E flat workspace, iOS) on the /kit/ gallery at phone, tablet and
-// laptop widths: axe, the variants each look names, screenshots kept for the PR; the densities' row heights; the look
-// and density switchers; the glass guard on a device with little memory. The list is docs/kit-tests.md.
+// @core/theme's looks (A tinted glass, B colour band, C dense and quiet, D slim, E flat workspace, M Android, iOS) on
+// the /kit/ gallery at phone, tablet and laptop widths: axe, the variants each look names, screenshots kept for the
+// PR; the densities' row heights; the look and density switchers; the glass guard on a device with little memory. The
+// list is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
@@ -21,6 +22,7 @@ const LOOKS = {
   c: { header: 'plain', menu: 'popover', glass: 'pill', tick: 'round', tabbar: 'edge', glassClass: true },
   d: { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge', glassClass: false },
   e: { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge', glassClass: false },
+  m: { header: 'plain', menu: 'popover', glass: 'none', tick: 'square', tabbar: 'edge', glassClass: false, family: 'android' },
   ios: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', glassClass: true },
 };
 
@@ -33,6 +35,7 @@ for (const width of [390, 820, 1280]) {
         const root = page.locator('html');
         await expect(root).toHaveAttribute('data-look', id);
         for (const k of ['header', 'menu', 'glass', 'tick', 'tabbar']) await expect(root).toHaveAttribute(`data-${k}`, want[k]);
+        await expect(root).toHaveAttribute('data-family', want.family ?? 'core');
         if (want.glassClass) await expect(root).toHaveClass(/\bglass\b/); else await expect(root).not.toHaveClass(/\bglass\b/);
         await expect(page.locator('#look-pick')).toHaveValue(id);
 

@@ -64,6 +64,30 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
 | Esc | in search: clear, then leave; in select mode: leave it; a phone's pushed detail: go back; a menu or dialog closes first |
 | Back (browser, Android) | pops the pushed screen or closes the open sheet |
 
+## The on-screen keyboard (`ui/keyboard.js`)
+
+- Every app page's viewport meta ends in `interactive-widget=resizes-content`
+  (`<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">`).
+  Why: Chrome on Android (108+) otherwise shrinks only the visible part of the page, so fixed bars and `100dvh` sheets
+  sit under the keyboard. With it the page shrinks to the space above the keyboard.
+- `startGestures` watches the keyboard (`{ keyboard: false }` leaves it out): while a field has focus and the visible
+  page is over 150 px shorter than its tallest, `html.ui-keyboard-open` is set and a `ui-keyboard` event (detail.open)
+  fires. The tab bar hides; a sheet and the select-mode action bar sit above the keyboard. `--ui-keyboard-h` is how
+  far the keyboard covers the layout's bottom (0 with `resizes-content`; it lifts them where a browser ignores it).
+
+## Haptics (`ui/gesture.js` `haptic`)
+
+- `haptic(kind)`, five kinds as `navigator.vibrate` patterns (`HAPTIC_PATTERNS`): `tick` 8 ms (a step: a row ticked,
+  a switch flipped, a dragged row passing another), `threshold` 12 ms (a drag crossing where its let-go would land
+  somewhere else: a sheet past its close line or onto another height, the drawer past half), `long` 20 ms (a touch
+  and hold taking hold), `confirm` and `reject` (10-40-10, 20-60-20: for an app's done or refused action). On
+  iPhone, which has no `vibrate`, every kind is the one system tap a hidden switch gives.
+- Not on tab changes or plain taps: those are everywhere, and a buzz on each wears out.
+- Haptics is a per-device theme choice (`haptics: 'on' | 'off'`, on by default), shown as `html[data-haptics="off"]`
+  and picked in `themeSwitch` ("Haptics"); `haptic()` gives nothing while it is off.
+- `startGestures` ticks every switch (`input[role=switch]`, `input[switch]`) and segmented control a person changes
+  (`toggleTicks`; `{ ticks: false }` leaves it out).
+
 ## Placement rules
 
 Where each thing goes, on every size.
@@ -133,13 +157,17 @@ A look is data, not a fork. Each one is a file in `theme/looks/` with:
   | `glass` | `bars` (all floating chrome) · `pill` (only the floating pills: the action bar, toasts and a floating tab bar) · `none` |
   | `tick` | `round` · `square` (the ticks in select mode) |
   | `tabbar` | `float` (a pill over the content) · `edge` (full width along the bottom) |
+  | `family` | `core` (every look but M) · `android` (look M: `ui/gestures/android.css` restyles every part as Material 3) |
 
 - **tokens**: custom properties that `palette-css.js` puts on `:root`. Every look sets the same keys: the heading font,
   the title size, weight and tracking, the bar line, list card radius, inset, background, edge, separator and shadow, the row
   weight, the radii of controls, pills, menus and sheets, the tick size, the active tab's background, and the glass
   tint (how much of the accent colour the glass takes).
 
-The six looks so far:
+- **palette** (optional): `'m3'` makes the page colours Material 3 colour roles from the accent as the seed
+  (`theme/m3.js`: tonal palettes, Android's tonal spot scheme, light and dark), each role also as an `--m3-*` token.
+
+The seven looks so far:
 
 | Look | Name | In short |
 | --- | --- | --- |
@@ -148,9 +176,10 @@ The six looks so far:
 | C | Dense and quiet | Flush lists, small titles, glass only on the floating pills |
 | D | Slim | A slim bar always showing the name, lists as cards inset from the edges, an icon tab bar along the edge, no band or glass |
 | E | Workspace | Flat and compact like a desktop notes app: a slim bar, flush lists on the page, menus as bottom sheets, a filled search box, the sync chip as its icon alone when all is synced |
+| M | Android | Material 3 Expressive as Android 16 draws it: tonal colour roles from the accent, solid tonal surfaces (no glass), Roboto where the phone has it (Inter otherwise; no font is hosted), a top app bar that takes its tone on scroll, lists in rounded groups with 2 px gaps, a navigation bar with a pill on the current tab, Material's switch, sheet handle, menus and action button |
 | iOS | iOS | As close to iOS 26 as the web allows: the system colours (light and dark), the grouped grey ground, inset grouped lists with icon tiles, the iOS switch and segmented control, a collapsing large title, glass bars, sheets with half and full detents, row swipe actions; Inter (shipped in `theme/fonts/`) stands in for SF Pro, after `-apple-system`. Its accent (`#007aff`) and grouped ground apply only when the app and device name none |
 
-The app picks its own look with `applyTheme({ look: 'b' })`, and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey; `'linen'`: warm paper with soft ink, its own warm dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
+The app picks its own look with `applyTheme({ look: 'b' })` (an app opts into the Android look with `applyTheme({ look: 'm' })`; nothing else changes), and may name a ground (`surface: 'ink'`: white, or charcoal in dark; `'cool'`: a phone's cool grey; `'linen'`: warm paper with soft ink, its own warm dark) for presets with no ground of their own; a device's own pick of ground wins over both. A device's own pick wins. Without either, the look is A.
 
 **How an app opts in to the iOS look:** one line, `applyTheme({ look: 'ios' })`.
 
@@ -207,6 +236,10 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
   `.ui-row-input` (a value typed into the row) or `.ui-row-chevron`. `data-tone="action|danger"` colours the row's words; `data-align="center"` centres them.
 - **Cards and stats:** `.ui-card` (`-title`, `-text`, `-actions`); `.ui-stats` of `.ui-stat` (`-value`, `-label`).
 - **Badges:** `.ui-badge`, `data-tone="accent|ok|warn|danger"`.
+- **Action button** (`ui/gestures/fab.css`): `<button class="ui-fab" aria-label="…">` with an icon, and a
+  `.ui-fab-label` for the wide kind; the screen's one main action, fixed at the bottom end above a showing tab bar; `.is-small`
+  drops the words; it steps aside while a sheet or menu is open, and the page gets room under it. Look M draws it as
+  Material's rounded square (`.is-large`: 96 px).
 - **Buttons:** with theme.css's `button`, `.ui-fill` (primary) and `.ui-plain` (link-like): `.ui-tint` (accent-tinted), `.ui-wide` (full width),
   `data-size="small"` (32 px), `.ui-buttons` (a stack of buttons with the list's inset).
 - **Filter chips:** `.ui-chips` holding `button.ui-chip` with `aria-pressed` (ticked when on), a full tap tall;

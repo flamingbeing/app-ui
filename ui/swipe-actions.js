@@ -193,7 +193,7 @@ export function swipeActions(list, { lead, trail, onAction }) {
       const arm = hasFull && Math.abs(px) >= width * FULL_AT;
       if (arm !== armed) {
         armed = arm;
-        haptic();
+        haptic('threshold');
         const b = buttons[0];
         if (b) { b.classList.toggle('is-full', arm); }
       }

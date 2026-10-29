@@ -1,9 +1,9 @@
 // The theme switch: labelled selects for this device's look (looks.js), theme, dark style, style (preset), ground,
 // density, glass or Solid bars and sheets (with the glass guard's note when it turned glass down), motion (Auto or
-// Still), and a colour well for the accent with a reset to the style's own colour (choice.js). lookSwitch is the look
+// Still), haptics (On or Off), and a colour well for the accent with a reset to the style's own colour (choice.js). lookSwitch is the look
 // and density alone, for the gallery.
 import { THEMES, DENSITIES, themeChoice, chooseTheme, pickedAccent } from './choice.js';
-import { DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS } from './schema.js';
+import { DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS } from './schema.js';
 import { PRESETS, SURFACES } from './presets.js';
 import { LOOKS } from './looks.js';
 import { kept } from './guard.js';
@@ -11,7 +11,7 @@ import { GRID, SHADES, snap } from './grid.js';
 
 /** @type {Record<string, string>} */
 const WORDS = {
-  auto: 'Auto', light: 'Light', dark: 'Dark', oled: 'OLED black', regular: 'Regular', comfortable: 'Comfortable', compact: 'Compact', glass: 'Glass', solid: 'Solid', always: 'Glass, even here', still: 'Still', '': "The style's own",
+  auto: 'Auto', light: 'Light', dark: 'Dark', oled: 'OLED black', regular: 'Regular', comfortable: 'Comfortable', compact: 'Compact', glass: 'Glass', solid: 'Solid', always: 'Glass, even here', still: 'Still', on: 'On', off: 'Off', '': "The style's own",
   ...Object.fromEntries(PRESETS.map(p => [p.id, p.name])),
   ...Object.fromEntries(Object.entries(SURFACES).map(([id, s]) => [id, s.label])),
 };
@@ -19,7 +19,7 @@ const WORDS = {
 const LOOK_WORDS = { '': "The app's own", ...Object.fromEntries(LOOKS.map(l => [l.id, l.name])) };
 
 /**
- * @param {'theme' | 'dark' | 'preset' | 'surface' | 'look' | 'density' | 'material' | 'motion'} key @param {string} label
+ * @param {'theme' | 'dark' | 'preset' | 'surface' | 'look' | 'density' | 'material' | 'motion' | 'haptics'} key @param {string} label
  * @param {readonly string[]} values
  * @param {() => void} after  runs after a pick (the colour well follows the style)
  * @param {Record<string, string>} [words]
@@ -73,6 +73,7 @@ export function themeSwitch(host) {
     picker('preset', 'Style', PRESET_IDS, sync), picker('surface', 'Ground', SURFACE_IDS, sync),
     ...accent.parts, picker('density', 'Density', DENSITIES, sync),
     picker('material', 'Bars and sheets', MATERIALS, sync), note.part, picker('motion', 'Motion', MOTIONS, sync),
+    picker('haptics', 'Haptics', HAPTICS, sync),
   );
   host.append(box);
   return () => box.remove();

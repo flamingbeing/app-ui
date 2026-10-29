@@ -1,11 +1,37 @@
 # Changelog
 
-## 1.0.0-rc.46
+## 1.0.0-rc.49
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
   half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
 - Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module.
 - Gallery: the iOS look is its default, and `/kit/ios/` shows the iOS parts together.
+
+## 1.0.0-rc.48
+- Haptics: `haptic(kind)` with five kinds (`tick`, `threshold`, `long`, `confirm`, `reject`; `HAPTIC_PATTERNS`),
+  `haptic()` is a tick. The hold menu takes hold with a long; a sheet dragged past its close line or onto another
+  height and the drawer past half give a threshold; a dragged row (`gripDrag`) ticks as it picks up and passes each
+  row; `startGestures` ticks switches and segmented controls (`toggleTicks`; `{ ticks: false }` leaves it out).
+- Theme: Haptics (`haptics: 'on' | 'off'`, on by default), a per-device choice like Motion, in `themeSwitch`;
+  `html[data-haptics="off"]` and `haptic()` gives nothing. The gallery has a Haptics switch.
+
+## 1.0.0-rc.47
+- Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):
+  while a field has focus and the visible page is over 150 px shorter than its tallest, `html.ui-keyboard-open` and
+  a `ui-keyboard` event. The tab bar hides; a sheet and the action bar sit above the keyboard. `--ui-keyboard-h` is
+  how far the keyboard covers the layout's bottom.
+- Apps: end the viewport meta with `interactive-widget=resizes-content` (docs/ui-kit.md, "The on-screen
+  keyboard"); the gallery pages do.
+
+## 1.0.0-rc.46
+- Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed
+  (`theme/m3.js`, tonal spot, light and dark, each role also as `--m3-*`), solid tonal surfaces (no glass), the Roboto
+  stack (Inter otherwise; no font hosted), a top app bar that takes its tone on scroll, lists in rounded groups, a
+  navigation bar with a pill on the current tab, Material's switch, sheet handle, menus, chips and action button.
+  An app opts in with `applyTheme({ look: 'm' })`; the default stays look A.
+- New variant `family` (`core` · `android`, `data-family` on `<html>`); `ui/gestures/android.css` restyles every part
+  under `[data-family="android"]`, moves by transform and opacity only.
+- New part `.ui-fab` (`ui/gestures/fab.css`), the screen's one main action, in every look.
 
 ## 1.0.0-rc.45
 - Drawer: Android's Back closes the phone's drawer (it is a history entry while open, as a sheet is), and the page

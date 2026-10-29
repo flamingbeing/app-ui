@@ -11,6 +11,10 @@ dialog.ui-sheet { position: fixed; inset: auto 0 0; margin: 0 auto; width: 100%;
 dialog.ui-sheet[open] { display: flex; animation: ui-rise var(--d-spring) var(--spring-snappy); }
 dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - 12px); }
 dialog.ui-sheet.is-dragging { transition: none; }
+/* the keyboard up (ui/keyboard.js): the sheet sits on it and fits above it */
+.ui-keyboard-open dialog.ui-sheet { bottom: var(--ui-keyboard-h, 0px); max-height: calc(100dvh - var(--ui-keyboard-h, 0px) - 12px); }
+.ui-keyboard-open dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - var(--ui-keyboard-h, 0px) - 12px); }
+.ui-keyboard-open .ui-sheet-body { padding-bottom: var(--pad); }
 @media (max-width: 839.98px) { dialog.ui-sheet.is-dragging { will-change: transform; } }   /* a phone slides it by transform */
 .glass dialog.ui-sheet { padding: 0; border-radius: var(--glass-r) var(--glass-r) 0 0; }
 .ui-sheet-grabber { display: block; width: 100%; min-height: 24px; padding: 0; margin: 0; border: 0; background: none;

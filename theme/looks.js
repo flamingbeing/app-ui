@@ -1,12 +1,13 @@
 // The looks a device (or the app) can pick: each is a token set plus a few named variants, data only, one file in
 // looks/ per look. palette-css.js puts the tokens on :root; choice.js shows the variants as data-* marks on <html>
-// (data-header, data-menu, data-glass, data-tick, data-tabbar) that ui.css, gestures.css and glass.css style from.
+// (data-header, data-menu, data-glass, data-tick, data-tabbar, data-family) that ui.css, gestures.css and glass.css style from.
 // Adding a look: a file in looks/, one line in LOOKS below, an entry in the gallery (docs/ui-kit.md). Pure, no DOM.
 import a from './looks/a.js';
 import b from './looks/b.js';
 import c from './looks/c.js';
 import d from './looks/d.js';
 import e from './looks/e.js';
+import m from './looks/m.js';
 import ios from './looks/ios.js';
 
 /**
@@ -16,25 +17,27 @@ import ios from './looks/ios.js';
  * glass: bars (all floating chrome) | pill (only the floating pills: action bar, toasts, a floating tab bar) | none
  * tick: round | square (select mode's ticks)
  * tabbar: float (a pill over the content) | edge (full width along the bottom)
+ * family: core (the kit's own parts) | android (Material 3 parts: android.css restyles the same markup)
  * @typedef {{ header: 'band' | 'plain' | 'slim', menu: 'popover' | 'sheet', glass: 'bars' | 'pill' | 'none',
- *   tick: 'round' | 'square', tabbar: 'float' | 'edge' }} Variants
+ *   tick: 'round' | 'square', tabbar: 'float' | 'edge', family: 'core' | 'android' }} Variants
  * tokens: custom properties (without the --) every look sets, the same keys in each: look-font-head, title-size,
  * title-weight, title-track, bar-line, card-r, list-inset, list-bg (the lists' ground), list-edge,
  * list-sep, list-shadow, row-weight, control-r, pill-r,
  * menu-r, sheet-r, tick-size, tab-active, glass-tint (how much accent the glass takes, a percentage)
+ * palette: m3 (Material's colour roles from the accent as the seed, m3.js) | none (colour.js's palettes)
  * accent, surface (optional): the colour and the ground (presets.js SURFACES) the look falls back to when neither the
  * device, its theme nor the app names one
- * @typedef {{ id: string, name: string, desc: string, variants: Variants, tokens: Record<string, string>,
+ * @typedef {{ id: string, name: string, desc: string, variants: Variants, tokens: Record<string, string>, palette?: 'm3',
  *   accent?: string, surface?: string }} Look
  */
 
 /** @type {readonly Look[]} */
-export const LOOKS = Object.freeze([a, b, c, d, e, ios]);
+export const LOOKS = Object.freeze([a, b, c, d, e, m, ios]);
 export const LOOK_IDS = Object.freeze(LOOKS.map(l => l.id));
 // what each variant may be, first = what a look that names none gets
 export const VARIANTS = Object.freeze({
   header: ['plain', 'band', 'slim'], menu: ['popover', 'sheet'], glass: ['bars', 'pill', 'none'], tick: ['round', 'square'],
-  tabbar: ['float', 'edge'],
+  tabbar: ['float', 'edge'], family: ['core', 'android'],
 });
 // the look an app gets when it names none (applyTheme({ look }))
 export const DEFAULT_LOOK = 'a';

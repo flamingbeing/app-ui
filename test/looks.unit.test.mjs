@@ -7,7 +7,7 @@ import { verdict, median, MEMORY_FLOOR, SLOW_FRAME_MS, PROBE_FRAMES } from '../t
 import { placeSheetMenu } from '../ui/hold-menu.js';
 
 test('every look: a unique id, a name, every variant picked from VARIANTS, the same token keys', () => {
-  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd', 'e', 'ios']);
+  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd', 'e', 'm', 'ios']);
   assert.equal(new Set(LOOK_IDS).size, LOOKS.length);
   const keys = Object.keys(LOOKS[0].tokens).sort();
   for (const look of LOOKS) {
@@ -41,7 +41,7 @@ test('the looks differ where the canvas does: A glass + floating tab bar, B a ba
 test('look D "Slim": the bar always shows the name, lists as inset cards, an edge tab bar, no band or glass', () => {
   const d = lookOf('d');
   assert.equal(d.name, 'Slim');
-  assert.deepEqual(d.variants, { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge' });
+  assert.deepEqual(d.variants, { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge', family: 'core' });
   assert.ok(VARIANTS.header.includes('slim'));
   assert.equal(d.tokens['card-r'], 'var(--radius-l)', 'rows rounded like cards');
   assert.equal(d.tokens['list-inset'], 'var(--gap)', 'and inset from the screen edges');
@@ -51,9 +51,20 @@ test('look D "Slim": the bar always shows the name, lists as inset cards, an edg
 test('look E "Workspace": flat (no glass), slim bar, flush lists on the page, menus as sheets', () => {
   const e = lookOf('e');
   assert.equal(e.name, 'Workspace');
-  assert.deepEqual(e.variants, { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge' });
+  assert.deepEqual(e.variants, { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge', family: 'core' });
   assert.equal(e.tokens['list-inset'], '0', 'flush with the screen edges');
   assert.equal(e.tokens['list-bg'], 'transparent', 'rows on the page, no card');
+});
+
+test('look M "Android": Material colour, no glass, an edge navigation bar, square ticks, the android family', () => {
+  const m = lookOf('m');
+  assert.equal(m.name, 'Android');
+  assert.deepEqual(m.variants, { header: 'plain', menu: 'popover', glass: 'none', tick: 'square', tabbar: 'edge', family: 'android' });
+  assert.equal(m.palette, 'm3');
+  assert.equal(m.tokens['sheet-r'], '28px', "Material's extra-large shape");
+  assert.equal(m.tokens['list-sep'], 'transparent', 'groups with gaps, no lines');
+  assert.equal(DEFAULT_LOOK, 'a', 'never the default: apps opt in');
+  for (const look of LOOKS.filter(l => l.id !== 'm')) assert.equal(look.variants.family, 'core', look.id);
 });
 
 test('glass guard: little memory turns glass down at once; slow frames on the first scroll do; fast ones keep it', () => {
@@ -82,7 +93,7 @@ test('look iOS: large title, glass bars, a floating tab bar, grouped grounds and
   const { palettes, accentOf } = await import('../theme/palette-css.js');
   const ios = lookOf('ios');
   assert.equal(ios.name, 'iOS');
-  assert.deepEqual(ios.variants, { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float' });
+  assert.deepEqual(ios.variants, { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', family: 'core' });
   assert.equal(ios.tokens['list-sep'], 'var(--ios-separator)');
   assert.equal(accentOf({ look: 'ios' }), '#007aff', 'iOS blue when nobody names an accent');
   assert.equal(accentOf({ look: 'ios' }, { accent: '#0f766e' }), '#0f766e', 'the app\'s own accent wins');

@@ -48,6 +48,10 @@ syncChip($('sync-host'), { sync: /** @type {any} */ (fakeSync) });
 const stillBox = /** @type {HTMLInputElement} */ ($('still'));
 stillBox.checked = themeChoice().motion === 'still';
 stillBox.addEventListener('change', () => chooseTheme({ motion: stillBox.checked ? 'still' : 'auto' }));
+// Haptics: this device only, on until turned off
+const hapticsBox = /** @type {HTMLInputElement} */ ($('haptics'));
+hapticsBox.checked = themeChoice().haptics !== 'off';
+hapticsBox.addEventListener('change', () => chooseTheme({ haptics: hapticsBox.checked ? 'on' : 'off' }));
 
 /** @param {HTMLElement} row */
 function openRow(row) {
