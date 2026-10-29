@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.55
+## Unreleased
 - Row swipe actions are gone (`swipeActions`, `ui/swipe-actions.js`, `ui/gestures/swipe.css`, the arbiter's `rows`):
   not wanted. No app used them. `/kit/ios/` keeps its to-do list as plain rows.
 
