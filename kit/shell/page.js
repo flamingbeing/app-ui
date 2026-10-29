@@ -1,5 +1,5 @@
 // The shell gallery: the plants list in the adaptive shell. window.kit (the started parts) and window.shell are for the tests.
-import { startGestures, adaptiveShell, toaster } from '../../ui/index.js';
+import { startGestures, adaptiveShell, toaster, cardPager } from '../../ui/index.js';
 import { galleryPreview } from '../preview.js';
 
 galleryPreview();   // ?look=, ?density=, ?edge= as on the other gallery pages
@@ -64,3 +64,19 @@ document.addEventListener('ui-screen', e => {
   document.querySelectorAll('.ui-bar [data-edit-for]').forEach(b => { /** @type {HTMLElement} */ (b).hidden = !home; });
   if (!home) kit.selects.get('plants')?.setEditing(false);
 });
+
+// a deck of five cards on the Jobs page (ui/card-pager.js): a sideways swipe for the next or the previous
+const TIPS = ['Water the basil from below', 'Mist the orchid, never soak its crown', 'Turn the fig a quarter each week',
+  'Feed the lavender in spring only', 'Prune the rosemary after it flowers'];
+const cards = cardPager($('job-cards'), {
+  card: i => {
+    if (i < 0 || i >= TIPS.length) return null;
+    const c = document.createElement('article');
+    c.className = 'ui-card kit-card';
+    c.innerHTML = `<h3 class="ui-card-title">Tip ${i + 1} of ${TIPS.length}</h3><p class="ui-card-text"></p>`;
+    /** @type {HTMLElement} */ (c.querySelector('p')).textContent = TIPS[i];
+    return c;
+  },
+  onShow: i => { $('job-cards').dataset.shown = String(i); },
+});
+Object.assign(window, { cards });

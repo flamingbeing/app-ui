@@ -16,10 +16,10 @@ const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
 export const BUDGET = { frame: 20, late: 1, worst: 50, task: 50, press: 50, handler: 8, ends: 16 };
 const SLOWER = 4;
 
-async function load(sized, browserName) {
+async function load(sized, browserName, query = '') {
   const page = await sized(390);
   if (process.env.JANK_DEBUG) page.on('console', m => console.log('  page:', m.text()));
-  await page.goto(SHELL);
+  await page.goto(SHELL + query);
   // the plain look under the slowed CPU: with no GPU here, the glass's backdrop blur is drawn in software, between the
   // page's frames, and drops one at random (a phone's GPU draws it); the page's own work is what the gate holds.
   // WebKit keeps the glass
@@ -171,6 +171,21 @@ test('a sheet dragged by its grabber and let go keeps every frame on time on a s
   at = await grab();
   await gate(page, `sheet down to close (${browserName})`, () => page.__drag(path(at, [at[0], 820], 8)));
   await expect(sheet).not.toHaveAttribute('open', '');
+});
+
+test('a card swiped on and flicked back keeps every frame on time on a slow phone', async ({ sized, browserName }) => {
+  const page = await load(sized, browserName, '&tab=jobs');
+  const deck = page.locator('#job-cards');
+  await expect(deck.locator('.ui-card-slot:not([inert]) .ui-card-title')).toHaveText('Tip 1 of 5');
+  const box = await deck.boundingBox();
+  // about half the card, as the tab swipe above, so the glide has the other half to go
+  const y = Math.round(box.y + box.height / 2), right = Math.round(box.x + box.width - 60), left = Math.round(box.x + 90);
+  await gate(page, `card swipe (${browserName})`, () => page.__drag(path([right, y], [right - 200, y], 14)));
+  await expect(deck).toHaveAttribute('data-shown', '1');
+  await gate(page, `card flick back (${browserName})`, () => page.__drag(path([left, y], [left + 150, y], 5)));
+  await expect(deck).toHaveAttribute('data-shown', '0');
+  // the tab page stayed put: a swipe on the deck is the deck's
+  expect(await page.evaluate(() => window.__shown())).toEqual(['jobs']);
 });
 
 test('a touched button shows pressed in the first frame on a slow phone', async ({ sized, browserName }) => {
