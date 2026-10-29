@@ -3,7 +3,7 @@
 // node --test app/test/gestures.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HOLD_MS, SLOP, velocity, still, haptic } from '../ui/gesture.js';
+import { HOLD_MS, SLOP, velocity, still, haptic, releaseVelocity, unrubber, pathAt } from '../ui/gesture.js';
 import { placeMenu, placeAtPointer } from '../ui/hold-menu.js';
 import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
@@ -132,10 +132,11 @@ test('right-click menu: its corner at the pointer; flipped left or up near an ed
   assert.deepEqual(placeAtPointer(menu, { w: 230, h: 210 }, { x: 100, y: 100 }), { left: 8, top: 8, below: false });
 });
 
-test('tab swipe: a first move under 10 px tells nothing; sideways only when under about 37° from the horizontal', () => {
+test('tab swipe: a first move under 8 px tells nothing; sideways only when under about 40° from the horizontal', () => {
   assert.equal(swipeIntent(6, 3), null);
+  assert.equal(swipeIntent(8, 2), 'x', 'decided at 8 px, so the page moves from the first frames');
   assert.equal(swipeIntent(-30, 5), 'x');
-  assert.equal(swipeIntent(30, 24), 'y', 'a diagonal is a scroll');
+  assert.equal(swipeIntent(30, 30), 'y', 'a diagonal is a scroll');
   assert.equal(swipeIntent(2, 40), 'y');
 });
 
@@ -144,10 +145,29 @@ test('tab swipe: a looser angle still reads as sideways (under 40°), a steeper 
   assert.equal(swipeIntent(30, 26), 'y');
 });
 
-test('tab swipe: no start within 24 px of an edge, or an eighth of the width on a wider phone', () => {
-  assert.equal(swipeEdge(390), 48.75);
+test('tab swipe: no start within 24 px of an edge (Android’s Back), a little more on a wider phone, never past 32 px', () => {
+  assert.equal(Math.round(swipeEdge(390)), 28);
   assert.equal(swipeEdge(160), 24);
-  assert.equal(swipeEdge(430), 53.75);
+  assert.ok(swipeEdge(430) < 32 && swipeEdge(1000) === 32);
+});
+
+test('release speed: over the last 100 ms (from the sample just before), so a finger that stops reads still', () => {
+  assert.equal(releaseVelocity([[0, 0], [16, 20], [32, 40]], 32), 40 / 32);
+  assert.equal(releaseVelocity([[0, 0], [16, 20], [300, 20]], 300), 0, 'stopped for a while: no throw');
+  assert.equal(releaseVelocity([[0, 0], [300, 30]], 450), 0, 'nothing in the last 100 ms');
+  assert.equal(releaseVelocity([[0, 0], [5, 10]], 5), 10 / 16, 'one quick sample is not a rocket');
+});
+
+test('rubber band undone: the finger travel for a stretch', () => {
+  for (const d of [-300, -40, 0, 25, 200]) assert.ok(Math.abs(unrubber(rubber(d, 390), 390) - d) < 1e-6);
+});
+
+test('glide position: the path’s frame at the animation’s time', () => {
+  const path = [0, 10, 20, 30];
+  assert.equal(pathAt(/** @type {Animation} */ (/** @type {unknown} */ ({ currentTime: 0 })), path), 0);
+  assert.equal(pathAt(/** @type {Animation} */ (/** @type {unknown} */ ({ currentTime: 1000 / 30 })), path), 20);
+  assert.equal(pathAt(/** @type {Animation} */ (/** @type {unknown} */ ({ currentTime: 5000 })), path), 30);
+  assert.equal(pathAt(/** @type {Animation} */ (/** @type {unknown} */ ({ currentTime: null })), path), 0);
 });
 
 test('tab swipe: past half the width with its throw (a slow drag or a flick) goes to the next or previous page, if there is one', () => {
@@ -160,6 +180,9 @@ test('tab swipe: past half the width with its throw (a slow drag or a flick) goe
   assert.equal(pageStep(-300, 0, 400, true, false), 0, 'no next page');
   assert.equal(pageStep(300, 0, 400, false, true), 0, 'no previous page');
   assert.equal(pageStep(-250, 0.5, 400, true, true), 0, 'the finger turned back at the end: back');
+  assert.equal(pageStep(6, -2.5, 400, true, true), 1, 'caught just short of its place and flicked on: the next page');
+  assert.equal(pageStep(-30, -0.5, 400, true, true), 1, 'a short flick at 500 px/s still goes');
+  assert.equal(pageStep(-30, -0.3, 400, true, true), 0, 'slower is a drag let go: back');
 });
 
 test('rubber band: gives less and less where there is no page, never past the width', () => {

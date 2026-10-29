@@ -29,14 +29,15 @@
 /* --link, as the current tab: it is kept 4.5:1 on the selection tint (colour.js pairs); the raw accent fell to 3.6 (Violet) */
 .ui-side-link[aria-current="page"] { background: var(--selection); color: var(--link); font-weight: 600; }
 .ui-side-link:hover { background: color-mix(in srgb, var(--selection) 60%, transparent); }
+/* the drawer follows the finger and glides (shell.js sets its transform and the shade's opacity while it moves) */
+.ui-drawer-shade { display: none; }
 @media (max-width: 599.98px) {
-  .ui-shell.is-drawer-open::before { content: ''; position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / .35); }
-  .ui-shell.is-drawer-open .ui-sidebar { display: flex; position: fixed; inset: 0 auto 0 0; z-index: 41;
-    width: min(18rem, 85vw); box-shadow: 0 0 24px rgb(0 0 0 / .25); animation: ui-drawer-in .2s ease-out; }
+  .ui-shell:is(.is-drawer-open, .is-drawer-moving) > .ui-drawer-shade { display: block; position: fixed; inset: 0; z-index: 40;
+    background: rgb(0 0 0 / .35); touch-action: none; }
+  .ui-shell:is(.is-drawer-open, .is-drawer-moving) .ui-sidebar { display: flex; position: fixed; inset: 0 auto 0 0; z-index: 41;
+    width: min(18rem, 85vw); box-shadow: 0 0 24px rgb(0 0 0 / .25); touch-action: pan-y; }
+  .ui-shell.is-drawer-moving .ui-sidebar { will-change: transform; }
 }
-@media (prefers-reduced-motion: reduce) { .ui-shell.is-drawer-open .ui-sidebar { animation: none; } }
-[data-motion="still"] .ui-shell.is-drawer-open .ui-sidebar { animation: none; }
-@keyframes ui-drawer-in { from { transform: translateX(-100%); } }
 
 /* ---------- tablet and laptop: side bar + list + detail ---------- */
 @media (min-width: 600px) {

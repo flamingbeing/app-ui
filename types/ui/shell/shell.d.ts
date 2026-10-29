@@ -4,7 +4,9 @@ export function matchesSearch(text: string, query: string): boolean;
  * @param {HTMLElement} shell  .ui-shell
  * @param {{ screens?: { push: (t: string | HTMLElement, from?: HTMLElement | null) => void, pop: (a?: boolean) => void, depth: () => number } | null,
  *   render?: (row: HTMLElement, detail: HTMLElement) => void }} [opts]  screens: the page's screen stack (startGestures().screens)
- * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string, stop: () => void }}
+ * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string,
+ *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null, stop: () => void }}
+ *   drawer: the side bar's drawer for tab-pages.js to pull out (null without a side bar)
  */
 export function adaptiveShell(shell: HTMLElement, { screens, render }?: {
     screens?: {
@@ -17,6 +19,10 @@ export function adaptiveShell(shell: HTMLElement, { screens, render }?: {
     open: (row: HTMLElement) => void;
     current: () => HTMLElement | null;
     size: () => string;
+    drawer: {
+        pull: (x: number) => void;
+        release: (x: number, v: number) => void;
+    } | null;
     stop: () => void;
 };
 export const TABLET_MIN: 600;
