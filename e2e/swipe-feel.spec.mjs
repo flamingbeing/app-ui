@@ -163,3 +163,23 @@ test('a sheet closed by Esc (Chrome’s Back on Android asks a dialog to close t
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => [window.__shown(), history.state?.uiTabBack ?? null, history.length]), 'the tab’s entry stays').toEqual([['jobs'], 1, length + 1]);
 });
+
+test('one part owns a touch: a tab swipe takes it from a pressed row (the press and the hold clear), and it is free again once the finger lifts', async ({ sized }) => {
+  const page = await load(sized);
+  const row = page.locator('#home .ui-row[data-hold-menu]').first();
+  const b = await row.boundingBox();
+  const y = Math.round(b.y + b.height / 2);
+  await page.evaluate(([x, y]) => {
+    const el = document.elementFromPoint(x, y);
+    el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 3, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y, button: 0, buttons: 1 }));
+  }, [300, y]);
+  await expect(row).toHaveAttribute('data-pressed', '');
+  await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(300, -120, 6, 0, y));
+  expect(await page.evaluate(() => import('/ui/0.0.0-dev/ui/gesture.js').then(m => m.captured()))).toBe('tabs');
+  await expect(row, 'the press cleared as the swipe took the touch').not.toHaveAttribute('data-pressed', '');
+  await page.waitForTimeout(650);
+  await expect(page.locator('.ui-menu'), 'no hold menu').toHaveCount(0);
+  await page.evaluate(async () => { window.__lift(180, 420); await window.__settled(); });
+  await expect.poll(() => page.evaluate(() => import('/ui/0.0.0-dev/ui/gesture.js').then(m => m.captured()))).toBe(null);
+  expect(await page.evaluate(() => window.__shown())).toEqual(['rooms']);
+});

@@ -7,7 +7,7 @@
 // detent's height again once still. From 840 px wide it is a centred dialog: a drag changes its height.
 // Each open sheet is a history entry, so Back (Android's, the browser's, the edge swipe) closes it. Done and any
 // [data-close] close it; [data-open-sheet="#id"] buttons open it and get focus back.
-import { SLOP, haptic, listeners, still } from './gesture.js';
+import { SLOP, claim, haptic, listeners, still } from './gesture.js';
 import { glide as springGlide, tracker } from './motion.js';
 import { ourStep, stepBack as back, stepping, stepsSettled } from './steps.js';
 
@@ -224,6 +224,7 @@ export function detentSheet(sheet) {
     if (!fromBody) begin();   // the body waits until the finger clearly moves up or down
   }
   function begin() {
+    claim('sheet');   // the highest: always its own
     live = true;
     aimed = from0;
     try { if (from && typeof id === 'number') from.setPointerCapture(id); } catch { /* gone */ }

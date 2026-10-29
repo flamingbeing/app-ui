@@ -27,7 +27,7 @@
 import { tabBack, CLOSE_MS } from './tab-back.js';
 import { toaster } from './toast.js';
 import { LABELS } from './labels.js';
-import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber } from './gesture.js';
+import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber, claim, onCaptured } from './gesture.js';
 import { glide as springGlide, tracker, afterGesture } from './motion.js';
 import { EDGE, swipeGoesBack } from './screens.js';
 import { TABLET_MIN } from './shell/shell.js';
@@ -174,6 +174,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   let next = null;
   /** the drawer this touch pulls (a right swipe on the first page), or null @type {PullDrawer | null} */
   let pulling = null;
+  let held = '';   // the name this swipe claimed the touch as (its own win is not a rival's)
   /** the pages gliding after a let-go (motion.js), or null @type {Gliding | null} */
   let glide = null;
   /** the way the glide this touch caught was going (-1 left, 1 right, 0 none caught) */
@@ -306,6 +307,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     } else {
       catchGlide();
       dir = 'x';   // a caught page moves only sideways
+      held = 'tabs';
+      claim('tabs');   // a new touch: it is free
     }
     x0 = t.clientX - raw; y0 = t.clientY;
     hist.reset(e.timeStamp, t.clientX);
@@ -320,6 +323,9 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       if (!dir) return;
       if (dir === 'y') { x0 = null; putAway(); return; }   // a scroll: leave it to the page
       const d = mx > 0 && !prev ? drawer?.() ?? null : null;
+      const want = d ? 'drawer' : 'tabs';
+      held = want;
+      if (!claim(want)) { x0 = null; putAway(); return; }   // a part above has this touch
       if (d) { pulling = d; unpage(); }   // the first page, swiped right: the drawer comes out instead
       else prepare();
     }
@@ -374,6 +380,10 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   };
   l.on(document, 'touchend', end, { passive: false });
   l.on(document, 'touchcancel', end, { passive: true });
+  // a part above took the touch mid-swipe: let go where it is, as a cancelled touch does
+  const standDown = onCaptured(name => {
+    if (x0 !== null && dir === 'x' && name !== held) end(/** @type {TouchEvent} */ (/** @type {unknown} */ ({ type: 'touchcancel', timeStamp: performance.now(), cancelable: false })));
+  });
 
-  return { go, current: () => current, stop: () => { l.stop(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
+  return { go, current: () => current, stop: () => { l.stop(); standDown(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
 }
