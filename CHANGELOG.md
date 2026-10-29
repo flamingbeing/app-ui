@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.41
+- Gallery: the shell page drops its body's own tab-bar room (the kit's `.ui-screen::after` already leaves it), so the
+  page is no longer taller than it needs to be on a phone.
+
 ## 1.0.0-rc.40
 - `cardPager(stage, { fill: true })`: the stage reaches from where it starts on the page to the viewport's bottom
   (`100dvh`), less a showing tab bar's room and `--pad`, never under 16rem (`.ui-cards-fill`; card-pager.js keeps
