@@ -89,6 +89,21 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 
+## Bounce
+
+`ui/bounce.js` in Node (`test/bounce.unit.test.mjs`): nothing runs on import; `rubberSlope` is the rubber band's
+slope. `e2e/bounce.spec.mjs` on `/kit/shell/` at 390 px, in Chromium and WebKit with page-sent touch events, then in
+Chromium through DevTools protocol touch and the mouse wheel.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Pull at the top | the list stretches by `rubber(160, screen height)` ±1 px; the bar and the action bar stay; let go, one spring a part, it lands with no transform left | |
+| Pull at the bottom | stretches up; a finger landing on the spring back catches it where it is (no animation left) and it lands after | |
+| No stretch | a sideways swipe (the pager's) and a screen with `data-no-bounce` | |
+| Sheet | the sheet body at large stretches past its bottom, never past its top (the sheet's own drag) | |
+| Fling (Chromium) | a fast fling that ends short of the bottom bounces once it gets there and lands; with Less motion it doesn't | |
+| Wheel (Chromium) | a mouse wheel to the end never bounces | |
+
 ## Motion and the jank gate
 
 `ui/motion.js` in Node (`test/motion.unit.test.mjs`): `glide` hands each part the spring path as linear keyframes,
@@ -107,6 +122,7 @@ judged: each move's handlers within 8 ms, the touch down's and the lift's within
 | --- | --- | --- |
 | Tab swipe | a swipe from Plants to Rooms and a quick flick back: drag frames within 20 ms but one, none over 50 ms, glide frames none over 50 ms, no task over 50 ms; the page lands | |
 | Sheet drag | the New sheet's grabber dragged up to large, down to medium, then down and away: the same budget each; the detents and the close land | |
+| Bounce pull | a pull past the list's top, then past its bottom, and the spring back: the same budget each | |
 | Pressed | a touch on the Jobs tab shows `data-pressed` within 50 ms; it clears on the lift | |
 
 ## Settings screen gallery

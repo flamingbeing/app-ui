@@ -1,5 +1,5 @@
-// The jank gate (README, "Responsiveness rules"): a tab swipe and a sheet drag, start to landing, on a phone whose CPU
-// is slowed 4x (Chromium, through the DevTools protocol, with a real touch path), must keep every frame on time; a
+// The jank gate (README, "Responsiveness rules"): a tab swipe, a pull past a list's ends and a sheet drag, start to
+// landing, on a phone whose CPU is slowed 4x (Chromium, through the DevTools protocol, with a real touch path), must keep every frame on time; a
 // touched button must show pressed in the first frame. WebKit (the iPhone's engine) runs the same gestures unslowed,
 // from touch and pointer events sent in the page, as the second check: there the page's own work is held (each touch's
 // moves' handlers within half a frame, the touch down's and the lift's within one, pressed set by the touch itself), not
@@ -149,6 +149,20 @@ test('a tab swipe and its glide keep every frame on time on a slow phone', async
   // and back, a quick flick
   await gate(page, `tab flick back (${browserName})`, () => page.__drag(path([100, 420], [260, 420], 5)));
   expect(await page.evaluate(() => window.__shown())).toEqual(['home']);
+});
+
+test('a pull past the list\'s top and bottom and the spring back keep every frame on time on a slow phone', async ({ sized, browserName }) => {
+  const page = await load(sized, browserName);
+  const moved = () => page.evaluate(() => [...document.querySelectorAll('.ui-screen:not([hidden]) > *')].some(e => e.getAnimations().length));
+  await gate(page, `pull at the top (${browserName})`, async () => {
+    await page.__drag(path([200, 300], [200, 480], 12));
+    expect(await moved(), 'a spring back').toBe(true);
+  });
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await gate(page, `pull at the end (${browserName})`, async () => {
+    await page.__drag(path([200, 600], [200, 420], 12));
+    expect(await moved(), 'a spring back').toBe(true);
+  });
 });
 
 test('a sheet dragged by its grabber and let go keeps every frame on time on a slow phone', async ({ sized, browserName }) => {

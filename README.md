@@ -42,11 +42,16 @@ holds the kit to them):
 - **Defer work until the lift**: saves, syncs and re-renders a gesture starts go through `afterGesture(fn)`, which
   runs them once the fingers are up and the glides have landed, a frame after the landing paints. Listeners on touch
   and scroll are passive unless they must cancel.
+- **Bounce at the ends**: a pull past a list's top or bottom stretches it (rubber band, the bars staying put) and
+  springs back with the finger's speed; a fling into an end bounces past it and back (not with Less motion). Drawn by
+  `ui/bounce.js` (touch only; a wheel never bounces), since the page keeps `overscroll-behavior: none` (no pull to
+  reload) and Android has no bounce of its own. `startGestures()` starts it; `{ bounce: false }` or `data-no-bounce`
+  on a part leaves it out. A sheet body's top pull stays the sheet's.
 - **Pressed at once**: `startGestures()` marks a touched button, tab, menu item or row `data-pressed` on the touch
   (no wait for `:active`), cleared on lift, scroll or cancel.
 - **The budget** (the jank gate, CI): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch,
-  the plain look: CI has no GPU, so glass blur is drawn in software there), a tab swipe, a tab flick and a sheet
-  dragged up, down and away keep every drag frame within 20 ms but one, no frame over 50 ms (drag or glide) and no
+  the plain look: CI has no GPU, so glass blur is drawn in software there), a tab swipe, a tab flick, a pull past a list's
+  top and end, and a sheet dragged up, down and away keep every drag frame within 20 ms but one, no frame over 50 ms (drag or glide) and no
   task over 50 ms; a touched tab shows pressed within 50 ms. WebKit (the iPhone's engine) runs the same gestures
   unslowed, with the glass, and holds the page's own work (CI's WebKit draws in software, so its frames say little):
   each move's handlers within 8 ms, the touch down's and the lift's within 16 ms, pressed set by the touch. It runs alone after the other browser tests, one test at a time, with no retries; a
