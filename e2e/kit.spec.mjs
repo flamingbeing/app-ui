@@ -729,6 +729,59 @@ test('the list sits under the title; the demo controls are in one sheet from the
   await expect.poll(() => depth(page)).toBe(0);
 });
 
+// the sync chip's tappable twin: one colour, the state in the cloud's shape; a tap syncs now and shows sending at least
+// 700 ms; still under reduced motion
+test('the sync button shows each state in its icon, a tap syncs now and lifts; still under reduced motion; axe clean', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(KIT);
+  const btn = page.locator('#sync-btn');
+  // the state picker is in the Demo controls sheet; the bar button is behind it while it is open
+  const demo = page.locator('#demo-sheet');
+  const pick = async (/** @type {string} */ state) => { if (!await demo.isVisible()) await openDemo(page); await page.locator('#sync-pick').selectOption(state); };
+  const tap = async () => { if (await demo.isVisible()) await closeDemo(page); await btn.tap(); };
+  await expect(btn).toHaveAttribute('data-state', 'synced');
+  await expect(btn).toHaveAttribute('aria-label', 'Saved. Sync now');
+  await expect(btn.locator('svg.ui-icon')).toHaveCount(1);
+  for (const [state, shown, label] of [['pending', 'syncing', 'Sending… (3). Sync now'], ['offline', 'offline', 'Offline, kept on this device (2). Sync now'],
+    ['attention', 'attention', 'Needs you. Sync now'], ['at-risk', 'at-risk', 'Not saved on this device yet (1). Sync now'], ['unknown', 'unknown', 'Connecting…']]) {
+    await pick(state);
+    await expect(btn).toHaveAttribute('data-state', shown);
+    await expect(btn).toHaveAttribute('aria-label', label);
+    await expect(btn).toHaveAttribute('title', label);
+  }
+  // one colour whatever the state (the bar's); each state its own icon; a count of what waits
+  const lookOf = async (/** @type {string} */ state) => { await pick(state); return btn.evaluate(e => [getComputedStyle(e).color, e.querySelector('svg')?.innerHTML]); };
+  const looks = [await lookOf('synced'), await lookOf('pending'), await lookOf('offline'), await lookOf('attention'), await lookOf('unknown')];
+  expect(new Set(looks.map(l => l[0])).size, 'one colour').toBe(1);
+  expect(new Set(looks.map(l => l[1])).size, 'five icons').toBe(5);
+  await pick('pending');
+  await expect(btn.locator('.ui-sync-badge')).toHaveText('3');
+  await pick('attention');
+  expect(await btn.evaluate(e => getComputedStyle(e, '::after').content), 'attention has its dot').not.toBe('none');
+  expect(await AxeBuilder(page)).toEqual([]);
+  // a tap: syncs now, shows sending at least 700 ms even when the sync answers at once, then shows the state again
+  await pick('synced');
+  await tap();
+  expect(await page.evaluate(() => /** @type {any} */ (window).syncTaps)).toBe(1);
+  await expect(btn).toHaveAttribute('data-state', 'syncing');
+  expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('ui-sync-lift');
+  await page.waitForTimeout(400);
+  await expect(btn).toHaveAttribute('data-state', 'syncing');
+  await expect(btn).toHaveAttribute('data-state', 'synced', { timeout: 2000 });
+  // offline: a tap retries but the struck cloud stays (it is not sending)
+  await pick('offline');
+  await tap();
+  await expect(btn).toHaveAttribute('data-state', 'offline');
+  expect(await page.evaluate(() => /** @type {any} */ (window).syncTaps)).toBe(2);
+  // no lift under reduced motion, nor with Still picked
+  await pick('pending');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('none');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.evaluate(() => { document.documentElement.dataset.motion = 'still'; });
+  expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('none');
+});
+
 // look E keeps the bar quiet: synced is the icon alone (the word still read out), any other state shows its word; the
 // search box is filled, with no line round it
 test('look E: the synced chip is its icon (word read out), other states show the word; the search box has no line', async ({ sized }) => {

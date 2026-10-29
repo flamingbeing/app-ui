@@ -38,6 +38,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Home indicator | 390 px with a 34 px bottom inset: a full-height sheet's last row, look B's sheet menu and a toast on a page without a tab bar clear it | |
 | Sync chip | 390 px: the chip shows each made-up state in its word (`Saved`, `Sending… (3)`, …), its `data-state` set, a `status` role; axe clean with "Needs you" | |
 | Demo controls | 390 px: the list sits straight under the large title, with no demo control on the home screen; the bar's "Demo controls" button opens one sheet holding Open the sheet, Push a screen, the other pages, look, density, Still and the sync state, each scrolled to on screen; axe clean light and dark; Esc gives focus back to the button; Open the sheet swaps the demo sheet for the made-up one (its close gives focus back to the button); Push a screen pushes one screen | |
+| Sync button | 390 px: the chip's tappable twin beside it: each made-up state its label (`Saved. Sync now`, `Sending… (3). Sync now`, …) as `aria-label` and `title`, its `data-state` (pending shows `syncing`); one colour in every state, a different cloud icon in each, a count badge where something waits, a dot on needs you; a tap calls the app's sync now and shows sending at least 700 ms, offline keeps its struck cloud; no lift under reduced motion or Still | yes |
 | Installable, no pull | each gallery page (settings too): `overscroll-behavior-y: none` (no pull-to-refresh); demo words with no developer notes; the manifest (standalone; `id` and `start_url` `/ui/kit/`, scope `/ui/`, so the installed app opens the newest gallery) and its 192 and 512 icons are served; the page cancels `beforeinstallprompt`; the service worker (scope `kit/`) controls the page after a reload | |
 
 ## Shell gallery
@@ -154,6 +155,7 @@ judged: each move's handlers within 8 ms, the touch down's and the lift's within
 | Sheet drag | the New sheet's grabber dragged up to large, down to medium, then down and away: the same budget each; the detents and the close land | |
 | Bounce pull | a pull past the list's top, then past its bottom, and the spring back: the same budget each | |
 | Pressed | a touch on the Jobs tab shows `data-pressed` within 50 ms; it clears on the lift | |
+| Sync tap | a tap on the shell bar's sync button: the icon's lift is a CSS animation (transform, opacity); every frame while it shows sending within 20 ms but one, none over 50 ms; one tap counted. WebKit: the tap's handlers within 16 ms | |
 | Android look | look M: the tab swipe (its navigation pill moving) and the sheet dragged up to large, the same budget each | |
 
 ## Settings screen gallery
