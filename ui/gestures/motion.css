@@ -19,3 +19,7 @@
     animation: none !important; transition: none !important; }
   .ui-menu-preview.is-lifted, [data-hold-menu].is-holding { transform: none; }
 }
+/* ---------- card pager (ui/card-pager.js): three slots side by side, moved by transform only ---------- */
+.ui-cards { position: relative; overflow: hidden; min-height: 16rem; outline-offset: -2px; }
+.ui-card-slot { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; will-change: transform; contain: layout paint; }
+.ui-card-slot:empty { visibility: hidden; }
