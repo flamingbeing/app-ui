@@ -104,12 +104,14 @@ test('in a sheet: its body stretches past its bottom, never past its top (that p
   const body = () => page.evaluate(() => [...document.querySelector('#sheet .ui-sheet-body').children]
     .map(e => e.style.transform).filter(Boolean).length);
   await page.evaluate(() => { const b = document.querySelector('#sheet .ui-sheet-body'); b.scrollTop = b.scrollHeight; });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 100)));   // the sheet hears the scroll (its touch-action)
   await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(x, mid + 100, -150, 8));
   expect(await body(), 'past the bottom: stretched').toBeGreaterThan(0);
   await page.evaluate(([x, y]) => window.__lift(x, y), [x, mid - 50]);
   await page.evaluate(() => window.__settled());
   expect(await body()).toBe(0);
   await page.evaluate(() => { document.querySelector('#sheet .ui-sheet-body').scrollTop = 0; });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
   await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(x, mid - 100, 120, 8));
   expect(await body(), 'past the top: the sheet\'s, not a stretch').toBe(0);
   await page.evaluate(([x, y]) => window.__lift(x, y), [x, mid + 20]);
@@ -121,7 +123,18 @@ test.describe('through the real input path', () => {
   /** a fling up to the end, through the browser's own input, then the frames until it bounces (or not) */
   async function fling(page) {
     const cdp = await page.context().newCDPSession(page);
-    const send = (type, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 200, y }] });
+    // each event stamped 16 ms after the last, so a busy machine's timing can't slow the fling the browser reads
+    const t0 = Date.now() / 1000;
+    let n = 0;
+    const send = (type, y) => cdp.send('Input.dispatchTouchEvent',
+      { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 200, y }], timestamp: t0 + 0.016 * n++ });
+    // a longer list, the finger starting 450 px from its end: room for the fling to be under way when it gets there
+    await page.evaluate(() => {
+      const list = document.querySelector('.ui-screen:not([hidden]) .ui-list');
+      if (list.children.length < 40) for (const r of [...list.children]) list.append(r.cloneNode(true), r.cloneNode(true));
+      scrollTo(0, document.documentElement.scrollHeight - innerHeight - 450);
+    });
+    await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
     // fast, but not far enough to reach the end under the finger (that would be a pull): the fling takes it there
     await send('touchStart', 560);
     for (let i = 1; i <= 6; i++) { await new Promise(r => setTimeout(r, 16)); await send('touchMove', 560 - i * 40); }
@@ -143,8 +156,7 @@ test.describe('through the real input path', () => {
     await page.evaluate(() => window.__settled());
     expect(await shifted(page)).toEqual([]);
     expect(await page.evaluate(() => scrollY > 0)).toBe(true);
-    await page.evaluate(() => { scrollTo(0, 0); document.documentElement.dataset.motion = 'still'; });
-    await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
+    await page.evaluate(() => { document.documentElement.dataset.motion = 'still'; });
     expect(await fling(page), 'Less motion: no bounce').toBe(0);
   });
 

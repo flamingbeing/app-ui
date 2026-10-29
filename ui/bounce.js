@@ -186,9 +186,11 @@ export function bounce(root = document) {
     if (fingers || id !== null || now - lifted > FLING_MS || !prev || cur || still()) return;
     const max = maxOf(b), atTop = pos <= 0, atEnd = pos >= max - 1;
     if (!atTop && !atEnd || prev[1] <= 0 && atTop || prev[1] >= max - 1 && atEnd) return;
-    // a steady run of steps (three or more over the last 200 ms, none a jump; a busy phone's frames can be slow)
-    const run = seen.filter(([t]) => now - t <= 200);
-    if (run.length < 3 || run.some(([t, p], i) => i && (t - run[i - 1][0] > 100 || Math.abs(p - run[i - 1][1]) > 300))) return;
+    // a steady run of steps (three or more over the last 400 ms, all the same way, none after a pause; a busy phone
+    // can send them 200 ms apart): a key's or a script's jump is one step
+    const run = seen.filter(([t]) => now - t <= 400);
+    if (run.length < 3 || run.some(([t, p], i) => i && (t - run[i - 1][0] > 250
+      || Math.sign(p - run[i - 1][1]) !== Math.sign(pos - run[0][1])))) return;
     const speed = (pos - run[0][1]) / Math.max(1, now - run[0][0]);
     if (Math.abs(speed) < MIN_V || (speed < 0) !== atTop) return;
     const t = target && document.contains(target) ? target : null;
