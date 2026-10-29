@@ -483,6 +483,30 @@ test('a tab page keeps its scroll; tapping the current tab over a pushed screen 
   expect(await page.evaluate(() => [window.kit.screens.depth(), history.state?.uiScreens ?? 0])).toEqual([0, 0]);
 });
 
+test('Back with tabs, as Android apps: tab changes add one entry at most; Back on another tab goes to the first, then leaves', async ({ sized }) => {
+  const page = await load(sized);
+  const tab = name => page.locator('nav.ui-tabbar .ui-tab', { hasText: name }).dispatchEvent('click');
+  const len = () => page.evaluate(() => history.length);
+  const start = await len();
+  await tab('Rooms');
+  await expect.poll(() => shown(page)).toEqual(['rooms']);
+  await tab('Jobs');
+  await expect.poll(() => shown(page)).toEqual(['jobs']);
+  expect(await len(), 'one entry for leaving the first tab, none between the others').toBe(start + 1);
+  await page.goBack();
+  await expect.poll(() => shown(page)).toEqual(['home']);
+  // a tap on the first tab takes the entry away too
+  await tab('Rooms');
+  await expect.poll(() => page.evaluate(() => !!history.state?.uiTabBack)).toBe(true);
+  await tab('Plants');
+  await expect.poll(() => page.evaluate(() => !!history.state?.uiTabBack)).toBe(false);
+  expect(await shown(page)).toEqual(['home']);
+  // and Back on the first tab leaves the page
+  const url = page.url();
+  await page.goBack();
+  await expect.poll(() => page.url()).not.toBe(url);
+});
+
 test('a tab change never flashes the bar\'s tinted (collapsed) state: between two scrolled pages it stays; to a page at the top it just clears', async ({ sized }) => {
   const page = await load(sized);
   const bar = page.locator('.ui-bar');

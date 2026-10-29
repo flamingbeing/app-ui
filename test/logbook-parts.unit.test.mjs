@@ -7,6 +7,7 @@ import { moveIn } from '../ui/drag-list.js';
 import { shareText, copyText } from '../ui/share.js';
 import { createTransients } from '../ui/transients.js';
 import { createNavigation } from '../ui/navigation.js';
+import { tabBack } from '../ui/tab-back.js';
 import { cleanHideList, hideKey, MAX_HIDDEN, nameOf } from '../ui/hide-mode.js';
 import { LABELS } from '../ui/labels.js';
 
@@ -97,8 +98,9 @@ function fakeBrowser(path = '/app') {
     back() { if (i > 0) setTimeout(() => { i--; fire('popstate'); }, 0); },
     forward() { if (i < entries.length - 1) setTimeout(() => { i++; fire('popstate'); }, 0); },
   };
-  const events = { addEventListener: (t, fn) => { (listeners[t] ||= []).push(fn); } };
-  return { history, location, events, entries, at: () => i };
+  const events = { addEventListener: (t, fn) => { (listeners[t] ||= []).push(fn); },
+    removeEventListener: (t, fn) => { listeners[t] = (listeners[t] || []).filter(f => f !== fn); } };
+  return { history, location, events, entries, at: () => i, fire };
 }
 
 test('Back closes the top dialog first, then the one under it', async () => {
@@ -147,6 +149,29 @@ test('screen history: go pushes, Back returns, a deep link gets its parents', as
   assert.equal(b.location.hash, '#home');
   assert.deepEqual(shown, [['home', 0]]);
   assert.equal(nav.backTarget(), 'detail');
+});
+
+test('tab back: leaving the first tab adds one entry, the other tabs none; Back there goes to the first tab', async () => {
+  const b = fakeBrowser('/app#/');
+  let firsts = 0;
+  const t = tabBack({ history: b.history, events: b.events, onFirst: () => firsts++ });
+  t.went(false, '/app#/items');
+  t.went(false, '/app#/shop');
+  assert.equal(b.entries.length, 2, 'one entry for leaving the first tab');
+  assert.equal(b.location.hash, '#/shop');
+  b.history.back();
+  await new Promise(r => setTimeout(r, 5));
+  assert.equal(firsts, 1);
+  assert.equal(b.location.hash, '#/', 'the first tab\'s address');
+  t.went(false, '/app#/items');
+  assert.equal(b.entries.length, 2, 'the old step is replaced, not stacked');
+  t.went(true);   // a tap on the first tab goes back for its entry
+  await new Promise(r => setTimeout(r, 5));
+  assert.equal(b.at(), 0);
+  assert.equal(t.away(), false);
+  t.went(true, '/app#/');
+  assert.equal(b.entries.length, 2, 'the first tab adds nothing');
+  t.stop();
 });
 
 test('the hide list keeps only known kinds and short words, without repeats, up to the limit', () => {

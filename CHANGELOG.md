@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.42
+- Back with tabs, as Android apps do it (`ui/tab-back.js`, `tabBack`): switching tabs adds no Back steps; Back on
+  any other tab goes to the first tab, and Back on the first tab leaves the app. Leaving the first tab adds one
+  history entry, moving between the other tabs only changes its address, and a tap on the first tab takes the entry
+  away. `tabPages` does it by default (`{ backToFirst: false }`: no history at all, as before); an app with its own
+  router calls `tabBack({ history, events, onFirst }).went(isFirst, url)` after each tab change.
+
 ## 1.0.0-rc.41
 - Gallery: the shell page drops its body's own tab-bar room (the kit's `.ui-screen::after` already leaves it), so the
   page is no longer taller than it needs to be on a phone.

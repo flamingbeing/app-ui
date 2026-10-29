@@ -12,6 +12,7 @@ export { undoToast } from "./undo-toast.js";
 export { loadState } from "./load-state.js";
 export { createTransients } from "./transients.js";
 export { createNavigation } from "./navigation.js";
+export { tabBack } from "./tab-back.js";
 export { startGestures } from "./gestures.js";
 export { largeTitle } from "./large-title.js";
 export { holdMenus } from "./hold-menu.js";

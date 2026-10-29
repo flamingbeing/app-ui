@@ -2,7 +2,8 @@
 // one .ui-screen of the page's .ui-screens as the bottom screen (screens.js base); the tab with aria-current="page"
 // starts. A tab without data-tab-page (one that opens a sheet) is left alone and is no swipe stop. Each page keeps
 // its own scroll; tapping the current tab with a screen pushed over it goes back to the page. The host sends "ui-tab"
-// (detail.page, detail.tab) after each change.
+// (detail.page, detail.tab) after each change. Back, as Android apps do: another page goes to the first, the first
+// leaves the app; switching pages adds no other history (tab-back.js; { backToFirst: false }: none at all).
 // On a phone (< 600 px) a sideways swipe on the content moves to the next or previous page, the pages following the
 // finger 1:1 (a pager) and, let go, glide on as iOS's paging does: a spring that starts at the finger's speed and settles
 // without overshoot (springPath), to the next page if the finger's throw would carry it past half the width
@@ -21,6 +22,7 @@
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
 // page motion), at every width. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
 // { slide: false }.
+import { tabBack } from './tab-back.js';
 import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber } from './gesture.js';
 import { glide as springGlide, tracker, afterGesture } from './motion.js';
 import { EDGE, swipeGoesBack } from './screens.js';
@@ -61,13 +63,15 @@ export const SLIDE_MS = 280;
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void }} o
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
+ *   backToFirst?: boolean }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
  *   page); drawer: the drawer a right swipe on the first page pulls out (adaptiveShell().drawer); onPrevMissing
- *   (without a drawer): told after a right swipe on the first page (nothing before it)
+ *   (without a drawer): told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
+ *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all
  * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void }}
  */
-export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, drawer, onPrevMissing }) {
+export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, drawer, onPrevMissing, backToFirst = true }) {
   const l = listeners();
   const html = document.documentElement;
   /** one of the host's screens, by selector @param {string | null | undefined} sel @returns {HTMLElement | null} */
@@ -107,9 +111,14 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     void screens.base(page).then(() => {
       scrollTo(0, y);
       if (tab && dir && slide && bar.dataset.slide !== 'off' && html.dataset.slide !== 'off' && !still()) slideIn(page, dir);
+      if (current === page) back?.went(page === stops()[0]);
       host.dispatchEvent(new CustomEvent('ui-tab', { bubbles: true, detail: { page, tab } }));
     });
   }
+  // Back on another page goes to the first page (the address is the first page's already)
+  // (the pages keep their own scroll: the browser's would land a page at the scroll it had when the entry was added)
+  if (backToFirst) try { history.scrollRestoration = 'manual'; } catch { /* none */ }
+  const back = backToFirst ? tabBack({ history, events: window, onFirst: () => { const first = stops()[0]; if (first) go(first); } }) : null;
   /** @type {Animation | null} */
   let sliding = null;
   /** the tapped page comes in from its side (clipped, so the start offset can't widen the page) @param {HTMLElement} page @param {number} dir */
@@ -347,5 +356,5 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   l.on(document, 'touchend', end, { passive: false });
   l.on(document, 'touchcancel', end, { passive: true });
 
-  return { go, current: () => current, stop: () => { l.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
+  return { go, current: () => current, stop: () => { l.stop(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
 }
