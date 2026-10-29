@@ -17,7 +17,7 @@ const NS = 'http://www.w3.org/2000/svg';
 /** @type {IconNodes} */ export const cloudOff = [['path', { d: 'm2 2 20 20' }], ['path', { d: 'M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193' }],
   ['path', { d: 'M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07' }]];
 /** @type {IconNodes} */ export const cloud = [['path', { d: 'M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z' }]];
-/** @type {IconNodes} */ export const cloudCheck = [['path', { d: 'm17 15-5.5 5.5L9 18' }], ['path', { d: 'M5.516 16.07A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 3.501 7.327' }]];
+/** @type {IconNodes} */ export const cloudCheck = [['path', { d: 'M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z' }], ['path', { d: 'm8 13 3 3 5-5' }]];   // (not lucide's: its tick hangs below the cloud and doesn't read as one)
 /** @type {IconNodes} */ export const cloudUpload = [['path', { d: 'M12 13v8' }], ['path', { d: 'M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242' }], ['path', { d: 'm8 17 4-4 4 4' }]];
 /** @type {IconNodes} */ export const cloudAlert = [['path', { d: 'M12 12v4' }], ['path', { d: 'M12 20h.01' }], ['path', { d: 'M8.128 16.949A7 7 0 1 1 15.71 8h1.79a1 1 0 0 1 0 9h-1.642' }]];
 /** @type {IconNodes} */ export const triangleAlert = [['path', { d: 'm21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3' }],
