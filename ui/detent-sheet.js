@@ -9,35 +9,14 @@
 // [data-close] close it; [data-open-sheet="#id"] buttons open it and get focus back.
 import { SLOP, listeners, still } from './gesture.js';
 import { glide as springGlide, tracker } from './motion.js';
+import { ourStep, stepBack as back, stepping, stepsSettled } from './steps.js';
 
 const WIDE = '(min-width: 840px)';
 
-// A close's history.back() lands later (WebKit: much later). A sheet opened, or a page pushed, before it lands would be
-// undone by it: the step lands on the newer entry. So the steps on their way are counted; a sheet opened meanwhile
-// pushes its entry once they have landed, and sheets ignore the popstates they make. An app's router waits on
-// sheetsSettled() before it pushes a page.
-let backs = 0;
-/** @type {Promise<void> | null} */
-let backing = null;
-/** @type {(() => void) | null} */
-let landed = null;
-/** @type {ReturnType<typeof setTimeout> | undefined} */
-let lost;
-const done = () => { backs = 0; clearTimeout(lost); backing = null; const r = landed; landed = null; r?.(); };
-let ours = false;   // the popstate being handled is one of the steps
-if (typeof window !== 'undefined') window.addEventListener('popstate', () => {
-  ours = backs > 0;
-  if (ours && --backs === 0) done();
-  setTimeout(() => { ours = false; });
-}, true);
-function back() {
-  if (!backing) backing = new Promise(r => { landed = r; });
-  backs++;
-  clearTimeout(lost); lost = setTimeout(done, 1000);   // never landed (no history here)
-  try { history.back(); } catch { done(); }
-}
-/** Resolves once every sheet's step back has landed: push a page after it. @returns {Promise<void>} */
-export const sheetsSettled = () => backing || Promise.resolve();
+// A close's step back is counted (steps.js): a sheet opened meanwhile pushes its entry once the steps have landed, and
+// sheets ignore the popstates they make. An app's router waits on sheetsSettled() before it pushes a page.
+/** Resolves once every sheet's (and the drawer's) step back has landed: push a page after it. @returns {Promise<void>} */
+export const sheetsSettled = stepsSettled;
 // how much taller than the screen the sheet is made for a move on a phone, hidden below the bottom edge: room for
 // the pull past full height and the spring's overshoot
 const SPARE = 48;
@@ -102,7 +81,7 @@ export function detentSheet(sheet) {
       if (pushed || !sheet.open || leaving) return;
       try { history.pushState({ ...(history.state || {}), uiSheet: key }, ''); pushed = true; } catch { /* no history here */ }
     };
-    if (backing) backing.then(go); else go();
+    if (stepping()) void stepsSettled().then(go); else go();
   }
   /** @param {HTMLElement | null} [from] */
   function open(from = null) {
@@ -204,7 +183,7 @@ export function detentSheet(sheet) {
     if (pushed) { pushed = false; back(); }
     opener?.focus();
   });
-  l.on(window, 'popstate', () => { if (!ours && sheet.open && history.state?.uiSheet !== key) { pushed = false; close(); } });
+  l.on(window, 'popstate', () => { if (!ourStep() && sheet.open && history.state?.uiSheet !== key) { pushed = false; close(); } });
   if (grab && ds.length > 1) {
     grab.setAttribute('role', 'button');
     grab.tabIndex = 0;

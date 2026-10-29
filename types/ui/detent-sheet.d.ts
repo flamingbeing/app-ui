@@ -14,5 +14,6 @@ export function detentSheet(sheet: HTMLDialogElement): {
     setDetent: (d: string) => void;
     stop: () => void;
 };
-export function sheetsSettled(): Promise<void>;
+/** Resolves once every sheet's (and the drawer's) step back has landed: push a page after it. @returns {Promise<void>} */
+export const sheetsSettled: () => Promise<void>;
 export function topDetent(ds: string[]): string;

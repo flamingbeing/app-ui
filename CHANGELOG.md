@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.45
+- Drawer: Android's Back closes the phone's drawer (it is a history entry while open, as a sheet is), and the page
+  behind it (bar, pages, tab bar) is `inert`, so Tab and TalkBack stay in the drawer. A side link's page takes the
+  drawer's place in history.
+- `ui/steps.js` (`stepsSettled`): the counted steps back that sheets used, shared with the drawer; `tabBack` waits
+  for them before it adds or takes away its entry, so a step on its way can't undo a tab change.
+  `sheetsSettled` stays (same promise).
+- Checked: a sheet closed by Esc, the close request Chrome sends a modal dialog for Android's Back, steps back once.
+
 ## 1.0.0-rc.44
 - Tab pages: a swipe lights its new tab the moment the finger lets go, as Android's tab bars do, not when the
   pages land (the bar no longer lags the swipe). A let-go that springs back keeps the tab it had.
