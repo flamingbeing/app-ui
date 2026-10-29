@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.44
+- Tab pages: a swipe lights its new tab the moment the finger lets go, as Android's tab bars do, not when the
+  pages land (the bar no longer lags the swipe). A let-go that springs back keeps the tab it had.
+
 ## 1.0.0-rc.43
 - Gallery: the install file's colours are the dark ground (`#1c1c1e`), so the Android system bar at the bottom of
   the installed gallery is dark, not light.

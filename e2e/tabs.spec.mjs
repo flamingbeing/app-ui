@@ -203,6 +203,30 @@ test('swipe: let go, the pages glide on at the finger’s speed and land without
   expect(all.at(-1)).toMatchObject({ title: 'Rooms', show: 1 });
 });
 
+test('swipe: the tab lights the moment the finger lets go, not when the pages land; a spring-back keeps it', async ({ sized }) => {
+  const page = await load(sized);
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  const lit = () => page.evaluate(() => [...document.querySelectorAll('nav.ui-tabbar [aria-current="page"]')].map(t => t.getAttribute('data-tab-page')));
+  const homeX = () => page.locator('#home').evaluate(e => Math.round(e.getBoundingClientRect().x));
+  await send('touchStart', 300, 420);
+  for (const x of [290, 270, 240, 200, 150, 120]) { await send('touchMove', x, 420); await page.waitForTimeout(16); }
+  await send('touchEnd', 0, 0);
+  const [now, x] = [await lit(), await homeX()];
+  expect(x, 'the pages still gliding').toBeGreaterThan(-385);
+  expect(now).toEqual(['#rooms']);
+  await settled(page);
+  expect(await lit()).toEqual(['#rooms']);
+  // let go short of half: the tab stays where it was
+  await send('touchStart', 300, 420);
+  for (const x of [290, 270, 240]) await send('touchMove', x, 420);
+  for (let i = 0; i < 6; i++) { await page.waitForTimeout(40); await send('touchMove', 240 + (i % 2), 420); }
+  await send('touchEnd', 0, 0);
+  expect(await lit()).toEqual(['#rooms']);
+  await settled(page);
+  expect(await lit()).toEqual(['#rooms']);
+});
+
 test('swipe: let go short of half, the page springs back and keeps its title; at an end it stretches, less and less', async ({ sized }) => {
   const page = await load(sized);
   const cdp = await page.context().newCDPSession(page);

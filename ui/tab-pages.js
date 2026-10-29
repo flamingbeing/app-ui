@@ -90,9 +90,10 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   /** @type {Map<HTMLElement, number>} */
   const ys = new Map();
 
-  function mark() {
+  /** the tab of page lit (current's; a let-go swipe lights the page it goes to at once) @param {HTMLElement} [page] */
+  function mark(page = current) {
     for (const t of root.querySelectorAll('[data-tab-page]')) {
-      if (pageOf(t) === current) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+      if (pageOf(t) === page) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     }
   }
   /** @param {string | HTMLElement} target @param {Element | null} [tab] */
@@ -257,6 +258,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       scrollTo(0, ys.get(near) ?? 0);   // (go's own scroll comes a moment later, the same)
       dx = ahead ? x + w : x - w;   // (where it is beside the old page, either side of the middle)
     } else {
+      mark();
       ready = false;   // laid out again below, for the same page
       dx = x;
     }
@@ -345,6 +347,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const run = springGlide(parts, dx, to0, stretched ? 0 : v);
     /** @type {Gliding} */
     const g = glide = { run, to, missing, timer: 0 };
+    mark(to ?? current);   // the tab lights at the let-go, as Android's does, not when the pages land
     if (small) {
       // the title's words change where the glide passes halfway (unseen: it is faded out there)
       const path = run.path, half = path.findIndex(x => titleAt(x) !== titleAt(path[0]));
