@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.61
+- Swiping tab pages in a plain-header look (Tinted glass, the app's own): the page coming in sits level with the one
+  going out. The large title's top margin got out of `.ui-screens` for the page in the flow but not for the pages
+  beside it, so the incoming title sat one margin lower and jumped up as it landed. `.ui-screens` is a flow root.
+- On a phone the tab pages reach down to the tab bar (`.ui-shell` a column, the screens filling it), so a swipe on the
+  space under a short page changes tab; that space was the page background, outside the pager. (Notes had this in
+  its own CSS.)
+
 ## 1.0.0-rc.60
 - The update prompt tries the owed reload once when it mounts. On a slow phone the app can finish starting after a
   field was already left (or removed), so the `focusout` it listens for never came and the take-over reload stayed

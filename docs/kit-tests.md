@@ -73,6 +73,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Centre action | looks A, B (edge) light and C, B dark: `.ui-tab-action` (New) is a 44 px accent circle in the on-accent colour, raised above the other icons, its label for screen readers only, a 44 px target | yes |
 | Tap a tab | shows its page, marks both bars, names the bar; New opens the sheet and is no page | |
 | Swipe | left goes to the next page, past New; right comes back; a `ui-tab` event each time; nothing past the ends; a short slow move goes back with nothing left moved | |
+| Swipe, level and low | the page beside comes in with its title level with the current one's (looks A and B); on a short page a swipe just above the tab bar changes tab | |
 | Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it; in WebKit too, frame by frame, and the glide never goes back or faster than a fast finger | |
 | Glide | let go past half (or with a throw), every frame the pages sit side by side and only move onward, the glide takes under 500 ms and the new page lands where it ended (no jump); the bar title is Plants before halfway, Rooms partly faded in after, fully shown at the end | |
 | Tab lights at let-go | the swipe's new tab has `aria-current` at the let-go while the pages still glide, not only when they land; a let-go that springs back keeps the tab it had | |

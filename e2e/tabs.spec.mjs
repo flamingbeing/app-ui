@@ -158,6 +158,31 @@ test('swipe: the page follows the finger, the next one beside it', async ({ size
   expect(await shown(page)).toEqual(['home']);
 });
 
+test('swipe: the page beside comes in level with the current one (its title too), in a plain-header look and in the band', async ({ sized }) => {
+  for (const look of ['a', 'b']) {
+    const page = await load(sized, `&look=${look}`);
+    const cdp = await page.context().newCDPSession(page);
+    const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+    await send('touchStart', 300, 420);
+    for (const x of [290, 270, 240, 200]) await send('touchMove', x, 420);
+    const tops = await page.evaluate(() => ['home-title', 'rooms-title'].map(id => Math.round(document.getElementById(id).getBoundingClientRect().top)));
+    expect(tops[1], `look ${look}: no jump as the page lands (a top margin let out of .ui-screens)`).toBe(tops[0]);
+    await send('touchEnd', 0, 0);
+    await settled(page);
+  }
+});
+
+test('swipe: on a short page the space under its last row, down to the tab bar, still changes tab', async ({ sized }) => {
+  const page = await load(sized);
+  await swipe(page, 300, 60);
+  expect(await shown(page)).toEqual(['rooms']);
+  // just above the tab bar: below the page's own height (min-height 60vh) until the pages reach down to the bar
+  const y = await page.evaluate(() => Math.round(document.querySelector('.ui-tabbar').getBoundingClientRect().top - 24));
+  expect(y, 'the page is short: room under its rows').toBeGreaterThan(await page.evaluate(() => document.querySelector('#rooms .ui-row:last-child').getBoundingClientRect().bottom + 40));
+  await swipe(page, 300, 60, y);
+  expect(await shown(page)).toEqual(['jobs']);
+});
+
 // every frame's page positions and bar title from now on, until read @param {import('@playwright/test').Page} page
 async function frames(page) {
   await page.evaluate(() => {
