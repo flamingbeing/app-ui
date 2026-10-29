@@ -37,6 +37,11 @@
   .ui-shell:is(.is-drawer-open, .is-drawer-moving) .ui-sidebar { display: flex; position: fixed; inset: 0 auto 0 0; z-index: 41;
     width: min(18rem, 85vw); box-shadow: 0 0 24px rgb(0 0 0 / .25); touch-action: pan-y; }
   .ui-shell.is-drawer-moving .ui-sidebar { will-change: transform; }
+  /* the tab pages reach down to the tab bar, so a swipe on the space under a short page still changes tab (that space
+     was the page's background, outside the pager) */
+  .ui-shell:not([hidden]) { display: flex; flex-direction: column; min-height: 100dvh; }
+  .ui-shell > .ui-screens { flex: 1 0 auto; display: flex; flex-direction: column; }
+  .ui-shell > .ui-screens > .ui-screen { flex: 1 0 auto; }
 }
 
 /* ---------- tablet and laptop: side bar + list + detail ---------- */

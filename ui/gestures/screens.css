@@ -2,7 +2,10 @@
    ui/gestures.css (which loads them all, in order); link it alone
    for just this part, after theme.css and ui.css. */
 /* ---------- pushed screens ---------- */
-.ui-screens { position: relative; overflow-x: clip; }
+/* flow-root: a screen's top margin (the large title's, in the plain looks) stays inside .ui-screens. Let out, the
+   page in the flow sat one margin higher than the pages beside it (out of the flow, their margin kept), so the title
+   jumped as a swiped page landed */
+.ui-screens { position: relative; overflow-x: clip; display: flow-root; }
 .ui-screen { background: var(--bg); min-height: 60vh; }
 .ui-screen[hidden] { display: none; }
 .ui-screens.is-swiping .ui-screen:not(.is-top) { position: absolute; inset: 0 0 auto; }
