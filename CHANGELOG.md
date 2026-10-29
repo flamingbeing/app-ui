@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.51
+## 1.0.0-rc.52
 - Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
   words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
   state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
@@ -14,6 +14,10 @@
   with a switch.
 - Gallery: the Haptics switch is in the Demo controls sheet with Less motion.
 
+
+## 1.0.0-rc.51
+- Sync button: the count is the badge's CSS content (`data-count`), not text, so the button's name is its label alone
+  (axe `label-content-name-mismatch` with a count showing). Looks unchanged.
 
 ## 1.0.0-rc.50
 - Press Back again to close: the first Back on the first tab stays in the app and shows a toast, "Press Back again

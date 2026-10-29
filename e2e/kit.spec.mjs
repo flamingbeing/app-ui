@@ -755,7 +755,9 @@ test('the sync button shows each state in its icon, a tap syncs now and lifts; s
   expect(new Set(looks.map(l => l[0])).size, 'one colour').toBe(1);
   expect(new Set(looks.map(l => l[1])).size, 'five icons').toBe(5);
   await pick('pending');
-  await expect(btn.locator('.ui-sync-badge')).toHaveText('3');
+  await expect(btn.locator('.ui-sync-badge')).toHaveAttribute('data-count', '3');
+  await expect(btn.locator('.ui-sync-badge')).toBeVisible();
+  expect(await AxeBuilder(page), 'clean with the count showing').toEqual([]);
   await pick('attention');
   expect(await btn.evaluate(e => getComputedStyle(e, '::after').content), 'attention has its dot').not.toBe('none');
   expect(await AxeBuilder(page)).toEqual([]);
