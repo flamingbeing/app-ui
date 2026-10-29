@@ -177,19 +177,16 @@ judged: each move's handlers within 8 ms, the touch down's and the lift's within
 | Tab swipe | a swipe from Plants to Rooms and a quick flick back: drag frames within 20 ms but one, none over 50 ms, glide frames none over 50 ms, no task over 50 ms; the page lands | |
 | Sheet drag | the New sheet's grabber dragged up to large, down to medium, then down and away: the same budget each; the detents and the close land | |
 | Bounce pull | a pull past the list's top, then past its bottom, and the spring back: the same budget each | |
-| Row swipe | `/kit/ios/`: a to-do row swiped open on Flag and Delete, then flicked shut from on it: the same budget each; it opens at -148 px and closes | |
 | Pressed | a touch on the Jobs tab shows `data-pressed` within 50 ms; it clears on the lift | |
 | Sync tap | a tap on the shell bar's sync button: the icon's lift is a CSS animation (transform, opacity); every frame while it shows sending within 20 ms but one, none over 50 ms; one tap counted. WebKit: the tap's handlers within 16 ms | |
 | Android look | look M: the tab swipe (its navigation pill moving) and the sheet dragged up to large, the same budget each | |
 
-## iOS look (`e2e/ios.spec.mjs`, `kit/ios/`, `test/swipe.unit.test.mjs`)
+## iOS look (`e2e/ios.spec.mjs`, `kit/ios/`)
 
-`/kit/ios/` at 390 px in the iOS look (Chromium with DevTools touch, and WebKit with page-sent pointer events): a to-do
-row opens on Flag and Delete, a short swipe springs back, a tap or Escape closes, a full swipe arms and deletes, a swipe
-the other way runs Done; the edge strip and a vertical move are left alone; the segmented thumb moves and filters the
-rows; the switch is green; the bar collapses on scroll; the sheet goes medium to large by its grabber and Done closes
-it. axe in light and dark on the page, the open actions and the sheet. Node: `swipeSettle` and `swipeShown`; the look's
-variants, tokens, accent and ground fallbacks (`test/looks.unit.test.mjs`).
+`/kit/ios/` at 390 px in the iOS look (Chromium and WebKit): the segmented thumb moves and filters the rows; the switch
+is green; the bar collapses on scroll; the sheet goes medium to large by its grabber and Done closes it. axe in light
+and dark on the page and the sheet. Node: the look's variants, tokens, accent and ground fallbacks
+(`test/looks.unit.test.mjs`).
 
 ## Settings screen gallery
 

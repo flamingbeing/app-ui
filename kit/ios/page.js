@@ -1,7 +1,6 @@
-// The iOS gallery: the iOS look on a made-up plant app. Swipe a to-do row for its actions; the segmented control
-// filters the rows; the switches and the sheet are the kit's own. window.kit is { swipe, done: [] } for the tests:
-// done lists each action run, as "id:plant".
-import { startGestures, swipeActions, icon } from '../../ui/index.js';
+// The iOS gallery: the iOS look on a made-up plant app. The segmented control filters the to-do rows; the switches
+// and the sheet are the kit's own. window.kit is startGestures()'s, for the tests.
+import { startGestures, icon } from '../../ui/index.js';
 import { chevronRight } from '../../icons/lucide.js';
 import { previewTheme } from '../../theme/index.js';
 import { galleryPreview } from '../preview.js';
@@ -40,29 +39,15 @@ reminders.append(
     el('span', { class: 'ui-row-value' }, ['22:00 to 07:00']), icon(chevronRight, { class: 'ui-row-chevron' })])]),
 );
 
-const PLANTS = [['Fern', 'Water: soil dry on top', 'Today', true], ['Monstera', 'Turn a quarter towards the light', 'Today', true],
-  ['Basil', 'Pinch out the tops', 'Tomorrow', false], ['Orchid', 'Feed at half strength', 'Fri', false],
-  ['Snake plant', 'Wipe the leaves', 'Sun', false]];
+const PLANTS = [['Fern', 'Water: soil dry on top', 'Today', true, false], ['Monstera', 'Turn a quarter towards the light', 'Today', true, true],
+  ['Basil', 'Pinch out the tops', 'Tomorrow', false, false], ['Orchid', 'Feed at half strength', 'Fri', false, true],
+  ['Snake plant', 'Wipe the leaves', 'Sun', false, false]];
 const todo = /** @type {HTMLElement} */ (document.getElementById('todo'));
-for (const [name, what, when, due] of PLANTS) {
-  todo.append(el('li', due ? { 'data-due': '' } : {}, [el('div', { class: 'ui-row', 'data-plant': String(name) }, [
+for (const [name, what, when, due, flagged] of PLANTS) {
+  todo.append(el('li', due ? { 'data-due': '' } : {}, [el('div', { class: 'ui-row', 'data-plant': String(name), ...flagged ? { 'data-flagged': '' } : {} }, [
     el('span', { class: 'ui-row-main' }, [String(name), el('span', { class: 'ui-row-sub' }, [String(what)])]),
     el('span', { class: 'ui-row-value' }, [String(when)])])]));
 }
-
-/** @type {string[]} */
-const done = [];
-const swipe = swipeActions(todo, {
-  lead: row => [{ id: 'done', label: row.hasAttribute('data-done') ? 'Not done' : 'Done', tone: 'ok', full: true }],
-  trail: row => [{ id: 'delete', label: 'Delete', tone: 'danger', full: true },
-    { id: 'flag', label: row.hasAttribute('data-flagged') ? 'Unflag' : 'Flag', tone: 'warn' }],
-  onAction(id, row) {
-    done.push(`${id}:${row.dataset.plant}`);
-    if (id === 'delete') row.closest('li')?.remove();
-    else row.toggleAttribute(id === 'flag' ? 'data-flagged' : 'data-done');
-    filter();
-  },
-});
 
 const show = /** @type {HTMLFieldSetElement} */ (document.getElementById('show'));
 function filter() {
@@ -72,7 +57,7 @@ function filter() {
     /** @type {HTMLElement} */ (li).hidden = pick === 'due' ? !li.hasAttribute('data-due') : pick === 'flagged' ? !row.hasAttribute('data-flagged') : false;
   }
 }
-show.addEventListener('change', () => { swipe.close(); filter(); });
+show.addEventListener('change', filter);
 
 const kit = startGestures();
-/** @type {any} */ (window).kit = { ...kit, swipe, done };
+/** @type {any} */ (window).kit = kit;
