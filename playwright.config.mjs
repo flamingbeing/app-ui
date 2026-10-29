@@ -2,7 +2,8 @@
 // here unless already running. The base config comes from app-devkit (.devkit/, put there by setup-browser in CI; copy
 // it once locally).
 // Chromium runs every spec (the finger tests drive touch through the DevTools protocol, which only Chromium has);
-// Firefox and WebKit run the gallery smoke spec (each gallery page starts, is clean and keeps to the page policy).
+// Firefox and WebKit run the gallery smoke spec (each gallery page starts, is clean and keeps to the page policy);
+// WebKit, the iPhone's engine, also runs the swipe-feel spec (a finger from page-sent touch events).
 import { baseConfig, phone } from './.devkit/playwright/base.mjs';
 
 export const PORT = 4174;
@@ -21,6 +22,6 @@ const { isMobile, ...touch } = phone.use;   // (Firefox has no isMobile)
 config.projects = [
   { ...phone, use: { ...phone.use, browserName: 'chromium', launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {} } },
   { name: 'firefox', testMatch: 'gallery.spec.mjs', use: { ...touch, browserName: 'firefox' } },
-  { name: 'webkit', testMatch: 'gallery.spec.mjs', use: { ...phone.use, browserName: 'webkit' } },
+  { name: 'webkit', testMatch: /(gallery|swipe-feel)\.spec\.mjs/, use: { ...phone.use, browserName: 'webkit' } },
 ];
 export default config;

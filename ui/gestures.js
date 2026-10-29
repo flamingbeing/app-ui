@@ -20,12 +20,14 @@ import { tabPages } from './tab-pages.js';
 
 /**
  * @param {ParentNode} [root]
- * @param {{ onPrevMissing?: () => void }} [o]  onPrevMissing: a right swipe on the first tab page (an app opens its drawer)
+ * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void }} [o]  drawer: the
+ *   drawer a right swipe on the first tab page pulls out with the finger (adaptiveShell(...).drawer); onPrevMissing
+ *   (without a drawer): told after such a swipe
  * @returns {{ title: ReturnType<typeof largeTitle> | null, menus: ReturnType<typeof holdMenus> | null,
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root = document, { onPrevMissing } = {}) {
+export function startGestures(root = document, { drawer, onPrevMissing } = {}) {
   /** @type {(() => void)[]} */
   const stops = [];
   // iOS shows :active press states only when the page listens for touches
@@ -68,7 +70,7 @@ export function startGestures(root = document, { onPrevMissing } = {}) {
   if (back) stops.push(() => { back.remove(); host?.classList.remove('has-bar-back'); });
   const tabBar = /** @type {HTMLElement | null} */ (root.querySelector('nav.ui-tabbar'));
   if (tabBar) stops.push(tabBarRoom(tabBar));
-  const tabs = tabBar && host && screens && tabBar.querySelector('[data-tab-page]') ? tabPages(tabBar, { screens, host, root, onPrevMissing }) : null;
+  const tabs = tabBar && host && screens && tabBar.querySelector('[data-tab-page]') ? tabPages(tabBar, { screens, host, root, drawer, onPrevMissing }) : null;
   if (tabs) stops.push(tabs.stop);
   const selects = new Map();
   for (const list of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('.ui-list[data-select]'))) {

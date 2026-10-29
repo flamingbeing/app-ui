@@ -15,9 +15,11 @@
 //                Ctrl/Cmd+K focuses the visible one; Esc clears it, then leaves it
 //   Esc          on a phone's pushed detail, goes back (select mode, menus and dialogs keep their own Esc)
 //   side bar     a .ui-bar-menu button (in the bar's [data-bar-lead]) opens the side bar as a drawer on a phone
-//                (.ui-shell.is-drawer-open); a side link, the shade, Esc or growing past phone width closes it
+//                (.ui-shell.is-drawer-open, over a .ui-drawer-shade); a side link, a tap on the shade, Esc or growing
+//                past phone width closes it. It follows the finger: .drawer (returned) is what tab-pages.js pulls out
+//                on a right swipe from the first tab page; a left swipe on the drawer or the shade pushes it back
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
-import { listeners } from '../gesture.js';
+import { listeners, still, swipeIntent, THROW_MS, springPath, pathAt, releaseVelocity } from '../gesture.js';
 
 export const TABLET_MIN = 600;
 export const LAPTOP_MIN = 840;
@@ -41,7 +43,9 @@ function defaultRender(row, detail) {
  * @param {HTMLElement} shell  .ui-shell
  * @param {{ screens?: { push: (t: string | HTMLElement, from?: HTMLElement | null) => void, pop: (a?: boolean) => void, depth: () => number } | null,
  *   render?: (row: HTMLElement, detail: HTMLElement) => void }} [opts]  screens: the page's screen stack (startGestures().screens)
- * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string, stop: () => void }}
+ * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string,
+ *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null, stop: () => void }}
+ *   drawer: the side bar's drawer for tab-pages.js to pull out (null without a side bar)
  */
 export function adaptiveShell(shell, { screens = null, render = defaultRender } = {}) {
   const l = listeners();
@@ -131,22 +135,148 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   for (const s of searches) l.on(s, 'input', () => { for (const o of searches) if (o !== s) o.value = s.value; filter(s.value); });
   const visibleSearch = () => searches.find(s => s.getClientRects().length > 0) ?? null;
 
-  // the phone's drawer: the side bar over the page
+  // the phone's drawer: the side bar over the page, on a shade. It follows the finger: a right swipe on the first tab
+  // page pulls it out (tab-pages.js, the drawer option), a left swipe on it or the shade pushes it back; let go, it
+  // glides open or shut at the finger's speed (the tab pages' spring). The menu button and the shade's tap glide it too.
   const side = /** @type {HTMLElement | null} */ (shell.querySelector('.ui-sidebar'));
   const menus = /** @type {HTMLElement[]} */ ([...shell.querySelectorAll('.ui-bar-menu')]);
   const drawerOpen = () => shell.classList.contains('is-drawer-open');
+  /** @type {HTMLElement | null} */
+  let shade = null;
+  /** how far out the drawer is (0 shut, dw open), and its width */
+  let dx = 0, dw = 0;
+  /** the drawer's glide, or null @type {{ runs: Animation[], path: number[], open: boolean } | null} */
+  let slid = null;
+  /** the drawer and its shade show, for the finger or a glide */
+  function lay() {
+    if (!side) return;
+    if (!shade) {
+      shade = document.createElement('div');
+      shade.className = 'ui-drawer-shade';
+      shell.append(shade);
+      l.on(shade, 'click', () => drawer(false));
+      swipeShut(shade);
+    }
+    shell.classList.add('is-drawer-moving');
+    dw = side.offsetWidth || 288;
+  }
+  /** @param {number} x */
+  function place(x) {
+    dx = Math.max(0, Math.min(dw, x));
+    /** @type {HTMLElement} */ (side).style.transform = `translateX(${dx - dw}px)`;
+    /** @type {HTMLElement} */ (shade).style.opacity = String(dx / dw);
+  }
+  /** the drawer stops where its glide has it (the finger caught it) */
+  function hold() {
+    const g = slid;
+    if (!g) return;
+    slid = null;
+    dx = g.runs.length ? pathAt(g.runs[0], g.path) : dx;
+    for (const a of g.runs) a.cancel();
+  }
+  /** the drawer comes to rest open or shut @param {boolean} on @param {boolean} [touch] */
+  function rest(on, touch = false) {
+    const was = drawerOpen();
+    shell.classList.toggle('is-drawer-open', on);
+    shell.classList.remove('is-drawer-moving');
+    if (side) side.style.transform = '';
+    if (shade) shade.style.opacity = '';
+    dx = on ? dw : 0;
+    if (on === was) return;
+    for (const m of menus) m.setAttribute('aria-expanded', String(on));
+    // (a finger's open doesn't focus a field: the keyboard would come up)
+    if (on) /** @type {HTMLElement | null} */ (side?.querySelector(touch ? 'a, button' : 'a, button, input'))?.focus({ preventScroll: true });
+    else if (side?.contains(document.activeElement)) menus[0]?.focus({ preventScroll: true });
+  }
+  /** the drawer glides open or shut from where it is, starting at v px/ms @param {boolean} on @param {number} [v] @param {boolean} [touch] */
+  function glide(on, v = 0, touch = false) {
+    if (!side) return;
+    hold();
+    if (still()) { rest(on, touch); return; }
+    lay();
+    const path = springPath(dx, on ? dw : 0, v);
+    const timing = { duration: (path.length - 1) * 1000 / 60, easing: 'linear', fill: /** @type {const} */ ('forwards') };
+    const runs = [side.animate(path.map(x => ({ transform: `translateX(${x - dw}px)` })), timing),
+      /** @type {HTMLElement} */ (shade).animate(path.map(x => ({ opacity: x / dw })), timing)];
+    const g = slid = { runs, path, open: on };
+    if (on) rest(on, touch), shell.classList.add('is-drawer-moving');   // open at once for focus and Esc; still moving
+    void Promise.all(runs.map(a => a.finished.catch(() => {}))).then(() => {
+      if (slid !== g) return;
+      slid = null;
+      for (const a of runs) a.cancel();
+      rest(on, touch);
+    });
+  }
   /** @param {boolean} on */
   function drawer(on) {
-    if (on === drawerOpen() || !side) return;
-    shell.classList.toggle('is-drawer-open', on);
-    for (const m of menus) m.setAttribute('aria-expanded', String(on));
-    if (on) /** @type {HTMLElement | null} */ (side.querySelector('a, button, input'))?.focus();
-    else if (side.contains(document.activeElement)) menus[0]?.focus();
+    if (!side || (on === drawerOpen() && !slid)) return;
+    glide(on);
   }
+  /** a release: open if it is out past half, counting the throw @param {number} x @param {number} v */
+  const opens = (x, v) => x + v * THROW_MS > dw / 2;
+  let pull0 = 0;
+  /** The drawer for a finger that started elsewhere (tab-pages.js): pull(x) has it x px out, release lets it go.
+   * @type {{ pull: (x: number) => void, release: (x: number, v: number) => void } | null} */
+  const pull = side && {
+    pull(x) {
+      if (!shell.classList.contains('is-drawer-moving') || slid) { hold(); lay(); pull0 = dx; }
+      place(pull0 + x);
+    },
+    release(x, v) { void x; glide(opens(dx, v), v, true); pull0 = 0; },
+  };
+  /** a left swipe on the open drawer, or its shade, pushes it back with the finger @param {HTMLElement} el */
+  function swipeShut(el) {
+    /** @type {number | null} */
+    let x0 = null;
+    let y0 = 0, from = 0;
+    /** @type {'x' | 'y' | null} */
+    let way = null;
+    let going = false;
+    /** @type {[number, number][]} */
+    let hist = [];
+    l.on(el, 'touchstart', (/** @type {TouchEvent} */ e) => {
+      x0 = null;
+      if (e.touches.length > 1 || (!drawerOpen() && !slid) || size !== 'phone') return;
+      const t = e.touches[0];
+      going = slid ? slid.open : drawerOpen();
+      const moving = !!slid;
+      hold(); lay();
+      if (!moving) dx = dw;   // (open and still)
+      from = dx; place(dx);
+      way = null;
+      x0 = t.clientX; y0 = t.clientY;
+      hist = [[e.timeStamp, t.clientX]];
+    }, { passive: true });
+    l.on(el, 'touchmove', (/** @type {TouchEvent} */ e) => {
+      if (x0 === null) return;
+      const t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
+      if (!way) {
+        way = swipeIntent(mx, my);
+        if (way === 'y') { x0 = null; letGo(); return; }   // the side bar's own scroll
+        if (!way) return;
+      }
+      if (e.cancelable) e.preventDefault();
+      hist.push([e.timeStamp, t.clientX]);
+      if (hist.length > 12) hist.shift();
+      place(from + Math.min(0, mx));
+    }, { passive: false });
+    const end = (/** @type {TouchEvent} */ e) => {
+      if (x0 === null) return;
+      x0 = null;
+      if (way !== 'x') { letGo(); return; }   // a tap (the shade's click shuts it after)
+      if (e.cancelable) e.preventDefault();   // no click under the finger
+      const v = e.type === 'touchend' ? releaseVelocity(hist, e.timeStamp) : 0;
+      glide(opens(dx, v), v, true);
+    };
+    // not a swipe: a caught glide goes on where it was going; a still drawer stays as it was
+    const letGo = () => { if (dx === (going ? dw : 0)) rest(going); else glide(going); };
+    l.on(el, 'touchend', end, { passive: false });
+    l.on(el, 'touchcancel', end, { passive: true });
+  }
+  if (side) swipeShut(side);
   for (const m of menus) { m.setAttribute('aria-expanded', 'false'); l.on(m, 'click', () => drawer(!drawerOpen())); }
   if (side) l.on(side, 'click', (/** @type {MouseEvent} */ e) => { if (/** @type {Element} */ (e.target).closest('a, .ui-side-link')) drawer(false); });
-  l.on(shell, 'click', (/** @type {MouseEvent} */ e) => { if (e.target === shell && drawerOpen()) drawer(false); });   // the shade
-  l.on(shell, 'ui-size', () => { if (size !== 'phone') drawer(false); });
+  l.on(shell, 'ui-size', () => { if (size !== 'phone') { hold(); rest(false); } });
 
   l.on(document, 'keydown', (/** @type {KeyboardEvent} */ e) => {
     const t = /** @type {Element} */ (e.target);
@@ -165,5 +295,5 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     }
   });
 
-  return { open, current: () => current, size: () => size, stop() { gone.disconnect(); l.stop(); } };
+  return { open, current: () => current, size: () => size, drawer: pull, stop() { gone.disconnect(); l.stop(); hold(); shade?.remove(); } };
 }

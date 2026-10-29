@@ -7,6 +7,7 @@
 - rc.11 plug-and-play fixes (plain `<button>` tabs with icons, borderless bar buttons, tab pages with swipe between tabs on phones, the About group in `settingsScreen`, look D "Slim" and a phone side-bar drawer), 10:05 SGT 28 Oct.
 - rc.12 core-review follow-ups (gallery CSS shipped, gestures.css split, `ui-` names and `idPrefix`, optional detail pane, bar ends, tab contrast, toasts over the tab bar, switch width, types and sideEffects; `@layer` waits on tokens.css), 28 Oct.
 - rc.13 tab slide on tap (owner, 28 Oct).
+- rc.34 swipe fidelity (owner, 29 Oct): pages follow the finger also with Reduce Motion, quick flicks all count, catch a glide, pan-y pager, 28 px edge, drawer pulled from the first page.
 
 ## Waiting on the owner
 -

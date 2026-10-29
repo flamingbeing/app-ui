@@ -60,8 +60,9 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 ## Tab pages and swipe
 
 `/kit/shell/` is also tested by `e2e/tabs.spec.mjs` (ui/tab-pages.js, plain tabs and bar buttons, the phone's
-drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeIntent`, `pageStep`, `swipeEdge`, `rubber`, `springPath`) are in
-`test/gestures.unit.test.mjs`.
+drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeIntent`, `pageStep`, `swipeEdge`, `rubber`, `unrubber`, `springPath`, `pathAt`, `releaseVelocity`)
+are in `test/gestures.unit.test.mjs`. `e2e/swipe-feel.spec.mjs` runs the feel in Chromium and WebKit (the iPhone's
+engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz finger.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
@@ -69,13 +70,17 @@ drawer), with an emulated finger at 390 px unless named. Pure parts (`swipeInten
 | Centre action | looks A, B (edge) light and C, B dark: `.ui-tab-action` (New) is a 44 px accent circle in the on-accent colour, raised above the other icons, its label for screen readers only, a 44 px target | yes |
 | Tap a tab | shows its page, marks both bars, names the bar; New opens the sheet and is no page | |
 | Swipe | left goes to the next page, past New; right comes back; a `ui-tab` event each time; nothing past the ends; a short slow move goes back with nothing left moved | |
-| Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it | |
+| Follows the finger | mid-swipe the page is moved by the finger's travel and the next page sits beside it; in WebKit too, frame by frame, and the glide never goes back or faster than a fast finger | |
 | Glide | let go past half (or with a throw), every frame the pages sit side by side and only move onward, the glide takes under 500 ms and the new page lands where it ended (no jump); the bar title is Plants before halfway, Rooms partly faded in after, fully shown at the end | |
 | Spring back | let go short of half and slow, the page springs back, the title stays, a `data-swipe-fade` part fades with the drag and is cleared after; at the first page a pull stretches less and less and springs back to 0 | |
-| No swipe | a mostly vertical move, a start within max(24 px, an eighth of the width) of either edge, the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
-| First page | a right swipe past a third of the finger's own travel (or a flick) fires `onPrevMissing` once (an app opens its drawer); a short move does not | |
+| No swipe | a mostly vertical move, a start within 28 px of either edge at 390 px (Android's Back; max 32), the Jobs chips (a sideways scroller), a field, a pushed screen, `data-swipe="off"` on the tab bar | |
+| First page | with `drawer=off`, a right swipe past a third of the finger's own travel (or a flick) fires `onPrevMissing` once; a short move does not | |
+| Quick flicks | three short flicks, each while the last still glides, go three pages (none lost to a glide); also in WebKit | |
+| Catch | a finger on the gliding pages holds them where they are, and a tap there opens nothing; let go still, they land on the nearer page; also in WebKit | |
+| Drawer pull | a right swipe on the first page pulls the side bar out by the finger's travel over a shade (opacity with it), the page stays; let go past half or with a flick it opens, a short slow pull goes back; a left swipe or a tap on the shade closes it; with Reduce Motion the button opens it with no animation; also in WebKit | |
+| Sideways scroller | the Jobs chips still scroll sideways under the pager's `touch-action: pan-y` | |
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
-| Reduce Motion | the swipe changes the tab with nothing moved | |
+| Reduce Motion | the pages still follow the finger, the next one beside, and glide on (rc.30 switched with nothing moved); also in WebKit | |
 | Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |

@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.0-rc.34
+Swipe feel changes for every app that moves to it:
+- Tab pages follow the finger 1:1 from the first move (8 px to tell sideways from up and down), with the next page
+  beside it, also with Reduce Motion (Android's Remove animations; rc.30 switched tabs with nothing moved there).
+- Quick flicks one after another each go a page (a flick is 0.4 px/ms or faster, however short); none is lost to the
+  last one's glide.
+- A finger landing on the gliding pages catches them where they are (a tap there opens nothing); let go, they go on
+  or land on the nearer page.
+- The pager is `touch-action: pan-y`, so the browser never takes a sideways move first; sideways scrollers inside
+  (`.ui-scroll-x`) still scroll.
+- The no-swipe edge is 28 px at 390 px (max 32; was 24), Android's system Back.
+- `startGestures(root, { drawer })` (and `tabPages`'s `drawer`): a right swipe on the first page pulls the phone
+  drawer out with the finger over a shade; let go past half or with a flick it opens; a left swipe or a tap on the
+  shade closes it. `adaptiveShell` returns `drawer` for this. Without `drawer`, `onPrevMissing` fires as before. The
+  drawer's open and close now glide on a spring (the `::before` shade and `ui-drawer-in` are gone).
+
 ## 1.0.0-rc.33
 - Add-ons (`theme/addons/index.js`, `theme/addons/addons.css`), opt-in and per device, off by default: wallpaper
   (patterns or a photo, dim, a backing for text on the page, optional see-through cards), fonts (stacks, a typed name,

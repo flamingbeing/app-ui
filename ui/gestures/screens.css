@@ -8,6 +8,8 @@
 .ui-screens.is-swiping .ui-screen:not(.is-top) { position: absolute; inset: 0 0 auto; }
 .ui-screens.is-swiping .ui-screen.is-top { position: relative; z-index: 2; box-shadow: -8px 0 24px rgb(0 0 0 / .12); }
 /* tab pages mid-swipe (tab-pages.js): the pages beside the current one sit at its sides, out of the flow */
+/* the tab pager (tab-pages.js): the browser keeps vertical pans; sideways moves come to the pager, cancelable */
+.ui-screens.is-pager { touch-action: pan-y; }
 .ui-screens.is-paging > .ui-screen.is-beside { position: absolute; inset: 0 0 auto; }
 /* once the finger moves them, the pages get their own layers, so each frame only moves them */
 .ui-screens.is-moving > .ui-screen:not([hidden]) { will-change: transform; }

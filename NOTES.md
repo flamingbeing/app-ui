@@ -14,3 +14,8 @@ Lasting rules, owner preferences and lessons (never task chatter), and how to te
   and plain bar buttons in rc.12's try).
 - axe runs with `preload: false`: its CSSOM preload copies `@import`-ed sheets into inline `<style>`s, which the
   Worker's page CSP reports a moment later (flaky "style-src-elem inline" fails).
+- Swipe feel in WebKit: Playwright has no touch input there (`Touch` is not constructible), so `e2e/swipe-feel.spec.mjs`
+  dispatches `Event`s with `touches` defined on them. Give each a 60 Hz `timeStamp`: the let-go speed reads off it,
+  and a busy machine's headless frames run 40–80 ms, which turned flicks into drags (flaky). WebKit with emulated
+  Reduce Motion paints a move a frame late, so read positions with `expect.poll`.
+- CDP touch moves arrive every 35–50 ms in headless Chromium; a test reading the page right after a move polls.

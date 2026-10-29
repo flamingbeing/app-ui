@@ -4,86 +4,66 @@
 // its own scroll; tapping the current tab with a screen pushed over it goes back to the page. The host sends "ui-tab"
 // (detail.page, detail.tab) after each change.
 // On a phone (< 600 px) a sideways swipe on the content moves to the next or previous page, the pages following the
-// finger (a pager) and, let go, glide on as iOS's paging does: a spring that starts at the finger's speed and settles
+// finger 1:1 (a pager) and, let go, glide on as iOS's paging does: a spring that starts at the finger's speed and settles
 // without overshoot (springPath), to the next page if the finger's throw would carry it past half the width
-// (pageStep), else back. Where there is no page the page stretches like iOS's rubber band (rubber). The pages beside
-// are laid out at touchstart, so the first move has nothing to build. The bar's title cross-fades to the coming page's
-// (its .ui-large-title) as the page passes halfway; anything in the bar marked data-swipe-fade fades out with the
-// swipe and back in on the new page. Never on a pushed screen, in a field, editor,
-// sideways scroller, dialog, sheet or open menu, in select mode, with text selected, or within swipeEdge() px of either edge (the larger of EDGE and an eighth of the width)
-// (the system's Back gestures and screens.js's edge swipe). A mostly vertical move scrolls instead. Less motion: the
-// swipe switches without the slide. Off: data-swipe="off" on the tab bar (or <html>), or { swipe: false }.
+// (pageStep), else back. A finger that lands on gliding pages catches them where they are and throws them again (the
+// nearer page becomes the current one), so quick flicks in a row each count. Where there is no page the page
+// stretches like iOS's rubber band (rubber); on the first page, given a drawer (the shell's side bar), a right swipe
+// pulls the drawer out with the finger instead. The host gets touch-action: pan-y (.is-pager), so the browser never
+// pans sideways and every sideways move stays the pager's; the pages beside are laid out at the first move that
+// looks sideways (a scroll never pays for them). The bar's title cross-fades to the coming page's (its
+// .ui-large-title) as the page passes halfway; anything in the bar marked data-swipe-fade fades out with the swipe
+// and back in on the new page. Never on a pushed screen, in a field, editor, sideways scroller, dialog, sheet or open
+// menu, in select mode, with text selected, or within swipeEdge() px of either edge (the system's Back gestures and
+// screens.js's edge swipe). A mostly vertical move scrolls instead. Less motion doesn't stop it: the pages move with
+// the finger (direct touch, as iOS's paging with Reduce Motion). Off: data-swipe="off" on the tab bar (or <html>), or
+// { swipe: false }.
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
 // page motion), at every width. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
 // { slide: false }.
-import { still, noGesture, listeners, velocity } from './gesture.js';
+import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber, springPath, pathAt, releaseVelocity } from './gesture.js';
 import { EDGE, swipeGoesBack } from './screens.js';
 import { TABLET_MIN } from './shell/shell.js';
 
-/** A first move's direction (pure): 'x' a sideways swipe, 'y' a scroll, null not far enough to tell. A swipe is under
- * about 37° from the horizontal. @param {number} mx @param {number} my */
-export function swipeIntent(mx, my) {
-  if (Math.max(Math.abs(mx), Math.abs(my)) < 10) return null;
-  return Math.abs(mx) > Math.abs(my) * 1.3 ? 'x' : 'y';
-}
+export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath } from './gesture.js';
 
-/** How far ahead a let-go swipe's speed is projected, in ms (iOS's paging: the throw counts, not just the drag). */
-export const THROW_MS = 200;
+/** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
+export const FLICK_V = 0.4;
 
 /** Where a let-go swipe goes (pure): 1 the next page, -1 the previous one, 0 back to this one. Like iOS's paging,
- * the page goes when where it is plus its throw (v x THROW_MS) is past half the width: a slow drag past half, or a
- * flick; a finger that turns back at the end takes it back.
+ * the page goes when where it is plus its throw (v x THROW_MS) is past half the width (a slow drag past half), or on
+ * a flick (FLICK_V or faster) that way; a finger that turns back at the end takes it back. So quick flicks one after
+ * another each go one page on (a caught glide counts from the page it was going to).
  * @param {number} dx  finger travel, negative = to the left @param {number} v  px/ms, signed like dx
  * @param {number} width @param {boolean} hasPrev @param {boolean} hasNext */
 export function pageStep(dx, v, width, hasPrev, hasNext) {
   const end = dx + v * THROW_MS;
-  if (dx < 0 && hasNext && end < -width / 2) return 1;
-  if (dx > 0 && hasPrev && end > width / 2) return -1;
+  if (hasNext && (end < -width / 2 || (v <= -FLICK_V && end < 0))) return 1;
+  if (hasPrev && (end > width / 2 || (v >= FLICK_V && end > 0))) return -1;
   return 0;
 }
 
-/** iOS's rubber band (pure): how far a page shows when pulled d px where there is no page, for a width w. It gives
- * less and less, never more than w. @param {number} d @param {number} w */
-export const rubber = (d, w) => Math.sign(d) * (1 - 1 / (Math.abs(d) * 0.55 / w + 1)) * w;
-
-/** How quickly the let-go glide settles: the spring's response in s (iOS's paging feel). */
-export const SPRING_S = 0.3;
-
-/** A critically damped spring's path (pure), one position per 60 Hz frame from `from` to `to`, starting at v px/ms
- * (the finger's speed, so the page doesn't jerk when let go). The speed is capped so it lands without passing `to`
- * (no page waits beyond it). The last position is exactly `to`.
- * @param {number} from @param {number} to @param {number} v @param {number} [response] */
-export function springPath(from, to, v, response = SPRING_S) {
-  const w = 2 * Math.PI / response, a = from - to;
-  // toward `to` faster than w|a| would pass it; cap there (the fastest start that still lands without overshoot)
-  const v0 = Math.sign(v) === -Math.sign(a) ? -Math.sign(a) * Math.min(Math.abs(v * 1000), w * Math.abs(a)) : v * 1000;
-  const b = v0 + w * a;
-  const out = [from];
-  for (let i = 1; i <= 90; i++) {
-    const t = i / 60, x = (a + b * t) * Math.exp(-w * t);
-    if (Math.abs(x) < 1) break;   // the last pixel is not seen; crawling to it is
-    out.push(to + x);
-  }
-  out.push(to);
-  return out;
-}
-
-/** How far from either edge a tab swipe may not start (pure): the system's Back gesture zone, wider on wide phones.
- * @param {number} width */
-export const swipeEdge = width => Math.max(EDGE, width / 8);
+/** How far from either edge a tab swipe may not start (pure): the system's Back gesture zone (Android's is about
+ * 24-30 px at its default), a little wider on wide phones, never more than 32 px. @param {number} width */
+export const swipeEdge = width => Math.max(EDGE, Math.min(32, width / 14));
 
 /** How long a tapped tab's page takes to slide in, in ms. */
 export const SLIDE_MS = 280;
 
+/** A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
+ * release(x, v) lets it go there at v px/ms, to open or closed.
+ * @typedef {{ pull: (x: number) => void, release: (x: number, v: number) => void }} PullDrawer */
+
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean, onPrevMissing?: () => void }} o  screens: the page's screen stack; host: its
- *   .ui-screens; root: where the tabs and side links are (default the page); onPrevMissing: a right swipe on the
- *   first page (nothing before it)
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void }} o
+ *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
+ *   page); drawer: the drawer a right swipe on the first page pulls out (adaptiveShell().drawer); onPrevMissing
+ *   (without a drawer): told after a right swipe on the first page (nothing before it)
  * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void }}
  */
-export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, onPrevMissing }) {
+export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, drawer, onPrevMissing }) {
   const l = listeners();
   const html = document.documentElement;
   /** one of the host's screens, by selector @param {string | null | undefined} sel @returns {HTMLElement | null} */
@@ -109,6 +89,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   }
   /** @param {string | HTMLElement} target @param {Element | null} [tab] */
   function go(target, tab = null) {
+    if (glide) settle();   // a tab tapped while the pages glide: they land first
     const page = typeof target === 'string' ? find(target) : target;
     if (!page || page.parentElement !== host) return;
     if (page === current) { if (screens.depth() > 0) void screens.base(page); return; }
@@ -147,9 +128,12 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
 
   // the swipe
   const on = () => swipe && innerWidth < TABLET_MIN && bar.dataset.swipe !== 'off' && html.dataset.swipe !== 'off';
+  // the browser keeps vertical scrolls only: a sideways move is never its pan, so each one comes to the pager, at once
+  // and cancelable (a browser pan, once started, would take the rest of the touch)
+  host.classList.add('is-pager');
   /** @type {number | null} */
   let x0 = null;
-  let y0 = 0, dx = 0, raw = 0, w = 0, busy = false;
+  let y0 = 0, dx = 0, raw = 0, w = 0, ready = false;
   /** @type {'x' | 'y' | null} */
   let dir = null;
   /** @type {[number, number][]} */
@@ -158,9 +142,17 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   let prev = null;
   /** @type {HTMLElement | null} */
   let next = null;
+  /** the drawer this touch pulls (a right swipe on the first page), or null @type {PullDrawer | null} */
+  let pulling = null;
+  /** the pages gliding after a let-go, or null @type {{ runs: Animation[], path: number[], to: HTMLElement | null, missing: boolean, timer: number } | null} */
+  let glide = null;
+  /** the way the glide this touch caught was going (-1 left, 1 right, 0 none caught) */
+  let caughtWay = 0;
   // the bar's title cross-fades to the coming page's at halfway; its data-swipe-fade parts fade out (filter, so the
   // bar's own opacity rules stand)
   const fades = () => /** @type {HTMLElement[]} */ ([...root.querySelectorAll('.ui-bar [data-swipe-fade]')]);
+  /** @type {HTMLElement[]} */
+  let faders = [];
   const small = /** @type {HTMLElement | null} */ (root.querySelector('.ui-bar .ui-bar-title'));
   let own = '';
   /** the page coming in with the page at x, or null @param {number} x */
@@ -173,20 +165,27 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   const titleShows = x => Math.abs(1 - 2 * gone(x));
   /** @param {number} x */
   const fadeShows = x => Math.max(0, 1 - 2 * gone(x));
+  // one frame: transforms and filters only (the words change only at halfway)
   const place = () => {
     current.style.transform = `translateX(${dx}px)`;
     if (prev) prev.style.transform = `translateX(${dx - w}px)`;
     if (next) next.style.transform = `translateX(${dx + w}px)`;
-    if (small) { small.textContent = titleAt(dx); small.style.filter = `opacity(${titleShows(dx)})`; }
-    for (const f of fades()) f.style.filter = `opacity(${fadeShows(dx)})`;
+    if (small) {
+      const t = titleAt(dx);
+      if (small.textContent !== t) small.textContent = t;
+      small.style.filter = `opacity(${titleShows(dx)})`;
+    }
+    for (const f of faders) f.style.filter = `opacity(${fadeShows(dx)})`;
   };
-  // the pages beside are laid out as the finger lands, out of sight, so the first move only moves them
+  // the pages beside are laid out, out of sight, at the first move that looks sideways
   function prepare() {
+    if (ready) return;
+    ready = true;
     const all = stops(), i = all.indexOf(current);
     prev = all[i - 1] ?? null; next = all[i + 1] ?? null;
     w = host.clientWidth || innerWidth;
     own = small?.textContent ?? '';
-    if (still()) return;
+    faders = fades();
     host.classList.add('is-paging');
     for (const [n, off] of /** @type {[HTMLElement | null, number][]} */ ([[prev, -w], [next, w]])) {
       if (!n) continue;
@@ -197,6 +196,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     }
   }
   function unpage() {
+    ready = false;
     host.classList.remove('is-paging', 'is-moving');
     current.style.transform = '';
     for (const n of [prev, next]) {
@@ -205,51 +205,115 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       n.style.transform = ''; n.style.top = '';
       if (n !== current) n.hidden = true;
     }
-    for (const f of fades()) f.style.filter = '';
+    for (const f of faders) f.style.filter = '';
     if (small) small.style.filter = '';
+  }
+  /** the pages land where the glide was taking them: the new page, or back @param {NonNullable<typeof glide>} g */
+  function land(g) {
+    clearTimeout(g.timer);
+    if (small) small.textContent = own;   // the landing (go) names the bar; back, it keeps its own
+    unpage();
+    if (g.to) go(g.to); else if (g.missing) onPrevMissing?.();
+    for (const a of g.runs) a.cancel();
+    // the new page's bar parts come in
+    if (g.to && !still()) for (const f of faders) f.animate([{ filter: 'opacity(0)' }, { filter: 'opacity(1)' }], { duration: 200, easing: 'ease-out' });
+  }
+  /** the glide lands now (a tab tapped, the swipe stopped) */
+  function settle() {
+    const g = glide;
+    glide = null;
+    if (g) land(g);
+  }
+  /** a finger lands on the gliding pages: they stop under it, the nearer page as the current one */
+  function catchGlide() {
+    const g = /** @type {NonNullable<typeof glide>} */ (glide);
+    glide = null;
+    clearTimeout(g.timer);
+    const x = g.runs.length ? pathAt(g.runs[0], g.path) : 0;
+    caughtWay = Math.sign(g.path[g.path.length - 1] - g.path[0]);
+    // the page it was going to is the current one now (so a flick goes on from it), or the nearer one going back
+    const near = g.to ?? (Math.abs(x) > w / 2 ? coming(x) : null);
+    for (const a of g.runs) a.cancel();
+    if (near) {
+      const ahead = near === next;
+      if (small) small.textContent = own;
+      unpage();
+      go(near);
+      scrollTo(0, ys.get(near) ?? 0);   // (go's own scroll comes a moment later, the same)
+      dx = ahead ? x + w : x - w;   // (where it is beside the old page, either side of the middle)
+    } else {
+      ready = false;   // laid out again below, for the same page
+      dx = x;
+    }
+    prepare();
+    host.classList.add('is-moving');
+    // the finger travel that puts the page where it is (more than that, on a rubber band)
+    raw = (dx < 0 && !next) || (dx > 0 && !prev) ? unrubber(dx, w) : dx;
+    place();
   }
   l.on(document, 'touchstart', (/** @type {TouchEvent} */ e) => {
     x0 = null;
-    if (!on() || busy || e.touches.length > 1 || screens.depth() > 0 || !current) return;
+    pulling = null;
     const t = e.touches[0];
-    const edge = swipeEdge(innerWidth);
-    if (t.clientX <= edge || t.clientX >= innerWidth - edge) return;
-    if (!current.contains(/** @type {Node} */ (e.target)) || noGesture(e.target)) return;
-    if (html.classList.contains('ui-menu-open') || document.querySelector('dialog[open]') || host.querySelector('.is-editing')) return;
-    const sel = getSelection();
-    if (sel && !sel.isCollapsed) return;
-    x0 = t.clientX; y0 = t.clientY; dx = raw = 0; dir = null; hist = [[e.timeStamp, t.clientX]];
-    prepare();
+    const caught = !!glide && e.touches.length === 1 && host.contains(/** @type {Node} */ (e.target));
+    if (glide && !caught) settle();
+    if (!on() || e.touches.length > 1 || screens.depth() > 0 || !current) return;
+    if (!caught) {
+      const edge = swipeEdge(innerWidth);
+      if (t.clientX <= edge || t.clientX >= innerWidth - edge) return;
+      if (!current.contains(/** @type {Node} */ (e.target)) || noGesture(e.target)) return;
+      if (html.classList.contains('ui-menu-open') || document.querySelector('dialog[open]') || host.querySelector('.is-editing')) return;
+      const sel = getSelection();
+      if (sel && !sel.isCollapsed) return;
+      dx = raw = 0; dir = null; caughtWay = 0;
+    } else {
+      catchGlide();
+      dir = 'x';   // a caught page moves only sideways
+    }
+    x0 = t.clientX - raw; y0 = t.clientY;
+    hist = [[e.timeStamp, t.clientX]];
   }, { passive: true });
   l.on(document, 'touchmove', (/** @type {TouchEvent} */ e) => {
     if (x0 === null) return;
-    const t = e.touches[0], mx = t.clientX - x0;
+    const t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
     if (!dir) {
-      dir = swipeIntent(mx, t.clientY - y0);
+      if (!e.cancelable) { x0 = null; unpage(); return; }   // the browser has started its scroll: it keeps the touch
+      if (Math.abs(mx) >= Math.abs(my)) { prepare(); e.preventDefault(); }   // looks sideways: lay out, hold the scroll
+      dir = swipeIntent(mx, my);
       if (!dir) return;
       if (dir === 'y') { x0 = null; unpage(); return; }   // a scroll: leave it to the page
-      host.classList.add('is-moving');
+      const d = mx > 0 && !prev ? drawer?.() ?? null : null;
+      if (d) { pulling = d; unpage(); }   // the first page, swiped right: the drawer comes out instead
+      else { prepare(); host.classList.add('is-moving'); }
     }
     if (e.cancelable) e.preventDefault();
     raw = mx;
+    hist.push([e.timeStamp, t.clientX]);
+    if (hist.length > 12) hist.shift();
+    if (pulling) { pulling.pull(Math.max(0, mx)); return; }
     // no page that way: the page stretches, less and less (iOS's rubber band)
     dx = (mx < 0 && !next) || (mx > 0 && !prev) ? rubber(mx, w) : mx;
-    hist.push([e.timeStamp, t.clientX]);
-    if (hist.length > 5) hist.shift();
-    if (!still()) place();
+    place();
   }, { passive: false });
-  const end = async (/** @type {Event} */ e) => {
+  const end = (/** @type {TouchEvent} */ e) => {
     if (x0 === null) return;
     x0 = null;
+    const v = releaseVelocity(hist, e.timeStamp);
+    if (pulling) {
+      const d = pulling;
+      pulling = null;
+      if (e.cancelable) e.preventDefault();
+      d.release(e.type === 'touchend' ? Math.max(0, raw) : 0, e.type === 'touchend' ? v : 0);
+      return;
+    }
     if (dir !== 'x') { unpage(); return; }
-    if (small) small.textContent = own;   // the landing (go) names the bar; still or back, it keeps its own
-    const v = velocity(hist);
-    const step = pageStep(dx, v, w, !!prev, !!next);
+    if (e.cancelable) e.preventDefault();   // no click on what the finger let go of (a caught page, a tap that stopped it)
+    // a flick on a caught glide, the way it was going: one page on from where it was going (quick flicks each count)
+    const onward = caughtWay !== 0 && Math.sign(v) === caughtWay && Math.abs(v) >= FLICK_V;
+    const step = onward ? (v < 0 ? (next ? 1 : 0) : (prev ? -1 : 0)) : pageStep(dx, v, w, !!prev, !!next);
     const to = step === 1 ? next : step === -1 ? prev : null;
-    // a right swipe on the first page (nothing before it): tell the app (it opens a drawer)
+    // a right swipe on the first page (nothing before it, no drawer): tell the app
     const missing = e.type === 'touchend' && !prev && raw > 0 && swipeGoesBack(raw, v, w);
-    if (still() || !host.classList.contains('is-paging')) { unpage(); if (to) go(to); else if (missing) onPrevMissing?.(); return; }
-    busy = true;
     // the glide: a spring from where the finger left the page, at its speed (none from a stretched end), one frame each
     const stretched = dx !== raw;
     const path = springPath(dx, step === 1 ? -w : step === -1 ? w : 0, stretched ? 0 : v);
@@ -259,24 +323,20 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     for (const [el, off] of /** @type {[HTMLElement | null, number][]} */ ([[current, 0], [prev, -w], [next, w]])) {
       if (el) runs.push(el.animate(path.map(x => ({ transform: `translateX(${x + off}px)` })), timing));
     }
-    for (const f of fades()) runs.push(f.animate(path.map(x => ({ filter: `opacity(${fadeShows(x)})` })), timing));
+    for (const f of faders) runs.push(f.animate(path.map(x => ({ filter: `opacity(${fadeShows(x)})` })), timing));
+    /** @type {NonNullable<typeof glide>} */
+    const g = glide = { runs, path, to, missing, timer: 0 };
     if (small) {
       runs.push(small.animate(path.map(x => ({ filter: `opacity(${titleShows(x)})` })), timing));
       // the title's words change where the glide passes halfway (unseen: it is faded out there)
       const half = path.findIndex(x => titleAt(x) !== titleAt(path[0]));
-      if (half >= 0) setTimeout(() => { small.textContent = titleAt(path[half]); }, half * 1000 / 60);
+      if (half >= 0) g.timer = setTimeout(() => { small.textContent = titleAt(path[half]); }, half * 1000 / 60);
       else small.textContent = titleAt(path[0]);
     }
-    await Promise.all(runs.map(a => a.finished.catch(() => {})));
-    unpage();
-    if (to) go(to); else if (missing) onPrevMissing?.();
-    for (const a of runs) a.cancel();
-    // the new page's bar parts come in
-    if (to) for (const f of fades()) f.animate([{ filter: 'opacity(0)' }, { filter: 'opacity(1)' }], { duration: 200, easing: 'ease-out' });
-    busy = false;
+    void Promise.all(runs.map(a => a.finished.catch(() => {}))).then(() => { if (glide === g) settle(); });
   };
-  l.on(document, 'touchend', end, { passive: true });
+  l.on(document, 'touchend', end, { passive: false });
   l.on(document, 'touchcancel', end, { passive: true });
 
-  return { go, current: () => current, stop: () => { l.stop(); unpage(); } };
+  return { go, current: () => current, stop: () => { l.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
 }
