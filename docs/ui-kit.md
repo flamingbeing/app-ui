@@ -75,6 +75,19 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   fires. The tab bar hides; a sheet and the select-mode action bar sit above the keyboard. `--ui-keyboard-h` is how
   far the keyboard covers the layout's bottom (0 with `resizes-content`; it lifts them where a browser ignores it).
 
+## Haptics (`ui/gesture.js` `haptic`)
+
+- `haptic(kind)`, five kinds as `navigator.vibrate` patterns (`HAPTIC_PATTERNS`): `tick` 8 ms (a step: a row ticked,
+  a switch flipped, a dragged row passing another), `threshold` 12 ms (a drag crossing where its let-go would land
+  somewhere else: a sheet past its close line or onto another height, the drawer past half), `long` 20 ms (a touch
+  and hold taking hold), `confirm` and `reject` (10-40-10, 20-60-20: for an app's done or refused action). On
+  iPhone, which has no `vibrate`, every kind is the one system tap a hidden switch gives.
+- Not on tab changes or plain taps: those are everywhere, and a buzz on each wears out.
+- Haptics is a per-device theme choice (`haptics: 'on' | 'off'`, on by default), shown as `html[data-haptics="off"]`
+  and picked in `themeSwitch` ("Haptics"); `haptic()` gives nothing while it is off.
+- `startGestures` ticks every switch (`input[role=switch]`, `input[switch]`) and segmented control a person changes
+  (`toggleTicks`; `{ ticks: false }` leaves it out).
+
 ## Placement rules
 
 Where each thing goes, on every size.
