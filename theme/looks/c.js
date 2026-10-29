@@ -6,7 +6,7 @@ export default {
   id: 'c',
   name: 'Dense and quiet',
   desc: 'Flush lists, small titles, glass only on floating pills',
-  variants: { header: 'plain', menu: 'popover', glass: 'pill', tick: 'round', tabbar: 'edge' },
+  variants: { header: 'plain', menu: 'popover', glass: 'pill', tick: 'round', tabbar: 'edge', family: 'core' },
   tokens: {
     'look-font-head': 'inherit',
     'title-size': '1.375rem', 'title-weight': '700', 'title-track': '0',

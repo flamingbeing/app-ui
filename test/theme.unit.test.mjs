@@ -12,7 +12,7 @@ import { GRID, HUES, SHADES, gridIndex, snap } from '../theme/grid.js';
 
 const DEFAULTS = { theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '', look: '', density: 'regular', material: 'glass', motion: 'auto' };
 // what show() puts on <html> for look A (the default), besides the marks a choice sets
-const LOOK_A = { look: 'a', header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float' };
+const LOOK_A = { look: 'a', header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', family: 'core' };
 
 test('nothing stored: the defaults, so new options stay off until picked', () => {
   assert.deepEqual(parseChoice(null), DEFAULTS);

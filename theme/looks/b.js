@@ -6,7 +6,7 @@ export default {
   id: 'b',
   name: 'Colour band',
   desc: 'A band of the colour behind a bold title, solid bars, menus as sheets',
-  variants: { header: 'band', menu: 'sheet', glass: 'none', tick: 'square', tabbar: 'edge' },
+  variants: { header: 'band', menu: 'sheet', glass: 'none', tick: 'square', tabbar: 'edge', family: 'core' },
   tokens: {
     'look-font-head': '"Avenir Next", "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui, sans-serif',
     'title-size': '2.5rem', 'title-weight': '800', 'title-track': '-.02em',

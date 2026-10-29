@@ -2,7 +2,8 @@
 // the app's), the ground, then the light palette and the dark one (OLED when picked), each brought up to its contrast
 // floor (colour.js), with the glass strengths that keep text on glass at that floor. choice.js puts the text in the
 // page; the tests read the same palettes. Pure, no DOM.
-import { lightPalette, darkPalette, floor, glassStrengths } from './colour.js';
+import { lightPalette, darkPalette, floor, glassStrengths, STATUS } from './colour.js';
+import { m3Palette } from './m3.js';
 import { PRESETS, SURFACES } from './presets.js';
 import { cleanChoice } from './schema.js';
 import { lookOf } from './looks.js';
@@ -32,6 +33,11 @@ export function palettes(choice, app = {}) {
   const c = cleanChoice(choice), preset = presetOf(c), accent = accentOf(c, app);
   const ground = SURFACES[c.surface || preset.surface || app.surface || ''];
   const oled = c.dark === 'oled', strong = !!preset.strong;
+  // (a look with Material's colour, the Android look: its roles from the accent as the seed; no ground, Material has its own)
+  if (lookOf(c.look, app.look).palette === 'm3') return {
+    light: floor(m3Palette(accent, { status: STATUS.light }), { strong }),
+    dark: floor(m3Palette(accent, { dark: true, oled, status: STATUS.dark }), { strong }),
+  };
   return {
     light: floor({ ...lightPalette(accent), ...ground?.light }, { strong }),
     dark: floor({ ...darkPalette(accent, oled), ...(oled ? {} : ground?.dark) }, { strong }),

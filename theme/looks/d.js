@@ -6,7 +6,7 @@ export default {
   id: 'd',
   name: 'Slim',
   desc: 'A slim bar with the name always showing, flat lists, no band',
-  variants: { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge' },
+  variants: { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge', family: 'core' },
   tokens: {
     'look-font-head': 'inherit',
     'title-size': '1.25rem', 'title-weight': '600', 'title-track': '0',

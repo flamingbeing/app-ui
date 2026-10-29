@@ -1,0 +1,183 @@
+/* @core/ui gestures, the Android look's parts (look M: data-family="android" on <html>). One part of
+   ui/gestures.css (which loads them all, in order); link it alone for just this part, after the others.
+   Material 3 Expressive as Android 16 draws it, on the same markup as every other look: the colour roles are m3-*
+   tokens (theme/m3.js, from the accent as the seed); surfaces are solid, a raised one is a lighter tone, not a shadow
+   or glass. State layers: hover 8%, pressed 10% of the content colour; focus a 3 px ring. Everything that moves moves
+   by transform or opacity. Nothing here applies to any other look. */
+/* ---------- type, shape, state ---------- */
+:root[data-family="android"] {
+  /* Roboto Flex / Roboto where the phone has it (every Android phone), else the kit's face (Inter), else the system's;
+     nothing downloaded */
+  --m3-font: "Roboto Flex", Roboto, "Google Sans Flex", "Google Sans Text", Inter, var(--home-font, system-ui), sans-serif;
+  --font: var(--m3-font);
+  --leading: 1.5;
+  --press: color-mix(in srgb, var(--text) 10%, transparent);
+  --m3-hover: color-mix(in srgb, currentColor 8%, transparent);
+  --m3-press: color-mix(in srgb, currentColor 10%, transparent);
+  --radius-button: 9999px;
+  --radius-input: 4px;
+  --backdrop: rgb(0 0 0 / .32);   /* Material's scrim */
+  /* elevation as a soft shadow only where Material keeps one (FAB, menus); surfaces are toned instead */
+  --m3-elev-2: 0 1px 2px rgb(0 0 0 / .3), 0 2px 6px 2px rgb(0 0 0 / .15);
+  --m3-elev-3: 0 1px 3px rgb(0 0 0 / .3), 0 4px 8px 3px rgb(0 0 0 / .15);
+  --shadow: none;
+  --focus: var(--m3-secondary);
+  --button-bg: transparent;
+  --button-text: var(--m3-primary);
+  /* Material's standard and emphasised easing for fades; springs stay the kit's */
+  --m3-ease: cubic-bezier(.2, 0, 0, 1);
+  --m3-ease-out: cubic-bezier(.05, .7, .1, 1);
+}
+[data-family="android"] body { letter-spacing: .03125em; }   /* body large: 16 / 24, 0.5 px */
+[data-family="android"] :focus-visible { outline: 3px solid var(--m3-secondary); outline-offset: 2px; }
+/* buttons: a pill, label large (14 / 20, medium); the plain one outlined, the filled one primary */
+[data-family="android"] button { font-size: .875rem; font-weight: 500; letter-spacing: .00625em; border-color: var(--m3-outline-variant); }
+[data-family="android"] :where(.ui-fill) { border-color: transparent; }
+/* hover: a state layer of the content colour (below the pressed one, which keeps its own rule) */
+@media (hover: hover) {
+  [data-family="android"] :where(button:not(:disabled), a.ui-row, button.ui-row, .ui-row[tabindex], .ui-chip, .ui-menu-item):hover {
+    box-shadow: inset 0 0 0 100vmax var(--m3-hover); }
+}
+[data-family="android"] :where(.ui-icon-btn) { border-radius: 50%; color: var(--m3-on-surface-variant); }
+[data-family="android"] :where(.ui-icon-btn):hover { background: none; }
+[data-family="android"] select, [data-family="android"] :where(input:not([type]), input[type="text"], input[type="search"],
+  input[type="email"], input[type="number"], input[type="tel"], input[type="url"], input[type="password"], input[type="date"],
+  input[type="time"], textarea) { border-color: var(--m3-outline); background-color: transparent; }
+
+/* ---------- top app bar: the headline on the page collapses into the bar, which tones up once content is under it ---------- */
+[data-family="android"] .ui-bar { min-height: 64px; padding-inline: 4px; gap: 4px; background: var(--bg); border-bottom-color: transparent;
+  transition: none; }
+/* the raised tone fades in on its own layer (opacity only), under the bar's words */
+[data-family="android"] .ui-bar::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--m3-bar);
+  opacity: 0; transition: opacity var(--d-quick) var(--m3-ease); pointer-events: none; }
+[data-family="android"] .ui-bar.is-collapsed { border-bottom-color: transparent; }
+[data-family="android"] .ui-bar.is-collapsed::before { opacity: 1; }
+/* the title at the start (title large, 22 / 28), the actions at the end */
+[data-family="android"] .ui-bar-side { flex: none; gap: 0; }
+[data-family="android"] .ui-bar-title { order: 0; flex: 1; min-width: 0; padding-inline: 12px; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; text-align: start; font-size: 1.375rem; font-weight: 400; transition: opacity var(--d-quick) var(--m3-ease); }
+[data-family="android"] .ui-bar-side:first-child:empty + .ui-bar-title { padding-inline-start: 12px; }
+[data-family="android"] .ui-bar-end { order: 1; }
+[data-family="android"] .ui-bar button { min-height: 48px; padding: 0 12px; border-radius: 20px; color: var(--m3-primary); font-weight: 500; }
+/* the headline (headline medium, 28 / 36) under the bar, at the content's start */
+[data-family="android"] .ui-large-title { margin: 4px 16px 20px; font-size: var(--title-size); line-height: 1.29; }
+/* Back: Material's arrow in a 48 px circle, no words (the words stay for screen readers) */
+[data-family="android"] .ui-back { width: 48px; min-width: 48px; height: 48px; min-height: 48px; padding: 0; gap: 0; justify-content: center;
+  border-radius: 50%; color: var(--m3-on-surface); font-size: 0; overflow: hidden; }
+[data-family="android"] .ui-back::before { content: ""; width: 24px; height: 24px; background: currentColor;
+  -webkit-mask: var(--m3-arrow) center / 24px no-repeat; mask: var(--m3-arrow) center / 24px no-repeat; }
+[dir="rtl"][data-family="android"] .ui-back::before { transform: scaleX(-1); }
+:root[data-family="android"] { --m3-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7.83 13l5.59 5.59L12 20l-8-8 8-8 1.41 1.41L7.83 11H20v2z'/%3E%3C/svg%3E"); }
+
+/* ---------- lists: Android 16's rounded groups, rows 2 px apart, round at the group's ends ---------- */
+[data-family="android"] .ui-list { display: grid; gap: 2px; background: transparent; overflow: visible; }
+[data-family="android"] :is(.ui-list > .ui-row, .ui-list > li > .ui-row, .ui-row + .ui-row, .ui-list > li + li > .ui-row) {
+  background: var(--list-bg); border-radius: 4px; padding-inline: 16px; }
+[data-family="android"] :is(.ui-list > .ui-row:first-child, .ui-list > li:first-child > .ui-row) {
+  border-start-start-radius: var(--card-r); border-start-end-radius: var(--card-r); }
+[data-family="android"] :is(.ui-list > .ui-row:last-child, .ui-list > li:last-child > .ui-row) {
+  border-end-start-radius: var(--card-r); border-end-end-radius: var(--card-r); }
+[data-family="android"] .ui-row-sub { font-size: .875rem; letter-spacing: .0156em; color: var(--m3-on-surface-variant); }
+[data-family="android"] .ui-list.is-editing .ui-row::before { border-radius: 2px; border-color: var(--m3-on-surface-variant); }
+[data-family="android"] .ui-list.is-editing .ui-row[aria-selected="true"]::before { background: var(--m3-primary); border-color: var(--m3-primary);
+  box-shadow: none; background-image: var(--m3-check); background-size: 14px; background-position: center; background-repeat: no-repeat; }
+[data-family="android"] .ui-list.is-editing .ui-row[aria-selected="true"] { background: var(--m3-secondary-container); }
+:root[data-family="android"] { --m3-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
+[data-theme="dark"][data-family="android"] { --m3-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) {
+  :root[data-family="android"]:not([data-theme="light"]) { --m3-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); }
+}
+[data-family="android"] .ui-section-head { color: var(--m3-primary); font-size: .875rem; font-weight: 500; letter-spacing: .00625em;
+  text-transform: none; }
+
+/* ---------- navigation bar: a pill behind the current tab's icon (or words), on the container tone ---------- */
+[data-family="android"] .ui-tabbar { gap: 8px; padding: 12px 8px calc(env(safe-area-inset-bottom, 0px) + 16px); min-height: 80px;
+  box-sizing: border-box; background: var(--m3-bar); border: 0; box-shadow: none; }
+[data-family="android"] .ui-tab { position: relative; isolation: isolate; gap: 4px; padding: 0 4px; min-height: 48px; border-radius: 0;
+  color: var(--m3-on-surface-variant); font-size: .75rem; font-weight: 500; letter-spacing: .03em; background: transparent; }
+[data-family="android"] .ui-tab:not(:has(.ui-tab-icon)) { font-size: .875rem; }
+/* the pill: 56 x 32 behind the icon, or round the words of a tab with none; it grows out from the middle (transform) */
+[data-family="android"] .ui-tab:not(.ui-tab-action)::before, [data-family="android"] .ui-tab:not(.ui-tab-action)::after {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: 0; width: 56px; height: 32px; margin-left: -28px;
+  border-radius: 16px; pointer-events: none; }
+[data-family="android"] .ui-tab:not(.ui-tab-action):not(:has(.ui-tab-icon))::before,
+[data-family="android"] .ui-tab:not(.ui-tab-action):not(:has(.ui-tab-icon))::after {
+  top: 50%; width: min(100%, 7.5rem); height: 40px; margin: -20px 0 0; translate: -50% 0; border-radius: 20px; }
+[data-family="android"] .ui-tab:not(.ui-tab-action)::before { background: var(--m3-secondary-container); opacity: 0; transform: scaleX(.4);
+  transition: transform var(--d-quick) var(--spring-snappy), opacity calc(var(--d-quick) / 2) var(--m3-ease); }
+[data-family="android"] .ui-tab[aria-current="page"]::before { opacity: 1; transform: none; }
+[data-family="android"] .ui-tab[aria-current="page"] { color: var(--m3-secondary); font-weight: 600; background: transparent; }
+[data-family="android"] .ui-tab[aria-current="page"]:not(:has(.ui-tab-icon)),
+[data-family="android"] .ui-tab[aria-current="page"] .ui-tab-icon { color: var(--m3-on-secondary-container); }
+[data-family="android"] .ui-tab-icon { width: 24px; height: 24px; margin-block: 4px; font-size: 1.25rem; line-height: 24px; }
+/* pressed or hovered: a state layer on the pill only, not the whole tab */
+[data-family="android"] .ui-tab:not(.ui-tab-action)::after { background: currentColor; opacity: 0; transition: opacity 90ms linear; }
+[data-family="android"] .ui-tab:is(:active, [data-pressed]) { box-shadow: none; }
+[data-family="android"] .ui-tab:not(.ui-tab-action):is(:active, [data-pressed])::after { opacity: .1; transition: none; }
+@media (hover: hover) { [data-family="android"] .ui-tab:not(.ui-tab-action):hover::after { opacity: .08; } }
+/* the centre action: a FAB-like rounded square on the primary container */
+[data-family="android"] .ui-tab-action .ui-tab-icon { margin-top: 0; border-radius: 16px; background: var(--m3-primary-container);
+  color: var(--m3-on-primary-container); box-shadow: var(--m3-elev-2); }
+
+/* ---------- floating action button: Material's 56 px rounded square on the primary container ---------- */
+[data-family="android"] .ui-fab { height: 56px; min-width: 56px; padding: 0 20px 0 16px; border-radius: 16px;
+  background: var(--m3-primary-container); color: var(--m3-on-primary-container); font-size: 1rem; font-weight: 500;
+  box-shadow: var(--m3-elev-3); bottom: calc(max(var(--ui-tabbar-room, 0px), env(safe-area-inset-bottom, 0px)) + 16px);
+  inset-inline-end: calc(16px + env(safe-area-inset-right, 0px)); }
+[data-family="android"] .ui-fab:not(:has(.ui-fab-label)), [data-family="android"] .ui-fab.is-small { padding: 0; }
+[data-family="android"] .ui-fab.is-large { height: 96px; min-width: 96px; border-radius: 28px; }
+[data-family="android"] .ui-fab.is-large > svg { width: 36px; height: 36px; }
+/* pressed: the state layer, and the corners round a little more (Expressive's shape change, by scale only) */
+[data-family="android"] .ui-fab:not(:disabled):is(:active, [data-pressed]) { transform: scale(.96);
+  box-shadow: var(--m3-elev-2), inset 0 0 0 100vmax var(--m3-press); }
+
+/* ---------- switch: Material's track (52 x 32) and a thumb that grows when on (16 -> 24 px) and when pressed (28) ---------- */
+[data-family="android"] .ui-switch { width: 52px; max-width: 52px; height: 32px; border-radius: 16px;
+  background: var(--m3-surface-container-highest); box-shadow: inset 0 0 0 2px var(--m3-outline); }
+[data-family="android"] .ui-switch::before { top: 2px; left: 2px; width: 28px; height: 28px; background: var(--m3-outline); box-shadow: none;
+  transform: scale(.5714); transition: transform var(--d-quick) var(--spring-snappy), background-color var(--d-quick) var(--m3-ease); }
+[data-family="android"] .ui-switch:checked { background: var(--m3-primary); box-shadow: none; }
+[data-family="android"] .ui-switch:checked::before { background: var(--m3-on-primary); transform: translateX(20px) scale(.8571); }
+[dir="rtl"][data-family="android"] .ui-switch:checked::before { transform: translateX(-20px) scale(.8571); }
+[data-family="android"] .ui-switch:active::before { transform: scale(1); background: var(--m3-on-surface-variant); }
+[data-family="android"] .ui-switch:checked:active::before { transform: translateX(20px) scale(1); background: var(--m3-primary-container); }
+[dir="rtl"][data-family="android"] .ui-switch:checked:active::before { transform: translateX(-20px) scale(1); }
+[data-family="android"] .ui-switch:focus-visible { outline: 3px solid var(--m3-secondary); outline-offset: 2px; }
+[data-family="android"] .ui-switch:disabled { opacity: .38; }
+
+/* ---------- bottom sheet: the low container, 28 px top corners, Material's 32 x 4 drag handle ---------- */
+[data-family="android"] dialog.ui-sheet { background: var(--m3-surface-container-low); color: var(--text); border: 0; }
+[data-family="android"] .ui-sheet-grabber { min-height: 36px; }
+[data-family="android"] .ui-sheet-grabber::before { top: 16px; width: 32px; height: 4px; border-radius: 2px;
+  background: var(--m3-on-surface-variant); opacity: .4; }
+[data-family="android"] .ui-sheet-head h2 { font-size: 1.5rem; font-weight: 400; }   /* headline small */
+[data-family="android"] .ui-sheet-head button { color: var(--m3-primary); font-weight: 500; }
+@media (min-width: 840px) {
+  [data-family="android"] dialog.ui-sheet { background: var(--m3-surface-container-high); border: 0; }   /* a dialog */
+}
+
+/* ---------- menus: the container tone, Expressive's 16 px corners, a soft shadow, no line ---------- */
+[data-family="android"] .ui-menu { padding: 4px; background: var(--m3-surface-container); border: 0; box-shadow: var(--m3-elev-2); }
+[data-family="android"] .ui-menu-item { min-height: 48px; padding: 0 12px; border-radius: 12px; font-size: .875rem; font-weight: 500; }
+[data-family="android"] .ui-menu-item:focus-visible { background: color-mix(in srgb, var(--text) 10%, transparent); }
+@media (hover: hover) { [data-family="android"] .ui-menu-item:hover { background: none; } }
+[data-family="android"] .ui-menu.is-sheet { background: var(--m3-surface-container-low); }
+
+/* ---------- snackbar (toasts), chips, cards, badges ---------- */
+[data-family="android"] .toast { min-height: 48px; padding: 4px 8px 4px 16px; background: var(--m3-inverse-surface);
+  color: var(--m3-inverse-on-surface); border: 0; border-radius: 4px; box-shadow: var(--m3-elev-3); font-size: .875rem; }
+[data-family="android"] .toast button { color: var(--m3-inverse-on-surface); }
+[data-family="android"] .toast .toast-action { color: var(--m3-inverse-primary); font-weight: 500; }
+[data-family="android"] .ui-chips > button.ui-chip { min-height: 32px; margin-block: 6px; padding: 0 16px; border-radius: 8px; background: transparent;
+  box-shadow: inset 0 0 0 1px var(--m3-outline-variant); color: var(--m3-on-surface-variant); font-size: .875rem; font-weight: 500; }
+[data-family="android"] .ui-chips > button.ui-chip[aria-pressed="true"] { background: var(--m3-secondary-container); box-shadow: none;
+  color: var(--m3-on-secondary-container); font-weight: 500; }
+[data-family="android"] .ui-card { border-radius: 12px; background: var(--m3-surface-container-highest); border: 0; box-shadow: none; }
+[data-family="android"] .ui-card-title { font-size: 1.375rem; font-weight: 400; }
+[data-family="android"] .ui-card-text { color: var(--m3-on-surface-variant); }
+[data-family="android"] .ui-badge { border-radius: 8px; }
+
+/* ---------- pushed screens: Back slides the page off at once, and the swipe shrinks it as Android's predictive back
+   does (gestures.js sets the screen's transform; a scale here is static, so no extra work per frame) ---------- */
+[data-family="android"] .ui-screens.is-swiping .ui-screen.is-top,
+[data-family="android"] .ui-screen:is(.is-entering, .is-leaving) { box-shadow: none; border-radius: 28px; overflow: clip; }
