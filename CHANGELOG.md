@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.38
+## 1.0.0-rc.39
 - The bounce: `ui/bounce.js`, exported from `@core/ui` as `bounce`. A pull past a list's top or bottom stretches it
   (the same rubber band as the sheets and drags; the bars and fixed parts stay) and springs back on the compositor
   with the finger's speed; a finger catches it on the way; a fling into an end bounces past it and back (not with
@@ -10,6 +10,14 @@
 - Known: a finger that turns back while stretched scrolls at once, so the content runs a little ahead of it until the
   stretch is gone (touch moves can't be held back once the browser scrolls).
 - The jank gate adds a pull past the list's top and bottom.
+
+## 1.0.0-rc.38
+- `cardPager(stage, { card, start, onShow })`, exported from `@core/ui` (`ui/card-pager.js`): one card at a time, a
+  sideways swipe for the next or the previous (a flashcard deck, a review queue). The card beside follows the finger;
+  the let-go glides on `glide` (a finger catches it); `onShow` waits until it lands (`afterGesture`); arrow keys go
+  too. Leaves fields, sideways scrollers and the screen's edges alone; `refresh()` after the queue changes.
+- The tab pager never starts on `[data-swipe-own]` (a card deck's own swipe).
+- Gallery: a card deck on the shell's Jobs page; the jank gate swipes it on and back.
 
 ## 1.0.0-rc.37
 Responsiveness (README, "Responsiveness rules"):

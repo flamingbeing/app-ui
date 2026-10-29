@@ -28,6 +28,9 @@ async function load(sized, query = '', width = 390) {
   await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
   return page;
 }
+// the middle of the Jobs page's list (below it is the card deck, whose swipes are its own)
+const listY = async page => { const b = await page.locator('#jobs .ui-list').boundingBox(); return b.y + b.height / 2; };
+
 /** a sideways swipe across the middle of the page, from x0 to x1 */
 async function swipe(page, x0, x1, y = 420) {
   await (await finger(page)).drag(x0, y, x1, y);
@@ -125,7 +128,7 @@ test('swipe: left goes to the next tab page (skipping the sheet tab), right come
   await swipe(page, 300, 60);
   expect(await shown(page), 'past New, which opens a sheet').toEqual(['jobs']);
   await expect(page.locator('#sheet')).toBeHidden();
-  await swipe(page, 60, 300);
+  await swipe(page, 60, 300, await listY(page));   // on the list: lower down, the card deck takes the swipe
   expect(await shown(page)).toEqual(['rooms']);
   expect(await events).toEqual(['rooms', 'jobs', 'rooms']);
   await swipe(page, 60, 300);
@@ -238,7 +241,8 @@ test('swipe does nothing: a vertical scroll, the back edge, a sideways scroller,
   // mostly vertical
   await (await finger(page)).drag(200, 600, 150, 300);
   await settled(page);
-  expect(await shown(page)).toEqual(['home']);
+  // the page laid out beside at the touch is put away once the gesture settles (afterGesture: a timer after the lift)
+  await expect.poll(() => shown(page)).toEqual(['home']);
   // from within 24 px of either edge (the browser's own Back may take it: a spare history entry keeps the page)
   const tabbed = page.evaluate(() => new Promise(r => { addEventListener('ui-tab', () => r(true)); setTimeout(() => r(false), 3000); }));
   await page.evaluate(() => history.pushState({}, ''));
@@ -254,7 +258,7 @@ test('swipe does nothing: a vertical scroll, the back edge, a sideways scroller,
   await swipe(page, 300, 60, chips.y + chips.height / 2);
   expect(await shown(page)).toEqual(['jobs']);
   expect(await page.locator('#job-chips').evaluate(e => e.scrollLeft), 'the chips scrolled instead (the pager’s pan-y stops above them)').toBeGreaterThan(0);
-  await swipe(page, 300, 60);
+  await swipe(page, 300, 60, await listY(page));
   expect(await shown(page)).toEqual(['settings']);
   const field = await page.locator('#shelf-name').boundingBox();
   await swipe(page, field.x + field.width - 10, 40, field.y + field.height / 2);
@@ -299,6 +303,27 @@ test('quick flicks one after another all count: each lands the next page, none i
   await settled(page);
   expect(await shown(page)).toEqual(['settings']);
   await expect(page.locator('nav.ui-tabbar .ui-tab[aria-current="page"]')).toHaveText('Settings');
+});
+
+test('the card deck: shown from the start, a swipe on it goes a card and not a tab, not from the edge; the arrow keys go too', async ({ sized }) => {
+  const page = await load(sized, '&tab=jobs');
+  const deck = page.locator('#job-cards');
+  await expect(deck, 'onShow told of the first card').toHaveAttribute('data-shown', '0');
+  const box = await deck.boundingBox();
+  const y = box.y + box.height / 2;
+  await swipe(page, 300, 60, y);
+  await expect(deck).toHaveAttribute('data-shown', '1');
+  expect(await shown(page), 'the tab stayed').toEqual(['jobs']);
+  await expect(deck.locator('.ui-card-slot:not([inert]) .ui-card-title')).toHaveText('Tip 2 of 5');
+  // from within the edge (Android's Back): nothing moves
+  await swipe(page, 380, 120, y);
+  await expect(deck).toHaveAttribute('data-shown', '1');
+  expect(await shown(page)).toEqual(['jobs']);
+  await deck.focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(deck).toHaveAttribute('data-shown', '2');
+  await page.keyboard.press('ArrowLeft');
+  await expect(deck).toHaveAttribute('data-shown', '1');
 });
 
 test('a finger caught on the gliding pages stops them under it; let go still, they land on the nearer page', async ({ sized }) => {

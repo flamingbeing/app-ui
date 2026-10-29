@@ -80,6 +80,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Catch | a finger on the gliding pages holds them where they are, and a tap there opens nothing; let go still, they land on the nearer page; also in WebKit | |
 | Drawer pull | a right swipe on the first page pulls the side bar out by the finger's travel over a shade (opacity with it), the page stays; let go past half or with a flick it opens, a short slow pull goes back; a left swipe or a tap on the shade closes it; with Reduce Motion the button opens it with no animation; also in WebKit | |
 | Sideways scroller | the Jobs chips still scroll sideways under the pager's `touch-action: pan-y` | |
+| Card deck | the Jobs page's deck (`cardPager`) tells `onShow` of the first card; a swipe on it goes a card, never a tab; not from within the edge; ArrowRight and ArrowLeft go too | |
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
 | Reduce Motion | the pages still follow the finger, the next one beside, and glide on (rc.30 switched with nothing moved); also in WebKit | |
 | Pressed at once | a touch on a button or tab marks it `data-pressed` at once (jank gate); the tab bar, buttons and glass buttons show it as they show `:active` | |
