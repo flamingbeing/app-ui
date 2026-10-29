@@ -207,3 +207,12 @@ test('spring glide: starts where let go, lands exactly, never passes the target,
   assert.ok(away[1] < -50, 'a finger still moving away carries the page on a little before it turns');
   assert.deepEqual(springPath(0, 0, 0), [0, 0]);
 });
+
+test('keyboardState: open only while typing and over KEYBOARD_MIN shorter; lift is the cover below the visible part', async () => {
+  const { keyboardState, KEYBOARD_MIN } = await import('../ui/keyboard.js');
+  assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 500, top: 0, editing: false }), { open: false, lift: 0 });
+  assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 500, top: 0, editing: true }), { open: true, lift: 344 });
+  assert.deepEqual(keyboardState({ base: 844, inner: 500, height: 500, top: 0, editing: true }), { open: true, lift: 0 });
+  assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 844 - KEYBOARD_MIN, top: 0, editing: true }), { open: false, lift: 0 });
+  assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 500, top: 20, editing: true }), { open: true, lift: 324 });
+});

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.47
+## 1.0.0-rc.48
 - `syncButton(host, { sync, syncNow?, labels?, idPrefix? })`: the sync chip's tappable twin for a header bar
   (`#sync-btn`). One colour, the bar's; the state is the cloud icon's shape: a tick (saved), an arrow up that lifts
   (sending, with a count of what waits), struck (offline), an exclamation mark (not saved yet; needs you adds a dot),
@@ -9,6 +9,14 @@
   passed as `host` becomes the button, so an app's markup can place it. Looks theme it with `--ui-sync-dot` and
   `--ui-sync-badge`. New label `syncNow` ("Sync now"); new icons `cloud`, `cloudCheck`, `cloudUpload`, `cloudAlert`.
 - The shell gallery's bar shows it; the jank gate times a tap on it.
+
+## 1.0.0-rc.47
+- Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):
+  while a field has focus and the visible page is over 150 px shorter than its tallest, `html.ui-keyboard-open` and
+  a `ui-keyboard` event. The tab bar hides; a sheet and the action bar sit above the keyboard. `--ui-keyboard-h` is
+  how far the keyboard covers the layout's bottom.
+- Apps: end the viewport meta with `interactive-widget=resizes-content` (docs/ui-kit.md, "The on-screen
+  keyboard"); the gallery pages do.
 
 ## 1.0.0-rc.46
 - Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed

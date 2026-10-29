@@ -95,6 +95,17 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Sheet, Esc and Back | a sheet closed by Esc (the close request Chrome's Back sends a modal dialog on Android) steps back once: the tab's entry under it stays; also in WebKit | |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 
+## Keyboard
+
+`ui/keyboard.js`: `keyboardState` in Node (`test/gestures.unit.test.mjs`). `e2e/keyboard.spec.mjs` on `/kit/shell/`
+at 390 px, in Chromium and WebKit, with the keyboard played (no browser here shows one): the viewport made shorter
+(`interactive-widget=resizes-content`) or a stand-in visual viewport (a browser without it).
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Resizes content | a tapped field in the sheet, then the page 344 px shorter: `html.ui-keyboard-open`, `--ui-keyboard-h` 0, the tab bar hidden, the sheet inside the space above; the page tall again: closed, the tab bar back | |
+| Visible part only | a field and the visual viewport 344 px shorter: `--ui-keyboard-h` 344px and the sheet's bottom on the keyboard's top; a blur: closed, 0 | |
+
 ## Bounce
 
 `ui/bounce.js` in Node (`test/bounce.unit.test.mjs`): nothing runs on import; `rubberSlope` is the rubber band's
