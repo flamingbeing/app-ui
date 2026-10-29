@@ -326,6 +326,32 @@ test('the card deck: shown from the start, a swipe on it goes a card and not a t
   await expect(deck).toHaveAttribute('data-shown', '1');
 });
 
+for (const width of [390, 1280]) {
+  test(`the card deck with fill reaches down to the tab bar (${width} px): a short card no scroll of its own, a long one scrolls in its card`, async ({ sized }) => {
+    const page = await load(sized, '&tab=jobs', width);
+    const deck = page.locator('#job-cards');
+    await expect(deck).toHaveClass(/ui-cards-fill/);
+    const m = () => page.evaluate(() => {
+      const d = /** @type {HTMLElement} */ (document.getElementById('job-cards')), b = d.getBoundingClientRect();
+      const bar = document.querySelector('.ui-tabbar:not([hidden])'), pad = parseFloat(getComputedStyle(d).marginBottom);
+      const slot = /** @type {HTMLElement} */ (d.querySelector('.ui-card-slot:not([inert])'));
+      return { top: b.top, bottom: b.bottom, floor: bar && bar.getBoundingClientRect().height ? bar.getBoundingClientRect().top : innerHeight,
+        pad, page: document.scrollingElement.scrollHeight - innerHeight, own: slot.scrollHeight - slot.clientHeight };
+    });
+    await expect.poll(async () => { const r = await m(); return Math.round(r.floor - r.pad - r.bottom); }, { message: 'its bottom one --pad above the tab bar (or the window)' }).toBeLessThanOrEqual(1);
+    const r = await m();
+    expect(r.floor - r.pad - r.bottom).toBeGreaterThanOrEqual(-1);
+    expect(r.own, 'a short card has no scroll of its own').toBe(0);
+    // (on a phone the gallery's body adds its own tab-bar room below, so only the laptop's page fits exactly)
+    if (width >= 600) expect(r.page, 'the page itself does not scroll (the side bar fits in 100dvh)').toBeLessThanOrEqual(0);
+    // a card taller than the stage keeps the stage's height and scrolls in its slot
+    await page.evaluate(() => { const c = document.querySelector('#job-cards .ui-card-slot:not([inert]) .ui-card-text'); c.textContent = 'A long tip. '.repeat(400); });
+    const long = await m();
+    expect(long.bottom).toBeCloseTo(r.bottom, 0);
+    expect(long.own).toBeGreaterThan(0);
+  });
+}
+
 test('a finger caught on the gliding pages stops them under it; let go still, they land on the nearer page', async ({ sized }) => {
   const page = await load(sized);
   const cdp = await page.context().newCDPSession(page);

@@ -24,3 +24,6 @@
 /* a slot scrolls, so the stage's touch-action stops at it: pan-y here too, or the browser takes a sideways swipe */
 .ui-card-slot { position: absolute; inset: 0; overflow-y: auto; touch-action: pan-y; will-change: transform; contain: layout paint; }
 .ui-card-slot:empty { visibility: hidden; }
+/* fill (cardPager's option): from the stage's top on the page (--ui-cards-top, card-pager.js) to the viewport's bottom,
+   less a showing tab bar's room (tabbar.css) and --pad, so the page needs no scroll; a short screen keeps 16rem */
+.ui-cards.ui-cards-fill { height: max(16rem, calc(100dvh - var(--ui-cards-top, 0px) - var(--ui-tabbar-room, 0px) - var(--pad))); }

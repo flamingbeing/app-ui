@@ -65,7 +65,8 @@ document.addEventListener('ui-screen', e => {
   if (!home) kit.selects.get('plants')?.setEditing(false);
 });
 
-// a deck of five cards on the Jobs page (ui/card-pager.js): a sideways swipe for the next or the previous
+// a deck of five cards on the Jobs page (ui/card-pager.js): a sideways swipe for the next or the previous; it fills
+// the page down to the tab bar
 const TIPS = ['Water the basil from below', 'Mist the orchid, never soak its crown', 'Turn the fig a quarter each week',
   'Feed the lavender in spring only', 'Prune the rosemary after it flowers'];
 const cards = cardPager($('job-cards'), {
@@ -78,5 +79,6 @@ const cards = cardPager($('job-cards'), {
     return c;
   },
   onShow: i => { $('job-cards').dataset.shown = String(i); },
+  fill: true,
 });
 Object.assign(window, { cards });
