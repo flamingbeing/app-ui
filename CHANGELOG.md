@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.59
+- The refused list's heading is a section head (`.ui-section` / `.ui-section-head`), the small grey words over a
+  list, not a browser-default h2 bigger than the screen's own headings.
+
 ## 1.0.0-rc.58
 - No swipe pulls the side bar out as a drawer any more: on the first tab page a right swipe stretches the page and
   tells `onPrevMissing`, as without a drawer. The pull claimed the whole touch from its first few pixels, so swipes
