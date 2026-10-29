@@ -24,6 +24,8 @@
 @media (prefers-reduced-motion: reduce) { :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; } }
 :root[data-motion="still"] :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; }
 :is(.ui-chip, .chip)[data-state="attention"], .ui-error, .ui-danger, .error, .danger { color: var(--danger); }
+/* in a band's bar (look B) the chip takes the band's white text (the state colours fail on it): its icon tells the state */
+[data-header="band"] .ui-bar :is(.ui-chip, .chip)[data-state] { color: var(--on-band); }
 .ui-small, .small { font-size: .85rem; color: var(--muted); }
 .ui-inline, .row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
 

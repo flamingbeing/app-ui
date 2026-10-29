@@ -90,7 +90,7 @@ h1 { font-family: var(--font-head); }
 button, input, select { font: inherit; color: inherit; }
 button { display: inline-flex; align-items: center; justify-content: center; gap: .4em; box-sizing: border-box; min-height: var(--button-h);
   padding: 0 var(--pad); cursor: pointer; font-family: var(--font-ui); color: var(--button-text); border-radius: var(--radius-button); }
-button, select { background: var(--button-bg); border: var(--border) solid var(--line); }
+button { background: var(--button-bg); border: var(--border) solid var(--line); }
 button[hidden] { display: none; }   /* (the rule above would otherwise show a hidden button) */
 /* two kinds of button: plain (the default) and filled (the accent); a link-style one has no box at all */
 :where(.ui-fill) { background: var(--fill); color: var(--on-fill); border-color: var(--fill); }
@@ -99,12 +99,17 @@ button[hidden] { display: none; }   /* (the rule above would otherwise show a hi
 .ui-icon-btn { min-width: var(--button-h); padding: 0; background: none; border-color: transparent; color: var(--muted); }
 .ui-icon-btn:hover { background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--text); }
 .ui-icon-btn[aria-pressed="true"] { color: var(--accent); }
-/* form controls a finger can hit, in the theme's colours (zero specificity: a page's own rules win). A select draws
-   its own chevron (two gradients, no image) with room so the words never run under it. */
-select { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border-radius: var(--radius-input); -webkit-appearance: none;
-  appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+/* form controls a finger can hit, in the theme's colours (zero specificity: a page's own rules win). A select is a
+   soft filled field with no line round it, so it sits on a list card without a box in a box; it draws its own
+   chevron (two gradients, no image) with room so the words never run under it. In a row (a list's, a setting's, the
+   theme switch's) it is the row's value: muted words at the end, the chevron, no fill. */
+select { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border: var(--border) solid transparent;
+  border-radius: var(--radius-input); background-color: color-mix(in srgb, var(--text) 7%, transparent);
+  -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
   linear-gradient(135deg, currentColor 50%, transparent 50%); background-repeat: no-repeat;
   background-position: calc(100% - 1rem) 50%, calc(100% - .7rem) 50%; background-size: .3rem .3rem; cursor: pointer; }
+:where(.ui-row, .theme-switch > label) select { background-color: transparent; color: var(--muted); text-align: end;
+  text-align-last: end; padding-inline-start: 0; }
 :where(input:not([type]), input[type="text"], input[type="search"], input[type="email"], input[type="number"],
   input[type="tel"], input[type="url"], input[type="password"], input[type="date"], input[type="time"], textarea) {
   min-height: var(--tap); padding: 0 var(--gap); box-sizing: border-box; background: var(--surface);
@@ -119,8 +124,13 @@ button:not(:disabled):is(:active, [data-pressed]) { box-shadow: inset 0 0 0 100v
 a { color: var(--link); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 ::selection { background: var(--selection); color: var(--text); }
-/* the theme switch (switch.js themeSwitch / lookSwitch): one row per setting, its name at the start and its control at
-   the end, two to a row when there is room; zero specificity, so a page's own layout wins */
-:where(.theme-switch) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap) var(--pad); }
-:where(.theme-switch > label) { display: flex; flex: 1 1 15rem; align-items: center; justify-content: space-between; gap: var(--gap); }
-:where(.theme-switch > .guard-note) { flex-basis: 100%; }
+/* the theme switch (switch.js themeSwitch / lookSwitch): a card like a list's, one row per setting, its name at the
+   start and its control at the end; zero specificity, so a page's own layout wins */
+:where(.theme-switch) { display: flex; flex-direction: column; margin: 0; background: var(--list-bg, var(--surface));
+  border-block: var(--border) solid var(--list-edge); border-radius: var(--card-r); box-shadow: var(--list-shadow); overflow: hidden; }
+:where(.theme-switch > *) { display: flex; align-self: stretch; align-items: center; justify-content: space-between; gap: var(--gap);
+  min-height: var(--row); padding: 0 var(--pad); box-sizing: border-box; }
+:where(.theme-switch > * + *) { background: linear-gradient(var(--list-sep), var(--list-sep)) right top / calc(100% - var(--pad)) var(--border) no-repeat; }
+:where(.theme-switch > button) { justify-content: flex-start; border: 0; border-radius: 0; color: var(--link); background-color: transparent; }
+:where(.theme-switch > .guard-note) { padding-block: var(--gap); }
+:where(.theme-switch > [hidden]) { display: none; }

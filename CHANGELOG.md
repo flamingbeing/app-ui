@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0-rc.47
+- Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
+  words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
+  state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
+  sync chip sits in the bar on the home screen. Open the sheet and Push a screen close the demo sheet first.
+- `select` takes the kit's look: a filled field with no border line; in a row (`.ui-row`) or a theme-switch row it
+  is plain muted text at the row's end, as a settings value is.
+- The theme switch (`.theme-switch`) is a card of rows like a list, with lines between them; on the settings page it
+  lines up with the lists above it.
+- In a band's bar (look B) the sync chip takes the band's white text (the state colours failed contrast on it).
+- Gallery: four more made-up plants, so the list scrolls at tablet height; the dense page's controls are one card
+  with a switch.
 ## 1.0.0-rc.46
 - Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed
   (`theme/m3.js`, tonal spot, light and dark, each role also as `--m3-*`), solid tonal surfaces (no glass), the Roboto

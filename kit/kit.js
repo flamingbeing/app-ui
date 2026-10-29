@@ -2,7 +2,8 @@
 // no import map. ?edge=always turns the edge swipe on outside the iPhone home-screen app (for tests and desktops);
 // ?look= and ?density= preview without keeping (preview.js; the switcher on the page keeps a pick on this device),
 // ?guard=again reruns the glass guard. window.kit is the started parts, for the tests.
-import { startGestures, toaster, syncChip, LABELS } from '../ui/index.js';
+import { startGestures, sheetsSettled, toaster, syncChip, LABELS } from '../ui/index.js';
+import { icon, slidersHorizontal } from '../icons/lucide.js';
 import { chooseTheme, themeChoice, lookSwitch } from '../theme/index.js';
 import { galleryPreview } from './preview.js';
 
@@ -27,6 +28,7 @@ for (const a of /** @type {NodeListOf<HTMLAnchorElement>} */ (document.querySele
 }
 
 const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
+$('demo').append(icon(slidersHorizontal));
 const kit = startGestures();
 /** @type {any} */ (window).kit = kit;
 const toasts = toaster(document.body);
@@ -48,6 +50,20 @@ syncChip($('sync-host'), { sync: /** @type {any} */ (fakeSync) });
 const stillBox = /** @type {HTMLInputElement} */ ($('still'));
 stillBox.checked = themeChoice().motion === 'still';
 stillBox.addEventListener('change', () => chooseTheme({ motion: stillBox.checked ? 'still' : 'auto' }));
+
+// the demo sheet's Open the sheet and Push a screen: the demo sheet goes first (its Back step landed), then what they
+// open hands focus back to the bar's button when it closes
+const demoBtn = $('demo');
+/** @param {() => void} run */
+function fromDemo(run) {
+  const sheet = /** @type {HTMLDialogElement} */ ($('demo-sheet'));
+  const go = () => { void sheetsSettled().then(run); };
+  if (!sheet.open) { run(); return; }
+  sheet.addEventListener('close', go, { once: true });
+  kit.sheets.get('demo-sheet')?.close();
+}
+$('open-sheet').addEventListener('click', () => fromDemo(() => kit.sheets.get('sheet')?.open(demoBtn)));
+$('push').addEventListener('click', () => fromDemo(() => { if (kit.screens && !kit.screens.depth()) kit.screens.push('#detail', demoBtn); }));
 
 /** @param {HTMLElement} row */
 function openRow(row) {
@@ -92,5 +108,6 @@ $('compare').addEventListener('click', () => {
 document.addEventListener('ui-screen', e => {
   const home = /** @type {CustomEvent} */ (e).detail.top.id === 'home';
   $('select').hidden = !home;
+  $('sync-host').hidden = !home;
   if (!home) kit.selects.get('plants')?.setEditing(false);
 });

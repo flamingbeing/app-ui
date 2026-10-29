@@ -37,6 +37,7 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 | Page held still | 390 and 1280 px: a wheel over an open sheet or hold menu doesn't scroll the page (the menu's preview stays on its row); closed, it scrolls again | |
 | Home indicator | 390 px with a 34 px bottom inset: a full-height sheet's last row, look B's sheet menu and a toast on a page without a tab bar clear it | |
 | Sync chip | 390 px: the chip shows each made-up state in its word (`Saved`, `Sending… (3)`, …), its `data-state` set, a `status` role; axe clean with "Needs you" | |
+| Demo controls | 390 px: the list sits straight under the large title, with no demo control on the home screen; the bar's "Demo controls" button opens one sheet holding Open the sheet, Push a screen, the other pages, look, density, Still and the sync state, each scrolled to on screen; axe clean light and dark; Esc gives focus back to the button; Open the sheet swaps the demo sheet for the made-up one (its close gives focus back to the button); Push a screen pushes one screen | |
 | Installable, no pull | each gallery page (settings too): `overscroll-behavior-y: none` (no pull-to-refresh); demo words with no developer notes; the manifest (standalone; `id` and `start_url` `/ui/kit/`, scope `/ui/`, so the installed app opens the newest gallery) and its 192 and 512 icons are served; the page cancels `beforeinstallprompt`; the service worker (scope `kit/`) controls the page after a reload | |
 
 ## Shell gallery

@@ -20,4 +20,5 @@ export function icon(nodes: IconNodes, o?: {
 /** @type {IconNodes} */ export const triangleAlert: IconNodes;
 /** @type {IconNodes} */ export const loaderCircle: IconNodes;
 /** @type {IconNodes} */ export const gripVertical: IconNodes;
+/** @type {IconNodes} */ export const slidersHorizontal: IconNodes;
 export type IconNodes = readonly (readonly [string, Readonly<Record<string, string | number>>])[];
