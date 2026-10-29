@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.43
+- Gallery: the install file's colours are the dark ground (`#1c1c1e`), so the Android system bar at the bottom of
+  the installed gallery is dark, not light.
+
 ## 1.0.0-rc.42
 - Back with tabs, as Android apps do it (`ui/tab-back.js`, `tabBack`): switching tabs adds no Back steps; Back on
   any other tab goes to the first tab, and Back on the first tab leaves the app. Leaving the first tab adds one
