@@ -16,8 +16,8 @@ const asJson = record => JSON.stringify(record);
  */
 export function refusedList(host, { sync, kind, text = asJson, idPrefix = '' }) {
   const list = el('ul', { id: `${idPrefix}refused`, class: 'ui-refused' });
-  const box = el('section', { id: `${idPrefix}refused-box`, 'aria-labelledby': `${idPrefix}refused-title` },
-    el('h2', { id: `${idPrefix}refused-title` }, 'Not saved: the server refused these'), list);
+  const box = el('section', { id: `${idPrefix}refused-box`, class: 'ui-section', 'aria-labelledby': `${idPrefix}refused-title` },
+    el('h2', { id: `${idPrefix}refused-title`, class: 'ui-section-head' }, 'Not saved: the server refused these'), list);
   host.append(box);
   const draw = () => {
     const jobs = sync.queue.refused(kind);

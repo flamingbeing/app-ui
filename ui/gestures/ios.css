@@ -121,6 +121,7 @@
 /* ---------- fields and buttons in the content ---------- */
 :root[data-look="ios"] :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select) {
   border-color: transparent; background-color: var(--ios-fill-3); }
+:root[data-look="ios"] :is(.ui-row, .theme-switch > label) select { background-color: transparent; }   /* a row's value: no fill, as theme.css */
 :root[data-look="ios"] button:not(.ui-row, .ui-tab, .ui-sheet-grabber, .ui-switch) { border-color: transparent; font-weight: 500; }
 :root[data-look="ios"] :where(.ui-fill) { background: var(--accent); color: var(--on-accent); }
 
