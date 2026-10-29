@@ -25,4 +25,9 @@ export async function fromDemo(page, sel) {
   await page.click(sel);
   await expect(page.locator('#demo-sheet')).toBeHidden();
   if (sel === '#open-sheet') await expect(page.locator('#sheet')).toBeVisible();
+  // the push waits for the closed sheet's history step back; a reload or Back before it lands is aborted
+  if (sel === '#push') {
+    await expect(page.locator('#detail')).toBeVisible();
+    await expect.poll(() => page.evaluate(() => /** @type {any} */ (window).kit.screens.depth())).toBe(1);
+  }
 }
