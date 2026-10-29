@@ -1,11 +1,21 @@
 # Changelog
 
-## 1.0.0-rc.49
+## 1.0.0-rc.50
 - An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
   and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
   half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
 - Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module.
 - Gallery: the iOS look is its default, and `/kit/ios/` shows the iOS parts together.
+
+## 1.0.0-rc.49
+- `syncButton(host, { sync, syncNow?, labels?, idPrefix? })`: the sync chip's tappable twin for a header bar
+  (`#sync-btn`). One colour, the bar's; the state is the cloud icon's shape: a tick (saved), an arrow up that lifts
+  (sending, with a count of what waits), struck (offline), an exclamation mark (not saved yet; needs you adds a dot),
+  faded (connecting). A tap syncs now (default: `sync.nudge('wake')` then `sync.flush()`, app-sync's own) and shows
+  sending at least 700 ms. The lift is transform and opacity only, off under reduced motion and Still. A `<button>`
+  passed as `host` becomes the button, so an app's markup can place it. Looks theme it with `--ui-sync-dot` and
+  `--ui-sync-badge`. New label `syncNow` ("Sync now"); new icons `cloud`, `cloudCheck`, `cloudUpload`, `cloudAlert`.
+- The shell gallery's bar shows it; the jank gate times a tap on it.
 
 ## 1.0.0-rc.48
 - Haptics: `haptic(kind)` with five kinds (`tick`, `threshold`, `long`, `confirm`, `reject`; `HAPTIC_PATTERNS`),
