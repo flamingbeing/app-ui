@@ -19,8 +19,8 @@ const TYPES = { js: 'text/javascript; charset=utf-8', css: 'text/css; charset=ut
   svg: 'image/svg+xml', png: 'image/png', webmanifest: 'application/manifest+json', json: 'application/json; charset=utf-8', ts: 'text/plain; charset=utf-8' };
 // public code, no cookies or credentials, so any app origin may import it (and <link> its CSS)
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Cross-Origin-Resource-Policy': 'cross-origin' };
-// the gallery pages: their own files, the design kit's tokens and its fonts; nothing else
-const KIT = 'https://design.flamingbeing.com';
+// the gallery pages: their own files, the design kits' tokens and fonts (?kit= shows each); nothing else
+const KIT = 'https://design.flamingbeing.com https://design.anawj.com https://design.anantf.com';
 export const PAGE_CSP = [
   "default-src 'self'", `script-src 'self' ${KIT}`, `style-src 'self' ${KIT} https://fonts.googleapis.com`,
   `font-src 'self' ${KIT} https://fonts.gstatic.com`, `img-src 'self' data: blob: ${KIT}`,

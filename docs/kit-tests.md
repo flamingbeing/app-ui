@@ -115,6 +115,7 @@ stand-in for `@core/settings` on the page.
 | Wide bar | 1280 px, looks A to D, gallery and dense page: the top bar is full width, its title centred and its start in line with the large title's words; an edge tab bar keeps its tabs together in the middle | |
 | Density | rows 60 / 50 / 44 px; taps never under 44; a link's `?look=` is a preview, a pick is kept after reload | |
 | Glass guard | little memory turns glass off, kept, with the reason in Settings; Solid and "Glass, even here" still win | yes |
+| Design kits | `?kit=ntf` swaps the page's `/v1/tokens.css` to `design.anantf.com` and sets wine on the linen ground; `?kit=nuhs` to `design.anawj.com`, navy on white; no `?kit` keeps the default kit | |
 
 ### Layout parts and extra-dense (`e2e/dense.spec.mjs`)
 

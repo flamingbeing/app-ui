@@ -49,7 +49,7 @@ export function shapeTokens(choice) {
     'radius-s': s, radius: m, 'radius-l': l, border: `${p.border ?? 1}px`,
     shadow: p.shadow === false ? 'none' : '0 1px 3px rgb(0 0 0 / .14)',
     // (a serif theme wins; else the look's heading face)
-    'font-head': p.head === 'serif' ? 'ui-serif, Georgia, "Times New Roman", serif' : 'var(--look-font-head, inherit)',
+    'font-head': p.head === 'serif' ? 'var(--home-serif, ui-serif), Georgia, "Times New Roman", serif' : 'var(--look-font-head, inherit)',
     leading: String(p.leading ?? 1.5),
   };
 }

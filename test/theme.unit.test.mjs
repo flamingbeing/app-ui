@@ -310,3 +310,11 @@ test('an app with its own palette: layer puts the kit palette in that cascade la
     if (wasSheet) Object.defineProperty(globalThis, 'CSSStyleSheet', wasSheet); else delete globalThis.CSSStyleSheet;
   }
 });
+
+test('linen ground: the NTF kit\'s paper and ink in light, its own dark; a serif head follows the kit\'s --home-serif', () => {
+  const p = palettes({}, { accent: '#633d3c', surface: 'linen' });
+  assert.equal(p.light.bg, '#f1ede4');
+  assert.equal(p.light.surface, '#fbfaf6');
+  assert.equal(p.dark.bg, '#151412');
+  assert.match(String(LOOKS.find(l => l.id === 'a')?.tokens['look-font-head']), /^var\(--home-serif, ui-serif\)/);
+});
