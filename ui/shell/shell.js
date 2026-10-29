@@ -16,11 +16,12 @@
 //   Esc          on a phone's pushed detail, goes back (select mode, menus and dialogs keep their own Esc)
 //   side bar     a .ui-bar-menu button (in the bar's [data-bar-lead]) opens the side bar as a drawer on a phone
 //                (.ui-shell.is-drawer-open, over a .ui-drawer-shade); a side link, a tap on the shade, Esc or growing
-//                past phone width closes it. It follows the finger: .drawer (returned) is what tab-pages.js pulls out
+//                past phone width closes it. Open, it is a history entry (Back closes it) and the page behind is inert. It follows the finger: .drawer (returned) is what tab-pages.js pulls out
 //                on a right swipe from the first tab page; a left swipe on the drawer or the shade pushes it back
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
 import { listeners, still, swipeIntent, THROW_MS } from '../gesture.js';
 import { glide as springGlide, tracker } from '../motion.js';
+import { ourStep, stepBack, stepping, stepsSettled } from '../steps.js';
 
 export const TABLET_MIN = 600;
 export const LAPTOP_MIN = 840;
@@ -174,10 +175,27 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     slid = null;
     dx = g.run.stop();
   }
+  // open, the drawer is a history entry (Android's Back closes it, as it does a sheet) and the page behind is inert
+  // (Tab and TalkBack stay in the drawer); its entry goes as soon as it starts to shut, so a side link's new page
+  // isn't undone by the step back (tab-back.js waits on it)
+  let pushed = false;
+  /** @param {boolean} on */
+  function entry(on) {
+    for (const el of shell.children) if (el !== side && el !== shade) /** @type {HTMLElement} */ (el).inert = on;
+    if (on && !pushed) {
+      const go = () => {
+        if (pushed || !drawerOpen()) return;
+        try { history.pushState({ ...(history.state || {}), uiDrawer: 1 }, ''); pushed = true; } catch { /* no history here */ }
+      };
+      if (stepping()) void stepsSettled().then(go); else go();
+    } else if (!on && pushed) { pushed = false; stepBack(); }
+  }
+  l.on(window, 'popstate', () => { if (pushed && !ourStep() && !history.state?.uiDrawer) { pushed = false; drawer(false); } });
   /** the drawer comes to rest open or shut @param {boolean} on @param {boolean} [touch] */
   function rest(on, touch = false) {
     const was = drawerOpen();
     shell.classList.toggle('is-drawer-open', on);
+    entry(on);
     shell.classList.remove('is-drawer-moving');
     if (side) side.style.transform = '';
     if (shade) shade.style.opacity = '';
@@ -192,6 +210,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   function glide(on, v = 0, touch = false) {
     if (!side) return;
     hold();
+    if (!on) entry(false);
     if (still() && !touch) { rest(on, touch); return; }   // (a finger's let-go glides on, as its drag did)
     lay();
     const run = springGlide([[side, x => ({ transform: `translateX(${x - dw}px)` })],
@@ -291,5 +310,5 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     }
   });
 
-  return { open, current: () => current, size: () => size, drawer: pull, stop() { gone.disconnect(); l.stop(); hold(); shade?.remove(); } };
+  return { open, current: () => current, size: () => size, drawer: pull, stop() { gone.disconnect(); l.stop(); hold(); entry(false); shade?.remove(); } };
 }

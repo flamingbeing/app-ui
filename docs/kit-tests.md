@@ -90,6 +90,8 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Back with tabs | leaving the first tab adds one history entry, the other tabs none; Back on another tab goes to the first, Back there leaves; a tap on the first tab takes the entry away | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
+| Drawer and Back | the drawer open (pulled out, or by its button) is a history entry: Back closes it and stays on the page; the bar, pages and tab bar are `inert` while it is open; a side link's page takes the drawer's place in history, so Back then goes to the first page; also in WebKit | |
+| Sheet, Esc and Back | a sheet closed by Esc (the close request Chrome's Back sends a modal dialog on Android) steps back once: the tab's entry under it stays; also in WebKit | |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 
 ## Bounce
