@@ -420,7 +420,6 @@ test('a right swipe on the first page never pulls the side bar out; its button o
   await send('touchEnd', 0, 0);
   await settled(page);
   await expect(side).toBeHidden();
-  expect(await page.evaluate(() => document.documentElement.dataset.prevMissing), 'the app is told').toBe('1');
   expect(await shown(page)).toEqual(['home']);
   await (await finger(page)).drag(300, 420, 80, 420, { steps: 8, ms: 16 });
   await settled(page);

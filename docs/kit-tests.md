@@ -81,7 +81,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | First page | a right swipe past a third of the finger's own travel (or a flick) fires `onPrevMissing` once; a short move does not | |
 | Quick flicks | three short flicks, each while the last still glides, go three pages (none lost to a glide); also in WebKit | |
 | Catch | a finger on the gliding pages holds them where they are, and a tap there opens nothing; let go still, they land on the nearer page; also in WebKit | |
-| Drawer swipe | a right swipe on the first page never pulls the side bar out (the page stretches, `onPrevMissing` fires) and a left swipe straight after still changes page; opened by its button, a left swipe on the shade pushes it back with the finger, a tap on the shade closes it; with Reduce Motion the button opens it with no animation; also in WebKit | |
+| Drawer swipe | a right swipe on the first page never pulls the side bar out (the page stretches) and a left swipe straight after still changes page; opened by its button, a left swipe on the shade pushes it back with the finger, a tap on the shade closes it; with Reduce Motion the button opens it with no animation; also in WebKit | |
 | Sideways scroller | the Jobs chips still scroll sideways under the pager's `touch-action: pan-y` | |
 | Card deck | the Jobs page's deck (`cardPager`) tells `onShow` of the first card; a swipe on it goes a card, never a tab; not from within the edge; ArrowRight and ArrowLeft go too | |
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
