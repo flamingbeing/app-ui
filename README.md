@@ -48,7 +48,8 @@ holds the kit to them):
   the plain look: CI has no GPU, so glass blur is drawn in software there), a tab swipe, a tab flick and a sheet
   dragged up, down and away keep every drag frame within 20 ms but one, no frame over 50 ms (drag or glide) and no
   task over 50 ms; a touched tab shows pressed within 50 ms. WebKit (the iPhone's engine) runs the same gestures
-  unslowed, with the glass. It runs alone after the other browser tests, one test at a time, with no retries; a
+  unslowed, with the glass, and holds the page's own work (CI's WebKit draws in software, so its frames say little):
+  each move's handlers within 8 ms, the touch down's and the lift's within 16 ms, pressed set by the touch. It runs alone after the other browser tests, one test at a time, with no retries; a
   failure is a slow frame to fix, never a number to loosen.
 
 ## Releases

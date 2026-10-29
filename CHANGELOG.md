@@ -16,7 +16,8 @@ Responsiveness (README, "Responsiveness rules"):
 - Pressed at once: `startGestures()` (option `press`, on by default) marks a touched control `data-pressed` on the
   touch; the theme, tab bar and glass buttons show it like `:active`.
 - CI's jank gate (`e2e/jank.spec.mjs`): a tab swipe and flick and a sheet drag on a phone with the CPU slowed 4x
-  (Chromium) and in WebKit, within the budget; it runs alone after the other browser tests.
+  (Chromium, frames) and in WebKit (each move's handlers within 8 ms, touch down and lift within 16), within the
+  budget; it runs alone after the other browser tests.
 - The parts gallery gains "Follow the finger", a `drag` and `glide` demo with a save held by `afterGesture`.
 
 ## 1.0.0-rc.36
