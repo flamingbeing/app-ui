@@ -297,9 +297,9 @@ for (const width of [390, 820, 1280]) {
         await expect(sheet).toBeVisible();
         await expect(sheet).toHaveAttribute('data-detent', 'medium');
       }
-      // and from the body it does
+      // and from the body it does (past halfway: a let-go lands on the nearest height)
       const body = await centre(page.locator('#sheet .ui-sheet-body p').first());
-      await f.drag(body.x, body.y, body.x, body.y - 200);
+      await f.drag(body.x, body.y, body.x, body.y - 350);
       await expect(sheet).toHaveAttribute('data-detent', 'large');
     });
 

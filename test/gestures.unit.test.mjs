@@ -67,20 +67,27 @@ test('sheet: the top detent is large when there is one', () => {
   assert.equal(topDetent(['medium']), 'medium');
 });
 
-test('sheet: small moves stay; up goes to the top; down steps down, then closes', () => {
-  const ds = ['medium', 'large'];
-  assert.equal(settle(ds, 'medium', 30, 0), 'medium');
-  assert.equal(settle(ds, 'medium', -100, 0), 'large');
-  assert.equal(settle(ds, 'large', 200, 0), 'medium');
-  assert.equal(settle(ds, 'medium', 200, 0), 'close');
-  assert.equal(settle(['medium'], 'medium', 200, 0), 'close');
+test('sheet: a let-go settles on the nearest height; well below the lowest it closes', () => {
+  const ds = ['medium', 'large'], px = { medium: 422, large: 832 };
+  assert.equal(settle(ds, px, 452, 0, 'medium'), 'medium');
+  assert.equal(settle(ds, px, 522, 0, 'medium'), 'medium', 'up 100 px: still nearer medium');
+  assert.equal(settle(ds, px, 660, 0, 'medium'), 'large', 'past halfway: large');
+  assert.equal(settle(ds, px, 600, 0, 'large'), 'medium', 'down past halfway from large');
+  assert.equal(settle(ds, px, 700, 0, 'large'), 'large');
+  assert.equal(settle(ds, px, 300, 0, 'medium'), 'medium', 'a little below medium: back up');
+  assert.equal(settle(ds, px, 260, 0, 'medium'), 'close');
+  assert.equal(settle(['medium'], { medium: 422 }, 222, 0, 'medium'), 'close');
+  assert.equal(settle(['medium'], { medium: 200 }, 120, 0, 'medium'), 'medium', 'a short sheet: the close line is half its height');
+  assert.equal(settle(['medium'], { medium: 200 }, 90, 0, 'medium'), 'close');
 });
 
-test('sheet: a flick counts as where it would carry the sheet', () => {
-  const ds = ['medium', 'large'];
-  assert.equal(settle(ds, 'medium', -20, -0.5), 'large');
-  assert.equal(settle(ds, 'large', 40, 0.6), 'medium');
-  assert.equal(settle(ds, 'medium', 10, 0.1), 'medium');
+test('sheet: a flick goes on to the next height its way, or as far as it would carry the sheet', () => {
+  const ds = ['medium', 'large'], px = { medium: 422, large: 832 };
+  assert.equal(settle(ds, px, 442, -0.5, 'medium'), 'large');
+  assert.equal(settle(ds, px, 792, 0.6, 'large'), 'medium');
+  assert.equal(settle(ds, px, 412, 0.1, 'medium'), 'medium');
+  assert.equal(settle(ds, px, 400, 0.8, 'medium'), 'close', 'flung down from the lowest: closes');
+  assert.equal(settle(ds, px, 700, 3, 'large'), 'medium', 'flung hard down from full height: medium, not closed');
 });
 
 test('tab bar: shrinks after 40 px down, grows after 24 px up or near the top', () => {

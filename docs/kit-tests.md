@@ -120,6 +120,16 @@ page-sent touch pointer events.
 | On a fixed bar | a tab on the tab bar (`inScroller` false): pressed at once; cleared after the lift | |
 | Ripple | look M: `data-ripple="in"` from the finger (`--ui-ripple-x` 30 px), to the farthest corner, a radial gradient; after the lift `out`, then gone with its properties; the plain look: none | |
 
+## Sheet drag
+
+`ui/detent-sheet.js` `settle` in Node (`test/gestures.unit.test.mjs`). `e2e/sheet-snap.spec.mjs` on `/kit/shell/` at
+390 px, in Chromium and WebKit, with touch pointer events on the grabber.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Nearest height | up short of halfway: back to medium; past halfway: full height; down short of halfway: stays; past it: medium | |
+| Backdrop | dragged below medium: lighter, lighter still further down; back up and let go: full again; past the close line: closes | |
+
 ## Haptics
 
 `ui/gesture.js` `haptic`, the theme's `haptics`: `cleanChoice` in Node (`test/theme.unit.test.mjs`).
