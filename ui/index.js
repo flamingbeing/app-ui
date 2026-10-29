@@ -34,6 +34,7 @@ export { shrinkingTabBar, tabBarRoom } from './tab-bar.js';
 export { holdMenus } from './hold-menu.js';
 export { detentSheet, sheetsSettled } from './detent-sheet.js';
 export { stepsSettled } from './steps.js';
+export { watchKeyboard, keyboardState, KEYBOARD_MIN } from './keyboard.js';
 export { screenStack } from './screens.js';
 export { selectMode } from './select-mode.js';
 export { tabPages, swipeIntent, pageStep } from './tab-pages.js';

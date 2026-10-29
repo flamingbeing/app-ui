@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0-rc.48
+- Press Back again to close: the first Back on the first tab stays in the app and shows a toast, "Press Back again
+  to close"; a second Back within 2 s (`CLOSE_MS`) leaves. Before, one Back let the browser close an installed app,
+  so the next open was a cold start with the splash. `tabPages` does it by default (`{ backToClose: false }`: off;
+  `toasts`: the app's own toaster; `labels.backAgain`: own words). An app with its own router passes `onClose` to
+  `tabBack` (and `first` when it may start on another tab).
+- How: one more history entry, the guard, over the first tab's own (`uiTabGuard` in its state); Back lands below it
+  and opens the 2 s window, after which the guard comes back. Sheets, the drawer and pushed screens still close
+  first; a reload keeps the one guard. Chrome skips an entry added with no tap since until the next tap, so a Back
+  before any tap at all may still leave.
+
+## 1.0.0-rc.47
+- Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):
+  while a field has focus and the visible page is over 150 px shorter than its tallest, `html.ui-keyboard-open` and
+  a `ui-keyboard` event. The tab bar hides; a sheet and the action bar sit above the keyboard. `--ui-keyboard-h` is
+  how far the keyboard covers the layout's bottom.
+- Apps: end the viewport meta with `interactive-widget=resizes-content` (docs/ui-kit.md, "The on-screen
+  keyboard"); the gallery pages do.
+
 ## 1.0.0-rc.46
 - Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed
   (`theme/m3.js`, tonal spot, light and dark, each role also as `--m3-*`), solid tonal surfaces (no glass), the Roboto
