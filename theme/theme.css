@@ -113,7 +113,9 @@ select { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border-radius: va
 :where(input[type="checkbox"], input[type="radio"]) { width: 1.375rem; height: 1.375rem; margin: 0; accent-color: var(--accent); }
 input[type="color"] { min-height: var(--tap); min-width: var(--tap); padding: 2px; border: var(--border) solid var(--line);
   border-radius: var(--radius); background: var(--surface); }
-button:not(:disabled):active { box-shadow: inset 0 0 0 100vmax var(--press); }
+button:not(:disabled):is(:active, [data-pressed]) { box-shadow: inset 0 0 0 100vmax var(--press); }
+/* pressed at once (ui/motion.js pressFeedback): a finger's touch shows before the browser's own :active would */
+:where([role="button"], summary, [data-press])[data-pressed] { box-shadow: inset 0 0 0 100vmax var(--press); }
 a { color: var(--link); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 ::selection { background: var(--selection); color: var(--text); }

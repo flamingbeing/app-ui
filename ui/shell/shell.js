@@ -19,7 +19,8 @@
 //                past phone width closes it. It follows the finger: .drawer (returned) is what tab-pages.js pulls out
 //                on a right swipe from the first tab page; a left swipe on the drawer or the shade pushes it back
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
-import { listeners, still, swipeIntent, THROW_MS, springPath, pathAt, releaseVelocity } from '../gesture.js';
+import { listeners, still, swipeIntent, THROW_MS } from '../gesture.js';
+import { glide as springGlide, tracker } from '../motion.js';
 
 export const TABLET_MIN = 600;
 export const LAPTOP_MIN = 840;
@@ -145,7 +146,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   let shade = null;
   /** how far out the drawer is (0 shut, dw open), and its width */
   let dx = 0, dw = 0;
-  /** the drawer's glide, or null @type {{ runs: Animation[], path: number[], open: boolean } | null} */
+  /** the drawer's glide, or null @type {{ run: import('../motion.js').Glide, open: boolean } | null} */
   let slid = null;
   /** the drawer and its shade show, for the finger or a glide */
   function lay() {
@@ -171,8 +172,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     const g = slid;
     if (!g) return;
     slid = null;
-    dx = g.runs.length ? pathAt(g.runs[0], g.path) : dx;
-    for (const a of g.runs) a.cancel();
+    dx = g.run.stop();
   }
   /** the drawer comes to rest open or shut @param {boolean} on @param {boolean} [touch] */
   function rest(on, touch = false) {
@@ -192,18 +192,16 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   function glide(on, v = 0, touch = false) {
     if (!side) return;
     hold();
-    if (still()) { rest(on, touch); return; }
+    if (still() && !touch) { rest(on, touch); return; }   // (a finger's let-go glides on, as its drag did)
     lay();
-    const path = springPath(dx, on ? dw : 0, v);
-    const timing = { duration: (path.length - 1) * 1000 / 60, easing: 'linear', fill: /** @type {const} */ ('forwards') };
-    const runs = [side.animate(path.map(x => ({ transform: `translateX(${x - dw}px)` })), timing),
-      /** @type {HTMLElement} */ (shade).animate(path.map(x => ({ opacity: x / dw })), timing)];
-    const g = slid = { runs, path, open: on };
+    const run = springGlide([[side, x => ({ transform: `translateX(${x - dw}px)` })],
+      [/** @type {HTMLElement} */ (shade), x => ({ opacity: x / dw })]], dx, on ? dw : 0, v);
+    const g = slid = { run, open: on };
     if (on) rest(on, touch), shell.classList.add('is-drawer-moving');   // open at once for focus and Esc; still moving
-    void Promise.all(runs.map(a => a.finished.catch(() => {}))).then(() => {
-      if (slid !== g) return;
+    void run.done.then(landed => {
+      if (!landed || slid !== g) return;
       slid = null;
-      for (const a of runs) a.cancel();
+      run.stop();
       rest(on, touch);
     });
   }
@@ -232,8 +230,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     /** @type {'x' | 'y' | null} */
     let way = null;
     let going = false;
-    /** @type {[number, number][]} */
-    let hist = [];
+    const hist = tracker();
     l.on(el, 'touchstart', (/** @type {TouchEvent} */ e) => {
       x0 = null;
       if (e.touches.length > 1 || (!drawerOpen() && !slid) || size !== 'phone') return;
@@ -245,7 +242,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
       from = dx; place(dx);
       way = null;
       x0 = t.clientX; y0 = t.clientY;
-      hist = [[e.timeStamp, t.clientX]];
+      hist.reset(e.timeStamp, t.clientX);
     }, { passive: true });
     l.on(el, 'touchmove', (/** @type {TouchEvent} */ e) => {
       if (x0 === null) return;
@@ -256,8 +253,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
         if (!way) return;
       }
       if (e.cancelable) e.preventDefault();
-      hist.push([e.timeStamp, t.clientX]);
-      if (hist.length > 12) hist.shift();
+      hist.add(e.timeStamp, t.clientX);
       place(from + Math.min(0, mx));
     }, { passive: false });
     const end = (/** @type {TouchEvent} */ e) => {
@@ -265,7 +261,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
       x0 = null;
       if (way !== 'x') { letGo(); return; }   // a tap (the shade's click shuts it after)
       if (e.cancelable) e.preventDefault();   // no click under the finger
-      const v = e.type === 'touchend' ? releaseVelocity(hist, e.timeStamp) : 0;
+      const v = e.type === 'touchend' ? hist.speed(e.timeStamp) : 0;
       glide(opens(dx, v), v, true);
     };
     // not a swipe: a caught glide goes on where it was going; a still drawer stays as it was

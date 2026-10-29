@@ -88,6 +88,25 @@ for (const width of [390, 1280]) {
       expect(await AxeBuilder(page), 'axe').toEqual([]);
     });
 
+    test('follow the finger: the knob goes with a finger, glides to the end it was let go nearer, and saves after', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      const knob = page.locator('#motion-knob');
+      await knob.scrollIntoViewIfNeeded();
+      const k = await knob.boundingBox(), t = await page.locator('#motion-track').boundingBox();
+      const y = k.y + k.height / 2;
+      await drag(page, k.x + k.width / 2, y, k.x + k.width / 2 + (t.width - k.width) * .7, y);
+      await expect(page.locator('#motion-state')).toHaveText('At the right.');
+      await expect(page.locator('#motion-saved')).toHaveText('Saved 1 time.');
+      const end = await knob.boundingBox();
+      expect(Math.abs(end.x + end.width - (t.x + t.width - 4))).toBeLessThan(2);
+      // back, a short move: it glides back to the right
+      await drag(page, end.x + end.width / 2, y, end.x + end.width / 2 - 30, y);
+      await expect(page.locator('#motion-saved')).toHaveText('Saved 2 times.');
+      await expect(page.locator('#motion-state')).toHaveText('At the right.');
+      expect(await AxeBuilder(page), 'axe').toEqual([]);
+    });
+
     test('share out: Copy says so; Share without a share sheet copies', async ({ sized, context }) => {
       await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
       const page = await sized(width);

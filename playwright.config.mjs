@@ -4,6 +4,8 @@
 // Chromium runs every spec (the finger tests drive touch through the DevTools protocol, which only Chromium has);
 // Firefox and WebKit run the gallery smoke spec (each gallery page starts, is clean and keeps to the page policy);
 // WebKit, the iPhone's engine, also runs the swipe-feel spec (a finger from page-sent touch events).
+// The jank gate (jank.spec.mjs) times frames, so it runs alone, after the rest: its tests one at a time, Chromium then
+// WebKit, with no other browser busy beside it.
 import { baseConfig, phone } from './.devkit/playwright/base.mjs';
 
 export const PORT = 4174;
@@ -19,9 +21,13 @@ const config = baseConfig({
   ],
 });
 const { isMobile, ...touch } = phone.use;   // (Firefox has no isMobile)
+const chromium = { ...phone.use, browserName: 'chromium', launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {} };
+const JANK = 'jank.spec.mjs';
 config.projects = [
-  { ...phone, use: { ...phone.use, browserName: 'chromium', launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {} } },
+  { ...phone, testIgnore: JANK, use: chromium },
   { name: 'firefox', testMatch: 'gallery.spec.mjs', use: { ...touch, browserName: 'firefox' } },
   { name: 'webkit', testMatch: /(gallery|swipe-feel)\.spec\.mjs/, use: { ...phone.use, browserName: 'webkit' } },
+  { name: 'jank', testMatch: JANK, fullyParallel: false, dependencies: ['phone', 'firefox', 'webkit'], use: chromium },
+  { name: 'jank-webkit', testMatch: JANK, fullyParallel: false, dependencies: ['jank'], use: { ...phone.use, browserName: 'webkit' } },
 ];
 export default config;

@@ -21,7 +21,8 @@
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
 // page motion), at every width. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
 // { slide: false }.
-import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber, springPath, pathAt, releaseVelocity } from './gesture.js';
+import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber } from './gesture.js';
+import { glide as springGlide, tracker, afterGesture } from './motion.js';
 import { EDGE, swipeGoesBack } from './screens.js';
 import { TABLET_MIN } from './shell/shell.js';
 
@@ -53,6 +54,9 @@ export const SLIDE_MS = 280;
 /** A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
  * release(x, v) lets it go there at v px/ms, to open or closed.
  * @typedef {{ pull: (x: number) => void, release: (x: number, v: number) => void }} PullDrawer */
+
+/** The pages' glide after a let-go: where to, and whether it was a right swipe with nothing before.
+ * @typedef {{ run: import('./motion.js').Glide, to: HTMLElement | null, missing: boolean, timer: ReturnType<typeof setTimeout> | number }} Gliding */
 
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
@@ -90,6 +94,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   /** @param {string | HTMLElement} target @param {Element | null} [tab] */
   function go(target, tab = null) {
     if (glide) settle();   // a tab tapped while the pages glide: they land first
+    if (ready) unpage();   // (laid out early, at a touch: put away)
     const page = typeof target === 'string' ? find(target) : target;
     if (!page || page.parentElement !== host) return;
     if (page === current) { if (screens.depth() > 0) void screens.base(page); return; }
@@ -133,18 +138,17 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   host.classList.add('is-pager');
   /** @type {number | null} */
   let x0 = null;
-  let y0 = 0, dx = 0, raw = 0, w = 0, ready = false;
+  let y0 = 0, dx = 0, raw = 0, w = 0, ready = false, readyY = 0;
   /** @type {'x' | 'y' | null} */
   let dir = null;
-  /** @type {[number, number][]} */
-  let hist = [];
+  const hist = tracker();
   /** @type {HTMLElement | null} */
   let prev = null;
   /** @type {HTMLElement | null} */
   let next = null;
   /** the drawer this touch pulls (a right swipe on the first page), or null @type {PullDrawer | null} */
   let pulling = null;
-  /** the pages gliding after a let-go, or null @type {{ runs: Animation[], path: number[], to: HTMLElement | null, missing: boolean, timer: number } | null} */
+  /** the pages gliding after a let-go (motion.js), or null @type {Gliding | null} */
   let glide = null;
   /** the way the glide this touch caught was going (-1 left, 1 right, 0 none caught) */
   let caughtWay = 0;
@@ -184,6 +188,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const all = stops(), i = all.indexOf(current);
     prev = all[i - 1] ?? null; next = all[i + 1] ?? null;
     w = host.clientWidth || innerWidth;
+    readyY = scrollY;
     own = small?.textContent ?? '';
     faders = fades();
     host.classList.add('is-paging');
@@ -208,13 +213,15 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     for (const f of faders) f.style.filter = '';
     if (small) small.style.filter = '';
   }
-  /** the pages land where the glide was taking them: the new page, or back @param {NonNullable<typeof glide>} g */
+  // the pages laid out for a touch that became a scroll are put away once the scroll is done, not on its first frame
+  const putAway = () => afterGesture(() => { if (x0 === null && !glide && ready) unpage(); });
+  /** the pages land where the glide was taking them: the new page, or back @param {Gliding} g */
   function land(g) {
     clearTimeout(g.timer);
     if (small) small.textContent = own;   // the landing (go) names the bar; back, it keeps its own
     unpage();
     if (g.to) go(g.to); else if (g.missing) onPrevMissing?.();
-    for (const a of g.runs) a.cancel();
+    g.run.stop();
     // the new page's bar parts come in
     if (g.to && !still()) for (const f of faders) f.animate([{ filter: 'opacity(0)' }, { filter: 'opacity(1)' }], { duration: 200, easing: 'ease-out' });
   }
@@ -226,14 +233,13 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   }
   /** a finger lands on the gliding pages: they stop under it, the nearer page as the current one */
   function catchGlide() {
-    const g = /** @type {NonNullable<typeof glide>} */ (glide);
+    const g = /** @type {Gliding} */ (glide);
     glide = null;
     clearTimeout(g.timer);
-    const x = g.runs.length ? pathAt(g.runs[0], g.path) : 0;
-    caughtWay = Math.sign(g.path[g.path.length - 1] - g.path[0]);
+    const x = g.run.stop();   // stopped where it is, under the finger
+    caughtWay = Math.sign(g.run.to - g.run.from);
     // the page it was going to is the current one now (so a flick goes on from it), or the nearer one going back
     const near = g.to ?? (Math.abs(x) > w / 2 ? coming(x) : null);
-    for (const a of g.runs) a.cancel();
     if (near) {
       const ahead = near === next;
       if (small) small.textContent = own;
@@ -266,30 +272,33 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       const sel = getSelection();
       if (sel && !sel.isCollapsed) return;
       dx = raw = 0; dir = null; caughtWay = 0;
+      if (ready && scrollY !== readyY) unpage();   // laid out for another scroll
+      // the pages beside are laid out now, before the finger has moved: the first move then only moves them (laid
+      // out at that move, the move comes a frame or two late); a touch that turns out a scroll or a tap puts them away
+      prepare();
     } else {
       catchGlide();
       dir = 'x';   // a caught page moves only sideways
     }
     x0 = t.clientX - raw; y0 = t.clientY;
-    hist = [[e.timeStamp, t.clientX]];
+    hist.reset(e.timeStamp, t.clientX);
   }, { passive: true });
   l.on(document, 'touchmove', (/** @type {TouchEvent} */ e) => {
     if (x0 === null) return;
     const t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
     if (!dir) {
-      if (!e.cancelable) { x0 = null; unpage(); return; }   // the browser has started its scroll: it keeps the touch
+      if (!e.cancelable) { x0 = null; putAway(); return; }   // the browser has started its scroll: it keeps the touch
       if (Math.abs(mx) >= Math.abs(my)) { prepare(); e.preventDefault(); }   // looks sideways: lay out, hold the scroll
       dir = swipeIntent(mx, my);
       if (!dir) return;
-      if (dir === 'y') { x0 = null; unpage(); return; }   // a scroll: leave it to the page
+      if (dir === 'y') { x0 = null; putAway(); return; }   // a scroll: leave it to the page
       const d = mx > 0 && !prev ? drawer?.() ?? null : null;
       if (d) { pulling = d; unpage(); }   // the first page, swiped right: the drawer comes out instead
       else { prepare(); host.classList.add('is-moving'); }
     }
     if (e.cancelable) e.preventDefault();
     raw = mx;
-    hist.push([e.timeStamp, t.clientX]);
-    if (hist.length > 12) hist.shift();
+    hist.add(e.timeStamp, t.clientX);
     if (pulling) { pulling.pull(Math.max(0, mx)); return; }
     // no page that way: the page stretches, less and less (iOS's rubber band)
     dx = (mx < 0 && !next) || (mx > 0 && !prev) ? rubber(mx, w) : mx;
@@ -298,7 +307,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   const end = (/** @type {TouchEvent} */ e) => {
     if (x0 === null) return;
     x0 = null;
-    const v = releaseVelocity(hist, e.timeStamp);
+    const v = hist.speed(e.timeStamp);
     if (pulling) {
       const d = pulling;
       pulling = null;
@@ -316,24 +325,24 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const missing = e.type === 'touchend' && !prev && raw > 0 && swipeGoesBack(raw, v, w);
     // the glide: a spring from where the finger left the page, at its speed (none from a stretched end), one frame each
     const stretched = dx !== raw;
-    const path = springPath(dx, step === 1 ? -w : step === -1 ? w : 0, stretched ? 0 : v);
-    const timing = { duration: (path.length - 1) * 1000 / 60, easing: 'linear', fill: /** @type {const} */ ('forwards') };
-    /** @type {Animation[]} */
-    const runs = [];
+    const to0 = step === 1 ? -w : step === -1 ? w : 0;
+    /** @type {[Element, (x: number) => Keyframe][]} */
+    const parts = [];
     for (const [el, off] of /** @type {[HTMLElement | null, number][]} */ ([[current, 0], [prev, -w], [next, w]])) {
-      if (el) runs.push(el.animate(path.map(x => ({ transform: `translateX(${x + off}px)` })), timing));
+      if (el) parts.push([el, x => ({ transform: `translateX(${x + off}px)` })]);
     }
-    for (const f of faders) runs.push(f.animate(path.map(x => ({ filter: `opacity(${fadeShows(x)})` })), timing));
-    /** @type {NonNullable<typeof glide>} */
-    const g = glide = { runs, path, to, missing, timer: 0 };
+    for (const f of faders) parts.push([f, x => ({ filter: `opacity(${fadeShows(x)})` })]);
+    if (small) parts.push([small, x => ({ filter: `opacity(${titleShows(x)})` })]);
+    const run = springGlide(parts, dx, to0, stretched ? 0 : v);
+    /** @type {Gliding} */
+    const g = glide = { run, to, missing, timer: 0 };
     if (small) {
-      runs.push(small.animate(path.map(x => ({ filter: `opacity(${titleShows(x)})` })), timing));
       // the title's words change where the glide passes halfway (unseen: it is faded out there)
-      const half = path.findIndex(x => titleAt(x) !== titleAt(path[0]));
+      const path = run.path, half = path.findIndex(x => titleAt(x) !== titleAt(path[0]));
       if (half >= 0) g.timer = setTimeout(() => { small.textContent = titleAt(path[half]); }, half * 1000 / 60);
       else small.textContent = titleAt(path[0]);
     }
-    void Promise.all(runs.map(a => a.finished.catch(() => {}))).then(() => { if (glide === g) settle(); });
+    void run.done.then(landed => { if (landed && glide === g) settle(); });
   };
   l.on(document, 'touchend', end, { passive: false });
   l.on(document, 'touchcancel', end, { passive: true });

@@ -25,6 +25,31 @@ Pin one version in the import map and link the styles from the same base:
 For types, add `github:flamingbeing/app-ui#v1.0.0-rc.1` as a devDependency and point `paths` at `node_modules/app-ui`.
 `/ui/versions.json` lists the served versions (`latest` is the last stable one).
 
+## Responsiveness rules
+
+Every gesture in the kit, and any an app adds, keeps to these (`ui/motion.js` does the work; `e2e/jank.spec.mjs`
+holds the kit to them):
+
+- **Transform and opacity only** while anything moves: no layout, no `top`, `height` or `width` per frame. Lay out
+  what a gesture will show before the finger moves (the tab pager lays the pages beside out at the touch).
+- **Follow the finger** 1:1 from the first move that shows the axis (8 px), with `touch-action` set so the browser
+  never takes that axis (`pan-y` for a sideways drag, `pan-x` for an up-and-down one); past an end, a rubber band.
+  Reduce Motion never stops a finger-driven move or the glide that finishes it; only extra flourishes skip.
+- **Let go into a spring**: the finger's speed goes to a critically damped spring (`glide`), run by the compositor
+  (Web Animations), so a busy main thread can't stutter it. `spring` is the main-thread fallback for values that
+  aren't a transform or opacity.
+- **Interruptible**: a finger on a glide stops it where it is (`stop()` gives the place) and drags on from there.
+- **Defer work until the lift**: saves, syncs and re-renders a gesture starts go through `afterGesture(fn)`, which
+  runs them once the fingers are up and the glides have landed, a frame after the landing paints. Listeners on touch
+  and scroll are passive unless they must cancel.
+- **Pressed at once**: `startGestures()` marks a touched button, tab, menu item or row `data-pressed` on the touch
+  (no wait for `:active`), cleared on lift, scroll or cancel.
+- **The budget** (the jank gate, CI): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch),
+  a tab swipe, a tab flick and a sheet dragged up, down and away keep every drag frame within 20 ms but one, no frame
+  over 50 ms (drag or glide) and no task over 50 ms; a touched tab shows pressed within 50 ms. WebKit (the iPhone's
+  engine) runs the same gestures unslowed. It runs alone after the other browser tests, one test at a time, with no
+  retries; a failure is a slow frame to fix, never a number to loosen.
+
 ## Releases
 
 `versions.lock.json` holds every version's file hashes. To release: bump `package.json`, run
@@ -39,4 +64,6 @@ route `core.anawj.com/ui/*`, in front of app-sync's Worker on the same host.
   in Chromium; `e2e/gallery.spec.mjs` (each gallery page starts clean: no page error, axe, no CSP report) also in
   Firefox and WebKit. The base config comes from app-devkit: copy its `playwright/` folder to `.devkit/` once locally
   (CI's setup-browser does it). `PW_CHROMIUM=<path>` uses a Chromium already on the machine.
+- The jank gate (`e2e/jank.spec.mjs`, projects `jank` and `jank-webkit`) runs after the rest; alone:
+  `npx playwright test --project=jank --no-deps`.
 - What the gallery tests cover: [docs/kit-tests.md](docs/kit-tests.md).

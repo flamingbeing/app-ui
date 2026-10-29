@@ -8,6 +8,8 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
 /** A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
  * release(x, v) lets it go there at v px/ms, to open or closed.
  * @typedef {{ pull: (x: number) => void, release: (x: number, v: number) => void }} PullDrawer */
+/** The pages' glide after a let-go: where to, and whether it was a right swipe with nothing before.
+ * @typedef {{ run: import('./motion.js').Glide, to: HTMLElement | null, missing: boolean, timer: ReturnType<typeof setTimeout> | number }} Gliding */
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
@@ -46,5 +48,14 @@ export const SLIDE_MS: 280;
 export type PullDrawer = {
     pull: (x: number) => void;
     release: (x: number, v: number) => void;
+};
+/**
+ * The pages' glide after a let-go: where to, and whether it was a right swipe with nothing before.
+ */
+export type Gliding = {
+    run: import("./motion.js").Glide;
+    to: HTMLElement | null;
+    missing: boolean;
+    timer: ReturnType<typeof setTimeout> | number;
 };
 export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath } from "./gesture.js";

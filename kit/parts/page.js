@@ -1,7 +1,7 @@
 // The reference parts gallery: the undo toast, the loading and error states and the About sheet, on made-up data.
 // ?look= and ?density= preview as on the other gallery pages (preview.js). The fake update api and import map stand in for an app's.
 import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, createTransients,
-  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard } from '../../ui/index.js';
+  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard, drag, glide, afterGesture } from '../../ui/index.js';
 import { icon, gripVertical } from '../../icons/lucide.js';
 import { galleryPreview } from '../preview.js';
 
@@ -139,4 +139,30 @@ hoverCard($('prose'), 'a.note-link', a => {
   card.className = 'ui-prose';
   card.innerHTML = `<h3>${a.dataset.note}</h3><p>Morning, before the heat. Tomatoes and peppers daily; herbs every other day.</p>`;
   return card;
+});
+
+// follow the finger (motion.js): the knob moves with the finger (stretching past the ends), and let go it glides to
+// the nearer end, or the way it was thrown; a finger on the gliding knob stops it there. The save waits for the lift.
+const knob = $('motion-knob'), track = $('motion-track');
+const far = () => track.clientWidth - knob.offsetWidth - 8;
+let knobAt = 0, saves = 0;
+/** @type {import('../../ui/motion.js').Glide | null} */
+let knobGlide = null;
+const show = (/** @type {number} */ x) => { knob.style.transform = `translateX(${x}px)`; };
+drag(knob, {
+  mouse: true,
+  bounds: () => [0, far()],
+  start: () => { if (knobGlide) { knobAt = knobGlide.stop(); knobGlide = null; show(knobAt); } return knobAt; },
+  move: x => show(x),
+  end: (x, v) => {
+    const to = Math.abs(v) > 0.3 ? (v > 0 ? far() : 0) : x > far() / 2 ? far() : 0;
+    const g = knobGlide = glide([[knob, x => ({ transform: `translateX(${x}px)` })]], x, to, v);
+    knobAt = to;
+    void g.done.then(landed => {
+      if (!landed || knobGlide !== g) return;
+      show(to); g.stop(); knobGlide = null;
+      $('motion-state').textContent = to ? 'At the right.' : 'At the left.';
+    });
+    afterGesture(() => { $('motion-saved').textContent = `Saved ${++saves} ${saves === 1 ? 'time' : 'times'}.`; });
+  },
 });

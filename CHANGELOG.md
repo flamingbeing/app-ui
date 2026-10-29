@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0-rc.37
+Responsiveness (README, "Responsiveness rules"):
+- `ui/motion.js`, exported from `@core/ui`: `glide` (a critically damped spring from the finger's let-go speed, run
+  by the compositor through Web Animations, transform and opacity only; `stop()` catches it where it is), `spring`
+  (the same on the main thread for other values), `tracker` (the let-go speed), `drag` (pointer drag along one axis,
+  glued to the finger, `touch-action` set, rubber band past `bounds`, interruptible), `afterGesture` and
+  `gesturing` (hold saves, syncs and re-renders until the fingers lift and the glides land), `pressFeedback` and
+  `PRESSABLE`. Nothing runs on import.
+- The tab pager, the phone drawer, the detent sheet (drag, detents and close) and the edge swipe back now glide on
+  `glide`, so each let-go is a compositor animation a finger can catch; Reduce Motion still never stops a
+  finger-driven move or its glide.
+- The tab pager lays the pages beside out at the touch, not at the first sideways move, so the first move only moves
+  them; a touch that turns out a scroll puts them away once it's done.
+- Pressed at once: `startGestures()` (option `press`, on by default) marks a touched control `data-pressed` on the
+  touch; the theme, tab bar and glass buttons show it like `:active`.
+- CI's jank gate (`e2e/jank.spec.mjs`): a tab swipe and flick and a sheet drag on a phone with the CPU slowed 4x
+  (Chromium) and in WebKit, within the budget; it runs alone after the other browser tests.
+- The parts gallery gains "Follow the finger", a `drag` and `glide` demo with a save held by `afterGesture`.
+
 ## 1.0.0-rc.34
 Swipe feel changes for every app that moves to it:
 - Tab pages follow the finger 1:1 from the first move (8 px to tell sideways from up and down), with the next page
