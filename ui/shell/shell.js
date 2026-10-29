@@ -19,7 +19,7 @@
 //                past phone width closes it. Open, it is a history entry (Back closes it) and the page behind is inert. It follows the finger: .drawer (returned) is what tab-pages.js pulls out
 //                on a right swipe from the first tab page; a left swipe on the drawer or the shade pushes it back
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
-import { listeners, still, swipeIntent, THROW_MS } from '../gesture.js';
+import { haptic, listeners, still, swipeIntent, THROW_MS } from '../gesture.js';
 import { glide as springGlide, tracker } from '../motion.js';
 import { ourStep, stepBack, stepping, stepsSettled } from '../steps.js';
 
@@ -168,6 +168,12 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     /** @type {HTMLElement} */ (side).style.transform = `translateX(${dx - dw}px)`;
     /** @type {HTMLElement} */ (shade).style.opacity = String(dx / dw);
   }
+  /** place, for a finger: a haptic as the drawer crosses half (where a still let-go would turn) @param {number} x */
+  function follow(x) {
+    const was = dx > dw / 2;
+    place(x);
+    if (dx > dw / 2 !== was) haptic('threshold');
+  }
   /** the drawer stops where its glide has it (the finger caught it) */
   function hold() {
     const g = slid;
@@ -237,7 +243,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   const pull = side && {
     pull(x) {
       if (!shell.classList.contains('is-drawer-moving') || slid) { hold(); lay(); pull0 = dx; }
-      place(pull0 + x);
+      follow(pull0 + x);
     },
     release(x, v) { void x; glide(opens(dx, v), v, true); pull0 = 0; },
   };
@@ -273,7 +279,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
       }
       if (e.cancelable) e.preventDefault();
       hist.add(e.timeStamp, t.clientX);
-      place(from + Math.min(0, mx));
+      follow(from + Math.min(0, mx));
     }, { passive: false });
     const end = (/** @type {TouchEvent} */ e) => {
       if (x0 === null) return;

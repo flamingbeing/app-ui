@@ -106,6 +106,19 @@ at 390 px, in Chromium and WebKit, with the keyboard played (no browser here sho
 | Resizes content | a tapped field in the sheet, then the page 344 px shorter: `html.ui-keyboard-open`, `--ui-keyboard-h` 0, the tab bar hidden, the sheet inside the space above; the page tall again: closed, the tab bar back | |
 | Visible part only | a field and the visual viewport 344 px shorter: `--ui-keyboard-h` 344px and the sheet's bottom on the keyboard's top; a blur: closed, 0 | |
 
+## Haptics
+
+`ui/gesture.js` `haptic`, the theme's `haptics`: `cleanChoice` in Node (`test/theme.unit.test.mjs`).
+`e2e/haptics.spec.mjs` on `/kit/`, `/kit/shell/` and `/kit/settings/` at 390 px, in Chromium and WebKit, with a
+stand-in `navigator.vibrate` that writes down each pattern.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Drawer | a finger pulling it out past half: one threshold (12); back under half: another; Haptics Off: none | |
+| Sheet | the grabber dragged down past the close line: a threshold; back up: another; the sheet stays | |
+| Hold, switch | a touch and hold: a long (20); the gallery's Haptics switch turned off: quiet; on again: a tick (8) | |
+| Kept | the theme switch's Haptics Off: `data-haptics="off"`, kept on the next page; `haptic()` then gives nothing | |
+
 ## Bounce
 
 `ui/bounce.js` in Node (`test/bounce.unit.test.mjs`): nothing runs on import; `rubberSlope` is the rubber band's

@@ -1,5 +1,7 @@
-// Drag a row of a list by its grip (a finger or a mouse). The row follows the pointer; on release, onDrop(from, to)
-// gets its old and new index among the list's rows. A cancelled drag (the browser took the touch) puts the row back. Style: ui/ui.css, "drag-reorder".
+// Drag a row of a list by its grip (a finger or a mouse). The row follows the pointer, with a tick (gesture.js haptic)
+// as it picks up and as it passes each row; on release, onDrop(from, to) gets its old and new index among the list's
+// rows. A cancelled drag (the browser took the touch) puts the row back. Style: ui/ui.css, "drag-reorder".
+import { haptic } from './gesture.js';
 
 /**
  * Start the drag from a grip's pointerdown.
@@ -13,9 +15,17 @@ export function gripDrag(e, list, onDrop) {
   const row = /** @type {HTMLElement | null} */ (grip.closest('li'));
   if (!row) return;
   const rows = /** @type {HTMLElement[]} */ ([...list.children]), y0 = e.clientY;
+  // where a drop at y would put the row (its new index)
+  const slot = (/** @type {number} */ y) => rows.filter(r => r !== row && y > r.getBoundingClientRect().top + r.getBoundingClientRect().height / 2).length;
+  let at = rows.indexOf(row);
   row.classList.add('dragging');
+  haptic();
   grip.setPointerCapture?.(e.pointerId);
-  const move = (/** @type {PointerEvent} */ ev) => { row.style.transform = `translateY(${ev.clientY - y0}px)`; };
+  const move = (/** @type {PointerEvent} */ ev) => {
+    row.style.transform = `translateY(${ev.clientY - y0}px)`;
+    const to = slot(ev.clientY);
+    if (to !== at) { at = to; haptic(); }
+  };
   const end = () => {
     grip.removeEventListener('pointermove', move);
     grip.removeEventListener('pointerup', up);
@@ -25,7 +35,7 @@ export function gripDrag(e, list, onDrop) {
   };
   const up = (/** @type {PointerEvent} */ ev) => {
     end();
-    const to = rows.filter(r => r !== row && ev.clientY > r.getBoundingClientRect().top + r.getBoundingClientRect().height / 2).length;
+    const to = slot(ev.clientY);
     const from = rows.indexOf(row);
     if (to !== from) onDrop(from, to);
   };

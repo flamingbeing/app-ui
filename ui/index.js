@@ -40,7 +40,7 @@ export { screenStack } from './screens.js';
 export { selectMode } from './select-mode.js';
 export { tabPages, swipeIntent, pageStep } from './tab-pages.js';
 export { cardPager } from './card-pager.js';
-export { still, haptic } from './gesture.js';
+export { still, haptic, HAPTIC_PATTERNS, toggleTicks } from './gesture.js';
 // motion (motion.js): the shared finger physics: a pointer drag glued to the finger, the spring a let-go glides on,
 // work held until the finger lifts, the instant pressed state
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from './motion.js';

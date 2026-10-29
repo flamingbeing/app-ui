@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.48
+## 1.0.0-rc.49
 - `syncButton(host, { sync, syncNow?, labels?, idPrefix? })`: the sync chip's tappable twin for a header bar
   (`#sync-btn`). One colour, the bar's; the state is the cloud icon's shape: a tick (saved), an arrow up that lifts
   (sending, with a count of what waits), struck (offline), an exclamation mark (not saved yet; needs you adds a dot),
@@ -9,6 +9,14 @@
   passed as `host` becomes the button, so an app's markup can place it. Looks theme it with `--ui-sync-dot` and
   `--ui-sync-badge`. New label `syncNow` ("Sync now"); new icons `cloud`, `cloudCheck`, `cloudUpload`, `cloudAlert`.
 - The shell gallery's bar shows it; the jank gate times a tap on it.
+
+## 1.0.0-rc.48
+- Haptics: `haptic(kind)` with five kinds (`tick`, `threshold`, `long`, `confirm`, `reject`; `HAPTIC_PATTERNS`),
+  `haptic()` is a tick. The hold menu takes hold with a long; a sheet dragged past its close line or onto another
+  height and the drawer past half give a threshold; a dragged row (`gripDrag`) ticks as it picks up and passes each
+  row; `startGestures` ticks switches and segmented controls (`toggleTicks`; `{ ticks: false }` leaves it out).
+- Theme: Haptics (`haptics: 'on' | 'off'`, on by default), a per-device choice like Motion, in `themeSwitch`;
+  `html[data-haptics="off"]` and `haptic()` gives nothing. The gallery has a Haptics switch.
 
 ## 1.0.0-rc.47
 - Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):

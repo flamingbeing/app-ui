@@ -34,7 +34,7 @@ export { shrinkingTabBar, tabBarRoom } from "./tab-bar.js";
 export { detentSheet, sheetsSettled } from "./detent-sheet.js";
 export { watchKeyboard, keyboardState, KEYBOARD_MIN } from "./keyboard.js";
 export { tabPages, swipeIntent, pageStep } from "./tab-pages.js";
-export { still, haptic } from "./gesture.js";
+export { still, haptic, HAPTIC_PATTERNS, toggleTicks } from "./gesture.js";
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from "./motion.js";
 export { adaptiveShell, sizeClass, matchesSearch } from "./shell/shell.js";
 export { startLayout, stepper, toolbar, clearableSegments, stepValue } from "./layout.js";
