@@ -336,12 +336,14 @@ for (const width of [390, 1280]) {
       const bar = document.querySelector('.ui-tabbar:not([hidden])'), pad = parseFloat(getComputedStyle(d).marginBottom);
       const slot = /** @type {HTMLElement} */ (d.querySelector('.ui-card-slot:not([inert])'));
       return { top: b.top, bottom: b.bottom, floor: bar && bar.getBoundingClientRect().height ? bar.getBoundingClientRect().top : innerHeight,
-        pad, own: slot.scrollHeight - slot.clientHeight };
+        pad, page: document.scrollingElement.scrollHeight - innerHeight, own: slot.scrollHeight - slot.clientHeight };
     });
     await expect.poll(async () => { const r = await m(); return Math.round(r.floor - r.pad - r.bottom); }, { message: 'its bottom one --pad above the tab bar (or the window)' }).toBeLessThanOrEqual(1);
     const r = await m();
     expect(r.floor - r.pad - r.bottom).toBeGreaterThanOrEqual(-1);
     expect(r.own, 'a short card has no scroll of its own').toBe(0);
+    // (on a phone the gallery's body adds its own tab-bar room below, so only the laptop's page fits exactly)
+    if (width >= 600) expect(r.page, 'the page itself does not scroll (the side bar fits in 100dvh)').toBeLessThanOrEqual(0);
     // a card taller than the stage keeps the stage's height and scrolls in its slot
     await page.evaluate(() => { const c = document.querySelector('#job-cards .ui-card-slot:not([inert]) .ui-card-text'); c.textContent = 'A long tip. '.repeat(400); });
     const long = await m();
