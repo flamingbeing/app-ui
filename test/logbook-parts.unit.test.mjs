@@ -7,7 +7,7 @@ import { moveIn } from '../ui/drag-list.js';
 import { shareText, copyText } from '../ui/share.js';
 import { createTransients } from '../ui/transients.js';
 import { createNavigation } from '../ui/navigation.js';
-import { backGuard, installedApp } from '../ui/back-guard.js';
+import { tabBack } from '../ui/tab-back.js';
 import { cleanHideList, hideKey, MAX_HIDDEN, nameOf } from '../ui/hide-mode.js';
 import { LABELS } from '../ui/labels.js';
 
@@ -151,43 +151,27 @@ test('screen history: go pushes, Back returns, a deep link gets its parents', as
   assert.equal(nav.backTarget(), 'detail');
 });
 
-test('back guard: off in a browser tab; in the installed app a tap at home adds a spare entry Back uses once', async () => {
-  const tab = fakeBrowser();
-  backGuard({ history: tab.history, events: tab.events, standalone: false });
-  tab.fire('pointerup');
-  assert.equal(tab.entries.length, 1, 'a browser tab gets nothing');
-
-  const b = fakeBrowser();
-  let home = true, homes = 0;
-  const g = backGuard({ history: b.history, events: b.events, standalone: true, atHome: () => home, onHome: () => homes++ });
-  b.history.replaceState({ app: 1 }, '');
-  assert.equal(b.entries.length, 1, 'nothing before a tap');
-  home = false;
-  b.fire('pointerup');
-  assert.equal(g.armed(), false, 'not while something is open');
-  home = true;
-  b.fire('pointerup');
-  assert.equal(b.entries.length, 2);
-  assert.deepEqual(b.history.state, { app: 1, uiBackGuard: 'top' }, 'keeps the page\'s own state');
-  b.fire('keydown');
-  assert.equal(b.entries.length, 2, 'one spare entry only');
-  b.history.pushState({ ...b.history.state, tab: 'items' }, '');   // the app's own step
+test('tab back: leaving the first tab adds one entry, the other tabs none; Back there goes to the first tab', async () => {
+  const b = fakeBrowser('/app#/');
+  let firsts = 0;
+  const t = tabBack({ history: b.history, events: b.events, onFirst: () => firsts++ });
+  t.went(false, '/app#/items');
+  t.went(false, '/app#/shop');
+  assert.equal(b.entries.length, 2, 'one entry for leaving the first tab');
+  assert.equal(b.location.hash, '#/shop');
   b.history.back();
   await new Promise(r => setTimeout(r, 5));
-  assert.equal(homes, 0, 'the app\'s own step goes back first');
-  b.history.back();
+  assert.equal(firsts, 1);
+  assert.equal(b.location.hash, '#/', 'the first tab\'s address');
+  t.went(false, '/app#/items');
+  assert.equal(b.entries.length, 2, 'the old step is replaced, not stacked');
+  t.went(true);   // a tap on the first tab goes back for its entry
   await new Promise(r => setTimeout(r, 5));
-  assert.equal(homes, 1, 'Back on the home screen stays');
-  assert.equal(g.armed(), false);
-  b.fire('pointerup');
-  assert.equal(g.armed(), true, 'the next tap puts it back');
-  g.stop();
-});
-
-test('installedApp: the home-screen window, not a browser tab', () => {
-  assert.equal(installedApp(q => q === '(display-mode: standalone)', /** @type {any} */ ({})), true);
-  assert.equal(installedApp(() => false, /** @type {any} */ ({ standalone: true })), true);
-  assert.equal(installedApp(() => false, /** @type {any} */ ({})), false);
+  assert.equal(b.at(), 0);
+  assert.equal(t.away(), false);
+  t.went(true, '/app#/');
+  assert.equal(b.entries.length, 2, 'the first tab adds nothing');
+  t.stop();
 });
 
 test('the hide list keeps only known kinds and short words, without repeats, up to the limit', () => {

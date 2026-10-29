@@ -19,13 +19,13 @@ export { loadState } from './load-state.js';
 export { aboutSheet, packagesFromImportMap } from './about-sheet.js';
 export { settingsScreen, SETTINGS_WORDS } from './settings-screen.js';
 // logbook parts (opt-in, named exports; nothing runs on import): drafts, drag-reorder, share out, Back closes the top
-// dialog (transients) and screen history (navigation), Back on the installed app's home screen (back guard), hide mode
+// dialog (transients) and screen history (navigation), Back with tabs (tab back), hide mode
 export { draftSlot, listDrafts } from './drafts.js';
 export { gripDrag, moveIn } from './drag-list.js';
 export { shareText, copyText } from './share.js';
 export { createTransients } from './transients.js';
 export { createNavigation } from './navigation.js';
-export { backGuard, installedApp } from './back-guard.js';
+export { tabBack } from './tab-back.js';
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from './hide-mode.js';
 // gestures (ui/gestures.css): each part starts only where its markup is; startGestures() starts them all
 export { startGestures } from './gestures.js';

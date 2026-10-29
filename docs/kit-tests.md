@@ -87,6 +87,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
 | Bar on a tab change | between two scrolled pages the bar stays tinted (collapsed) all the way; to a page at the top it clears once (no flash) | |
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
+| Back with tabs | leaving the first tab adds one history entry, the other tabs none; Back on another tab goes to the first, Back there leaves; a tap on the first tab takes the entry away | |
 | Drawer | look D: the side-bar button opens the side bar over the page; a link goes to its page and closes it; Esc closes and gives focus back; hidden while Back shows | open |
 | Tablet | 820 px: a side link's tab page takes both panes; no swipe; Plants brings the list and detail back | yes |
 

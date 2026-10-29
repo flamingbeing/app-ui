@@ -1,10 +1,11 @@
 # Changelog
 
 ## 1.0.0-rc.42
-- `backGuard({ history, events, atHome, onHome })` (opt-in, `ui/back-guard.js`): in the installed app only, Back on
-  the home screen runs `onHome` (for example, go to the first tab) instead of leaving, where Android can show an
-  empty window. One spare history entry goes in at a tap while `atHome()` holds, and again after each use (Chrome
-  skips entries pushed without a tap). Off in a browser tab. `installedApp()` tells the two apart.
+- Back with tabs, as Android apps do it (`ui/tab-back.js`, `tabBack`): switching tabs adds no Back steps; Back on
+  any other tab goes to the first tab, and Back on the first tab leaves the app. Leaving the first tab adds one
+  history entry, moving between the other tabs only changes its address, and a tap on the first tab takes the entry
+  away. `tabPages` does it by default (`{ backToFirst: false }`: no history at all, as before); an app with its own
+  router calls `tabBack({ history, events, onFirst }).went(isFirst, url)` after each tab change.
 
 ## 1.0.0-rc.41
 - Gallery: the shell page drops its body's own tab-bar room (the kit's `.ui-screen::after` already leaves it), so the
