@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.49
+- `syncButton(host, { sync, syncNow?, labels?, idPrefix? })`: the sync chip's tappable twin for a header bar
+  (`#sync-btn`). One colour, the bar's; the state is the cloud icon's shape: a tick (saved), an arrow up that lifts
+  (sending, with a count of what waits), struck (offline), an exclamation mark (not saved yet; needs you adds a dot),
+  faded (connecting). A tap syncs now (default: `sync.nudge('wake')` then `sync.flush()`, app-sync's own) and shows
+  sending at least 700 ms. The lift is transform and opacity only, off under reduced motion and Still. A `<button>`
+  passed as `host` becomes the button, so an app's markup can place it. Looks theme it with `--ui-sync-dot` and
+  `--ui-sync-badge`. New label `syncNow` ("Sync now"); new icons `cloud`, `cloudCheck`, `cloudUpload`, `cloudAlert`.
+- The shell gallery's bar shows it; the jank gate times a tap on it.
+
 ## 1.0.0-rc.48
 - Haptics: `haptic(kind)` with five kinds (`tick`, `threshold`, `long`, `confirm`, `reject`; `HAPTIC_PATTERNS`),
   `haptic()` is a tick. The hold menu takes hold with a long; a sheet dragged past its close line or onto another

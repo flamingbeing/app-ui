@@ -24,6 +24,18 @@
 @media (prefers-reduced-motion: reduce) { :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; } }
 :root[data-motion="still"] :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; }
 :is(.ui-chip, .chip)[data-state="attention"], .ui-error, .ui-danger, .error, .danger { color: var(--danger); }
+/* the sync button (sync-button.js): one colour, the bar's; the state is the icon's shape. A look themes the dot and the
+   count with --ui-sync-dot and --ui-sync-badge */
+.ui-sync-btn { position: relative; }
+.ui-sync-btn[data-state="unknown"] .ui-icon { opacity: .5; }
+.ui-sync-btn[data-state="attention"]::after { content: ''; position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--ui-sync-dot, var(--danger)); }
+.ui-sync-badge { position: absolute; top: 4px; right: 2px; min-width: 1.4em; padding: 0 .3em; box-sizing: border-box; border-radius: 1em;
+  font-size: .65rem; line-height: 1.4em; font-weight: 600; text-align: center; background: var(--ui-sync-badge, currentColor); -webkit-text-fill-color: var(--bg); }
+.ui-sync-badge:empty { display: none; }
+.ui-sync-btn[data-state="syncing"] .ui-icon { animation: ui-sync-lift .7s ease-in-out infinite alternate; }
+@keyframes ui-sync-lift { to { transform: translateY(-2px); opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .ui-sync-btn[data-state="syncing"] .ui-icon { animation: none; } }
+:root[data-motion="still"] .ui-sync-btn[data-state="syncing"] .ui-icon { animation: none; }
 .ui-small, .small { font-size: .85rem; color: var(--muted); }
 .ui-inline, .row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
 

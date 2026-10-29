@@ -83,3 +83,17 @@ test('a hover card goes below its link, above it when the window has no room bel
   assert.deepEqual(placeCard({ left: 350, top: 100, bottom: 120 }, card, view).left, 94);
   assert.deepEqual(placeCard({ left: 20, top: 150, bottom: 170 }, { width: 300, height: 500 }, view).top, 176);   // no room either way: below
 });
+
+test('sync button: each state its shown state and label; a tap spins at least MIN_SPIN_MS; offline never spins', async () => {
+  const { syncLook, MIN_SPIN_MS } = await import('../ui/sync-button.js');
+  const words = { ...LABELS };
+  assert.ok(MIN_SPIN_MS >= 700);
+  assert.deepEqual(syncLook('synced', 0, false, words), { shown: 'synced', label: 'Saved. Sync now' });
+  assert.deepEqual(syncLook('pending', 3, false, words), { shown: 'syncing', label: 'Sending… (3). Sync now' });
+  assert.deepEqual(syncLook('synced', 0, true, words), { shown: 'syncing', label: 'Sending… Sync now' });
+  assert.deepEqual(syncLook('offline', 2, true, words), { shown: 'offline', label: 'Offline, kept on this device (2). Sync now' });
+  assert.equal(syncLook('attention', 0, false, words).shown, 'attention');
+  assert.equal(syncLook('at-risk', 1, false, words).shown, 'at-risk');
+  assert.equal(syncLook('unknown', 0, false, words).label, 'Connecting…');
+  assert.equal(syncLook('synced', 0, false, { ...words, synced: 'Synced', syncNow: 'Tap to sync' }).label, 'Synced. Tap to sync');
+});

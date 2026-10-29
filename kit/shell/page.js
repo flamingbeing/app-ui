@@ -1,5 +1,5 @@
 // The shell gallery: the plants list in the adaptive shell. window.kit (the started parts) and window.shell are for the tests.
-import { startGestures, adaptiveShell, toaster, cardPager } from '../../ui/index.js';
+import { startGestures, adaptiveShell, toaster, cardPager, syncButton } from '../../ui/index.js';
 import { galleryPreview } from '../preview.js';
 
 galleryPreview();   // ?look=, ?density=, ?edge= as on the other gallery pages
@@ -24,6 +24,13 @@ const toasts = toaster(document.body);
 const list = $('plants');
 const shell = adaptiveShell(/** @type {HTMLElement} */ (document.querySelector('.ui-shell')), { screens: kit.screens });
 Object.assign(window, { kit, shell });
+
+// the bar's sync button on a made-up sync that is always saved; a tap counts (window.syncTaps) and spins
+/** @type {any} */ (window).syncTaps = 0;
+syncButton($('sync-btn'), {
+  sync: /** @type {any} */ ({ status$: (/** @type {(st: { state: string, count: number }) => void} */ cb) => { cb({ state: 'synced', count: 0 }); return () => {}; } }),
+  syncNow: () => { /** @type {any} */ (window).syncTaps++; },
+});
 
 const count = () => { $('count-side').textContent = String(list.querySelectorAll('.ui-row').length); };
 /** Delete with Undo (no "are you sure?" for something that can be put back) @param {HTMLElement[]} rows */
