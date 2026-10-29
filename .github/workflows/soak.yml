@@ -1,9 +1,9 @@
 # Nightly soak (app-devkit README, "soak.yml"): the Chromium browser tests about 15 times, a third under a slow-phone
 # profile, and the unit tests 100 times, no retries, at 02:30 SGT. A failure opens or updates ONE issue titled "Nightly
 # soak"; it closes after 7 clean nights. Not a required check, never blocks a PR. Also runs by hand (Actions, "Nightly
-# soak", Run workflow). Firefox's gallery smoke spec runs here too (every run; the slow-phone profile throttles
-# Chromium only) and nowhere else: Checks leaves it out. WebKit is left to Checks. On demand, every spec in all three
-# browsers on any machine with podman or docker: app-devkit `tools/pw-run.sh flamingbeing/app-ui [ref]`.
+# soak", Run workflow). The `full` job runs Full checks (full-checks.yml: WebKit, Firefox, the jank gate, the @full axe
+# runs) on main each night too; a failure shows as a red run. On demand, every spec in all three browsers on any
+# machine with podman or docker: app-devkit `tools/pw-run.sh flamingbeing/app-ui [ref]`.
 name: Nightly soak
 on:
   schedule:
@@ -16,6 +16,7 @@ jobs:
   soak:
     uses: flamingbeing/app-devkit/.github/workflows/soak.yml@v1.13.9
     with:
-      browsers: chromium firefox
-      test-command: npx playwright test --project=phone --project=firefox
+      test-command: npx playwright test --project=phone
       unit-command: node --test 'worker/test/*.test.mjs' 'test/*.unit.test.mjs' 'tools/test/*.test.mjs'
+  full:
+    uses: ./.github/workflows/full-checks.yml

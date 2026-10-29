@@ -34,8 +34,9 @@ repo; never copy anything from there into this repo, a PR or an issue (neutral p
 node tools/check.mjs        # lock, relative imports, gallery page policy
 npm test                    # Worker, UI core and tools unit tests
 npm run typecheck           # ui, theme, settings, kit under strict
-npx playwright test         # browser tests (README, "Tests")
 ```
+
+Browser tests run on GitHub (README, "Tests"), not locally first; locally run only the one spec you are fixing.
 
 ## Working with the owner
 
@@ -55,5 +56,5 @@ npx playwright test         # browser tests (README, "Tests")
   owner's notes repo as well; then the environment's shared settings apply instead, so keep both in step.
 - `.claude/settings.json` denies reading `__/` and `vendor/` folders. Add generated files and very large files to its
   `deny` list (edit their build scripts instead), and say so here. Ask the owner if one is really needed.
-- Run only the touched app's tests while iterating and the full run once before merge. Screenshots only for visual
+- Run only the touched app's tests while iterating; the browser suite runs on GitHub. Screenshots only for visual
   changes (one, viewport-sized); debug logic with text.

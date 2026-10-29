@@ -97,7 +97,8 @@ for (const width of [390, 820, 1280]) {
 const SHELL = '/ui/0.0.0-dev/kit/shell/?edge=always';
 const solid = (page, sel) => page.locator(sel).first().evaluate(e => ({ bg: getComputedStyle(e).backgroundColor, blur: getComputedStyle(e).backdropFilter }));
 for (const width of [390, 1280]) {
-  test(`at ${width} px dark: each look's gallery and shell are clean (axe); B's band takes white text; menus and sheets are solid`, async ({ sized }) => {
+  // @full: ten pages through axe (about 20 s), so in Full checks, not the quick Checks
+  test(`at ${width} px dark: each look's gallery and shell are clean (axe); B's band takes white text; menus and sheets are solid`, { tag: '@full' }, async ({ sized }) => {
     const page = await sized(width);
     await page.emulateMedia({ colorScheme: 'dark' });
     for (const id of ['a', 'b', 'c', 'd', 'e']) {
