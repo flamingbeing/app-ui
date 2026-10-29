@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.47
+- `syncButton(host, { sync, syncNow?, labels?, idPrefix? })`: the sync chip's tappable twin for a header bar
+  (`#sync-btn`). One colour, the bar's; the state is the cloud icon's shape: a tick (saved), an arrow up that lifts
+  (sending, with a count of what waits), struck (offline), an exclamation mark (not saved yet; needs you adds a dot),
+  faded (connecting). A tap syncs now (default: `sync.nudge('wake')` then `sync.flush()`, app-sync's own) and shows
+  sending at least 700 ms. The lift is transform and opacity only, off under reduced motion and Still. A `<button>`
+  passed as `host` becomes the button, so an app's markup can place it. Looks theme it with `--ui-sync-dot` and
+  `--ui-sync-badge`. New label `syncNow` ("Sync now"); new icons `cloud`, `cloudCheck`, `cloudUpload`, `cloudAlert`.
+- The shell gallery's bar shows it; the jank gate times a tap on it.
+
 ## 1.0.0-rc.46
 - Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed
   (`theme/m3.js`, tonal spot, light and dark, each role also as `--m3-*`), solid tonal surfaces (no glass), the Roboto
