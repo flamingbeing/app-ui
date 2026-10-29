@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.47
+## 1.0.0-rc.48
 - Gallery: the first screen reads like an app. The list sits straight under the large title; every demo control (the
   words about the gallery, Open the sheet, Push a screen, the other pages, look, density, Less motion and the sync
   state) moves into one "Demo controls" sheet from a new bar button (`slidersHorizontal` icon) next to Select. The
@@ -12,6 +12,15 @@
 - In a band's bar (look B) the sync chip takes the band's white text (the state colours failed contrast on it).
 - Gallery: four more made-up plants, so the list scrolls at tablet height; the dense page's controls are one card
   with a switch.
+
+## 1.0.0-rc.47
+- Keyboard (`ui/keyboard.js`, `watchKeyboard`, started by `startGestures`; `{ keyboard: false }` leaves it out):
+  while a field has focus and the visible page is over 150 px shorter than its tallest, `html.ui-keyboard-open` and
+  a `ui-keyboard` event. The tab bar hides; a sheet and the action bar sit above the keyboard. `--ui-keyboard-h` is
+  how far the keyboard covers the layout's bottom.
+- Apps: end the viewport meta with `interactive-widget=resizes-content` (docs/ui-kit.md, "The on-screen
+  keyboard"); the gallery pages do.
+
 ## 1.0.0-rc.46
 - Look M, **Android**: Material 3 Expressive as Android 16 draws it. Colour roles from the accent as the seed
   (`theme/m3.js`, tonal spot, light and dark, each role also as `--m3-*`), solid tonal surfaces (no glass), the Roboto

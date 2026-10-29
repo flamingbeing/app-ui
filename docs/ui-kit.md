@@ -64,6 +64,17 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
 | Esc | in search: clear, then leave; in select mode: leave it; a phone's pushed detail: go back; a menu or dialog closes first |
 | Back (browser, Android) | pops the pushed screen or closes the open sheet |
 
+## The on-screen keyboard (`ui/keyboard.js`)
+
+- Every app page's viewport meta ends in `interactive-widget=resizes-content`
+  (`<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">`).
+  Why: Chrome on Android (108+) otherwise shrinks only the visible part of the page, so fixed bars and `100dvh` sheets
+  sit under the keyboard. With it the page shrinks to the space above the keyboard.
+- `startGestures` watches the keyboard (`{ keyboard: false }` leaves it out): while a field has focus and the visible
+  page is over 150 px shorter than its tallest, `html.ui-keyboard-open` is set and a `ui-keyboard` event (detail.open)
+  fires. The tab bar hides; a sheet and the select-mode action bar sit above the keyboard. `--ui-keyboard-h` is how
+  far the keyboard covers the layout's bottom (0 with `resizes-content`; it lifts them where a browser ignores it).
+
 ## Placement rules
 
 Where each thing goes, on every size.

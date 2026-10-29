@@ -16,3 +16,7 @@
   padding: 4px 4px calc(env(safe-area-inset-bottom, 0px) + 4px) var(--pad); }
 .glass .ui-action-bar { background: var(--glass-bg-thick); border-color: transparent; box-shadow: var(--glass-rim), var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur-thick); backdrop-filter: var(--glass-blur-thick); }
+
+/* the keyboard up (ui/keyboard.js): the action bar sits above it */
+.ui-keyboard-open .ui-action-bar { bottom: calc(var(--ui-keyboard-h, 0px) + var(--gap)); }
+.ui-keyboard-open[data-tabbar="edge"] .ui-action-bar, .ui-keyboard-open [data-tabbar="edge"] .ui-action-bar { bottom: var(--ui-keyboard-h, 0px); }

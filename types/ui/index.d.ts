@@ -31,6 +31,7 @@ export { shareText, copyText } from "./share.js";
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from "./hide-mode.js";
 export { shrinkingTabBar, tabBarRoom } from "./tab-bar.js";
 export { detentSheet, sheetsSettled } from "./detent-sheet.js";
+export { watchKeyboard, keyboardState, KEYBOARD_MIN } from "./keyboard.js";
 export { tabPages, swipeIntent, pageStep } from "./tab-pages.js";
 export { still, haptic } from "./gesture.js";
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from "./motion.js";
