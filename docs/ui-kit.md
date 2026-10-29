@@ -50,6 +50,9 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   is unchanged.
 - **Sheets.** From 840 px a sheet is a centred dialog. Give it `data-wide="panel"` and it docks to the right edge at
   full height instead (a form beside the list).
+- **Sheet drag.** Let go, a sheet settles on the height nearest where it would come to rest; a clear flick (0.5 px/ms)
+  goes on to the next height its way. Well below its lowest height it closes (140 px below, or half a short sheet).
+  On a phone, dragged below its lowest height, the backdrop fades with it and comes back when it settles.
 
 ### Keyboard and pointer
 

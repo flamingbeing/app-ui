@@ -27,7 +27,7 @@ const JANK = 'jank.spec.mjs';
 config.projects = [
   { ...phone, testIgnore: JANK, use: chromium },
   { name: 'firefox', testMatch: 'gallery.spec.mjs', use: { ...touch, browserName: 'firefox' } },
-  { name: 'webkit', testMatch: /(gallery|swipe-feel|bounce|keyboard|haptics|back-close|ios|press)\.spec\.mjs/, use: { ...phone.use, browserName: 'webkit' } },
+  { name: 'webkit', testMatch: /(gallery|swipe-feel|bounce|keyboard|haptics|back-close|ios|press|sheet-snap)\.spec\.mjs/, use: { ...phone.use, browserName: 'webkit' } },
   { name: 'jank', testMatch: JANK, fullyParallel: false, dependencies: ['phone', 'firefox', 'webkit'], use: chromium },
   { name: 'jank-webkit', testMatch: JANK, fullyParallel: false, dependencies: ['jank'], use: { ...phone.use, browserName: 'webkit' } },
 ];
