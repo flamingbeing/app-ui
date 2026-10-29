@@ -1,8 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.0.0-rc.57
 - Row swipe actions are gone (`swipeActions`, `ui/swipe-actions.js`, `ui/gestures/swipe.css`, the arbiter's `rows`):
   not wanted. No app used them. `/kit/ios/` keeps its to-do list as plain rows.
+
+## 1.0.0-rc.56
+- Sheets: a let-go settles on the nearest height (a clear flick goes on to the next one its way), not on fixed
+  distances from where the drag began. `settle(detents, sizes, shown, v, now)`.
+- On a phone, a sheet dragged below its lowest height fades its backdrop with it; a close fades on from there.
 
 ## 1.0.0-rc.55
 - Press feedback: inside something that scrolls a press shows after `PRESS_DELAY` (100 ms), so a scroll never

@@ -4,7 +4,7 @@
 // scrolls, and pulled down from its top it drags the sheet down. Let go, it settles on the nearest height, judged by
 // where it is and how fast it moved. On a phone the drag and the settle move it by transform only (no layout per
 // frame): the sheet is made as tall as it can get for the move, slid down so the right part shows, and given its
-// detent's height again once still. From 840 px wide it is a centred dialog: a drag changes its height.
+// detent's height again once still; dragged below its lowest height, the backdrop fades with it. From 840 px wide it is a centred dialog: a drag changes its height.
 // Each open sheet is a history entry, so Back (Android's, the browser's, the edge swipe) closes it. Done and any
 // [data-close] close it; [data-open-sheet="#id"] buttons open it and get focus back.
 import { SLOP, claim, haptic, listeners, still } from './gesture.js';
@@ -22,17 +22,23 @@ export const sheetsSettled = stepsSettled;
 const SPARE = 48;
 
 /**
- * Where a drag lands (pure): -> the detent to settle on, or 'close'.
- * @param {string[]} detents @param {string} now  the detent it started at
- * @param {number} dy  how far it moved (down is +) @param {number} v  px per ms at the end (down is +)
+ * Where a drag lands (pure): the height nearest where the sheet would come to rest, or 'close'. A clear flick goes
+ * on to the next height its way; well below the lowest height it closes.
+ * @param {string[]} detents @param {Record<string, number>} sizes  each detent's height (px)
+ * @param {number} shown  how much of the sheet shows now (px) @param {number} v  px per ms at the end (down is +)
+ * @param {string} now  the detent it started at
  */
-export function settle(detents, now, dy, v) {
-  const top = topDetent(detents), lower = detents.find(d => d !== top);
-  const projected = dy + v * 200;   // where a flick would carry it
-  if (projected < -80) return top;
-  if (projected > 140) return now === top && lower ? lower : 'close';
-  return now;
+export function settle(detents, sizes, shown, v, now) {
+  const by = [...detents].sort((a, b) => sizes[a] - sizes[b]), low = sizes[by[0]];
+  const aim = shown - v * 200;   // where a flick would carry it
+  // a close from the lowest height (or once below it); a flick from higher goes down one height, as a drag would
+  if (aim < low - Math.min(140, low / 2) && (now === by[0] || shown < low)) return 'close';
+  const i = by.indexOf(now) + (v <= -FLICK ? 1 : v >= FLICK ? -1 : 0);
+  if (i !== by.indexOf(now) && i >= 0 && i < by.length) return by[i];
+  return by.reduce((a, d) => Math.abs(sizes[d] - aim) < Math.abs(sizes[a] - aim) ? d : a);
 }
+// px per ms: a let-go this fast is a flick
+const FLICK = 0.5;
 
 /** @param {string[]} ds */
 export const topDetent = ds => ds.includes('large') ? 'large' : ds[ds.length - 1];
@@ -95,7 +101,7 @@ export function detentSheet(sheet) {
     opener = from ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     sheet.showModal();
     setDetent(ds[0]);
-    rest = sheet.getBoundingClientRect().height;   // pre-sized now, so a drag's first frame needs no layout
+    rest = known[ds[0]] = sheet.getBoundingClientRect().height;   // pre-sized now, so a drag's first frame needs no layout
     push();
   }
   // Close: on a phone the sheet slides down from wherever it is (mid-drag too) and the backdrop fades, then it closes;
@@ -106,7 +112,7 @@ export function detentSheet(sheet) {
   let fading = null;
   // a close cut short (opened again, or closed for real): the sheet back as it was
   function stay() {
-    leaving?.stop(); fading?.cancel(); leaving = null; fading = null;
+    leaving?.stop(); fading?.cancel(); leaving = null; fading = null; unshade(true);
     unstyle(); sheet.classList.remove('is-dragging');
   }
   // v: a finger's let-go speed (px/ms, down), which the slide starts at (a finger's let-go slides with Less motion too)
@@ -123,7 +129,8 @@ export function detentSheet(sheet) {
       ? springGlide([[sheet, x => ({ opacity: 1 - x / 100, transform: `scale(${1 - x * .0003})` })]], 0, 100, 0)
       : springGlide([[sheet, x => ({ transform: `translateY(${x}px)` })]], y, out, Math.max(0, v));
     const ms = (run.path.length - 1) * 1000 / 60;
-    try { fading = sheet.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, pseudoElement: '::backdrop', fill: 'forwards' }); } catch { /* no ::backdrop animation */ }
+    const k = unshade(true);
+    try { fading = sheet.animate([{ opacity: k }, { opacity: 0 }], { duration: ms, pseudoElement: '::backdrop', fill: 'forwards' }); } catch { /* no ::backdrop animation */ }
     void run.done.then(landed => { if (landed && leaving === run && sheet.open) sheet.close(); });
     // its history entry goes now, not at the end: what the app does next (a push, say) is not undone by it
     if (pushed) { pushed = false; back(); }
@@ -133,6 +140,44 @@ export function detentSheet(sheet) {
   /** the settle's glide (motion.js; its place is how much shows), and the box it moves in @type {import('./motion.js').Glide | null} */
   let glider = null;
   let box0 = 0;
+  // each detent's height as last measured (open, a settle), else what the CSS makes it: settle() picks the nearest
+  /** @type {Record<string, number>} */
+  let known = {};
+  const sizes = () => {
+    const full = wide.matches ? Math.min(innerHeight - 48, 832) : innerHeight - 12;
+    return { ...Object.fromEntries(ds.map(d => [d, d === 'large' ? full : Math.min(full, innerHeight / 2)])), ...known };
+  };
+  // where a let-go would land (a centred dialog only changes height: it never closes by a drag)
+  /** @param {number} h @param {number} v */
+  const landing = (h, v) => {
+    const to = settle(ds, sizes(), h, v, from0);
+    return to === 'close' && wide.matches ? ds.reduce((a, d) => sizes()[d] < sizes()[a] ? d : a) : to;
+  };
+  // On a phone the backdrop fades as the sheet is dragged below its lowest height: a paused fade, scrubbed
+  /** @type {Animation | null} */
+  let shading = null;
+  /** @param {number} h  how much shows */
+  function shade(h) {
+    if (wide.matches) return;
+    const low = Math.min(...Object.values(sizes())), k = Math.max(0, Math.min(1, h / low));
+    if (!shading) {
+      if (k >= 1) return;
+      try { shading = sheet.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1000, pseudoElement: '::backdrop', fill: 'both' }); }
+      catch { return; }   // no ::backdrop animation
+      shading.pause();
+    }
+    shading.currentTime = 1000 * k;
+  }
+  // back to full shade (a settle on a height), quickly; gives back how much it showed
+  function unshade(now = false) {
+    const a = shading;
+    if (!a) return 1;
+    shading = null;
+    const k = Number(a.currentTime ?? 1000) / 1000;
+    if (now || still()) a.cancel();
+    else { a.updatePlaybackRate(4); a.play(); void a.finished.then(() => a.cancel(), () => {}); }
+    return k;
+  }
   // the sheet's height at rest (0 = unknown: measure at drag start); keeps begin() free of a forced layout
   let rest = 0;
   // the sheet's own height and place again (inline styles off), without a transition
@@ -163,6 +208,7 @@ export function detentSheet(sheet) {
     sheet.style.transform = ''; sheet.style.height = ''; sheet.style.maxHeight = '';
     setDetent(d);
     const to = sheet.getBoundingClientRect().height, box = Math.max(from, to) + SPARE;
+    known[d] = to;
     place(box, to);
     box0 = box;
     const a = glider = springGlide([[sheet, x => ({ transform: `translateY(${box - x}px)` })]], from, to, v);
@@ -170,7 +216,7 @@ export function detentSheet(sheet) {
   }
   function cycle() { glide(ds[(ds.indexOf(sheet.getAttribute('data-detent') || ds[0]) + 1) % ds.length], shown()); }
 
-  l.on(window, 'resize', () => { rest = 0; });   // rotation, the URL bar, the keyboard: measure again at the next drag
+  l.on(window, 'resize', () => { rest = 0; known = {}; });   // rotation, the URL bar, the keyboard: measure again at the next drag
 
   document.querySelectorAll(`[data-open-sheet="#${CSS.escape(sheet.id)}"]`).forEach(b =>
     l.on(b, 'click', () => open(/** @type {HTMLElement} */ (b))));
@@ -248,9 +294,6 @@ export function detentSheet(sheet) {
       begin();
     }
     if (Math.abs(dy) > 4) moved = true;
-    // a let-go here (held still) would now land somewhere else: past the close line, or on another height
-    const aim = settle(ds, from0, dy, 0);
-    if (aim !== aimed) { aimed = aim; haptic('threshold'); }
     const maxH = innerHeight - 12;
     if (wide.matches) {   // a centred dialog: change the height
       const want = h0 - dy * 2;
@@ -261,6 +304,10 @@ export function detentSheet(sheet) {
       h = want > maxH ? maxH + Math.min(SPARE / 2, (want - maxH) * 0.15) : Math.max(0, want);
       place(box, h);
     }
+    shade(h);
+    // a let-go here (held still) would now land somewhere else: past the close line, or on another height
+    const aim = landing(h, 0);
+    if (aim !== aimed) { aimed = aim; haptic('threshold'); }
   }
   /** @param {{ pointerId: number | string, timeStamp: number, type?: string }} e */
   function up(e) {
@@ -268,9 +315,10 @@ export function detentSheet(sheet) {
     const wasLive = live;
     y0 = null; live = false;
     if (leaving) return;
-    if (!wasLive || !moved) { unstyle(); sheet.classList.remove('is-dragging'); return; }
+    if (!wasLive || !moved) { unshade(true); unstyle(); sheet.classList.remove('is-dragging'); return; }
     const v = e.type === 'pointercancel' || e.type === 'touchcancel' ? 0 : last.speed(e.timeStamp);
-    const to = settle(ds, from0, dy, v);
+    const to = landing(h, v);
+    if (to !== 'close') unshade();
     if (to === 'close') close(v, true);   // (slides on from where the finger left it, at its speed)
     else if (wide.matches) { sheet.classList.remove('is-dragging'); sheet.style.height = ''; sheet.style.maxHeight = ''; setDetent(to); }
     else glide(to, h, -v, true);
