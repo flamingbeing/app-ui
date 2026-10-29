@@ -69,8 +69,9 @@ route `core.anawj.com/ui/*`, in front of app-sync's Worker on the same host.
 - `npm test`: Worker, UI core and tools unit tests. `npm run typecheck`. `node tools/check.mjs`.
 - `npx playwright test`: the real Worker in Node (`e2e/serve.mjs`) serves this checkout as `/ui/0.0.0-dev/`. Every spec
   in Chromium; `e2e/gallery.spec.mjs` (each gallery page starts clean: no page error, axe, no CSP report) also in
-  Firefox and WebKit. The base config comes from app-devkit: copy its `playwright/` folder to `.devkit/` once locally
-  (CI's setup-browser does it). `PW_CHROMIUM=<path>` uses a Chromium already on the machine.
+  Firefox and WebKit. Checks runs every project but `firefox`, which runs in the nightly soak. The base config comes
+  from app-devkit: copy its `playwright/` folder to `.devkit/` once locally (CI's setup-browser does it).
+  `PW_CHROMIUM=<path>` uses a Chromium already on the machine.
 - The jank gate (`e2e/jank.spec.mjs`, projects `jank` and `jank-webkit`) runs after the rest; alone:
   `npx playwright test --project=jank --no-deps`.
 - What the gallery tests cover: [docs/kit-tests.md](docs/kit-tests.md).
