@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0-rc.33
+## 1.0.0-rc.34
 Swipe feel changes for every app that moves to it:
 - Tab pages follow the finger 1:1 from the first move (8 px to tell sideways from up and down), with the next page
   beside it, also with Reduce Motion (Android's Remove animations; rc.30 switched tabs with nothing moved there).
@@ -15,6 +15,13 @@ Swipe feel changes for every app that moves to it:
   drawer out with the finger over a shade; let go past half or with a flick it opens; a left swipe or a tap on the
   shade closes it. `adaptiveShell` returns `drawer` for this. Without `drawer`, `onPrevMissing` fires as before. The
   drawer's open and close now glide on a spring (the `::before` shade and `ui-drawer-in` are gone).
+
+## 1.0.0-rc.33
+- Add-ons (`theme/addons/index.js`, `theme/addons/addons.css`), opt-in and per device, off by default: wallpaper
+  (patterns or a photo, dim, a backing for text on the page, optional see-through cards), fonts (stacks, a typed name,
+  a font file), custom CSS with `@settings`, icon sets for `.ui-icon` and per-tab icons, saved themes with export and
+  import and a night theme, and `#t=` theme links. Saved themes and links take the app's own look schema and lists.
+  Nothing changes for an app that doesn't import them.
 
 ## 1.0.0-rc.32
 - `applyTheme({ layer, ownTheme })`, both optional, for an app that keeps its own palette and light/dark switch:

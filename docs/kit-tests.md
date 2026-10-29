@@ -180,3 +180,16 @@ stand-in for `@core/settings` on the page.
 | Prose | 390 and 1280 px: a task row has no bullet and its box sits on the text line, left of the words; a code block is not the accent; the box keeps to `--measure`; icon buttons are square | yes |
 | Hover card | 1280 px with a mouse: resting on the prose link shows the card below it (`aria-describedby`), axe passes, moving away removes it; 390 px touch: a tap shows none | yes |
 | Content parts | `/kit/parts/` gallery: sections, row extras, card, stats, badges, empty state and skeleton rows start clean under axe in every browser (`gallery.spec.mjs`) | |
+
+### Add-ons (`test/addons.unit.test.mjs`)
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Wallpaper | choices, dim steps, pattern CSS on the kit's `--text`; the floor and backing keep text at 4.5:1; see-through cards stay at 80% or more | |
+| Fonts | stacks, an app's own stacks, typed names cleaned, the writing font following the interface font | |
+| Custom CSS | `url()`, `@import` and unbalanced braces refused; `@settings` sliders, colours and switches become variables; odd values dropped | |
+| Colour grid | grid lookup, snapping, the 18-bit code round trip, recents | |
+| Icon sets | the default is no mark; old set names read as the same set; per-set paths; per-tab picks only from the app's list | |
+| Per-device choice | off unless chosen; a dim without a wallpaper, a blank typed font or refused CSS is dropped | |
+| Saved themes | save, match, the patch, export and import (other apps' files refused), the limit, the night theme | |
+| Theme links | a made-up look schema: a look and a bundled theme go out and come back the same; a broken link throws | |
