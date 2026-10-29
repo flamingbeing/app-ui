@@ -10,6 +10,8 @@
 - Known: a finger that turns back while stretched scrolls at once, so the content runs a little ahead of it until the
   stretch is gone (touch moves can't be held back once the browser scrolls).
 - The jank gate adds a pull past the list's top and bottom.
+- Sheets: at full height, scrolled to the top, the body no longer stays stuck on sideways-only panning in WebKit
+  (Safari has no `pan-down`; there the sheet's own touch handling takes the pull down).
 
 ## 1.0.0-rc.38
 - `cardPager(stage, { card, start, onShow })`, exported from `@core/ui` (`ui/card-pager.js`): one card at a time, a
