@@ -7,7 +7,7 @@ import { verdict, median, MEMORY_FLOOR, SLOW_FRAME_MS, PROBE_FRAMES } from '../t
 import { placeSheetMenu } from '../ui/hold-menu.js';
 
 test('every look: a unique id, a name, every variant picked from VARIANTS, the same token keys', () => {
-  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd', 'e']);
+  assert.deepEqual(LOOK_IDS, ['a', 'b', 'c', 'd', 'e', 'ios']);
   assert.equal(new Set(LOOK_IDS).size, LOOKS.length);
   const keys = Object.keys(LOOKS[0].tokens).sort();
   for (const look of LOOKS) {
@@ -76,4 +76,19 @@ test('glass guard: little memory turns glass down at once; slow frames on the fi
 test('a sheet menu sits on the bottom edge, never above the top one', () => {
   assert.deepEqual(placeSheetMenu({ h: 300 }, { h: 800 }), { top: 492 });
   assert.deepEqual(placeSheetMenu({ h: 900 }, { h: 800 }), { top: 8 });
+});
+
+test('look iOS: large title, glass bars, a floating tab bar, grouped grounds and system blue, only as fallbacks', async () => {
+  const { palettes, accentOf } = await import('../theme/palette-css.js');
+  const ios = lookOf('ios');
+  assert.equal(ios.name, 'iOS');
+  assert.deepEqual(ios.variants, { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float' });
+  assert.equal(ios.tokens['list-sep'], 'var(--ios-separator)');
+  assert.equal(accentOf({ look: 'ios' }), '#007aff', 'iOS blue when nobody names an accent');
+  assert.equal(accentOf({ look: 'ios' }, { accent: '#0f766e' }), '#0f766e', 'the app\'s own accent wins');
+  assert.equal(accentOf({ look: 'ios', accent: '#aa3355' }, { accent: '#0f766e' }), '#aa3355', 'the device\'s wins over both');
+  assert.equal(accentOf({}, { look: 'ios' }), '#007aff', 'an app opting in by its look');
+  assert.equal(palettes({ look: 'ios' }).light.bg, '#f2f2f7', 'grouped grey ground');
+  assert.equal(palettes({ look: 'ios' }).dark.bg, '#000000');
+  assert.notEqual(palettes({ look: 'a' }).light.bg, '#f2f2f7', 'other looks keep their ground');
 });

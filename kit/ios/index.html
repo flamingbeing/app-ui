@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" class="glass">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>iOS look gallery</title>
+  <script src="../../theme/early.js"></script>
+  <link rel="icon" href="../../icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../icons/icon-192.png">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <script src="../installable.js"></script>
+  <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
+  <link rel="stylesheet" href="../../theme/theme.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../ui/layout.css">
+  <link rel="stylesheet" href="../../theme/glass.css">
+  <link rel="stylesheet" href="../../ui/gestures.css">
+  <link rel="stylesheet" href="page.css">
+  <script type="module" src="page.js"></script>
+</head>
+<body>
+  <!-- The iOS look (theme/looks/ios.js, ui/gestures/ios.css) on a made-up plant app: the large title folding into the
+       bar, inset grouped lists with icon tiles and switches, a segmented control, row swipe actions
+       (ui/swipe-actions.js) and a sheet with half and full detents. Shown in the iOS look unless ?look= names another.
+       Tests: docs/kit-tests.md. -->
+  <header class="ui-bar">
+    <span class="kit-bar-side"><a class="ui-back kit-home" href="../">Gallery</a></span>
+    <h2 class="ui-bar-title" aria-hidden="true">Garden</h2>
+    <span class="kit-bar-side"><button type="button" class="ui-primary" id="add" data-open-sheet="#sheet">Add</button></span>
+  </header>
+
+  <main>
+    <h1 class="ui-large-title">Garden</h1>
+
+    <fieldset class="ui-segmented" id="show">
+      <legend>Show</legend>
+      <label><input type="radio" name="show" value="all" checked>All</label>
+      <label><input type="radio" name="show" value="due">Due</label>
+      <label><input type="radio" name="show" value="flagged">Flagged</label>
+    </fieldset>
+
+    <div class="ui-section">
+      <h2 class="ui-section-head">To do</h2>
+      <ul class="ui-list" id="todo"></ul>
+      <p class="ui-section-foot">Swipe a row left to flag or delete it, right to mark it done; swipe all the way to do the first at once.</p>
+    </div>
+
+    <div class="ui-section">
+      <h2 class="ui-section-head">Reminders</h2>
+      <ul class="ui-list" id="reminders"></ul>
+      <p class="ui-section-foot">Reminders come at the hour you pick, never in quiet hours.</p>
+    </div>
+
+    <div class="ui-section">
+      <ul class="ui-list">
+        <li><button type="button" class="ui-row" data-tone="action" id="open-sheet" data-open-sheet="#sheet"><span class="ui-row-main">New plant</span></button></li>
+      </ul>
+    </div>
+  </main>
+
+  <dialog class="ui-sheet" id="sheet" data-detents="medium large" aria-labelledby="sheet-title">
+    <div class="ui-sheet-grabber" aria-label="Expand or collapse"></div>
+    <div class="ui-sheet-head">
+      <button type="button" data-close>Cancel</button>
+      <h2 id="sheet-title">New plant</h2>
+      <button type="button" data-close class="ui-primary">Done</button>
+    </div>
+    <div class="ui-sheet-body">
+      <div class="ui-section">
+        <ul class="ui-list">
+          <li><label class="ui-row"><span class="ui-row-main">Name</span><input class="ui-row-input" id="sheet-name" autocomplete="off" placeholder="Fern"></label></li>
+          <li><label class="ui-row"><span class="ui-row-main">Remind me</span><input type="checkbox" role="switch" class="ui-switch" checked></label></li>
+        </ul>
+      </div>
+      <fieldset class="ui-segmented">
+        <legend>Light</legend>
+        <label><input type="radio" name="light" value="shade">Shade</label>
+        <label><input type="radio" name="light" value="part" checked>Part sun</label>
+        <label><input type="radio" name="light" value="sun">Full sun</label>
+      </fieldset>
+      <p class="ui-section-foot">Pull the sheet up for the care notes.</p>
+      <div class="ui-section">
+        <h3 class="ui-section-head">Care notes</h3>
+        <p>Water when the top few centimetres of soil are dry; most plants here would rather be a little thirsty than sit in a wet pot.</p>
+        <p>Turn the pot a quarter turn each week so the plant grows evenly instead of leaning towards the window.</p>
+        <p>Wipe broad leaves with a damp cloth every month or so; dust blocks the light they need.</p>
+        <p>Feed in spring and summer only, at half the strength the bottle suggests.</p>
+        <p>Yellow lower leaves usually mean too much water; brown crispy tips usually mean dry air.</p>
+        <p>Repot when roots come out of the drainage holes, into a pot one size bigger, not more.</p>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

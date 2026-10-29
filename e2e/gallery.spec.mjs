@@ -4,7 +4,7 @@ import AxeBuilder from './axe.mjs';
 import { test, expect } from '@playwright/test';
 import { BASE } from './fixtures.mjs';
 
-const PAGES = ['kit/', 'kit/shell/', 'kit/dense/', 'kit/parts/'];
+const PAGES = ['kit/', 'kit/shell/', 'kit/dense/', 'kit/parts/', 'kit/ios/'];
 
 for (const path of PAGES) {
   test(`${path} starts clean`, async ({ browser, browserName }) => {

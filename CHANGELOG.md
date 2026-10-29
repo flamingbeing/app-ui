@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.45
+- An iOS look (`theme/looks/ios.js`), opt-in with `applyTheme({ look: 'ios' })`: iOS 26's system colours in light
+  and dark, the grouped ground, inset grouped lists, the iOS switch and segmented control, glass bars, sheets with
+  half and full detents; Inter (now in `theme/fonts/`) after `-apple-system`. No app's look changes; the default stays A.
+- Row swipe actions (`ui/swipe-actions.js`, `swipeActions`): iOS Mail's swipe, on the shared gesture module.
+- Gallery: the iOS look is its default, and `/kit/ios/` shows the iOS parts together.
+
 ## 1.0.0-rc.44
 - Tab pages: a swipe lights its new tab the moment the finger lets go, as Android's tab bars do, not when the
   pages land (the bar no longer lags the swipe). A let-go that springs back keeps the tab it had.

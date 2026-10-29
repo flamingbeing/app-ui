@@ -31,6 +31,7 @@ export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entr
 export { shrinkingTabBar, tabBarRoom } from "./tab-bar.js";
 export { detentSheet, sheetsSettled } from "./detent-sheet.js";
 export { tabPages, swipeIntent, pageStep } from "./tab-pages.js";
+export { swipeActions, swipeSettle, swipeShown, FULL_AT, ACTION_W } from "./swipe-actions.js";
 export { still, haptic } from "./gesture.js";
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, rubber } from "./motion.js";
 export { adaptiveShell, sizeClass, matchesSearch } from "./shell/shell.js";

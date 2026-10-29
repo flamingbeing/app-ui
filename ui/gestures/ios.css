@@ -1,0 +1,196 @@
+/* @core/ui gestures, the iOS look (theme/looks/ios.js): iOS 26's system colours, type scale and spacing, and the
+   details that make the parts read as iOS: glass capsule buttons in the bar, inset grouped lists with hairlines
+   inset to the text, filled icon tiles, the iOS switch, a segmented control whose thumb slides, sheets floating clear
+   of the edges, the floating glass tab bar. Every rule here acts only on <html data-look="ios">, so other looks and
+   apps that never pick it are untouched. Movement is transform and opacity only. One part of ui/gestures.css (which
+   loads them all, in order); link it alone after the parts it styles. */
+
+/* SF Pro is Apple's and may not ship to other devices: Apple devices get it from -apple-system; elsewhere Inter (a
+   close match, its optical sizes standing in for SF's Text and Display) from this folder, fetched only when used */
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400 700; font-display: swap;
+  src: url("../../theme/fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+:root[data-look="ios"] {
+  /* system colours (light, dark): the tints, and the grey fills and lines; the ground and cards come from the
+     palette's Grouped ground (presets.js) unless the app or device names another */
+  --ios-blue: light-dark(#007aff, #0a84ff);
+  --ios-green: light-dark(#34c759, #30d158);
+  --ios-red: light-dark(#ff3b30, #ff453a);
+  --ios-orange: light-dark(#ff9500, #ff9f0a);
+  --ios-yellow: light-dark(#ffcc00, #ffd60a);
+  --ios-teal: light-dark(#30b0c7, #40c8e0);
+  --ios-indigo: light-dark(#5856d6, #5e5ce6);
+  --ios-purple: light-dark(#af52de, #bf5af2);
+  --ios-pink: light-dark(#ff2d55, #ff375f);
+  --ios-gray: light-dark(#8e8e93, #8e8e93);
+  /* the same tints at iOS's Increase Contrast strength: behind white words (swipe actions, filled buttons) they keep 4.5:1 */
+  --ios-blue-strong: #0040dd; --ios-red-strong: #d70015; --ios-orange-strong: #c93400; --ios-gray-strong: #6c6c70;
+  --ios-purple-strong: #8944ab; --ios-green-strong: #248a3d;
+  --ios-separator: light-dark(rgb(60 60 67 / .29), rgb(84 84 88 / .65));
+  --ios-fill: light-dark(rgb(120 120 128 / .2), rgb(120 120 128 / .36));
+  --ios-fill-2: light-dark(rgb(120 120 128 / .16), rgb(120 120 128 / .32));
+  --ios-fill-3: light-dark(rgb(118 118 128 / .12), rgb(118 118 128 / .24));
+  --ios-fill-tab: light-dark(rgb(0 0 0 / .06), rgb(255 255 255 / .1));
+  --ios-tertiary: light-dark(#c4c4c7, #5a5a5e);   /* chevrons, the grabber */
+  --ios-thumb: light-dark(#ffffff, #636366);      /* a segmented control's thumb */
+  /* type: SF Pro (Apple devices), else Inter; iOS's text styles at the default text size, in rem of 16 px */
+  --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --ios-font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --ios-large-title: 2.125rem; --ios-title-1: 1.75rem; --ios-title-2: 1.375rem; --ios-title-3: 1.25rem;
+  --ios-headline: 1.0625rem; --ios-body: 1.0625rem; --ios-callout: 1rem; --ios-subhead: .9375rem;
+  --ios-footnote: .8125rem; --ios-caption: .75rem; --ios-caption-2: .6875rem;
+  --font: var(--ios-font);
+  --font-size: var(--ios-body);
+  --leading: 1.29;   /* 22 on 17 */
+  --line: light-dark(#8a8a8e, #8e8e93);
+  --button-bg: var(--ios-fill-3);
+  --button-text: color-mix(in srgb, var(--link) 75%, var(--text));   /* the link, a shade stronger: readable on the grey fill */
+  --radius-button: 999px;
+  --radius-input: .625rem;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+/* Inter runs wider than SF: its own tracking (rsms.me/inter dynamic metrics). Apple devices keep SF's own. */
+@supports not (font: -apple-system-body) {
+  :root[data-look="ios"] body { letter-spacing: -.011em; }
+  :root[data-look="ios"] { --title-track: -.022em; }
+}
+:root[data-look="ios"] :is(h1, h2, h3) { letter-spacing: -.01em; }
+
+/* ---------- the bar: the screen's name at 17 semibold, glass capsule buttons (iOS 26) ---------- */
+:root[data-look="ios"] .ui-bar { min-height: 44px; padding-inline: 1rem; background: var(--bg); }
+:root[data-look="ios"] .ui-bar-title { font-size: var(--ios-headline); font-weight: 600; letter-spacing: -.02em; }
+:root[data-look="ios"] .ui-bar :is(button, .ui-back) { min-height: 2.75rem; min-width: 2.75rem; padding: 0 .875rem; border: 0;
+  border-radius: 999px; background: var(--ios-glass-button, var(--surface)); color: var(--text); font-size: var(--ios-body);
+  font-weight: 500; box-shadow: var(--ios-glass-button-rim, 0 1px 3px rgb(0 0 0 / .12)); justify-content: center; }
+:root[data-look="ios"].glass { --ios-glass-button: var(--glass-bg); --ios-glass-button-rim: var(--glass-rim), 0 2px 10px rgb(0 0 0 / .08); }
+:root[data-look="ios"].glass .ui-bar :is(button, .ui-back) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+/* the bold one (Done, Add): filled with the tint, as iOS 26's prominent glass button */
+:root[data-look="ios"] .ui-bar .ui-primary { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+/* Back: a round glass button holding the chevron; its words stay for screen readers */
+:root[data-look="ios"] .ui-bar .ui-back { width: 2.75rem; padding: 0; gap: 0; font-size: 0; }
+:root[data-look="ios"] .ui-bar .ui-back::before { font-size: 2rem; line-height: 1; margin-top: -.2rem; margin-inline-start: -.1rem; }
+:root[data-look="ios"] .ui-bar .ui-bar-menu { width: 2.75rem; padding: 0; font-size: 1.25rem; }
+:root[data-look="ios"] .ui-bar.is-collapsed { border-bottom-color: transparent; }
+
+/* ---------- the large title: 34 bold on the page, 16 from the edge ---------- */
+:root[data-look="ios"] .ui-large-title { margin: .125rem 1rem .5rem; line-height: 1.21; }
+
+/* ---------- inset grouped lists ---------- */
+/* hairline separators (one device pixel on a sharp screen), inset to the text */
+:root[data-look="ios"] .ui-list { --border: 1px; }
+@media (min-resolution: 2dppx) { :root[data-look="ios"] .ui-list { --border: .5px; } }
+:root[data-look="ios"] .ui-row { padding-block: .6875rem; padding-inline: 1rem; gap: .75rem; }
+:root[data-look="ios"] .ui-row-sub { font-size: var(--ios-subhead); line-height: 1.33; }
+:root[data-look="ios"] .ui-row-value { font-size: var(--ios-body); }
+:root[data-look="ios"] .ui-row-chevron { width: 1.0625rem; height: 1.0625rem; color: var(--ios-tertiary); stroke-width: 3; }
+/* section words: sentence case (iOS 26), above and below the card, lined up with the rows' text */
+:root[data-look="ios"] .ui-section { margin-bottom: 2.1875rem; }
+:root[data-look="ios"] .ui-section-head { padding: 0 calc(var(--list-inset) + 1rem) .4375rem; font-size: var(--ios-subhead);
+  font-weight: 600; text-transform: none; letter-spacing: -.01em; color: var(--muted); }
+:root[data-look="ios"] .ui-section-foot { padding: .4375rem calc(var(--list-inset) + 1rem) 0; font-size: var(--ios-footnote); }
+:root[data-look="ios"] .ui-settings-title { margin-inline: calc(var(--list-inset) + 1rem); font-size: var(--ios-subhead);
+  font-weight: 600; text-transform: none; letter-spacing: -.01em; }
+/* icon tiles (Settings' coloured squares): the tint filled, a white glyph; data-tone picks the colour */
+:root[data-look="ios"] .ui-row-lead { width: 1.875rem; height: 1.875rem; border-radius: .5rem; background: var(--tile, var(--ios-blue));
+  color: #fff; }
+:root[data-look="ios"] .ui-row-lead svg { width: 1.125rem; height: 1.125rem; }
+:root[data-look="ios"] .ui-row-lead[data-tone="grey"] { --tile: var(--ios-gray); color: #fff; }
+:root[data-look="ios"] .ui-row-lead[data-tone="danger"], :root[data-look="ios"] .ui-row-lead[data-tone="red"] { --tile: var(--ios-red); color: #fff; }
+:root[data-look="ios"] .ui-row-lead[data-tone="green"] { --tile: var(--ios-green); }
+:root[data-look="ios"] .ui-row-lead[data-tone="orange"] { --tile: var(--ios-orange); }
+:root[data-look="ios"] .ui-row-lead[data-tone="yellow"] { --tile: var(--ios-yellow); }
+:root[data-look="ios"] .ui-row-lead[data-tone="teal"] { --tile: var(--ios-teal); }
+:root[data-look="ios"] .ui-row-lead[data-tone="indigo"] { --tile: var(--ios-indigo); }
+:root[data-look="ios"] .ui-row-lead[data-tone="purple"] { --tile: var(--ios-purple); }
+:root[data-look="ios"] .ui-row-lead[data-tone="pink"] { --tile: var(--ios-pink); }
+/* the separator starts after a tile, at the text */
+:root[data-look="ios"] :is(.ui-list > li + li > .ui-row, .ui-row + .ui-row):has(> .ui-row-lead) {
+  background-size: calc(100% - 1rem - 1.875rem - .75rem) var(--border), auto; }
+:root[data-look="ios"] :is(.ui-list > li + li > .ui-row, .ui-row + .ui-row):has(> .ui-row-thumb) {
+  background-size: calc(100% - 1rem - 44px - .75rem) var(--border), auto; }
+/* pressed: the grey wash iOS gives a tapped row */
+:root[data-look="ios"] :is(a.ui-row, button.ui-row, .ui-row[tabindex], .ui-row[data-push]):is(:active, [data-pressed]) {
+  box-shadow: inset 0 0 0 100vmax light-dark(rgb(0 0 0 / .1), rgb(255 255 255 / .1)); }
+
+/* ---------- fields and buttons in the content ---------- */
+:root[data-look="ios"] :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), textarea, select) {
+  border-color: transparent; background-color: var(--ios-fill-3); }
+:root[data-look="ios"] button:not(.ui-row, .ui-tab, .ui-sheet-grabber, .ui-switch, .ui-swipe-action) { border-color: transparent; font-weight: 500; }
+:root[data-look="ios"] :where(.ui-fill) { background: var(--accent); color: var(--on-accent); }
+
+/* ---------- the switch: 51 by 31, iOS green when on; the knob stretches under a finger ---------- */
+:root[data-look="ios"] .ui-switch { width: 3.1875rem; max-width: 3.1875rem; height: 1.9375rem; border-radius: 999px;
+  background: light-dark(#e9e9ea, #39393d); }
+:root[data-look="ios"] .ui-switch:checked { background: var(--ios-green); }
+:root[data-look="ios"] .ui-switch::before { top: .125rem; left: .125rem; width: 1.6875rem; height: 1.6875rem;
+  box-shadow: 0 3px 8px rgb(0 0 0 / .15), 0 3px 1px rgb(0 0 0 / .06), 0 0 0 .5px rgb(0 0 0 / .04);
+  transform-origin: left center; transition: transform var(--d-quick) var(--spring-snappy); }
+:root[data-look="ios"] .ui-switch:checked::before { transform: translateX(1.25rem); transform-origin: right center; }
+:root[data-look="ios"] .ui-switch:active::before { transform: scaleX(1.18); }
+:root[data-look="ios"] .ui-switch:checked:active::before { transform: translateX(1.25rem) scaleX(1.18); }
+[dir="rtl"]:root[data-look="ios"] .ui-switch:checked::before, :root[data-look="ios"] [dir="rtl"] .ui-switch:checked::before { transform: translateX(-1.25rem); }
+
+/* ---------- the segmented control: a capsule track, a thumb that slides to the picked segment (up to 6) ---------- */
+:root[data-look="ios"] .ui-segmented { --seg-n: 2; --seg-i: 0; position: relative; isolation: isolate; gap: 0; padding: 2px;
+  border: 0; border-radius: 999px; background: var(--ios-fill-3); }
+:root[data-look="ios"] .ui-segmented label { min-height: 2rem; border-radius: 999px; background: transparent; box-shadow: none;
+  font-size: var(--ios-subhead); font-weight: 500; color: var(--text); }
+:root[data-look="ios"] .ui-segmented label:has(:checked) { background: transparent; box-shadow: none; font-weight: 600; color: var(--text); }
+:root[data-look="ios"] .ui-segmented::before { content: ""; position: absolute; z-index: -1; top: 2px; bottom: 2px; left: 2px;
+  width: calc((100% - 4px) / var(--seg-n)); border-radius: 999px; background: var(--ios-thumb);
+  box-shadow: 0 3px 8px rgb(0 0 0 / .12), 0 3px 1px rgb(0 0 0 / .04), 0 0 0 .5px rgb(0 0 0 / .04);
+  transform: translateX(calc(var(--seg-i) * 100%)); transition: transform var(--d-quick) var(--spring-snappy); }
+:root[data-look="ios"] .ui-segmented:not(:has(:checked))::before { opacity: 0; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(3)) { --seg-n: 3; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(4)) { --seg-n: 4; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(5)) { --seg-n: 5; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(6)) { --seg-n: 6; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(2) :checked) { --seg-i: 1; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(3) :checked) { --seg-i: 2; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(4) :checked) { --seg-i: 3; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(5) :checked) { --seg-i: 4; }
+:root[data-look="ios"] .ui-segmented:has(> label:nth-of-type(6) :checked) { --seg-i: 5; }
+[dir="rtl"]:root[data-look="ios"] .ui-segmented::before, :root[data-look="ios"] [dir="rtl"] .ui-segmented::before {
+  left: auto; right: 2px; transform: translateX(calc(var(--seg-i) * -100%)); }
+/* thin lines between segments that neither touch the thumb */
+:root[data-look="ios"] .ui-segmented label + label::after { content: ""; position: absolute; inset-inline-start: 0; top: 25%; bottom: 25%;
+  width: 1px; background: var(--ios-separator); transition: opacity var(--d-quick) var(--spring); }
+:root[data-look="ios"] .ui-segmented label:has(:checked)::after, :root[data-look="ios"] .ui-segmented label:has(:checked) + label::after { opacity: 0; }
+
+/* ---------- sheets: float clear of the edges with iOS 26's round corners; the grabber in the tertiary grey ---------- */
+@media (max-width: 839.98px) {
+  :root[data-look="ios"] dialog.ui-sheet { inset: auto .5rem calc(.5rem + env(safe-area-inset-bottom, 0px)); width: auto;
+    max-height: calc(100dvh - 12px - .5rem - env(safe-area-inset-bottom, 0px)); border: 0; border-radius: var(--sheet-r);
+    box-shadow: 0 0 0 .5px rgb(0 0 0 / .06), 0 10px 40px rgb(0 0 0 / .18); }
+  :root[data-look="ios"] dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - 12px - .5rem - env(safe-area-inset-bottom, 0px)); }
+  :root[data-look="ios"] .ui-sheet-body { padding-bottom: var(--pad); }
+}
+:root[data-look="ios"] dialog.ui-sheet { background: var(--surface); }
+:root[data-look="ios"] .ui-sheet-grabber::before { top: 5px; width: 36px; height: 5px; border-radius: 3px; background: var(--ios-tertiary); }
+:root[data-look="ios"] .ui-sheet-head { padding-inline: 1rem; }
+:root[data-look="ios"] .ui-sheet-head h2 { font-size: var(--ios-headline); font-weight: 600; }
+:root[data-look="ios"] .ui-sheet-head button { min-height: 2.75rem; padding: 0 1rem; margin: 0; border-radius: 999px;
+  background: var(--accent); color: var(--on-accent); }
+
+/* ---------- the tab bar: a floating glass capsule; the picked tab tinted on a soft lozenge ---------- */
+:root[data-look="ios"] .ui-tabbar { padding: 4px; gap: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + .75rem); }
+:root[data-look="ios"] .ui-tab { min-width: 4rem; border-radius: 999px; color: var(--text); font-size: var(--ios-caption-2); font-weight: 500; }
+:root[data-look="ios"] .ui-tab:has(.ui-tab-icon) { padding: 4px .75rem 3px; font-size: .625rem; }
+:root[data-look="ios"] .ui-tab[aria-current="page"] { color: var(--link); font-weight: 600; }
+
+/* ---------- swipe actions (swipe-actions.js): iOS's tints, at the strength that keeps the white words readable ---------- */
+:root[data-look="ios"] .ui-swipe-action { --act: var(--ios-blue-strong); font-size: var(--ios-subhead); font-weight: 600; }
+:root[data-look="ios"] .ui-swipe-action[data-tone="danger"] { --act: var(--ios-red-strong); }
+:root[data-look="ios"] .ui-swipe-action[data-tone="warn"] { --act: var(--ios-orange-strong); }
+:root[data-look="ios"] .ui-swipe-action[data-tone="grey"] { --act: var(--ios-gray-strong); }
+:root[data-look="ios"] .ui-swipe-action[data-tone="purple"] { --act: var(--ios-purple-strong); }
+:root[data-look="ios"] .ui-swipe-action[data-tone="ok"] { --act: var(--ios-green-strong); }
+
+/* Still or Reduce Motion: the switch, the thumb and the separators jump instead of sliding */
+:root[data-look="ios"][data-motion="still"] .ui-switch::before, :root[data-look="ios"][data-motion="still"] .ui-segmented::before { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-look="ios"] .ui-switch::before, :root[data-look="ios"] .ui-segmented::before { transition: none; }
+}

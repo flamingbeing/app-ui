@@ -1,4 +1,4 @@
-// @core/theme's looks (A tinted glass, B colour band, C dense and quiet, D slim, E flat workspace) on the /kit/ gallery at phone, tablet and
+// @core/theme's looks (A tinted glass, B colour band, C dense and quiet, D slim, E flat workspace, iOS) on the /kit/ gallery at phone, tablet and
 // laptop widths: axe, the variants each look names, screenshots kept for the PR; the densities' row heights; the look
 // and density switchers; the glass guard on a device with little memory. The list is docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
@@ -21,6 +21,7 @@ const LOOKS = {
   c: { header: 'plain', menu: 'popover', glass: 'pill', tick: 'round', tabbar: 'edge', glassClass: true },
   d: { header: 'slim', menu: 'popover', glass: 'none', tick: 'round', tabbar: 'edge', glassClass: false },
   e: { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge', glassClass: false },
+  ios: { header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', glassClass: true },
 };
 
 for (const width of [390, 820, 1280]) {

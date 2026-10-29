@@ -1,0 +1,21 @@
+/* Row swipe actions (swipe-actions.js): the tray rides on the row, just past the edge the row moves away from, so the
+   list's rounded card clips it to what the row has uncovered; each button sits at the row's edge and slides outwards
+   with the finger, its colour running on outwards to fill the gap to the next. */
+.ui-row.is-swiped { z-index: 1; }
+.ui-swipe-tray { position: absolute; top: 0; bottom: 0; width: 0; pointer-events: none; }
+.ui-swipe-tray[data-side="left"] { right: 100%; }
+.ui-swipe-tray[data-side="right"] { left: 100%; }
+.ui-swipe-action { --act: var(--accent); position: absolute; top: 0; bottom: 0; width: 74px; margin: 0; padding: 0 .5rem;
+  border: 0; border-radius: 0; box-shadow: none; background: var(--act); color: #fff; font: inherit; font-size: .9375rem;
+  font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; pointer-events: auto; touch-action: manipulation; }
+.ui-swipe-action::after { content: ""; position: absolute; top: 0; bottom: 0; width: 100vw; background: inherit; }
+.ui-swipe-tray[data-side="left"] .ui-swipe-action { right: 0; }
+.ui-swipe-tray[data-side="left"] .ui-swipe-action::after { right: 100%; }
+.ui-swipe-tray[data-side="right"] .ui-swipe-action { left: 0; }
+.ui-swipe-tray[data-side="right"] .ui-swipe-action::after { left: 100%; }
+.ui-swipe-action[data-tone="danger"] { --act: var(--danger); }
+.ui-swipe-action[data-tone="warn"] { --act: var(--warn); }
+.ui-swipe-action[data-tone="ok"] { --act: var(--ok); }
+.ui-swipe-action[data-tone="grey"] { --act: var(--muted); }
+.ui-swipe-action[data-tone="purple"] { --act: #8944ab; }
+.ui-swipe-action:focus-visible { outline: 2px solid #fff; outline-offset: -4px; }
