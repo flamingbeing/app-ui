@@ -29,6 +29,9 @@ async function load(sized, query = '', width = 390) {
   return page;
 }
 /** a sideways swipe across the middle of the page, from x0 to x1 */
+// the middle of the Jobs page's list (below it is the card deck, whose swipes are its own)
+const listY = async page => { const b = await page.locator('#jobs .ui-list').boundingBox(); return b.y + b.height / 2; };
+
 async function swipe(page, x0, x1, y = 420) {
   await (await finger(page)).drag(x0, y, x1, y);
   await settled(page);
@@ -125,7 +128,7 @@ test('swipe: left goes to the next tab page (skipping the sheet tab), right come
   await swipe(page, 300, 60);
   expect(await shown(page), 'past New, which opens a sheet').toEqual(['jobs']);
   await expect(page.locator('#sheet')).toBeHidden();
-  await swipe(page, 60, 300);
+  await swipe(page, 60, 300, await listY(page));   // on the list: lower down, the card deck takes the swipe
   expect(await shown(page)).toEqual(['rooms']);
   expect(await events).toEqual(['rooms', 'jobs', 'rooms']);
   await swipe(page, 60, 300);
@@ -254,7 +257,7 @@ test('swipe does nothing: a vertical scroll, the back edge, a sideways scroller,
   await swipe(page, 300, 60, chips.y + chips.height / 2);
   expect(await shown(page)).toEqual(['jobs']);
   expect(await page.locator('#job-chips').evaluate(e => e.scrollLeft), 'the chips scrolled instead (the pager’s pan-y stops above them)').toBeGreaterThan(0);
-  await swipe(page, 300, 60);
+  await swipe(page, 300, 60, await listY(page));
   expect(await shown(page)).toEqual(['settings']);
   const field = await page.locator('#shelf-name').boundingBox();
   await swipe(page, field.x + field.width - 10, 40, field.y + field.height / 2);

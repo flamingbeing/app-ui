@@ -21,5 +21,6 @@
 }
 /* ---------- card pager (ui/card-pager.js): three slots side by side, moved by transform only ---------- */
 .ui-cards { position: relative; overflow: hidden; min-height: 16rem; outline-offset: -2px; }
-.ui-card-slot { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; will-change: transform; contain: layout paint; }
+/* a slot scrolls, so the stage's touch-action stops at it: pan-y here too, or the browser takes a sideways swipe */
+.ui-card-slot { position: absolute; inset: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; will-change: transform; contain: layout paint; }
 .ui-card-slot:empty { visibility: hidden; }
