@@ -8,6 +8,7 @@ declare const _default: {
         glass: "none";
         tick: "square";
         tabbar: "edge";
+        family: "core";
     };
     tokens: {
         'look-font-head': string;

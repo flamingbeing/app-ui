@@ -54,7 +54,7 @@ export function nudge(c, on, ratio) {
 
 /** @typedef {Record<string, string>} Palette  token name (no leading --) -> hex */
 
-const STATUS = { light: { danger: '#b3261e', ok: '#197934', warn: '#8a5a00' }, dark: { danger: '#ff8a80', ok: '#74dd90', warn: '#f3c46e' } };
+export const STATUS = { light: { danger: '#b3261e', ok: '#197934', warn: '#8a5a00' }, dark: { danger: '#ff8a80', ok: '#74dd90', warn: '#f3c46e' } };
 
 /** @param {string} accent @returns {Palette} */
 export function lightPalette(accent) {

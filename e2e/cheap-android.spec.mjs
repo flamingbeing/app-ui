@@ -54,3 +54,17 @@ test('cheap Android: 2 GB turns glass down at once; slow frames turn it down on 
   await expect(slow.page.locator('html')).not.toHaveClass(/\bglass\b/);   // kept on this device
   await slow.context.close();
 });
+
+test('cheap Android, the Android look: solid from the start (no glass to turn down) and it scrolls', async ({ browser }, info) => {
+  const context = await browser.newContext({ viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true });
+  await context.addInitScript(() => Object.defineProperty(Navigator.prototype, 'deviceMemory', { configurable: true, get: () => 2 }));
+  const page = await context.newPage();
+  await page.goto(KIT + '&look=m');
+  await expect(page.locator('html')).toHaveAttribute('data-family', 'android');
+  await expect(page.locator('html')).not.toHaveClass(/\bglass\b/);
+  const gaps = await scrollGaps(page);
+  info.annotations.push({ type: 'Android look scroll median frame (ms)', description: String(median(gaps).toFixed(1)) });
+  expect(gaps.length, 'frames seen while scrolling').toBeGreaterThan(10);
+  await expect(page.locator('.ui-bar')).toHaveClass(/is-collapsed/);
+  await context.close();
+});

@@ -15,7 +15,7 @@ export { THEMES, LAYOUTS, DENSITIES };
 // the <html> marks early.js puts back before the first paint
 // (no data-preset: a preset (the switch's "style": colours, corners, lines) acts only through the palette's custom
 // properties; the look (looks.js) is what the CSS styles from)
-export const MARKS = Object.freeze(['theme', 'dark', 'look', 'density', 'motion', 'header', 'menu', 'glass', 'tick', 'tabbar']);
+export const MARKS = Object.freeze(['theme', 'dark', 'look', 'density', 'motion', 'header', 'menu', 'glass', 'tick', 'tabbar', 'family']);
 const KEY = 'core-theme';
 // The last look shown (marks + palette CSS), for early.js to put back before the first paint.
 const PAINT = 'core-theme-paint';

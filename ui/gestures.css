@@ -2,7 +2,8 @@
    collapsing large title and select mode, on @core/theme's custom properties (load after theme.css, ui.css and
    glass.css). Glass only on the floating bars (top bar, tab bar); menus, sheets and the action bar are solid, as is the
    content. Still (data-motion on <html>) or the device's Reduce Motion: no springs, slides or lifts. */
-/* Split by part (ui/gestures/*.css); this file loads them all, in order. */
+/* Split by part (ui/gestures/*.css); this file loads them all, in order. android.css, last, restyles them all for the
+   Android look (data-family="android" on <html>). */
 @import url("gestures/base.css");
 @import url("gestures/bar.css");
 @import url("gestures/tabbar.css");
@@ -13,4 +14,6 @@
 @import url("gestures/content.css");
 @import url("gestures/settings.css");
 @import url("gestures/action-bar.css");
+@import url("gestures/fab.css");
 @import url("gestures/motion.css");
+@import url("gestures/android.css");

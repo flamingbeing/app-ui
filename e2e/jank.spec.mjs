@@ -187,6 +187,20 @@ test('a sheet dragged by its grabber and let go keeps every frame on time on a s
   await expect(sheet).not.toHaveAttribute('open', '');
 });
 
+test('the Android look: a tab swipe (the navigation pill moving) and a sheet drag keep every frame on time on a slow phone', async ({ sized, browserName }) => {
+  const page = await load(sized, browserName, '&look=m');
+  await expect(page.locator('html')).toHaveAttribute('data-family', 'android');
+  await gate(page, `Android tab swipe (${browserName})`, () => page.__drag(path([300, 420], [90, 420], 14)));
+  expect(await page.evaluate(() => window.__shown())).toEqual(['rooms']);
+  await page.locator('.ui-tabbar [data-open-sheet="#sheet"]').click();
+  await expect(page.locator('#sheet')).toHaveAttribute('data-detent', 'medium');
+  await page.evaluate(() => window.__settled());
+  const g = await page.locator('#sheet .ui-sheet-grabber').boundingBox();
+  const at = [Math.round(g.x + g.width / 2), Math.round(g.y + g.height / 2)];
+  await gate(page, `Android sheet up (${browserName})`, () => page.__drag(path(at, [at[0], at[1] - 260], 12)));
+  await expect(page.locator('#sheet')).toHaveAttribute('data-detent', 'large');
+});
+
 test('a card swiped on and flicked back keeps every frame on time on a slow phone', async ({ sized, browserName }) => {
   const page = await load(sized, browserName, '&tab=jobs');
   const deck = page.locator('#job-cards');

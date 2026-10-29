@@ -4,7 +4,8 @@ import AxeBuilder from './axe.mjs';
 import { test, expect } from '@playwright/test';
 import { BASE } from './fixtures.mjs';
 
-const PAGES = ['kit/', 'kit/shell/', 'kit/dense/', 'kit/parts/'];
+// (and the Android look's, whose own CSS draws icons from data: images)
+const PAGES = ['kit/', 'kit/shell/', 'kit/dense/', 'kit/parts/', 'kit/?look=m', 'kit/parts/?look=m'];
 
 for (const path of PAGES) {
   test(`${path} starts clean`, async ({ browser, browserName }) => {

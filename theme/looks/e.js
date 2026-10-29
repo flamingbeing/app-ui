@@ -6,7 +6,7 @@ export default {
   id: 'e',
   name: 'Workspace',
   desc: 'Flat and compact, flush lists, menus as sheets',
-  variants: { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge' },
+  variants: { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge', family: 'core' },
   tokens: {
     'look-font-head': 'inherit',
     'title-size': '1.5rem', 'title-weight': '700', 'title-track': '-.015em',
