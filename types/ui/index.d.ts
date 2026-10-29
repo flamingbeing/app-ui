@@ -26,6 +26,7 @@ export { settingsScreen, SETTINGS_WORDS } from "./settings-screen.js";
 export { draftSlot, listDrafts } from "./drafts.js";
 export { gripDrag, moveIn } from "./drag-list.js";
 export { shareText, copyText } from "./share.js";
+export { backGuard, installedApp } from "./back-guard.js";
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from "./hide-mode.js";
 export { shrinkingTabBar, tabBarRoom } from "./tab-bar.js";
 export { detentSheet, sheetsSettled } from "./detent-sheet.js";
