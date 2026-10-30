@@ -13,6 +13,10 @@
 .ui-settings-part:has(> .theme-switch) { margin-inline: var(--list-inset); }
 .ui-settings-part > .theme-switch { margin-top: var(--gap); }
 .ui-settings-title + .ui-settings-part > .theme-switch { margin-top: 0; }
+/* a menu group whose pages are all hidden (visible: false) shows no heading and no empty card */
+.ui-settings-menu-groups > .ui-list:not(:has(> li:not([hidden]))),
+.ui-settings-menu-groups > .ui-settings-title:has(+ .ui-list:not(:has(> li:not([hidden]))))
+  { display: none; }
 .ui-settings-status { margin: var(--pad) calc(var(--list-inset) + var(--pad)) 0; min-height: 1lh; }
 .ui-setting > label.ui-row-main { cursor: pointer; }
 .ui-setting select { flex: none; max-width: 55%; }

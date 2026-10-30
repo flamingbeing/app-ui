@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.71
+- Colour band look: no hairline of page colour between the bar and the title's band on 3x phone screens (the bar
+  laps 1px of band over the title's edge while it is at the top).
+- Slim look: every tab page keeps the same gap under the bar (the hidden large title used to leave a page with no
+  gap at all when its first part had no margin of its own).
+- Settings menu: a group whose pages are all hidden (a `visible` that is false, say an empty Features page) no
+  longer shows its heading over an empty card.
+
 ## 1.0.0-rc.70
 - Look picker names the app: `themeSwitch(host, { name })` shows the app's name (say "Tasks") for the app's own look
   instead of "The app's own". Left out, the word is unchanged.
