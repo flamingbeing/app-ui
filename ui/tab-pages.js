@@ -89,9 +89,9 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   };
   /** @param {Element | null} t */
   const pageOf = t => find(t?.getAttribute('data-tab-page'));
-  // the swipe stops, in the tab bar's order (hidden tabs left out)
+  // the swipe stops, in the tab bar's order (hidden tabs, and the ones the person took off the bar, left out)
   const stops = () => [...new Set(/** @type {HTMLElement[]} */ ([...bar.querySelectorAll('[data-tab-page]')])
-    .filter(t => !t.hidden).map(pageOf).filter(p => p !== null))];
+    .filter(t => !t.hidden && !t.hasAttribute('data-off-bar')).map(pageOf).filter(p => p !== null))];
   /** @type {HTMLElement} */
   let current = pageOf(bar.querySelector('[data-tab-page][aria-current="page"]')) ?? stops()[0] ?? /** @type {HTMLElement} */ (host.querySelector(':scope > .ui-screen'));
   /** @type {Map<HTMLElement, number>} */

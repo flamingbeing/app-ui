@@ -12,6 +12,8 @@ export function icon(nodes: IconNodes, o?: {
 /** @type {IconNodes} */ export const check: IconNodes;
 /** @type {IconNodes} */ export const x: IconNodes;
 /** @type {IconNodes} */ export const chevronLeft: IconNodes;
+/** @type {IconNodes} */ export const chevronUp: IconNodes;
+/** @type {IconNodes} */ export const chevronDown: IconNodes;
 /** @type {IconNodes} */ export const chevronRight: IconNodes;
 /** @type {IconNodes} */ export const menu: IconNodes;
 /** @type {IconNodes} */ export const info: IconNodes;

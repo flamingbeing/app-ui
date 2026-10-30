@@ -107,6 +107,18 @@ dialog.modal p { margin: 0 0 var(--pad); }
 .ui-grip { flex: none; min-width: var(--tap); min-height: var(--tap); display: grid; place-items: center; cursor: grab; touch-action: none; color: var(--muted); }
 li.dragging { position: relative; z-index: 2; box-shadow: var(--list-shadow); background: var(--surface); }
 
+/* arrange tabs (tab-arrange.js): a tab the person took off the bar; the editor's rows and the "in place of" question */
+.ui-tabbar > [data-off-bar] { display: none !important; }
+.ui-tab-row { flex-wrap: wrap; }
+.ui-tab-row > .ui-row-main { flex: 1; }
+.ui-tab-row > .ui-grip { padding: 0; border: 0; background: none; box-shadow: none; }
+.ui-tab-step { flex: none; min-width: var(--tap); min-height: var(--tap); padding: 0; border: 0; background: none; color: var(--link); }
+.ui-tab-step:disabled { color: var(--muted); opacity: .4; }
+.ui-tab-replace { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap); padding-block: var(--gap); }
+.ui-tab-replace > .ui-row-sub { flex-basis: 100%; }
+.ui-tab-replace > button { min-height: var(--tap); }
+.ui-tab-arranger-note { margin: var(--gap) calc(var(--list-inset) + var(--pad)) 0; }
+
 /* hide mode (hide-mode.js) */
 .user-hidden { display: none !important; }
 .hide-cand { outline: 2px dashed var(--accent); outline-offset: 2px; cursor: pointer; }

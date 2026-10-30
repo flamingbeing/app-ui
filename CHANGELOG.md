@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0-rc.62
+- Settings menu (from the logbook): `settingsScreen(host, { …, menu })` opens on a search box and one row per section
+  (its `icon`, title and `sub`, under its `group` heading); a row opens that section as a page with a Back button.
+  Given `menu.steps` (createTransients), each page is a history entry, so Back closes it. `menu.top` mounts the app's
+  own part above the menu. Without `menu`, the screen is as before.
+- Arrange tabs (from the logbook's Layout and More → Edit), `ui/tab-arrange.js`: the person's tab order and the tabs
+  off the bar, kept by the app in one option (`cleanTabs` is its clean). `arrangeTabs` (pure rule: max on the bar,
+  fixed tabs, off by default), `setTabOn`, `replaceTab`, `moveTab`; `applyTabs(bar, …)` orders the bar's
+  `[data-tab-id]` buttons and marks the ones off it `data-off-bar` (not drawn, no swipe stop in `tabPages`);
+  `tabArranger(host, …)` is the editor (grip, Up, Down, a switch; a full bar asks which tab it replaces).
+- Icons: `chevronUp`, `chevronDown`.
+
 ## 1.0.0-rc.61
 - Swiping tab pages in a plain-header look (Tinted glass, the app's own): the page coming in sits level with the one
   going out. The large title's top margin got out of `.ui-screens` for the page in the flow but not for the pages

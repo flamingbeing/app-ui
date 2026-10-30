@@ -19,10 +19,11 @@ export { undoToast } from './undo-toast.js';
 export { loadState } from './load-state.js';
 export { aboutSheet, packagesFromImportMap } from './about-sheet.js';
 export { settingsScreen, SETTINGS_WORDS } from './settings-screen.js';
-// logbook parts (opt-in, named exports; nothing runs on import): drafts, drag-reorder, share out, Back closes the top
+// logbook parts (opt-in, named exports; nothing runs on import): drafts, drag-reorder, arrange tabs, share out, Back closes the top
 // dialog (transients) and screen history (navigation), Back with tabs (tab back), hide mode
 export { draftSlot, listDrafts } from './drafts.js';
 export { gripDrag, moveIn } from './drag-list.js';
+export { MAX_TABS, cleanTabs, arrangeTabs, setTabOn, replaceTab, moveTab, applyTabs, tabArranger } from './tab-arrange.js';
 export { shareText, copyText } from './share.js';
 export { createTransients } from './transients.js';
 export { createNavigation } from './navigation.js';

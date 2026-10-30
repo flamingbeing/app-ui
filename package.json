@@ -1,6 +1,6 @@
 {
   "name": "app-ui",
-  "version": "1.0.0-rc.61",
+  "version": "1.0.0-rc.62",
   "description": "The UI core for the apps: @core/ui, @core/theme, @core/settings, the looks and the /kit/ gallery, served at exact versions from core.anawj.com/ui/<version>/.",
   "type": "module",
   "sideEffects": [

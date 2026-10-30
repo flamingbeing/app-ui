@@ -27,6 +27,7 @@ export { aboutSheet, packagesFromImportMap } from "./about-sheet.js";
 export { settingsScreen, SETTINGS_WORDS } from "./settings-screen.js";
 export { draftSlot, listDrafts } from "./drafts.js";
 export { gripDrag, moveIn } from "./drag-list.js";
+export { MAX_TABS, cleanTabs, arrangeTabs, setTabOn, replaceTab, moveTab, applyTabs, tabArranger } from "./tab-arrange.js";
 export { shareText, copyText } from "./share.js";
 export { tabBack, CLOSE_MS } from "./tab-back.js";
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from "./hide-mode.js";
