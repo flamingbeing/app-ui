@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-rc.63
+- Keep the keyboard (from the logbook), `ui/keep-keyboard.js`: `holdKeyboard()` in a tap that opens a screen whose
+  field should take the focus (a search icon opening Search); `handTo(field)` once the field is drawn. On a phone a
+  hidden stand-in box takes the focus during the tap, so iOS opens the keyboard (it only does for a focus made during
+  the tap) and the keyboard moves to the field; a stand-in nobody takes is gone after `HOLD_MS` (3 s). On a computer
+  `handTo` just focuses the field.
+- Bars over the keyboard (from the logbook): while the keyboard is up, `--ui-keyboard-bar-h` is the tallest shown
+  bar that sits above it (the action bar, or an app's own fixed bar marked `data-over-keyboard`, such as a Save bar),
+  and a field scrolls into view that far above it (`scroll-margin-bottom`), so the bar no longer covers the field
+  being typed in. `barCover`, `OVER_KEYBOARD`.
+
 ## 1.0.0-rc.62
 - Settings menu (from the logbook): `settingsScreen(host, { …, menu })` opens on a search box and one row per section
   (its `icon`, title and `sub`, under its `group` heading); a row opens that section as a page with a Back button.

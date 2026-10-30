@@ -14,6 +14,16 @@ export function keyboardState({ base, inner, height, top, editing }: {
     open: boolean;
     lift: number;
 };
+/**
+ * How far the bars over the keyboard reach up (pure): the tallest shown one.
+ * @param {{ height: number, shown: boolean }[]} bars
+ */
+export function barCover(bars: {
+    height: number;
+    shown: boolean;
+}[]): number;
 /** Watches the keyboard; gives back the function that stops it. @returns {() => void} */
 export function watchKeyboard(): () => void;
 export const KEYBOARD_MIN: 150;
+/** The fixed bars that sit above the keyboard. */
+export const OVER_KEYBOARD: ".ui-action-bar, [data-over-keyboard]";

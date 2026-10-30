@@ -5,6 +5,9 @@
 // Apps put interactive-widget=resizes-content in their viewport meta: the page then shrinks to the space above the
 // keyboard (Chrome on Android otherwise only shrinks the visible part, Chrome 108+), so fixed bars and 100dvh sheets
 // fit without --ui-keyboard-h (it stays 0). Without it, or in a browser that ignores it, --ui-keyboard-h lifts them.
+// A bar that stays above the keyboard (the action bar, or an app's own fixed bar marked [data-over-keyboard], such as
+// a Save bar) would cover the field being typed in: while the keyboard is up, --ui-keyboard-bar-h is the tallest shown
+// one's height, and fields scroll into view that far above it (scroll-margin-bottom, ui/gestures/action-bar.css).
 // Nothing runs on import: startGestures starts it ({ keyboard: false } leaves it out).
 
 export const KEYBOARD_MIN = 150;
@@ -18,6 +21,17 @@ export const KEYBOARD_MIN = 150;
 export function keyboardState({ base, inner, height, top, editing }) {
   const open = editing && base - height > KEYBOARD_MIN;
   return { open, lift: open ? Math.max(0, Math.round(inner - height - top)) : 0 };
+}
+
+/** The fixed bars that sit above the keyboard. */
+export const OVER_KEYBOARD = '.ui-action-bar, [data-over-keyboard]';
+
+/**
+ * How far the bars over the keyboard reach up (pure): the tallest shown one.
+ * @param {{ height: number, shown: boolean }[]} bars
+ */
+export function barCover(bars) {
+  return Math.round(Math.max(0, ...bars.filter(b => b.shown).map(b => b.height)));
 }
 
 const TYPED = /^(text|search|email|url|tel|password|number|date|datetime-local|month|time|week)$/;
@@ -40,6 +54,12 @@ export function watchKeyboard() {
     if (!editing) base = Math.max(base, innerHeight);
     const { open, lift } = keyboardState({ base, inner: innerHeight, height: view.height, top: view.offsetTop, editing });
     html.style.setProperty('--ui-keyboard-h', `${lift}px`);
+    // (a fixed bar has no offsetParent, so "shown" is: it has a box)
+    const bars = open ? [...document.querySelectorAll(OVER_KEYBOARD)].map(el => {
+      const bar = /** @type {HTMLElement} */ (el);
+      return { height: bar.offsetHeight, shown: !bar.hidden && bar.getClientRects().length > 0 };
+    }) : [];
+    html.style.setProperty('--ui-keyboard-bar-h', `${barCover(bars)}px`);
     if (open !== was) {
       was = open;
       html.classList.toggle('ui-keyboard-open', open);
@@ -57,5 +77,6 @@ export function watchKeyboard() {
     for (const [t, type, f] of on) t.removeEventListener(type, f);
     html.classList.remove('ui-keyboard-open');
     html.style.removeProperty('--ui-keyboard-h');
+    html.style.removeProperty('--ui-keyboard-bar-h');
   };
 }
