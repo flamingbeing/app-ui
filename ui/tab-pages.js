@@ -223,7 +223,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       if (!n) continue;
       n.hidden = false;
       n.classList.add('is-beside');
-      n.style.top = `${scrollY - (ys.get(n) ?? 0)}px`;   // where it will be once shown at its own scroll
+      // where it shows at its own scroll (readyY, not scrollY: read after a page is unhidden, it lays both out here)
+      n.style.top = `${readyY - (ys.get(n) ?? 0)}px`;
       n.style.transform = `translateX(${off}px)`;
     }
   }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.68
+- Tab pages: a finger landing no longer lays out both pages beside inside the touch. `prepare()` read `scrollY` after
+  unhiding a page, which forced a full layout there (about 50 ms at 4x CPU slowdown with a long page beside); it now uses
+  the scroll read before, and the layout runs in the next frame, before the finger moves.
+
 ## 1.0.0-rc.67
 - Tab pages no longer go blank while a page scrolls (iOS): a touch lays out the pages beside but gives them their
   own layers (`is-moving`, `will-change: transform`) only once it is a sideways swipe. Every scroll used to make and
