@@ -311,3 +311,16 @@ stand-in for `@core/settings` on the page.
 | Per-device choice | off unless chosen; a dim without a wallpaper, a blank typed font or refused CSS is dropped | |
 | Saved themes | save, match, the patch, export and import (other apps' files refused), the limit, the night theme | |
 | Theme links | a made-up look schema: a look and a bundled theme go out and come back the same; a broken link throws | |
+
+## Settings menu and arrange tabs
+
+`/kit/settings/?menu` is tested by `e2e/arrange.spec.mjs` (Chromium, 390 px): `settingsScreen`'s menu and `tabArranger`
+over a made-up tab bar; the pure order rules by `test/tab-arrange.unit.test.mjs`.
+
+| Part | What is tested | axe |
+| --- | --- | --- |
+| Menu | a row per page under its group heading, no page open; a row opens its page; Back (history) and the page's Back button go to the menu; nothing wider than the screen | yes |
+| Search | finds a row and opens its page there; "No setting matches"; a page's own find words | |
+| Arrange tabs | Up and Down move a tab; a switch takes one off the bar; the fixed tab can't go off; a full bar asks which tab it replaces; kept after reload | yes |
+| Order rules | saved order wins, a new tab after the ones before it, fixed last, off by default, over the limit, at least min, replace, move, a bad saved value | |
+

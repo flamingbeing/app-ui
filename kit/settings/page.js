@@ -1,7 +1,10 @@
 // The settings screen gallery: a made-up plant app's options in the settings screen. The values live in a stand-in for
 // @core/settings (same api, same option rules from its schema and file code, kept in this tab's sessionStorage), so the
-// page works signed out. window.kit is { settings, stop, retries } for the tests.
-import { settingsScreen } from '../../ui/index.js';
+// page works signed out. window.kit is { settings, stop, retries } for the tests. With ?menu at the end of the address
+// it opens on the menu (search, a row per page, Back closes a page), with a Tab bar page: the tab arranger over a
+// made-up tab bar (its order and the tabs off it kept in the tabs option, on this device).
+import { settingsScreen, createTransients, tabArranger, arrangeTabs, applyTabs, cleanTabs } from '../../ui/index.js';
+import { slidersHorizontal, info, menu as menuIcon, refreshCw } from '../../icons/lucide.js';
 import { themeSwitch } from '../../theme/index.js';
 import { compile, valueOf, isCustom, readFile, writeFile } from '../../settings/index.js';
 import { galleryPreview } from '../preview.js';
@@ -16,6 +19,7 @@ const cfg = compile({
     reminders: { scope: 'account', default: true },
     reminderHour: { scope: 'account', default: 8, clean: (/** @type {any} */ v) => (Number.isInteger(v) && Number(v) >= 0 && Number(v) <= 23 ? v : undefined) },
     photos: { default: false },
+    tabs: { scope: 'device', default: { order: [], hidden: [] }, clean: cleanTabs },
   },
   profiles: {
     balcony: { label: 'Balcony garden', defaults: { sort: 'room', reminderHour: 7 } },
@@ -83,19 +87,44 @@ const settings = fakeSettings();
 let checks = 0;
 const update = { versionLabel: async () => '1.2.3', checkNow: async () => ++checks % 2 === 0, retryUpdate: () => { kit.retries++; } };
 const kit = { settings, stop: () => {}, retries: 0 };
+// ?menu: the menu, and the Tab bar page (a made-up app's tabs; Settings always stays on the bar)
+const MENU = new URLSearchParams(location.search).has('menu');
+const TABS = [{ id: 'plants', label: 'Plants' }, { id: 'rooms', label: 'Rooms' }, { id: 'calendar', label: 'Calendar' },
+  { id: 'shop', label: 'Shop' }, { id: 'diary', label: 'Diary' }, { id: 'settings', label: 'Settings' }];
+const RULES = { max: 4, fixed: ['settings'] };
+/** the made-up tab bar, drawn as the person arranged it @param {HTMLElement} host */
+function tabBarPage(host) {
+  const bar = document.createElement('nav');
+  bar.className = 'kit-tabs-preview';
+  bar.setAttribute('aria-label', 'Tab bar preview');
+  for (const t of TABS) {
+    const tab = Object.assign(document.createElement('span'), { textContent: t.label, className: 'kit-tab' });
+    tab.dataset.tabId = t.id;
+    bar.append(tab);
+  }
+  const show = () => applyTabs(bar, arrangeTabs(TABS.map(t => t.id), settings.get('tabs'), RULES));
+  show();
+  const off = settings.watch('tabs', show);
+  host.append(bar);
+  const stopArranger = tabArranger(host, { tabs: TABS, get: () => settings.get('tabs'), set: v => settings.set('tabs', v),
+    watch: fn => settings.watch('tabs', fn), rules: RULES });
+  return () => { off(); stopArranger(); bar.remove(); };
+}
 const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById('screen')), {
   settings,
+  menu: MENU ? { steps: createTransients({ history, location, events: window }) } : undefined,
   file: 'plants-settings.json',
   sections: [
-    { title: 'Plants', rows: [
+    { title: 'Plants', icon: slidersHorizontal, sub: 'Sorting and units', group: 'Your plants', rows: [
       { key: 'sort', label: 'Sort the list by', choices: [['due', 'Next watering'], ['name', 'Name'], ['room', 'Room']] },
       { key: 'units', label: 'Units', sub: 'For pot sizes and water', choices: [['metric', 'Litres and cm'], ['imperial', 'Cups and inches']] },
     ] },
-    { title: 'Reminders', reset: true, rows: [
+    { title: 'Reminders', icon: refreshCw, sub: 'When to water', group: 'Your plants', reset: true, rows: [
       { key: 'reminders', label: 'Watering reminders', more: 'Reminders arrive once a day, at the hour below, and only for plants that are due.' },
       { key: 'reminderHour', label: 'Remind at', sub: 'Hour of the day, 0 to 23', min: 0, max: 23, step: 1 },
     ] },
-    { title: 'This device', rows: [
+    ...(MENU ? [{ title: 'Tab bar', icon: menuIcon, sub: 'Order, and which tabs show', group: 'This device', find: 'arrange tabs', mount: tabBarPage }] : []),
+    { title: 'This device', icon: info, sub: 'Photos and the look', group: 'This device', rows: [
       { key: 'photos', label: 'Keep photos on this phone', sub: 'Only here, not on your other devices' },
     ], mount: host => themeSwitch(host) },
   ],

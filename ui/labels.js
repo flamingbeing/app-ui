@@ -30,4 +30,15 @@ export const LABELS = Object.freeze({
   copied: 'Copied',
   copiedPaste: 'Copied: paste it where you want it',
   copyFailed: 'Could not copy on this device',
+  // arrange tabs (tab-arrange.js): {n} a number, {tab} a tab's name
+  tabsOnBar: 'Tabs on the bar',
+  onBar: 'On the tab bar',
+  alwaysOnBar: 'Always on the bar',
+  dragTab: 'Drag',
+  moveUp: 'Move up',
+  moveDown: 'Move down',
+  keepTabs: 'Keep at least {n} tabs on the bar',
+  barFull: 'The tab bar holds {n} tabs.',
+  putInPlace: 'Put {tab} in place of:',
+  tabsHint: 'Up to {n} tabs fit on the bar. Drag a tab, or use its arrows, to move it.',
 });
