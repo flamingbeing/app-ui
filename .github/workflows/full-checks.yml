@@ -1,7 +1,7 @@
-# Full checks: everything slower than the quick Checks (checks.yml): WebKit (the iPhone's engine), Firefox, the jank
+# Full checks: everything slower than the quick Checks (checks.yml): WebKit (the iPhone's engine), the jank
 # gate, and the heavy axe runs tagged @full (each look's gallery and shell in dark). Runs nightly from soak.yml, by hand
 # (Actions, "Full checks", Run workflow; `ref` = a PR number, branch, tag or SHA, empty = main), and on PRs when the
-# repo variable FULL_CHECKS_ON_PRS is true. Never after merges or releases.
+# repo variable FULL_CHECKS_ON_PRS is true. Never after merges or releases. Firefox is on demand only (firefox.yml).
 name: Full checks
 on:
   workflow_dispatch:
@@ -26,14 +26,6 @@ jobs:
       browsers: webkit
       webkit-deps: true
       args: --project=webkit
-
-  firefox:
-    uses: flamingbeing/app-devkit/.github/workflows/e2e.yml@v1.14.0
-    with:
-      name: firefox
-      ref: ${{ inputs.ref }}
-      browsers: firefox
-      args: --project=firefox
 
   axe:
     # the @full tests in Chromium phone (the quick Checks leave them out)

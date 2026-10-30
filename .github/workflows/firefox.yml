@@ -1,0 +1,25 @@
+# Firefox on demand (never on PRs, merges or nightly): Actions, "Firefox", Run workflow. `specs` = spec names or paths
+# to run (e.g. "tabs shell"; empty = every spec), `ref` = a PR number, branch, tag or SHA (empty = main). Specs that
+# drive a finger through the DevTools protocol (Chromium only) fail here by design; pick the ones that don't.
+name: Firefox
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: PR number, branch, tag or SHA (empty = main)
+        type: string
+        default: ''
+      specs:
+        description: Spec names or paths, space-separated (empty = every spec)
+        type: string
+        default: gallery
+permissions:
+  contents: read
+jobs:
+  firefox:
+    uses: flamingbeing/app-devkit/.github/workflows/e2e.yml@v1.14.0
+    with:
+      name: firefox
+      ref: ${{ inputs.ref }}
+      browsers: firefox
+      args: --project=firefox ${{ inputs.specs }}
