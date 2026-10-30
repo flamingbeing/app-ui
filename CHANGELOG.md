@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.69
+- Tab pages drawn ahead (from the logbook), opt-in: `tabPages(bar, { …, ahead })` (or `startGestures(root, { ahead })`)
+  calls `ahead(page)` so the app draws a still copy of a page that isn't on screen. After each landing every other page
+  on the bar is asked, nearest first, one per idle moment, never under a finger or a glide; as a finger lands, a page
+  about to come in beside that hasn't been asked since it was last on screen is asked at once (a caught glide's new
+  neighbours). So a swipe, or quick flicks in a row, never bring in an empty or "Loading…" page. An app that empties its
+  hidden pages must spare `.is-beside` ones. `drawAhead()` on the returned object asks for every page again. Left out,
+  nothing changes.
+
 ## 1.0.0-rc.68
 - Tab pages: a finger landing no longer lays out both pages beside inside the touch. `prepare()` read `scrollY` after
   unhiding a page, which forced a full layout there (about 50 ms at 4x CPU slowdown with a long page beside); it now uses

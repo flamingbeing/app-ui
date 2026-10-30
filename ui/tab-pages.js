@@ -24,6 +24,13 @@
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
 // page motion), at every width. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
 // { slide: false }.
+// Drawn ahead (opt-in, from the logbook: { ahead }): so a swipe never brings in an empty or out-of-date page, not even
+// in quick flicks in a row (each catches the glide and goes on from the page it was going to), ahead(page) asks the
+// app to draw a still copy of a page that isn't on screen, in that page. Each time a page lands, every other page on
+// the bar is asked, nearest first, one per idle moment, never under a finger or a glide (motion.js afterGesture); and
+// as a finger lands, a page about to come in beside that hasn't been asked since it was last on screen is asked at
+// once (a caught glide's new neighbours). The app keeps it cheap (a page it has just drawn ahead can return at once) and,
+// if it empties its hidden pages, spares the ones with .is-beside (tabPages has laid them out beside the current one).
 import { tabBack, CLOSE_MS } from './tab-back.js';
 import { toaster } from './toast.js';
 import { LABELS } from './labels.js';
@@ -54,6 +61,9 @@ export function pageStep(dx, v, width, hasPrev, hasNext) {
  * 24-30 px at its default), a little wider on wide phones, never more than 32 px. @param {number} width */
 export const swipeEdge = width => Math.max(EDGE, Math.min(32, width / 14));
 
+/** In an idle moment (no requestIdleCallback, as Safari: soon after) @param {() => void} fn */
+const idle = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
+
 /** How long a tapped tab's page takes to slide in, in ms. */
 export const SLIDE_MS = 280;
 
@@ -70,15 +80,17 @@ export const SLIDE_MS = 280;
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
- *   labels?: Record<string, string> }} o
+ *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
  *   page); drawer: ignored (a swipe no longer pulls the side bar out); onPrevMissing: told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
  *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all;
  *   backToClose (default on, with backToFirst): the first Back on the first page stays and shows the backAgain words
- *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS
- * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void }}
+ *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS;
+ *   ahead: draws a still copy of a page that isn't on screen (above, "Drawn ahead"; left out, nothing is drawn ahead)
+ * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void, drawAhead: () => void }}
+ *   drawAhead: asks for every page again, nearest first (the app's data changed); nothing without ahead
  */
-export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, onPrevMissing, backToFirst = true, backToClose = true, toasts, labels = {} }) {
+export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, onPrevMissing, backToFirst = true, backToClose = true, toasts, labels = {}, ahead }) {
   const l = listeners();
   const html = document.documentElement;
   /** one of the host's screens, by selector @param {string | null | undefined} sel @returns {HTMLElement | null} */
@@ -114,10 +126,12 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const order = stops();
     const dir = Math.sign(order.indexOf(page) - order.indexOf(current));
     current = page;
+    asked.delete(page);   // (live now: once left, the app may empty it)
     mark();
     const y = ys.get(page) ?? 0;
     void screens.base(page).then(() => {
       scrollTo(0, y);
+      if (current === page) drawAhead();
       if (tab && dir && slide && bar.dataset.slide !== 'off' && html.dataset.slide !== 'off' && !still()) slideIn(page, dir);
       if (current === page) back?.went(page === stops()[0]);
       host.dispatchEvent(new CustomEvent('ui-tab', { bubbles: true, detail: { page, tab } }));
@@ -147,8 +161,39 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const done = () => { if (sliding === a) { sliding = null; host.classList.remove('is-sliding'); } };
     a.finished.then(done, done);
   }
+  // drawn ahead: the pages asked for a copy since they were last on screen, and the run asking them (a newer one stops it)
+  /** @type {WeakSet<HTMLElement>} */
+  const asked = new WeakSet();
+  let aheadRun = 0;
+  /** @param {HTMLElement} page */
+  function ask(page) {
+    asked.add(page);
+    try { ahead?.(page); } catch (err) { console.warn(err); }
+  }
+  function drawAhead() {
+    if (!ahead) return;
+    const run = ++aheadRun;
+    /** @type {HTMLElement[] | null} */
+    let todo = null;
+    const later = () => idle(() => afterGesture(step));
+    later();
+    function step() {
+      if (run !== aheadRun) return;
+      if (x0 !== null || glide || ready) { later(); return; }   // a finger is down, or the pages are out: after them
+      if (!todo) {
+        const all = stops(), i = all.indexOf(current);
+        /** @param {HTMLElement} p */
+        const far = p => Math.abs(all.indexOf(p) - i);
+        todo = all.filter(p => p !== current).sort((a, b) => far(a) - far(b));
+      }
+      const page = todo.shift();
+      if (!page) return;
+      if (todo.length) later();
+      if (page !== current && page.isConnected) ask(page);
+    }
+  }
   mark();
-  void screens.base(current);
+  void screens.base(current).then(drawAhead);
 
   l.on(root, 'click', (/** @type {MouseEvent} */ e) => {
     const t = /** @type {Element} */ (e.target).closest?.('[data-tab-page]');
@@ -221,6 +266,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     host.classList.add('is-paging');
     for (const [n, off] of /** @type {[HTMLElement | null, number][]} */ ([[prev, -w], [next, w]])) {
       if (!n) continue;
+      if (ahead && !asked.has(n)) ask(n);   // not drawn ahead since it was on screen (a caught glide's new neighbour)
       n.hidden = false;
       n.classList.add('is-beside');
       // where it shows at its own scroll (readyY, not scrollY: read after a page is unhidden, it lays both out here)
@@ -378,5 +424,5 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     if (x0 !== null && dir === 'x' && name !== held) end(/** @type {TouchEvent} */ (/** @type {unknown} */ ({ type: 'touchcancel', timeStamp: performance.now(), cancelable: false })));
   });
 
-  return { go, current: () => current, stop: () => { l.stop(); standDown(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
+  return { go, current: () => current, drawAhead, stop: () => { aheadRun++; l.stop(); standDown(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
 }
