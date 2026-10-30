@@ -141,6 +141,28 @@ test('swipe: left goes to the next tab page (skipping the sheet tab), right come
   expect(await page.locator('#home').evaluate(e => e.style.transform)).toBe('');
 });
 
+test('swipe: a sideways move the page can\'t hold (Firefox after the drawer shuts) still changes tab; an up-and-down one doesn\'t', async ({ sized }) => {
+  const page = await load(sized);
+  // touch events sent as the browser sends them when it doesn't wait on the page: cancelable false
+  const move = (x0, y0, x1, y1) => page.evaluate(async ([x0, y0, x1, y1]) => {
+    const el = /** @type {Element} */ (document.elementFromPoint(x0, y0));
+    const fire = (type, x, y) => {
+      const t = new Touch({ identifier: 3, target: el, clientX: x, clientY: y });
+      const on = type === 'touchend' ? [] : [t];
+      el.dispatchEvent(new TouchEvent(type, { touches: on, targetTouches: on, changedTouches: [t], bubbles: true, cancelable: type === 'touchstart' }));
+    };
+    fire('touchstart', x0, y0);
+    for (let i = 1; i <= 8; i++) { await new Promise(r => setTimeout(r, 16)); fire('touchmove', x0 + (x1 - x0) * i / 8, y0 + (y1 - y0) * i / 8); }
+    fire('touchend', x1, y1);
+  }, [x0, y0, x1, y1]);
+  await move(200, 420, 200, 200);
+  await settled(page);
+  expect(await shown(page), 'up and down: the browser\'s scroll').toEqual(['home']);
+  await move(300, 420, 60, 420);
+  await settled(page);
+  expect(await shown(page)).toEqual(['rooms']);
+});
+
 test('swipe: the page follows the finger, the next one beside it', async ({ sized }) => {
   const page = await load(sized);
   const cdp = await page.context().newCDPSession(page);
