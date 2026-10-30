@@ -152,7 +152,7 @@ What Settings lets you change, by where it lives.
 settingsScreen(el, { settings, file: 'plants-settings.json', sections: [
   { title: 'Plants', rows: [{ key: 'sort', label: 'Sort the list by', choices: [['due', 'Next watering'], ['name', 'Name']] }] },
   { title: 'Reminders', rows: [{ key: 'reminders', label: 'Watering reminders' }, { key: 'hour', label: 'Remind at', min: 0, max: 23 }] },
-  { title: 'This device', mount: host => themeSwitch(host) },
+  { title: 'This device', mount: host => themeSwitch(host, { name: 'Plants' }) },   // name: the Look picker's word for the app's own look
 ] });
 ```
 

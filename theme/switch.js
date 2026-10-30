@@ -15,8 +15,9 @@ const WORDS = {
   ...Object.fromEntries(PRESETS.map(p => [p.id, p.name])),
   ...Object.fromEntries(Object.entries(SURFACES).map(([id, s]) => [id, s.label])),
 };
-// the look picker's words: the looks' names (a's id is also nothing's word, so they stay apart from WORDS)
-const LOOK_WORDS = { '': "The app's own", ...Object.fromEntries(LOOKS.map(l => [l.id, l.name])) };
+// the look picker's words: the looks' names (a's id is also nothing's word, so they stay apart from WORDS); nothing
+// picked is the app's own look, named after the app when it gives its name (themeSwitch's `name`)
+const lookWords = (/** @type {string} */ own = "The app's own") => ({ '': own, ...Object.fromEntries(LOOKS.map(l => [l.id, l.name])) });
 
 /**
  * @param {'theme' | 'dark' | 'preset' | 'surface' | 'look' | 'density' | 'material' | 'motion' | 'haptics'} key @param {string} label
@@ -60,16 +61,17 @@ function accentPicker() {
 
 /**
  * @param {HTMLElement} host  the switch is added here
+ * @param {{ name?: string }} [o]  name: the app's name, the Look picker's word for the app's own look (else "The app's own")
  * @returns {() => void} stop: removes it
  */
-export function themeSwitch(host) {
+export function themeSwitch(host, { name } = {}) {
   const box = document.createElement('div');
   box.className = 'row theme-switch';
   const accent = accentPicker();
   const note = guardNote();
   const sync = () => { accent.sync(); note.sync(); };
   box.append(
-    lookPicker(sync), picker('theme', 'Theme', THEMES, sync), picker('dark', 'Dark style', DARK_STYLES, sync),
+    lookPicker(sync, name), picker('theme', 'Theme', THEMES, sync), picker('dark', 'Dark style', DARK_STYLES, sync),
     picker('preset', 'Style', PRESET_IDS, sync), picker('surface', 'Ground', SURFACE_IDS, sync),
     ...accent.parts, picker('density', 'Density', DENSITIES, sync),
     picker('material', 'Bars and sheets', MATERIALS, sync), note.part, picker('motion', 'Motion', MOTIONS, sync),
@@ -92,8 +94,8 @@ export function lookSwitch(host, after = () => {}) {
   return () => box.remove();
 }
 
-/** @param {() => void} after */
-const lookPicker = after => picker('look', 'Look', ['', ...LOOKS.map(l => l.id)], after, LOOK_WORDS);
+/** @param {() => void} after @param {string} [own]  the word for the app's own look */
+const lookPicker = (after, own) => picker('look', 'Look', ['', ...LOOKS.map(l => l.id)], after, lookWords(own?.trim() || undefined));
 
 // why the bars are solid when Glass is picked: the glass guard turned it down on this device (guard.js)
 function guardNote() {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.70
+- Look picker names the app: `themeSwitch(host, { name })` shows the app's name (say "Tasks") for the app's own look
+  instead of "The app's own". Left out, the word is unchanged.
+- Colour band look: pulling a page down past its top no longer opens a gap of page colour between the bar and the
+  title's band; the band reaches on up behind the bar, so the stretch stays one colour.
+
 ## 1.0.0-rc.69
 - Tab pages drawn ahead (from the logbook), opt-in: `tabPages(bar, { …, ahead })` (or `startGestures(root, { ahead })`)
   calls `ahead(page)` so the app draws a still copy of a page that isn't on screen. After each landing every other page
