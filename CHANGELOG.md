@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.0-rc.64
+- Page with its own scroller (from notes), `.ui-page` / `.ui-page-scroll` in `ui/layout.css`, opt-in: only the content
+  scrolls, so a bounce at either end moves the content and never the header or a toolbar; bars (a fixed one too) sit
+  in `.ui-page` outside the scroller, so a pull no longer drags them or makes them flash. While the keyboard is up the
+  page ends where the keyboard starts (`--ui-keyboard-h`), and `ui/keyboard.js` scrolls the caret in `.ui-page-scroll`
+  into sight when the keyboard opens over it (`caretShift`), so the end of long text can be typed in.
+- The bar's title gives way (one line, an ellipsis) when the bar's buttons need the room, so a fourth icon no longer
+  pushes the page sideways (from notes).
+- No grey tap square and no focus ring from a tap or a hold on buttons, links and rows; the keyboard's
+  `:focus-visible` ring stays (from pantry).
+- Instant start (from notes, pantry and tailnet-app), `ui/load-state.js`: `cachedPaint(list, { read, write })` paints
+  the last list at once from the app's kept copy and hands back a row tapped before the real list came; `holdEmpty()`
+  holds a list's empty state (loading instead) until its first data, at most 8 s, so there is no "Nothing here yet"
+  flash; `swapWhenReady(host, next, ready)` keeps a tab's last view up while its module loads, so a tab switch no
+  longer flashes "Loading…". The app keeps the data and chooses where the copy lives.
+- Select mode (from notes): `selectMode(list, { steps })` takes one history step while on (createTransients), so Back
+  ends select mode instead of leaving; Done, Esc or `setEditing(false)` take the step back. Icon `trash2` for a bin
+  button in the select bar.
+- Back on the first tab (from pantry): a transients list emptied by its last close or a sign-out no longer counts as a
+  part over the first tab, so Press Back again to close still asks there. (Pushed screens and transients already
+  marked their entries; apps with their own router mark theirs with `uiScreens` / `uiTransient`.)
+- Sign-in sheet (from prewarm): a sign-in refused while away from the sheet (an email link, a redirect or another tab;
+  another account's unsent changes are on the device, or its wipe failed) now says why, as the sheet's own button
+  does: `signInSheet` reads `auth.blocked()` on each `onUser` (and so on mount), naming the account and pointing to
+  Forget this device. Said once, not again when the button's own sign-in gets the same answer; cleared once someone
+  is signed in. `AuthApi.blocked` is optional (an older auth module without it: as before).
+
 ## 1.0.0-rc.63
 - Keep the keyboard (from the logbook), `ui/keep-keyboard.js`: `holdKeyboard()` in a tap that opens a screen whose
   field should take the focus (a search icon opening Search); `handTo(field)` once the field is drawn. On a phone a

@@ -82,6 +82,8 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   it rather than under it.
 - A tap that opens a screen with a field to type in (a search icon opening Search) calls `holdKeyboard()` in the tap
   and `handTo(field)` once the field is drawn, or iOS opens the screen without its keyboard.
+- In a page with its own scroller (`.ui-page` / `.ui-page-scroll`, Layout parts) the page ends where the keyboard
+  starts, and when the keyboard opens (or grows) over the caret there, the scroller brings it into sight (`caretShift`).
 
 ## Haptics (`ui/gesture.js` `haptic`)
 
@@ -126,7 +128,8 @@ Where each thing goes, on every size.
 - **Filters:** chips under the title; more than five go into a Filter sheet.
 - **Item actions:** hold (phone) or right-click (laptop) for the menu; the detail screen repeats them as buttons.
 - **Select mode:** from the hold menu or Select in the header; actions in a bottom bar (phone) or the list header
-  (tablet and laptop).
+  (tablet and laptop). Pass `selectMode(list, { steps })` (createTransients) so Back ends it; a bin action is an icon
+  button (`trash2`) in the bar.
 - **Sync, account, sign out:** in Settings, plus a small sync dot in the bar only when something is wrong.
 - **Undo over "Are you sure":** toasts with Undo for moves and deletes; a typed confirmation only for wiping data.
 
@@ -273,6 +276,20 @@ Plain CSS, loaded by `gestures.css`, on the palette and density tokens (see `/ki
   scrolls sideways, or wraps with `data-wrap="on"`. A `.ui-chip` elsewhere stays the small status chip.
 - **Empty and loading:** `.ui-empty` (`-icon`, `-title`, `-text`); `.ui-skeleton` with `data-shape="line|short|thumb"`.
 
+## Instant start (`ui/load-state.js`)
+
+Nothing flashes empty or "Loading…" while a screen starts. The app keeps its data and says where a kept copy lives;
+these only paint, wait and swap.
+
+- `cachedPaint(list, { read, write })` at start, before sign-in or sync: paints the list's kept copy at once
+  (`read()` returns the markup, `write(html | null)` keeps or forgets it, say in `localStorage` under the app's own key).
+  `keep()` after each draw (written when the page is idle, and at once on leaving), `takeOver()` just before the first
+  real draw (gives back the id of a `[data-id]` row tapped meanwhile, to open then), `drop()` at sign-out.
+- `holdEmpty({ hold, ms, onEnd })`: draw the empty state only when `!hold.holding`, loading while it holds; `release()`
+  when the first data (or a failure) comes; it ends by itself after `ms` (8 s).
+- `swapWhenReady(host, next, ready)`: a tab whose module mounts into `next` keeps the host's last view up (inert) until
+  `ready` settles, then swaps; a later swap wins.
+
 ## Layout parts and extra-dense
 
 `ui/layout.css` and `ui/layout.js` (load the CSS after `ui.css`; `startLayout()` starts the parts that need script).
@@ -288,6 +305,7 @@ timed readings screen and a case-entry screen on made-up data (`?screen=readings
 | Segmented | `fieldset.ui-segmented` with a `legend` and native radios in labels (`data-clearable`) | arrows pick, screen readers say "2 of 7"; clearable: a second tap clears (a key never does) |
 | Stepper | `.ui-stepper` with `[data-step="-1"]` and `[data-step="1"]` buttons around an `input type=number` (`data-start`) | the field is the Tab stop and takes typing and arrows; the buttons step in its `step`, kept in `min`/`max`; an empty box starts at `data-start` |
 | Field | `.ui-field` | a small label over a stepper or segmented control |
+| Page with its own scroller | `.ui-page` (header, toolbars, a fixed bar) with one `.ui-page-scroll` child (the content) | opt-in; only the content scrolls and bounces, the bars never move; ends above the keyboard (`--ui-keyboard-h`) |
 
 **Extra-dense** is opt-in per screen: `data-dense="extra"` on the screen (or a part of it). Main targets 32 px (a
 stepper's field too: it takes typing), small ones (`--tap-s`: segments, stepper buttons, tags) 24 px, the WCAG 2.2

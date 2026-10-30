@@ -1,3 +1,10 @@
+/** @param {{ reason: string, from?: { email?: string } | null }} r  auth.signIn()'s answer (or auth.blocked()) -> '' or why it was refused */
+export function whyRefused({ reason, from }: {
+    reason: string;
+    from?: {
+        email?: string;
+    } | null;
+}): string;
 /**
  * @param {HTMLElement} host  the sheet's parts are added here
  * @param {{ auth: import('./types').AuthApi, label?: string, onForget?: (ok: boolean) => void, idPrefix?: string }} o

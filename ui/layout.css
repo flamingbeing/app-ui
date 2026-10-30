@@ -12,6 +12,21 @@
 [data-dense="extra"] :is(h2, h3) { margin-block: var(--gap); font-size: 1em; }
 [data-dense="extra"] :is(small, .ui-small, .small) { font-size: max(12px, .85em); }
 
+/* ---------- page with its own scroller (opt-in): .ui-page holds the header and toolbars, .ui-page-scroll the content ----------
+   For a full-height page (an editor, a pushed page, a dialog page): only .ui-page-scroll scrolls, so a bounce at either
+   end (bounce.js moves the scroller's children) moves the content, never the header or a toolbar; put every bar,
+   a fixed one too, as a child of .ui-page outside the scroller (a fixed bar inside a moved part moves with it and
+   flashes as the stretch comes and goes). While the keyboard is up the page ends where the keyboard starts
+   (--ui-keyboard-h, ui/keyboard.js), so the end of long text can scroll above it; keyboard.js also scrolls the caret
+   into sight when the keyboard opens over it. Give .ui-page its height's room (100% of a fixed or full-height box). */
+.ui-page { display: flex; flex-direction: column; box-sizing: border-box; height: 100%; min-height: 0; overflow: hidden;
+  overscroll-behavior: none; }
+.ui-page:is([hidden], dialog:not([open])) { display: none; }
+.ui-page > * { flex: none; }
+.ui-page > .ui-page-scroll { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+  touch-action: pan-y; }
+.ui-keyboard-open .ui-page { height: calc(100% - var(--ui-keyboard-h, 0px)); }
+
 /* ---------- grid: equal tiles that wrap; data-cols fixes the count (2, 3, 4 or 6) ---------- */
 .ui-grid { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fill, minmax(min(var(--grid-min, 9rem), 100%), 1fr)); }
 .ui-grid[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }

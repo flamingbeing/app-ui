@@ -1,6 +1,8 @@
 // The sign-in sheet: "Sign in" (#sign-in) with why it didn't work (#sign-in-error), and "Forget this device" (#forget),
 // which the auth module refuses while saves are unsent; then "Forget anyway" (#forget-force) loses them on purpose.
 // Signing out keeps the device's data, so forget is the only way to clear it here.
+// A refused sign-in says why whichever way it came back: from this sheet's own button, or by an email link, a redirect
+// or another tab (auth.blocked(), read on each onUser and so once on mount); the same reason is said once.
 import { el, button } from './dom.js';
 
 /** @param {unknown} err  a failed sign-in -> why, in plain words (never the raw error text) */
@@ -12,11 +14,11 @@ function whyFailed(err) {
   return 'Sign-in didn’t work. Try again in a moment.';
 }
 
-/** @param {{ reason: string, from?: { email?: string } | null }} r  auth.signIn()'s answer -> '' or why it was refused */
-function whyRefused({ reason, from }) {
+/** @param {{ reason: string, from?: { email?: string } | null }} r  auth.signIn()'s answer (or auth.blocked()) -> '' or why it was refused */
+export function whyRefused({ reason, from }) {
   const last = from?.email || 'the last account';
   if (reason === 'unsent') return `This phone still has changes from ${last} that haven’t been sent. Sign in as that account to send them, or forget this device.`;
-  if (reason === 'wipe') return `This phone couldn’t clear ${last}’s copy, so it stays. Try again.`;
+  if (reason === 'wipe') return `This phone couldn’t clear ${last}’s copy, so it stays. Try again, or forget this device.`;
   return '';
 }
 
@@ -37,6 +39,8 @@ function forgetWords({ ok, reason, failed = [] }) {
 export function signInSheet(host, { auth, label = 'Sign in with Google', onForget = () => {}, idPrefix = '' }) {
   const error = el('p', { id: `${idPrefix}sign-in-error`, class: 'ui-error error', role: 'alert' });
   const said = el('p', { id: `${idPrefix}forget-msg`, role: 'status' });
+  /** the reason shown, set only when it changes (an alert said again is read out again) @param {string} text */
+  const tell = text => { if (error.textContent !== text) error.textContent = text; };
   /** @param {boolean} force */
   const forget = async force => {
     said.textContent = '';
@@ -50,7 +54,7 @@ export function signInSheet(host, { auth, label = 'Sign in with Google', onForge
   const parts = [
     button(label, async () => {
       error.textContent = '';
-      try { error.textContent = whyRefused(await auth.signIn()); } catch (e) { error.textContent = whyFailed(e); }
+      try { tell(whyRefused(await auth.signIn())); } catch (e) { tell(whyFailed(e)); }
     }, { id: `${idPrefix}sign-in` }),
     error,
     el('p', { class: 'ui-small small' }, 'Signing out keeps this phone’s copy and unsent changes for the next sign-in. To clear them:'),
@@ -60,7 +64,13 @@ export function signInSheet(host, { auth, label = 'Sign in with Google', onForge
   ];
   host.append(...parts);
   const off = auth.onUser(user => {
-    if (!user) return;
+    if (!user) {
+      // refused while away (an email link, a redirect, another tab): the same reason the button would give
+      const r = auth.blocked?.();
+      if (r) tell(whyRefused(r));
+      return;
+    }
+    tell('');
     said.textContent = '';
     forceButton.hidden = true;
   });

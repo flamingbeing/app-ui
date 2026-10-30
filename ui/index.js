@@ -16,7 +16,7 @@ export { emptyState } from './empty-state.js';
 export { hoverCard, placeCard } from './hover-card.js';
 // reference parts any app can import (a named export you don't import isn't bundled)
 export { undoToast } from './undo-toast.js';
-export { loadState } from './load-state.js';
+export { loadState, cachedPaint, holdEmpty, swapWhenReady, SNAP_ROWS } from './load-state.js';
 export { aboutSheet, packagesFromImportMap } from './about-sheet.js';
 export { settingsScreen, SETTINGS_WORDS } from './settings-screen.js';
 // logbook parts (opt-in, named exports; nothing runs on import): drafts, drag-reorder, arrange tabs, share out, Back closes the top
@@ -36,7 +36,7 @@ export { shrinkingTabBar, tabBarRoom } from './tab-bar.js';
 export { holdMenus } from './hold-menu.js';
 export { detentSheet, sheetsSettled } from './detent-sheet.js';
 export { stepsSettled } from './steps.js';
-export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD } from './keyboard.js';
+export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD, caretShift } from './keyboard.js';
 export { holdKeyboard, HOLD_MS } from './keep-keyboard.js';
 export { screenStack } from './screens.js';
 export { selectMode } from './select-mode.js';

@@ -7,6 +7,9 @@
 // near the screen's edges. [data-select-toolbar="#list"] (the bottom action bar) replaces the tab bar; its
 // [data-needs="2-4"] buttons follow the count; [data-select-count="#list"] says how many (a live region);
 // [data-select-all="#list"] ticks all or none. The list sends "ui-select" events (detail.count, detail.rows).
+// Given `steps` (createTransients), select mode takes one history step while on, so Back (Android's button or gesture)
+// ends it instead of leaving the app or the tab; Done, Esc or setEditing(false) (after an action) take the step back.
+// A bin (delete) action is the app's own [data-needs] button in the select bar; the icon is `trash2` (icons/lucide.js).
 import { claim, haptic, listeners } from './gesture.js';
 
 /** where the ticks are: a finger starting this far (px) from the list's left edge drags the range */
@@ -29,10 +32,11 @@ export function needs(/** @type {string} */ spec) {
 
 /**
  * @param {HTMLElement} list  .ui-list[data-select] (needs an id)
- * @param {{ tabBar?: HTMLElement | null }} [opts]  the tab bar the action bar replaces (default nav.ui-tabbar)
+ * @param {{ tabBar?: HTMLElement | null, steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } } }} [opts]
+ *   tabBar: the tab bar the action bar replaces (default nav.ui-tabbar); steps: createTransients(), so Back ends select mode
  * @returns {{ setEditing: (on: boolean) => void, selected: () => HTMLElement[], stop: () => void }}
  */
-export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (document.querySelector('.ui-tabbar')) } = {}) {
+export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (document.querySelector('.ui-tabbar')), steps } = {}) {
   const l = listeners();
   const sel = `#${CSS.escape(list.id)}`;
   const q = (/** @type {string} */ attr) => /** @type {HTMLElement[]} */ ([...document.querySelectorAll(`[${attr}="${sel}"]`)]);
@@ -65,9 +69,16 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
     for (const b of alls) b.textContent = total && shownRows.every(isTicked) ? 'Deselect all' : 'Select all';
     list.dispatchEvent(new CustomEvent('ui-select', { bubbles: true, detail: { count: n, rows: selected() } }));
   }
+  /** select mode's history step while it is on (given steps) @type {{ readonly active: boolean, close: () => Promise<void> } | null} */
+  let step = null;
   /** @param {boolean} v */
   function setEditing(v) {
     if (v === on()) return;
+    if (steps) {
+      // Back runs the step's dismiss (setEditing(false), the step already gone); any other way out takes it back
+      if (v) step = steps.open(() => { step = null; setEditing(false); });
+      else if (step) { const s = step; step = null; if (s.active) void s.close(); }
+    }
     list.classList.toggle('is-editing', v);
     list.setAttribute('role', v ? 'listbox' : plainRole);
     if (v) { list.setAttribute('aria-multiselectable', 'true'); if (!label) list.setAttribute('aria-label', 'Select items'); }

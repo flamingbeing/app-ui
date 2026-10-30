@@ -6,5 +6,10 @@ html, body { overscroll-behavior: none; }
 /* no pinch or double-tap zoom: a finger pans, and the sideways swipes keep working */
 html, body { touch-action: pan-x pan-y; }
 
+/* no grey tap square (WebKit and Chrome on a phone) and no focus ring from a tap or a hold: the ring is for the
+   keyboard (theme.css's :focus-visible still draws it) */
+html { -webkit-tap-highlight-color: transparent; }
+:where(button, a, summary, [role="button"], [tabindex]):focus:not(:focus-visible) { outline: none; }
+
 /* the hidden switch the iPhone haptic toggles (gesture.js) */
 .ui-haptic { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; }

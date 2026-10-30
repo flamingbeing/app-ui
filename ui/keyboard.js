@@ -8,6 +8,9 @@
 // A bar that stays above the keyboard (the action bar, or an app's own fixed bar marked [data-over-keyboard], such as
 // a Save bar) would cover the field being typed in: while the keyboard is up, --ui-keyboard-bar-h is the tallest shown
 // one's height, and fields scroll into view that far above it (scroll-margin-bottom, ui/gestures/action-bar.css).
+// In a page with its own scroller (.ui-page-scroll, ui/layout.css), the page ends above the keyboard; when the keyboard
+// opens (or grows) over the caret of the field being typed in there, the scroller brings the caret into sight
+// (caretShift), clear of the bars over the keyboard.
 // Nothing runs on import: startGestures starts it ({ keyboard: false } leaves it out).
 
 export const KEYBOARD_MIN = 150;
@@ -34,6 +37,42 @@ export function barCover(bars) {
   return Math.round(Math.max(0, ...bars.filter(b => b.shown).map(b => b.height)));
 }
 
+/**
+ * How far a scroller scrolls to bring the caret into sight (pure): 0 when it shows, else down past the bottom edge or
+ * up past the top, keeping `margin` px clear. One taller than the room (a whole tall field) only moves if it is out of
+ * sight altogether, its top then lined up at the top.
+ * @param {{ top: number, bottom: number }} caret @param {{ top: number, bottom: number }} view @param {number} [margin]
+ */
+export function caretShift(caret, view, margin = 12) {
+  const top = view.top + margin, bottom = view.bottom - margin;
+  if (caret.bottom - caret.top > bottom - top) return caret.top > bottom || caret.bottom < top ? Math.round(caret.top - top) : 0;
+  if (caret.top < top) return Math.round(caret.top - top);
+  if (caret.bottom > bottom) return Math.round(caret.bottom - bottom);
+  return 0;
+}
+
+/** The caret's box in a field (a contenteditable's selection, else the field itself), or null. @param {HTMLElement} field */
+function caretBox(field) {
+  if (field.isContentEditable) {
+    const s = getSelection();
+    if (s && s.rangeCount) {
+      const r = s.getRangeAt(0), box = r.getClientRects()[0] ?? r.getBoundingClientRect();
+      if (box && (box.height || box.width)) return box;
+    }
+  }
+  return field.getBoundingClientRect();
+}
+
+/** Scrolls the field's .ui-page-scroll so its caret shows above the keyboard and the bars over it. @param {Element | null} field @param {number} cover */
+function caretIntoView(field, cover) {
+  const box = field instanceof HTMLElement ? field.closest('.ui-page-scroll') : null;
+  if (!box || !(field instanceof HTMLElement)) return;
+  const vv = window.visualViewport, edge = box.getBoundingClientRect();
+  const bottom = Math.min(edge.bottom, vv ? vv.offsetTop + vv.height : innerHeight) - cover;
+  const by = caretShift(caretBox(field), { top: edge.top, bottom });
+  if (by) box.scrollTop += by;
+}
+
 const TYPED = /^(text|search|email|url|tel|password|number|date|datetime-local|month|time|week)$/;
 /** @param {Element | null} el */
 const typing = el => !!el && ((el instanceof HTMLInputElement && TYPED.test(el.type)) || el instanceof HTMLTextAreaElement
@@ -44,7 +83,7 @@ export function watchKeyboard() {
   const vv = typeof window !== 'undefined' ? window.visualViewport : null;
   if (!vv) return () => {};
   const html = document.documentElement;
-  let width = innerWidth, base = innerHeight, was = false;
+  let width = innerWidth, base = innerHeight, was = false, lifted = 0;
   /** @type {ReturnType<typeof setTimeout> | undefined} */
   let later;
   function update() {
@@ -59,7 +98,13 @@ export function watchKeyboard() {
       const bar = /** @type {HTMLElement} */ (el);
       return { height: bar.offsetHeight, shown: !bar.hidden && bar.getClientRects().length > 0 };
     }) : [];
-    html.style.setProperty('--ui-keyboard-bar-h', `${barCover(bars)}px`);
+    const cover = barCover(bars);
+    html.style.setProperty('--ui-keyboard-bar-h', `${cover}px`);
+    // opened, or grew (a suggestion strip): the caret in a page's own scroller comes into sight, once the page has
+    // taken its new height
+    const covered = open ? base - view.height : 0;
+    if (open && covered > lifted + 1) requestAnimationFrame(() => caretIntoView(document.activeElement, cover));
+    lifted = covered;
     if (open !== was) {
       was = open;
       html.classList.toggle('ui-keyboard-open', open);
