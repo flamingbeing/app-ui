@@ -69,8 +69,8 @@ route `core.anawj.com/ui/*`, in front of app-sync's Worker on the same host.
 - `npm test`: Worker, UI core and tools unit tests. `npm run typecheck`. `node tools/check.mjs`.
 - `npx playwright test`: the real Worker in Node (`e2e/serve.mjs`) serves this checkout as `/ui/0.0.0-dev/`. Every spec
   in Chromium; `e2e/gallery.spec.mjs` (each gallery page starts clean: no page error, axe, no CSP report) also in
-  Firefox and WebKit. The quick Checks on every PR run the Chromium phone project (8 shards) minus the tests tagged
-  `@full`; Full checks (`.github/workflows/full-checks.yml`: WebKit, Firefox, the jank gate, the `@full` axe runs) run
+  WebKit. Firefox only on demand: Actions, "Firefox" (`.github/workflows/firefox.yml`), any specs on any ref. The quick Checks on every PR run the Chromium phone project (8 shards) minus the tests tagged
+  `@full`; Full checks (`.github/workflows/full-checks.yml`: WebKit, the jank gate, the `@full` axe runs) run
   nightly with the soak and by hand (Actions, "Full checks", Run workflow, optional PR number or ref). The repo
   variable `FULL_CHECKS_ON_PRS=true` makes PRs run them too. The base config comes
   from app-devkit: copy its `playwright/` folder to `.devkit/` once locally (CI's setup-browser does it).

@@ -2,9 +2,10 @@
 // here unless already running. The base config comes from app-devkit (.devkit/, put there by setup-browser in CI; copy
 // it once locally).
 // Chromium runs every spec (the finger tests drive touch through the DevTools protocol, which only Chromium has);
-// Firefox and WebKit run the gallery smoke spec (each gallery page starts, is clean and keeps to the page policy;
-// both in Full checks, not the quick Checks);
-// WebKit, the iPhone's engine, also runs the swipe-feel spec (a finger from page-sent touch events) and back-close.
+// WebKit, the iPhone's engine, runs the gallery smoke spec (each gallery page starts, is clean and keeps to the page
+// policy) and the specs a finger can drive from page-sent touch events, in Full checks, not the quick Checks.
+// Firefox runs only on demand (firefox.yml, "Firefox" in Actions: any specs, any ref); its touch events are on, but the
+// specs that drive a finger through the DevTools protocol can't run there.
 // The jank gate (jank.spec.mjs) times frames, so it runs alone, after the rest: its tests one at a time, Chromium then
 // WebKit, with no other browser busy beside it.
 import { baseConfig, phone } from './.devkit/playwright/base.mjs';
@@ -26,9 +27,9 @@ const chromium = { ...phone.use, browserName: 'chromium', launchOptions: process
 const JANK = 'jank.spec.mjs';
 config.projects = [
   { ...phone, testIgnore: JANK, use: chromium },
-  { name: 'firefox', testMatch: 'gallery.spec.mjs', use: { ...touch, browserName: 'firefox' } },
+  { name: 'firefox', testIgnore: JANK, use: { ...touch, browserName: 'firefox', launchOptions: { firefoxUserPrefs: { 'dom.w3c_touch_events.enabled': 1 } } } },
   { name: 'webkit', testMatch: /(gallery|swipe-feel|bounce|keyboard|haptics|back-close|ios|press|sheet-snap)\.spec\.mjs/, use: { ...phone.use, browserName: 'webkit' } },
-  { name: 'jank', testMatch: JANK, fullyParallel: false, dependencies: ['phone', 'firefox', 'webkit'], use: chromium },
+  { name: 'jank', testMatch: JANK, fullyParallel: false, dependencies: ['phone', 'webkit'], use: chromium },
   { name: 'jank-webkit', testMatch: JANK, fullyParallel: false, dependencies: ['jank'], use: { ...phone.use, browserName: 'webkit' } },
 ];
 export default config;
