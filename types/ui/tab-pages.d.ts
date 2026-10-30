@@ -16,15 +16,17 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
- *   labels?: Record<string, string> }} o
+ *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
  *   page); drawer: ignored (a swipe no longer pulls the side bar out); onPrevMissing: told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
  *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all;
  *   backToClose (default on, with backToFirst): the first Back on the first page stays and shows the backAgain words
- *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS
- * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void }}
+ *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS;
+ *   ahead: draws a still copy of a page that isn't on screen (above, "Drawn ahead"; left out, nothing is drawn ahead)
+ * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void, drawAhead: () => void }}
+ *   drawAhead: asks for every page again, nearest first (the app's data changed); nothing without ahead
  */
-export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, onPrevMissing, backToFirst, backToClose, toasts, labels }: {
+export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, onPrevMissing, backToFirst, backToClose, toasts, labels, ahead }: {
     screens: {
         base: (s: HTMLElement) => Promise<void>;
         depth: () => number;
@@ -44,10 +46,12 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
         }) => () => void;
     };
     labels?: Record<string, string>;
+    ahead?: (page: HTMLElement) => void;
 }): {
     go: (page: string | HTMLElement) => void;
     current: () => HTMLElement;
     stop: () => void;
+    drawAhead: () => void;
 };
 /** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
 export const FLICK_V: 0.4;

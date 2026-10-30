@@ -13,9 +13,15 @@ if (tab && document.getElementById(tab)?.classList.contains('ui-tab-page')) {
 }
 
 const $ = (/** @type {string} */ id) => /** @type {HTMLElement} */ (document.getElementById(id));
+// ?ahead=1: the tab pages are drawn ahead (tab-pages.js, "Drawn ahead"); each page asked is noted, in order, in
+// window.aheadAsked (the pages here are drawn already: an app would draw a still copy into the page)
+/** @type {string[]} */
+const aheadAsked = /** @type {any} */ (window).aheadAsked = [];
+const ahead = new URLSearchParams(location.search).has('ahead') ? (/** @type {HTMLElement} */ page) => { aheadAsked.push(page.id); } : undefined;
 let prevMissing = 0;   // the swipe hook on the first tab (no swipe pulls the side bar out): an app would do something of its own here
 const kit = startGestures(document, {
   onPrevMissing: () => { prevMissing++; document.documentElement.dataset.prevMissing = String(prevMissing); },
+  ahead,
 });
 const toasts = toaster(document.body);
 const list = $('plants');

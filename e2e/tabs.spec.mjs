@@ -354,6 +354,30 @@ test('quick flicks one after another all count: each lands the next page, none i
   await expect(page.locator('nav.ui-tabbar .ui-tab[aria-current="page"]')).toHaveText('Settings');
 });
 
+test('drawn ahead (opt-in): every other page is asked, nearest first, after a page lands; a caught glide asks its new neighbours at once', async ({ sized }) => {
+  const page = await load(sized, '&ahead=1');
+  const order = await page.evaluate(() => [...document.querySelectorAll('nav.ui-tabbar [data-tab-page]')].filter(t => !t.hidden).map(t => t.getAttribute('data-tab-page')?.slice(1)));
+  await expect.poll(() => page.evaluate(() => /** @type {any} */ (window).aheadAsked.length)).toBe(order.length - 1);
+  expect(await page.evaluate(() => /** @type {any} */ (window).aheadAsked)).toEqual(order.slice(1));   // from the first: nearest first
+  // without ?ahead nothing is asked (checked on the plain load below); after a swipe, the run starts again from there
+  await page.evaluate(() => { /** @type {any} */ (window).aheadAsked.length = 0; });
+  await swipe(page, 320, 80);
+  expect(await shown(page)).toEqual([order[1]]);
+  await expect.poll(() => page.evaluate(() => /** @type {any} */ (window).aheadAsked.length)).toBe(order.length - 1);
+  expect((await page.evaluate(() => /** @type {any} */ (window).aheadAsked)).slice(0, 2).sort()).toEqual([order[0], order[2]].sort());
+  // quick flicks: each catches the last glide; the pages it brings in beside are asked as the finger lands
+  await page.evaluate(() => { /** @type {any} */ (window).aheadAsked.length = 0; });
+  const f = await finger(page);
+  await f.drag(320, 420, 140, 420, { steps: 4, ms: 8 });
+  await page.waitForTimeout(40);
+  await f.drag(320, 420, 140, 420, { steps: 4, ms: 8 });
+  await settled(page);
+  expect(await page.evaluate(() => /** @type {any} */ (window).aheadAsked)).toContain(order[1]);   // left, then beside again at the catch
+  const plain = await load(sized);
+  await plain.waitForTimeout(800);
+  expect(await plain.evaluate(() => /** @type {any} */ (window).aheadAsked.length)).toBe(0);
+});
+
 test('the card deck: shown from the start, a swipe on it goes a card and not a tab, not from the edge; the arrow keys go too', async ({ sized }) => {
   const page = await load(sized, '&tab=jobs');
   const deck = page.locator('#job-cards');
