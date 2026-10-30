@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.67
+- Tab pages no longer go blank while a page scrolls (iOS): a touch lays out the pages beside but gives them their
+  own layers (`is-moving`, `will-change: transform`) only once it is a sideways swipe. Every scroll used to make and
+  unmake those layers as it started and ended, and a page that is a layer mid-scroll paints blank.
+
 ## 1.0.0-rc.66
 - Settings sections show or hide live: a `settingsScreen` section takes `visible`, a function or an option key read
   with `settings.get` (a key is watched by that key, a function re-runs on any settings change). A hidden section

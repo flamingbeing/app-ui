@@ -216,7 +216,9 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     readyY = scrollY;
     own = small?.textContent ?? '';
     faders = fades();
-    host.classList.add('is-paging', 'is-moving');   // (its layers made now too, not at the first move)
+    // no layers yet: most touches are scrolls, and on iOS a page made a layer as the scroll starts (and unmade as it
+    // ends) goes blank while it scrolls; the layers come once the touch is a swipe (lift)
+    host.classList.add('is-paging');
     for (const [n, off] of /** @type {[HTMLElement | null, number][]} */ ([[prev, -w], [next, w]])) {
       if (!n) continue;
       n.hidden = false;
@@ -225,6 +227,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       n.style.transform = `translateX(${off}px)`;
     }
   }
+  /** the touch is a swipe: the pages get their own layers, so each frame only moves them */
+  const lift = () => host.classList.add('is-moving');
   function unpage() {
     ready = false;
     host.classList.remove('is-paging', 'is-moving');
@@ -278,6 +282,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       dx = x;
     }
     prepare();
+    lift();
     // the finger travel that puts the page where it is (more than that, on a rubber band)
     raw = (dx < 0 && !next) || (dx > 0 && !prev) ? unrubber(dx, w) : dx;
     place();
@@ -322,6 +327,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       held = 'tabs';
       if (!claim('tabs')) { x0 = null; putAway(); return; }   // a part above has this touch
       prepare();
+      lift();
     }
     if (e.cancelable) e.preventDefault();
     raw = mx;
