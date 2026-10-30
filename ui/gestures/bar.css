@@ -34,6 +34,11 @@
 /* a look with the title on a band of the accent (data-header="band"): the bar is the band's top until it collapses */
 [data-header="band"] .ui-large-title { margin: 0 0 var(--pad); padding: var(--gap) var(--pad) calc(var(--pad) * 1.5);
   background: var(--band); color: var(--on-band); border-radius: 0 0 var(--sheet-r) var(--sheet-r); }
+/* the band reaches on up behind the bar, so a pull down past the top (bounce.js moves the title) stretches the band
+   instead of opening a gap of page colour between the bar and the title */
+[data-header="band"] .ui-large-title { position: relative; }
+[data-header="band"] .ui-large-title::before { content: ""; position: absolute; inset: auto 0 100% 0; height: 100vh;
+  background: inherit; pointer-events: none; }
 /* the bar keeps the band's colour when the title goes under it (large-title.js waits for the title's words, not the
    band's padding): no empty band, no flash to the page colour; collapsed, it takes the small title and a soft edge */
 [data-header="band"] .ui-bar, .glass[data-header="band"] .ui-bar.is-collapsed { background: var(--band); color: var(--on-band);
