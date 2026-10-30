@@ -45,9 +45,15 @@
   border-bottom-color: transparent; }
 [data-header="band"] .ui-bar :is(button, a, .ui-back) { color: var(--on-band); background: transparent; border: 0; }
 [data-header="band"] .ui-bar.is-collapsed { box-shadow: 0 1px 6px rgb(0 0 0 / .18); }
+/* at the top the bar laps 1px of band over the title's edge, so a phone's part-pixel rounding (3x screens) never leaves
+   a hairline of page colour between them (the title's band can't reach up: the tab page clips it) */
+[data-header="band"] .ui-bar:not(.is-collapsed) { box-shadow: 0 1px 0 var(--band); }
 /* a look with a slim bar (data-header="slim"): the bar always shows the screen's name over a hairline; the large
    title stays for screen readers only (shell.css shows it again in a wide detail pane, where there is no bar) */
 [data-header="slim"] .ui-bar { border-bottom-color: var(--line); }
 [data-header="slim"] .ui-bar-title { opacity: 1; }
 [data-header="slim"] .ui-large-title { position: absolute; width: 1px; height: 1px; margin-block: 0; padding-block: 0; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap; }
+/* the hidden title leaves no room, so the page's first part keeps the gap the title's margin gave (the same on every
+   page, whatever that part's own margin) */
+[data-header="slim"] .ui-large-title + * { margin-top: var(--pad); }
