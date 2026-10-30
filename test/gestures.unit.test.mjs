@@ -224,6 +224,25 @@ test('keyboardState: open only while typing and over KEYBOARD_MIN shorter; lift 
   assert.deepEqual(keyboardState({ base: 844, inner: 844, height: 500, top: 20, editing: true }), { open: true, lift: 324 });
 });
 
+test('barCover: the tallest shown bar over the keyboard, 0 with none', async () => {
+  const { barCover } = await import('../ui/keyboard.js');
+  assert.equal(barCover([]), 0);
+  assert.equal(barCover([{ height: 64, shown: false }]), 0);
+  assert.equal(barCover([{ height: 56.4, shown: true }, { height: 80, shown: false }, { height: 48, shown: true }]), 56);
+});
+
+test('holdKeyboard: on a computer no stand-in, and handTo just focuses the field', async () => {
+  const { holdKeyboard } = await import('../ui/keep-keyboard.js');
+  const hold = holdKeyboard({ coarse: false });
+  assert.equal(hold.held(), false);
+  let focused = 0;
+  hold.handTo(/** @type {any} */ ({ isConnected: true, focus: () => { focused++; } }));
+  assert.equal(focused, 1);
+  hold.handTo(/** @type {any} */ ({ isConnected: false, focus: () => { focused++; } }));
+  assert.equal(focused, 1, 'a field no longer on the page is left alone');
+  hold.handTo(null);
+});
+
 test('the arbiter: the first claim owns the touch, a lower one stands down, a higher one takes it over', () => {
   assert.equal(captured(), null);
   assert.equal(claim('tabs'), true);

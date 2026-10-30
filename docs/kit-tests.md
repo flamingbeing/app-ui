@@ -101,7 +101,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 
 ## Keyboard
 
-`ui/keyboard.js`: `keyboardState` in Node (`test/gestures.unit.test.mjs`). `e2e/keyboard.spec.mjs` on `/kit/shell/`
+`ui/keyboard.js`: `keyboardState` and `barCover`, and `ui/keep-keyboard.js` `holdKeyboard` on a computer, in Node (`test/gestures.unit.test.mjs`). `e2e/keyboard.spec.mjs` on `/kit/shell/`
 at 390 px, in Chromium and WebKit, with the keyboard played (no browser here shows one): the viewport made shorter
 (`interactive-widget=resizes-content`) or a stand-in visual viewport (a browser without it).
 

@@ -77,6 +77,11 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   page is over 150 px shorter than its tallest, `html.ui-keyboard-open` is set and a `ui-keyboard` event (detail.open)
   fires. The tab bar hides; a sheet and the select-mode action bar sit above the keyboard. `--ui-keyboard-h` is how
   far the keyboard covers the layout's bottom (0 with `resizes-content`; it lifts them where a browser ignores it).
+- A fixed bar of the app's own that stays above the keyboard (a Save bar) gets `data-over-keyboard`: while the
+  keyboard is up, `--ui-keyboard-bar-h` is the tallest such bar (or the action bar), and fields scroll into view above
+  it rather than under it.
+- A tap that opens a screen with a field to type in (a search icon opening Search) calls `holdKeyboard()` in the tap
+  and `handTo(field)` once the field is drawn, or iOS opens the screen without its keyboard.
 
 ## Haptics (`ui/gesture.js` `haptic`)
 

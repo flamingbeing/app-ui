@@ -20,3 +20,6 @@
 /* the keyboard up (ui/keyboard.js): the action bar sits above it */
 .ui-keyboard-open .ui-action-bar { bottom: calc(var(--ui-keyboard-h, 0px) + var(--gap)); }
 .ui-keyboard-open[data-tabbar="edge"] .ui-action-bar, .ui-keyboard-open [data-tabbar="edge"] .ui-action-bar { bottom: var(--ui-keyboard-h, 0px); }
+/* a field being typed in scrolls into view above the bars over the keyboard (--ui-keyboard-bar-h: ui/keyboard.js),
+   not under them */
+.ui-keyboard-open :is(input, textarea, select, [contenteditable]) { scroll-margin-bottom: calc(var(--ui-keyboard-bar-h, 0px) + var(--gap, 12px)); }
