@@ -366,8 +366,11 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     if (x0 === null) return;
     const t = e.touches[0], mx = t.clientX - x0, my = t.clientY - y0;
     if (!dir) {
-      if (!e.cancelable) { x0 = null; putAway(); return; }   // the browser has started its scroll: it keeps the touch
-      if (Math.abs(mx) >= Math.abs(my)) { prepare(); e.preventDefault(); }   // looks sideways: lay out, hold the scroll
+      // a move the page can't hold: the browser has started its scroll, and keeps an up-or-down touch. A sideways one
+      // is still the pager's (touch-action: pan-y, so the browser never pans sideways): Firefox sends one this way
+      // after the drawer has shut (its touch hit-test still has the page as the drawer's inert one)
+      if (!e.cancelable && Math.abs(my) > Math.abs(mx)) { x0 = null; putAway(); return; }
+      if (Math.abs(mx) >= Math.abs(my)) { prepare(); if (e.cancelable) e.preventDefault(); }   // looks sideways: lay out, hold the scroll
       dir = swipeIntent(mx, my);
       if (!dir) return;
       if (dir === 'y') { x0 = null; putAway(); return; }   // a scroll: leave it to the page

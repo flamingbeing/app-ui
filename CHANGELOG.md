@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.72
+- Tab swipe in Firefox: after the side bar's drawer is pushed shut, a sideways swipe changes tab again. Firefox sends
+  that swipe's moves as ones the page can't hold; a sideways one is still the pager's (it has touch-action: pan-y),
+  only an up-and-down one is left to the browser's scroll.
+- Select mode's action bar: on a narrow phone the buttons keep their size and the count shortens ("3 sel…") instead
+  of pushing the last button off the bar.
+
 ## 1.0.0-rc.71
 - Colour band look: no hairline of page colour between the bar and the title's band on 3x phone screens (the bar
   laps 1px of band over the title's edge while it is at the top).
