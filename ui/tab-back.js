@@ -19,6 +19,17 @@ export const CLOSE_MS = 2000;
 const OVER = ['uiTabGuard', 'uiTabBack', 'uiScreens', 'uiSheet', 'uiTransient', 'uiDrawer'];
 
 /**
+ * Whether an entry's mark says a part sits over the tab (pure). A screen depth of 0 or a transients list emptied by
+ * its last close (or a sign-out's reset) is the tab's own entry again; an app's own mark (uiScreens: 1, uiTransient: 1)
+ * counts. @param {unknown} mark
+ */
+export function over(mark) {
+  if (mark == null || mark === false || mark === 0) return false;
+  if (typeof mark === 'object' && Array.isArray(/** @type {{ ids?: unknown }} */ (mark).ids)) return /** @type {{ ids: unknown[] }} */ (mark).ids.length > 0;
+  return true;
+}
+
+/**
  * @param {{ history: History, events: Pick<Window, 'addEventListener' | 'removeEventListener'>, onFirst: () => void,
  *   onClose?: () => void, closeMs?: number, first?: boolean }} o
  *   onFirst: Back took the page to the first tab; show it (the address is already the first tab's); onClose: Back on
@@ -32,7 +43,7 @@ const OVER = ['uiTabGuard', 'uiTabBack', 'uiScreens', 'uiSheet', 'uiTransient', 
 export function tabBack({ history, events, onFirst, onClose, closeMs = CLOSE_MS, first: startFirst }) {
   const away = () => !!history.state?.uiTabBack;
   const guarded = () => !!history.state?.uiTabGuard;
-  const bottom = () => !OVER.some(k => history.state?.[k] != null);   // the first tab's own entry, nothing over it
+  const bottom = () => !OVER.some(k => over(history.state?.[k]));   // the first tab's own entry, nothing over it
   let was = away();
   let wasGuarded = guarded();
   let first = startFirst ?? !was;

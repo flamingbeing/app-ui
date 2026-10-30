@@ -7,11 +7,18 @@ export function dragRange(snap: boolean[], from: number, to: number, setTo: bool
 export function needs(spec: string): number[];
 /**
  * @param {HTMLElement} list  .ui-list[data-select] (needs an id)
- * @param {{ tabBar?: HTMLElement | null }} [opts]  the tab bar the action bar replaces (default nav.ui-tabbar)
+ * @param {{ tabBar?: HTMLElement | null, steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } } }} [opts]
+ *   tabBar: the tab bar the action bar replaces (default nav.ui-tabbar); steps: createTransients(), so Back ends select mode
  * @returns {{ setEditing: (on: boolean) => void, selected: () => HTMLElement[], stop: () => void }}
  */
-export function selectMode(list: HTMLElement, { tabBar }?: {
+export function selectMode(list: HTMLElement, { tabBar, steps }?: {
     tabBar?: HTMLElement | null;
+    steps?: {
+        open: (dismiss: () => void) => {
+            readonly active: boolean;
+            close: () => Promise<void>;
+        };
+    };
 }): {
     setEditing: (on: boolean) => void;
     selected: () => HTMLElement[];

@@ -91,6 +91,8 @@ dialog.modal p { margin: 0 0 var(--pad); }
 
 /* loading and error states */
 .load-state[hidden] { display: none; }
+/* a view laid out but unseen until it is ready (load-state.js swapWhenReady): the one before it stays up */
+.ui-swap-in { position: absolute; inset: 0 0 auto; visibility: hidden; pointer-events: none; }
 .load-note { margin: 0 0 var(--gap); color: var(--muted); font-size: .85rem; }
 .load-row { height: var(--row); margin-bottom: var(--gap); border-radius: var(--control-r); background: linear-gradient(90deg, var(--line), var(--surface), var(--line)) 0 0 / 200% 100%;
   animation: load-shimmer 1.4s linear infinite; }

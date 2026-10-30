@@ -8,6 +8,9 @@
   transition: border-color var(--d-quick) var(--spring), background-color var(--d-quick) var(--spring); }
 .ui-bar-title { flex: 1; margin: 0; font-size: 1rem; font-weight: 600; text-align: center; opacity: 0;
   transition: opacity calc(var(--d-quick) / 2) var(--spring); }
+/* the title gives way (one line, cut with an ellipsis) when the bar's buttons need the room, so a fourth icon never
+   pushes the page sideways (a flex item's min-width is its text's width by default) */
+.ui-bar-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* glass only once collapsed (on purpose): at the top the bar is the page's own ground, one piece with the large title
    under it; once the title scrolls under the bar, content runs beneath it and the bar turns to glass over it */
 .ui-bar.is-collapsed { border-bottom-color: var(--line); }

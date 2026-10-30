@@ -42,6 +42,8 @@ export interface AuthApi {
   signIn(): Promise<{ ok: boolean; reason: string; from?: { email?: string } | null }>;
   forget(o: { force: boolean }): Promise<{ ok: boolean; reason: string; failed?: string[] }>;
   onUser(cb: (user: unknown) => void): () => void;
+  /** the last refused sign-in (app-sync 1.x), or null; older auth modules leave it out */
+  blocked?(): { reason: string; from?: { email?: string } | null } | null;
 }
 
 export interface UpdateApi {

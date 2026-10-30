@@ -22,6 +22,19 @@ export function barCover(bars: {
     height: number;
     shown: boolean;
 }[]): number;
+/**
+ * How far a scroller scrolls to bring the caret into sight (pure): 0 when it shows, else down past the bottom edge or
+ * up past the top, keeping `margin` px clear. One taller than the room (a whole tall field) only moves if it is out of
+ * sight altogether, its top then lined up at the top.
+ * @param {{ top: number, bottom: number }} caret @param {{ top: number, bottom: number }} view @param {number} [margin]
+ */
+export function caretShift(caret: {
+    top: number;
+    bottom: number;
+}, view: {
+    top: number;
+    bottom: number;
+}, margin?: number): number;
 /** Watches the keyboard; gives back the function that stops it. @returns {() => void} */
 export function watchKeyboard(): () => void;
 export const KEYBOARD_MIN: 150;
