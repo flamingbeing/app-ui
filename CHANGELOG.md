@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.66
+- Settings sections show or hide live: a `settingsScreen` section takes `visible`, a function or an option key read
+  with `settings.get` (a key is watched by that key, a function re-runs on any settings change). A hidden section
+  leaves the menu row and the menu search, and a page that is open when it hides closes back to the menu. Left out,
+  it is always shown, so existing callers are unchanged. The rule is `gate()` in `ui/section-gate.js`.
+
 ## 1.0.0-rc.65
 - Lazy modules (from the logbook), `ui/lazy-modules.js`: `lazyModules({ name: () => import('./screen.js'), … })` gives
   `need(name)` (loads once), `withMod(name, fn)` (now if loaded, else once it loads), `loaded(name)` and

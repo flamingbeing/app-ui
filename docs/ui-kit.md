@@ -159,6 +159,8 @@ settingsScreen(el, { settings, file: 'plants-settings.json', sections: [
 - A row with `choices` is a picker; an option whose value is a number is a number field; anything else is a switch.
   `sub` adds a small line under the label.
 - The app names its rows and sections; `labels` changes the screen's own words (`SETTINGS_WORDS`).
+- `visible` on a section (a function, or an option key such as `'advanced'`) shows it only while true, live: its menu
+  row and search hits come and go, and an open page closes back to the menu. Left out, it is always shown.
 - When the app has profiles, a "Profile" group comes first, with a note when a value was changed by hand.
 - The settings file (Export, Import) comes last; `file: false` leaves it out.
 - A refused value (its clean says no, or an account option while signed out) shows the reason in the status line and

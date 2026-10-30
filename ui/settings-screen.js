@@ -11,6 +11,7 @@
 import { el, button, plural } from './dom.js';
 import { LABELS } from './labels.js';
 import { aboutSheet } from './about-sheet.js';
+import { gate } from './section-gate.js';
 import { icon, info as infoIcon, chevronLeft, chevronRight } from '../icons/lucide.js';
 
 /**
@@ -19,9 +20,11 @@ import { icon, info as infoIcon, chevronLeft, chevronRight } from '../icons/luci
  *   max?: number, step?: number }} SettingRow  sub: one line of help; more: the rest, behind an info button; choices:
  *   [value, word] pairs (a picker); a boolean default is a switch; a number one a number field (min, max, step)
  * @typedef {{ title: string, rows?: SettingRow[], reset?: boolean, mount?: (host: HTMLElement) => (() => void) | void,
- *   icon?: IconNodes, sub?: string, group?: string, find?: string }} SettingSection
+ *   icon?: IconNodes, sub?: string, group?: string, find?: string, visible?: (() => boolean) | string }} SettingSection
  *   reset: adds "Reset this page", which puts this section's rows back to their defaults and offers Undo; with menu:
- *   icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by
+ *   icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by;
+ *   visible: a function or an option key (read with settings.get): shown only while true, live (a key is watched, a
+ *   function re-runs on any change); a hidden page leaves the menu and the search, and closes if open (default: shown)
  * @typedef {{ steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } },
  *   top?: (host: HTMLElement) => (() => void) | void, search?: boolean }} SettingsMenu
  *   steps: createTransients' api (Back closes a page); top: the app's own part above the menu (such as the tabs off
@@ -83,14 +86,16 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
   const id = () => `ui-set-${++n}`;
   const say = (/** @type {string} */ text, bad = false) => { status.replaceChildren(text); status.classList.toggle('ui-error', bad); status.classList.toggle('error', bad); };
 
-  /** @type {{ section: HTMLElement, meta: Partial<SettingSection> & { title: string } }[]} */
+  /** @type {{ section: HTMLElement, meta: Partial<SettingSection> & { title: string }, shown: boolean }[]} */
   const pages = [];
+  /** called when a page's `visible` flips (the menu sets it) @type {(p: typeof pages[number]) => void} */
+  let gated = p => { p.section.hidden = !p.shown; };
   /** @param {string} title @param {HTMLElement} body @param {Partial<SettingSection>} [meta] */
   function group(title, body, meta = {}) {
     const h = el('h2', { class: 'ui-settings-title', id: id() }, title);
     const s = el('section', { class: 'ui-settings-group', 'aria-labelledby': h.id }, h, body);
     box.append(s);
-    pages.push({ section: s, meta: { ...meta, title } });
+    pages.push({ section: s, meta: { ...meta, title }, shown: true });
     return s;
   }
   /** @param {string} label @param {string | undefined} sub @param {HTMLElement} control @param {string} [more] */
@@ -192,6 +197,13 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       list.append(row(r.label, r.sub, c.node, r.more));
     }
     const g = group(s.title, list, s);
+    if (s.visible !== undefined) {
+      const p = /** @type {typeof pages[number]} */ (pages[pages.length - 1]);
+      const gt = gate(settings, s.visible, v => { p.shown = v; gated(p); });
+      stops.push(gt.stop);
+      p.shown = gt.now();
+      g.hidden = !p.shown;
+    }
     if (!s.rows?.length) list.remove();
     if (s.reset && s.rows?.length) g.append(resetRow(s.rows.map(r => r.key)));
     if (s.mount) {
@@ -274,10 +286,13 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
     }
     const results = el('ul', { class: 'ui-list ui-settings-results', hidden: '' });
     const empty = el('p', { class: 'ui-settings-part ui-small small', hidden: '' }, words.noMatch);
+    /** @type {HTMLInputElement | null} */
+    let q = null;
     if (search) {
-      const q = el('input', { type: 'search', class: 'ui-settings-search', placeholder: words.search, 'aria-label': words.search, autocomplete: 'off' });
-      q.addEventListener('input', () => find(q.value));
-      front.append(el('div', { class: 'ui-settings-part' }, q), results, empty);
+      const input = el('input', { type: 'search', class: 'ui-settings-search', placeholder: words.search, 'aria-label': words.search, autocomplete: 'off' });
+      q = input;
+      input.addEventListener('input', () => find(input.value));
+      front.append(el('div', { class: 'ui-settings-part' }, input), results, empty);
     }
     const lists = el('div', { class: 'ui-settings-menu-groups' });
     front.append(lists);
@@ -305,7 +320,15 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       back.addEventListener('click', () => { if (step?.active) void step.close(); else shut(); });
       p.section.prepend(back);
       p.section.hidden = true;
+      if (!p.shown) go.parentElement?.setAttribute('hidden', '');
     }
+    gated = p => {
+      const li = gos.get(p.section)?.parentElement;
+      if (li) li.hidden = !p.shown;
+      if (!p.shown && shown === p.section) { if (step?.active) void step.close(); else shut(); }
+      if (!p.shown) p.section.hidden = true;
+      if (q && q.value.trim()) find(q.value);
+    };
     box.prepend(front);
     /** @type {{ readonly active: boolean, close: () => Promise<void> } | null} */
     let step = null;
@@ -336,6 +359,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       results.replaceChildren();
       if (!t) { empty.hidden = true; return; }
       for (const p of pages) {
+        if (!p.shown) continue;
         const hits = /** @type {HTMLElement[]} */ ([...p.section.querySelectorAll('.ui-row')]).filter(r => r.textContent?.toLowerCase().includes(t));
         const pageHit = `${p.meta.title} ${p.meta.sub || ''} ${p.meta.find || ''}`.toLowerCase().includes(t);
         for (const r of hits.length ? hits : pageHit ? [null] : []) {

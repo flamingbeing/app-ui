@@ -324,3 +324,4 @@ over a made-up tab bar; the pure order rules by `test/tab-arrange.unit.test.mjs`
 | Arrange tabs | Up and Down move a tab; a switch takes one off the bar; the fixed tab can't go off; a full bar asks which tab it replaces; kept after reload | yes |
 | Order rules | saved order wins, a new tab after the ones before it, fixed last, off by default, over the limit, at least min, replace, move, a bad saved value | |
 
+| Section visible | `gate()` (`test/section-gate.unit.test.mjs`): default shown and unwatched; a key is watched by that key and only a flip reports; a function re-runs on any change; a throwing function counts as hidden; stop unwatches | |

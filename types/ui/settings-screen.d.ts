@@ -29,9 +29,11 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
  *   max?: number, step?: number }} SettingRow  sub: one line of help; more: the rest, behind an info button; choices:
  *   [value, word] pairs (a picker); a boolean default is a switch; a number one a number field (min, max, step)
  * @typedef {{ title: string, rows?: SettingRow[], reset?: boolean, mount?: (host: HTMLElement) => (() => void) | void,
- *   icon?: IconNodes, sub?: string, group?: string, find?: string }} SettingSection
+ *   icon?: IconNodes, sub?: string, group?: string, find?: string, visible?: (() => boolean) | string }} SettingSection
  *   reset: adds "Reset this page", which puts this section's rows back to their defaults and offers Undo; with menu:
- *   icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by
+ *   icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by;
+ *   visible: a function or an option key (read with settings.get): shown only while true, live (a key is watched, a
+ *   function re-runs on any change); a hidden page leaves the menu and the search, and closes if open (default: shown)
  * @typedef {{ steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } },
  *   top?: (host: HTMLElement) => (() => void) | void, search?: boolean }} SettingsMenu
  *   steps: createTransients' api (Back closes a page); top: the app's own part above the menu (such as the tabs off
@@ -56,7 +58,9 @@ export type SettingRow = {
 };
 /**
  * reset: adds "Reset this page", which puts this section's rows back to their defaults and offers Undo; with menu:
- * icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by
+ * icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by;
+ * visible: a function or an option key (read with settings.get): shown only while true, live (a key is watched, a
+ * function re-runs on any change); a hidden page leaves the menu and the search, and closes if open (default: shown)
  */
 export type SettingSection = {
     title: string;
@@ -67,6 +71,7 @@ export type SettingSection = {
     sub?: string;
     group?: string;
     find?: string;
+    visible?: (() => boolean) | string;
 };
 /**
  * steps: createTransients' api (Back closes a page); top: the app's own part above the menu (such as the tabs off
