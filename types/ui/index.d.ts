@@ -16,6 +16,7 @@ export { startGestures } from "./gestures.js";
 export { largeTitle } from "./large-title.js";
 export { holdMenus } from "./hold-menu.js";
 export { stepsSettled } from "./steps.js";
+export { lazyModules } from "./lazy-modules.js";
 export { screenStack } from "./screens.js";
 export { selectMode } from "./select-mode.js";
 export { cardPager } from "./card-pager.js";

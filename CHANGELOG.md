@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.65
+- Lazy modules (from the logbook), `ui/lazy-modules.js`: `lazyModules({ name: () => import('./screen.js'), … })` gives
+  `need(name)` (loads once), `withMod(name, fn)` (now if loaded, else once it loads), `loaded(name)` and
+  `warmUp(names?, { delay })`, which loads the rest one per idle moment after the first screen is up. Screens and heavy
+  extras stay off startup, and changing tab stays instant.
+
 ## 1.0.0-rc.64
 - Page with its own scroller (from notes), `.ui-page` / `.ui-page-scroll` in `ui/layout.css`, opt-in: only the content
   scrolls, so a bounce at either end moves the content and never the header or a toolbar; bars (a fixed one too) sit
