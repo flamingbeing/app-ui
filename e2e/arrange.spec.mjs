@@ -26,6 +26,23 @@ test('the menu: a row per page under its group; a row opens its page; Back and t
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
+test('with onPage the open page is a screen of its own: its title over it, no Back on the page; Back gives the menu', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(`${PAGE}&titled`);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  const menu = page.locator('.ui-settings-menu'), title = page.locator('main > .ui-large-title');
+  await menu.getByRole('button', { name: /Reminders/ }).click();
+  await expect(title).toHaveText('Reminders');
+  const open = page.locator('.ui-settings-group:not([hidden])');
+  await expect(open.locator('.ui-settings-back')).toHaveCount(0);
+  await expect(open.getByRole('heading', { name: 'Reminders' })).toHaveCount(1);
+  expect(await open.locator('.ui-settings-title').first().evaluate(h => h.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+  expect(await AxeBuilder(page)).toEqual([]);
+  await page.goBack();
+  await expect(menu).toBeVisible();
+  await expect(title).toHaveText('Settings');
+});
+
 test('a menu row slides its page in from the right, Back slides the menu in from the left; Less motion just switches', async ({ sized }) => {
   const page = await sized(390);
   await page.goto(PAGE);

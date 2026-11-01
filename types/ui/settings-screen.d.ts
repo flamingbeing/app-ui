@@ -37,9 +37,12 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
  *   visible: a function or an option key (read with settings.get): shown only while true, live (a key is watched, a
  *   function re-runs on any change); a hidden page leaves the menu and the search, and closes if open (default: shown)
  * @typedef {{ steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } },
- *   top?: (host: HTMLElement) => (() => void) | void, search?: boolean }} SettingsMenu
+ *   top?: (host: HTMLElement) => (() => void) | void, search?: boolean,
+ *   onPage?: (page: { title: string, close: () => void } | null) => void }} SettingsMenu
  *   steps: createTransients' api (Back closes a page); top: the app's own part above the menu (such as the tabs off
- *   the bar); search: the search box (default on)
+ *   the bar); search: the search box (default on); onPage: told each time a page opens (its title, and close: what
+ *   Back does) and when the menu is back (null), so the screen's own title and Back stand for the page's; with it, a
+ *   page has no Back button of its own and its heading is visually hidden (pass steps too, so history Back closes it)
  */
 /** @type {Readonly<Record<string, string>>} */
 export const SETTINGS_WORDS: Readonly<Record<string, string>>;
@@ -77,7 +80,9 @@ export type SettingSection = {
 };
 /**
  * steps: createTransients' api (Back closes a page); top: the app's own part above the menu (such as the tabs off
- * the bar); search: the search box (default on)
+ * the bar); search: the search box (default on); onPage: told each time a page opens (its title, and close: what
+ * Back does) and when the menu is back (null), so the screen's own title and Back stand for the page's; with it, a
+ * page has no Back button of its own and its heading is visually hidden (pass steps too, so history Back closes it)
  */
 export type SettingsMenu = {
     steps?: {
@@ -88,4 +93,8 @@ export type SettingsMenu = {
     };
     top?: (host: HTMLElement) => (() => void) | void;
     search?: boolean;
+    onPage?: (page: {
+        title: string;
+        close: () => void;
+    } | null) => void;
 };

@@ -325,6 +325,7 @@ over a made-up tab bar; the pure order rules by `test/tab-arrange.unit.test.mjs`
 | Part | What is tested | axe |
 | --- | --- | --- |
 | Menu | a row per page under its group heading, no page open; a row opens its page; Back (history) and the page's Back button go to the menu; nothing wider than the screen | yes |
+| Page as a screen (`?menu&titled`, `menu.onPage`) | the open page's title goes over the screen, the page has no Back of its own and its heading is for screen readers only; history Back gives the menu and its title | yes |
 | Search | finds a row and opens its page there; "No setting matches"; a page's own find words | |
 | Arrange tabs | Up and Down move a tab; a switch takes one off the bar; the fixed tab can't go off; a full bar asks which tab it replaces; kept after reload | yes |
 | Order rules | saved order wins, a new tab after the ones before it, fixed last, off by default, over the limit, at least min, replace, move, a bad saved value | |
