@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.73
+- Bounce: a finger that catches the spring back (or drags back from a stretch) moves the page once, as on iOS: the
+  stretch takes the finger first and the scroll only once it is gone. Before, both moved and the page skipped. The
+  touchmove listener is no longer passive so a stretch can hold the browser's scroll back; when the browser is already
+  scrolling the touch (it began as a scroll), the stretch springs back on its own instead.
+
 ## 1.0.0-rc.72
 - Tab swipe in Firefox: after the side bar's drawer is pushed shut, a sideways swipe changes tab again. Firefox sends
   that swipe's moves as ones the page can't hold; a sideways one is still the pager's (it has touch-action: pan-y),

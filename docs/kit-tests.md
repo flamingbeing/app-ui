@@ -158,6 +158,7 @@ Chromium through DevTools protocol touch and the mouse wheel.
 | No stretch | a sideways swipe (the pager's) and a screen with `data-no-bounce` | |
 | Sheet | the sheet body at large stretches past its bottom, never past its top (the sheet's own drag) | |
 | Fling (Chromium) | a fast fling that ends short of the bottom bounces once it gets there and lands; with Less motion it doesn't | |
+| Catch and drag back (Chromium) | a finger catching the spring back and dragging back down moves the list at most as far as the finger: the stretch goes first, then the scroll, never both | |
 | Wheel (Chromium) | a mouse wheel to the end never bounces | |
 
 ## Motion and the jank gate
