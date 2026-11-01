@@ -766,6 +766,7 @@ test('the sync button shows each state in its icon, a tap syncs now and lifts; s
   await pick('synced');
   await tap();
   expect(await page.evaluate(() => /** @type {any} */ (window).syncTaps)).toBe(1);
+  expect(await page.evaluate(() => /** @type {any} */ (window).updateChecks), 'a tap also looks for a new version').toBe(1);
   await expect(btn).toHaveAttribute('data-state', 'syncing');
   expect(await btn.locator('.ui-icon').evaluate(e => getComputedStyle(e).animationName)).toBe('ui-sync-lift');
   await page.waitForTimeout(400);
@@ -776,6 +777,7 @@ test('the sync button shows each state in its icon, a tap syncs now and lifts; s
   await tap();
   await expect(btn).toHaveAttribute('data-state', 'offline');
   expect(await page.evaluate(() => /** @type {any} */ (window).syncTaps)).toBe(2);
+  expect(await page.evaluate(() => /** @type {any} */ (window).updateChecks), 'once per 30 s').toBe(1);
   // no lift under reduced motion, nor with Still picked
   await pick('pending');
   await page.emulateMedia({ reducedMotion: 'reduce' });

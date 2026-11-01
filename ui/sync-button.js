@@ -2,11 +2,17 @@
 // syncs now. One colour (the bar's), the state in the icon's shape: a tick (synced), an arrow up that lifts (sending, at
 // least MIN_SPIN_MS after a tap, with a count of what waits), struck (offline), an exclamation mark (not saved yet;
 // needs you adds a dot), faded (connecting). The state's word is its label. The sync chip's tappable twin: an app shows one.
+// A tap also looks for a newer version of the app (quietly: the app's update module installs it and reloads when allowed).
 import { LABELS } from './labels.js';
 import { el } from './dom.js';
 import { icon, cloud, cloudCheck, cloudUpload, cloudOff, cloudAlert } from '../icons/lucide.js';
 
 export const MIN_SPIN_MS = 700;   // a tap that finishes at once still shows it sending
+export const UPDATE_GAP_MS = 30000;   // taps closer together than this look for a new version once
+
+let lastUpdateCheck = -Infinity;
+/** The default update check on a tap: asks the page's service worker registration to look for a newer worker */
+const lookForUpdate = () => navigator.serviceWorker?.getRegistration().then(r => r?.update());
 
 // the icon each shown state draws
 const ICONS = { synced: cloudCheck, syncing: cloudUpload, offline: cloudOff, attention: cloudAlert, 'at-risk': cloudAlert, unknown: cloud };
@@ -28,12 +34,14 @@ export function syncLook(state, count, spinning, words) {
 /**
  * @param {HTMLElement} host  a <button> becomes the sync button (the app's markup places it before the script runs);
  *   any other element gets one added
- * @param {{ sync: import('./types').SyncApi, syncNow?: () => unknown, labels?: Record<string, string>, idPrefix?: string }} o
- *   syncNow: what a tap does (default: the sync module's nudge('wake') then flush()); labels: words over LABELS;
- *   idPrefix: put before the button's id
+ * @param {{ sync: import('./types').SyncApi, syncNow?: () => unknown, checkUpdate?: false | (() => unknown),
+ *   labels?: Record<string, string>, idPrefix?: string }} o
+ *   syncNow: what a tap does (default: the sync module's nudge('wake') then flush()); checkUpdate: what a tap also
+ *   does, at most once per UPDATE_GAP_MS (default: the service worker registration's update(); false: nothing);
+ *   labels: words over LABELS; idPrefix: put before the button's id
  * @returns {() => void} stop: unsubscribes, and removes the button if this part added it
  */
-export function syncButton(host, { sync, syncNow, labels = {}, idPrefix = '' }) {
+export function syncButton(host, { sync, syncNow, checkUpdate = lookForUpdate, labels = {}, idPrefix = '' }) {
   const words = { ...LABELS, ...labels };
   const own = !(host instanceof HTMLButtonElement);
   const btn = own ? el('button', { type: 'button' }) : host;
@@ -60,6 +68,10 @@ export function syncButton(host, { sync, syncNow, labels = {}, idPrefix = '' }) 
     spinUntil = performance.now() + MIN_SPIN_MS;
     clearTimeout(timer); timer = window.setTimeout(draw, MIN_SPIN_MS + 20);
     draw();
+    if (checkUpdate && performance.now() - lastUpdateCheck >= UPDATE_GAP_MS) {
+      lastUpdateCheck = performance.now();
+      Promise.resolve().then(checkUpdate).catch(() => { /* offline or no worker: the app's own checks carry on */ });
+    }
     try { await now(); } catch { /* the state shows it */ }
   };
   btn.addEventListener('click', tap);
