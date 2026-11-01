@@ -56,7 +56,9 @@ function partsOf(t, box) {
     && !/^(fixed|sticky)$/.test(getComputedStyle(c).position));   // (offsetParent: not shown, or fixed)
 }
 
-/** @param {HTMLElement | null} box */
+/** scrolls by a finger's move of d px (down: back up the page) @param {HTMLElement | null} box @param {number} d */
+const scrollOn = (box, d) => { if (box) box.scrollTop -= d; else scrollBy(0, -d); };
+/** where a scroller is @param {HTMLElement | null} box */
 const posOf = box => box ? box.scrollTop : (document.scrollingElement ?? document.documentElement).scrollTop;
 /** the furthest a scroller goes @param {HTMLElement | null} box */
 const maxOf = box => box ? box.scrollHeight - box.clientHeight
@@ -104,6 +106,8 @@ export function bounce(root = document) {
   let box = null;
   let ok = false, way = /** @type {'x' | 'y' | null} */ (null), top = true, x0 = 0, y0 = 0, last = 0, raw = 0, span = 1;
   let fingers = 0, lifted = -Infinity;
+  /** this touch's scroll is the bounce's: the browser's was held back (preventDefault), so the bounce scrolls it by hand */
+  let held = false;
   const v = tracker();
   /** @param {TouchList} list */
   const mine = list => [...list].find(t => t.identifier === id);
@@ -119,7 +123,7 @@ export function bounce(root = document) {
     ok = b !== false && !el.closest('[data-no-bounce]') && !document.documentElement.classList.contains('ui-menu-open')
       && pansY(el, b || null);
     if (!ok) return;
-    id = t.identifier; box = b || null; way = null; raw = 0;
+    id = t.identifier; box = b || null; way = null; raw = 0; held = false;
     x0 = t.clientX; y0 = last = t.clientY; span = spanOf(box);
     top = !box?.closest('dialog.ui-sheet');   // a sheet's top pull is the sheet's
     v.reset(e.timeStamp, t.clientY);
@@ -144,17 +148,26 @@ export function bounce(root = document) {
     const d = t.clientY - last;
     last = t.clientY;
     v.add(e.timeStamp, t.clientY);
+    // As on iOS the stretch takes the finger first and the scroll only once it is gone: one thing moves, never both.
     if (raw) {
       const r = raw + d;
-      if (Math.sign(r) !== Math.sign(raw)) { raw = 0; clear(); return; }   // back past the end: the scroll's again
+      if (Math.sign(r) !== Math.sign(raw)) {   // back past the end: the scroll's again, from where the stretch ran out
+        raw = 0; clear();
+        if (held) { e.preventDefault(); scrollOn(box, r); }
+        return;
+      }
+      // the browser already scrolls this touch (it began as a scroll, so it can't be held back): the stretch springs
+      // back on its own instead of shrinking under the finger while the page scrolls too
+      if (!e.cancelable && Math.abs(r) < Math.abs(raw)) { const y = rubber(raw, span); raw = 0; if (cur && !cur.run) letGo(y, 0); return; }
       raw = r;
     } else if (d > 0 && top && posOf(box) <= 0) raw = d;
     else if (d < 0 && posOf(box) >= maxOf(box) - 1) raw = d;
-    else return;
+    else { if (held) { e.preventDefault(); scrollOn(box, d); } return; }
     if (!claim('bounce')) { id = null; raw = 0; return; }   // another part has this touch
+    if (e.cancelable) { e.preventDefault(); held = true; }
     if (!cur || cur.box !== box || cur.run) take(box, partsOf(/** @type {Element} */ (target), box));
     show(rubber(raw, span));
-  }, { passive: true });
+  }, { passive: false });   // not passive: a stretch holds the browser's scroll back (above)
 
   const up = (/** @type {TouchEvent} */ e) => {
     fingers = e.touches.length;

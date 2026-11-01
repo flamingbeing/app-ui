@@ -160,6 +160,34 @@ test.describe('through the real input path', () => {
     expect(await fling(page), 'Less motion: no bounce').toBe(0);
   });
 
+  test('a finger that catches the spring back and drags back down moves the page once, not twice', async ({ sized }) => {
+    const page = await load(sized);
+    const cdp = await page.context().newCDPSession(page);
+    const send = (type, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 200, y }] });
+    const frame = () => page.evaluate(() => new Promise(r => requestAnimationFrame(() => r(undefined))));
+    await page.evaluate(() => {
+      const list = document.querySelector('.ui-screen:not([hidden]) .ui-list');
+      if (list.children.length < 40) for (const r of [...list.children]) list.append(r.cloneNode(true), r.cloneNode(true));
+      scrollTo(0, document.documentElement.scrollHeight);
+    });
+    // a pull past the bottom, let go
+    await send('touchStart', 600);
+    for (let i = 1; i <= 8; i++) { await frame(); await send('touchMove', 600 - i * 25); }
+    await send('touchEnd', 400);
+    await page.evaluate(() => new Promise(r => setTimeout(r, 40)));
+    // caught on the way back, then dragged back down 240 px: the list follows the finger, at most as far
+    const top = () => page.evaluate(() => document.querySelector('.ui-screen:not([hidden]) .ui-list').getBoundingClientRect().top);
+    await send('touchStart', 300);
+    const y0 = await top();
+    for (let i = 1; i <= 12; i++) { await frame(); await send('touchMove', 300 + i * 20); }
+    const y1 = await top();
+    await send('touchEnd', 540);
+    expect(y1 - y0, 'moved down with the finger').toBeGreaterThan(120);
+    expect(y1 - y0, 'never further than the finger (stretch and scroll both)').toBeLessThanOrEqual(242);
+    await page.evaluate(() => window.__settled());
+    expect(await shifted(page)).toEqual([]);
+  });
+
   test('a mouse wheel to the end never bounces', async ({ sized }) => {
     const page = await load(sized);
     await page.mouse.move(200, 400);
