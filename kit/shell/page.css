@@ -11,3 +11,6 @@ body { margin: 0; padding-bottom: 0; }
 }
 #job-cards { margin: 0 var(--pad) var(--pad); min-height: 10rem; }
 .kit-card { margin: 0; height: 100%; box-sizing: border-box; }
+
+/* Settings: a text box (a tab swipe starts on it while it is not focused) */
+#shelf-notes { display: block; width: calc(100% - 2rem); margin: 0 1rem; box-sizing: border-box; font: inherit; }

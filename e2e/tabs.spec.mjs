@@ -334,6 +334,14 @@ test('swipe does nothing: a vertical scroll, the back edge, a sideways scroller,
   const field = await page.locator('#shelf-name').boundingBox();
   await swipe(page, field.x + field.width - 10, 40, field.y + field.height / 2);
   expect(await shown(page)).toEqual(['settings']);
+  // a text box being typed in keeps the finger; one that isn't lets the swipe through (a tall box left little page)
+  const notes = page.locator('#shelf-notes'), box = await notes.boundingBox();
+  await notes.focus();
+  await swipe(page, 40, 300, box.y + box.height / 2);
+  expect(await shown(page), 'a focused text box keeps the swipe').toEqual(['settings']);
+  await notes.evaluate(e => /** @type {HTMLElement} */ (e).blur());
+  await swipe(page, 40, 300, box.y + box.height / 2);
+  expect(await shown(page), 'an idle text box lets the tab swipe through').toEqual(['jobs']);
   // on a pushed screen: the swipe is the screen's own (edge back), not a tab change
   await page.goto(SHELL);
   await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);

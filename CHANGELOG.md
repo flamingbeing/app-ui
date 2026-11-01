@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.75
+- Tab swipe from a text box: a swipe that starts on a textarea nobody is typing in now changes tab, as on the rest of
+  the page (a tall box, such as the notes app's Haiku tab, left little page to swipe on). While the box is focused
+  (typing, or a hold that selects text) the finger stays the text's. Inputs, pickers and editors keep the swipe out.
 ## 1.0.0-rc.74
 - Snappier tab changes: a tapped tab's page slides in over 180 ms (was 280 ms), and a let-go tab swipe settles on a
   quicker spring (`PAGE_SPRING_S`, 0.22 s response, was the shared 0.3 s), landing in about 0.3 s instead of 0.4 s.

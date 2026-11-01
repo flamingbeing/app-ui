@@ -8,10 +8,14 @@ export function still(): boolean;
  * Places a gesture never starts from: fields, dialogs (outside the sheet part's own handling), drag handles, things
  * that scroll sideways, and anything marked data-no-gesture.
  * @param {EventTarget | null} target
- * @param {{ inDialog?: boolean }} [opts]  inDialog: the caller is a dialog's own part, so dialogs don't count
+ * @param {{ inDialog?: boolean, idleText?: boolean }} [opts]  inDialog: the caller is a dialog's own part, so dialogs
+ *   don't count; idleText: a text box (textarea) that isn't being typed in (not focused) doesn't count either, so a
+ *   tab swipe can start on a big box (owner, 1 Nov 2026: a tall box left little page to swipe on). Typing in it, or
+ *   holding to select (that focuses it), keeps the finger for the text.
  */
-export function noGesture(target: EventTarget | null, { inDialog }?: {
+export function noGesture(target: EventTarget | null, { inDialog, idleText }?: {
     inDialog?: boolean;
+    idleText?: boolean;
 }): boolean;
 /**
  * A haptic of one kind, unless Haptics is Off on this device (the theme switch: data-haptics="off" on <html>):
