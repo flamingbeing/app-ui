@@ -159,7 +159,8 @@ Chromium through DevTools protocol touch and the mouse wheel.
 | Sheet | the sheet body at large stretches past its bottom, never past its top (the sheet's own drag) | |
 | Fling (Chromium) | a fast fling that ends short of the bottom bounces once it gets there and lands; with Less motion it doesn't | |
 | Catch and drag back (Chromium) | a finger catching the spring back and dragging back down moves the list at most as far as the finger: the stretch goes first, then the scroll, never both | |
-| Let go (Chromium) | a pull past the bottom (the browser scrolling the touch there first), let go: the list keeps the stretch in its style under the spring (no frame at rest before the spring) | |
+| Let go (Chromium) | a pull past the bottom, starting at the end, let go: the list keeps the stretch in its style under the spring (no frame at rest before the spring) | |
+| Scroll into the end (Chromium) | a finger that scrolls the page into its end stops there (moves at most as far as the scroll left, no stretch); a new finger at the end stretches | |
 | Wheel (Chromium) | a mouse wheel to the end never bounces | |
 
 ## Motion and the jank gate

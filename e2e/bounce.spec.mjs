@@ -193,10 +193,10 @@ test.describe('through the real input path', () => {
     const cdp = await page.context().newCDPSession(page);
     const send = (type, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 200, y }] });
     const top = () => page.evaluate(() => document.querySelector('.ui-screen:not([hidden]) .ui-list').getBoundingClientRect().top);
-    // 60 px short of the end: the browser scrolls the touch there, then it stretches (the browser's scroll, not held back)
-    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight - innerHeight - 60));
+    // at the end: the finger's first move is held, so it stretches
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
     await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
-    const rest = await top() - 60;
+    const rest = await top();
     await send('touchStart', 700);
     for (let i = 1; i <= 6; i++) { await new Promise(r => setTimeout(r, 8)); await send('touchMove', 700 - i * 50); }
     const pulled = rest - await top();
@@ -214,6 +214,34 @@ test.describe('through the real input path', () => {
     expect(-Number(/translateY\((-?[\d.]+)px\)/.exec(held)?.[1] ?? 0), 'the stretch held under it').toBeGreaterThan(pulled * 0.8);
     await page.evaluate(() => window.__settled());
     expect(await shifted(page)).toEqual([]);
+  });
+
+  test('a finger that scrolls the page into its end stops there: the stretch never adds to the scroll', async ({ sized }) => {
+    const page = await load(sized);
+    const cdp = await page.context().newCDPSession(page);
+    const send = (type, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 200, y }] });
+    const top = () => page.evaluate(() => document.querySelector('.ui-screen:not([hidden]) .ui-list').getBoundingClientRect().top);
+    // 80 px short of the end, a quick finger (60 px a move): the browser scrolls it there and on to the end
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight - innerHeight - 80));
+    await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
+    const y0 = await top();
+    await send('touchStart', 700);
+    let most = 0;
+    for (let i = 1; i <= 8; i++) {
+      await new Promise(r => setTimeout(r, 16));
+      await send('touchMove', 700 - i * 60);
+      most = Math.max(most, y0 - await top());
+    }
+    expect(most, 'the list moved no further than the page could scroll (no stretch on top of it)').toBeLessThanOrEqual(81);
+    expect(await shifted(page), 'nothing stretched').toEqual([]);
+    await send('touchEnd', 220);
+    await page.evaluate(() => window.__settled());
+    // the next finger, at the end, does stretch it (and holds the browser's scroll back)
+    await send('touchStart', 600);
+    for (let i = 1; i <= 8; i++) { await new Promise(r => setTimeout(r, 16)); await send('touchMove', 600 - i * 25); }
+    expect((await shifted(page)).length, 'a finger that starts at the end stretches it').toBeGreaterThan(0);
+    await send('touchEnd', 400);
+    await page.evaluate(() => window.__settled());
   });
 
   test('a mouse wheel to the end never bounces', async ({ sized }) => {

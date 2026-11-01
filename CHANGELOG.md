@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.79
+- Bounce: a finger that scrolls a page into its end now stops there. Before, once the browser was scrolling the
+  touch it could not be held back, and the stretch moved the list on top of the browser's own scroll (the list
+  jumped and flew off, not following the finger). A finger that starts at an end and pulls on is held from its first
+  move, so it stretches and follows; a fling into the end still bounces.
+
 ## 1.0.0-rc.78
 - Install this app (owner 1 Nov 2026): settingsScreen's About group starts with an "Install this app" row while the
   app isn't installed. A tap shows the browser's own install prompt if boot.js kept it (Chrome, Edge, Samsung:
