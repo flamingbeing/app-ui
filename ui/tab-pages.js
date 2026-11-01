@@ -34,12 +34,12 @@
 import { tabBack, CLOSE_MS } from './tab-back.js';
 import { toaster } from './toast.js';
 import { LABELS } from './labels.js';
-import { still, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber, claim, onCaptured } from './gesture.js';
+import { still, SLIDE_MS, SLIDE_EASE, noGesture, listeners, swipeIntent, THROW_MS, rubber, unrubber, claim, onCaptured } from './gesture.js';
 import { glide as springGlide, tracker, afterGesture } from './motion.js';
 import { EDGE, swipeGoesBack } from './screens.js';
 import { TABLET_MIN } from './shell/shell.js';
 
-export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath } from './gesture.js';
+export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath, SLIDE_MS } from './gesture.js';
 
 /** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
 export const FLICK_V = 0.4;
@@ -63,9 +63,6 @@ export const swipeEdge = width => Math.max(EDGE, Math.min(32, width / 14));
 
 /** In an idle moment (no requestIdleCallback, as Safari: soon after) @param {() => void} fn */
 const idle = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
-
-/** How long a tapped tab's page takes to slide in, in ms. */
-export const SLIDE_MS = 180;
 
 /** How quickly a let-go tab swipe settles (the spring's response in s): quicker than sheets' SPRING_S, so a page
  * change lands in about 0.3 s (owner 1 Nov: tab changes felt slow). */
@@ -161,7 +158,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     sliding?.cancel();
     host.classList.add('is-sliding');
     const a = sliding = page.animate([{ transform: `translateX(${dir * Math.round(innerWidth * .3)}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
-      { duration: SLIDE_MS, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+      { duration: SLIDE_MS, easing: SLIDE_EASE });
     const done = () => { if (sliding === a) { sliding = null; host.classList.remove('is-sliding'); } };
     a.finished.then(done, done);
   }

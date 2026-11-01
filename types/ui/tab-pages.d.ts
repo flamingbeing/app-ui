@@ -56,8 +56,6 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
 /** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
 export const FLICK_V: 0.4;
 export function swipeEdge(width: number): number;
-/** How long a tapped tab's page takes to slide in, in ms. */
-export const SLIDE_MS: 180;
 /** How quickly a let-go tab swipe settles (the spring's response in s): quicker than sheets' SPRING_S, so a page
  * change lands in about 0.3 s (owner 1 Nov: tab changes felt slow). */
 export const PAGE_SPRING_S: 0.22;
@@ -79,4 +77,4 @@ export type Gliding = {
     missing: boolean;
     timer: ReturnType<typeof setTimeout> | number;
 };
-export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath } from "./gesture.js";
+export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath, SLIDE_MS } from "./gesture.js";
