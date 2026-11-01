@@ -26,6 +26,7 @@ export { hoverCard, placeCard } from "./hover-card.js";
 export { loadState, cachedPaint, holdEmpty, swapWhenReady, SNAP_ROWS } from "./load-state.js";
 export { aboutSheet, packagesFromImportMap } from "./about-sheet.js";
 export { settingsScreen, SETTINGS_WORDS } from "./settings-screen.js";
+export { installApp, installMode, INSTALL_WORDS } from "./install.js";
 export { draftSlot, listDrafts } from "./drafts.js";
 export { gripDrag, moveIn } from "./drag-list.js";
 export { MAX_TABS, cleanTabs, arrangeTabs, setTabOn, replaceTab, moveTab, applyTabs, tabArranger } from "./tab-arrange.js";

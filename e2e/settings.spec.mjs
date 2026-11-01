@@ -167,3 +167,27 @@ test('About: the Version row, Check for updates says what it found, the About sh
   // it is the last group, after the settings file
   expect(await page.locator('.ui-settings-title').last().textContent()).toBe('About');
 });
+
+test('About: Install this app shows the kept browser prompt on a tap, once; with none it says how; installed hides the row', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(PAGE);
+  const about = page.locator('.ui-settings-group', { has: page.getByRole('heading', { name: 'About' }) });
+  const install = about.getByRole('button', { name: 'Install this app' });
+  await expect(install).toBeVisible();
+  // no prompt kept (the browser hasn't offered one): the how-to, from the browser menu
+  await install.click();
+  const how = page.getByRole('dialog');
+  await expect(how).toContainText('browser menu');
+  await how.getByRole('button').first().click();
+  await expect(how).toHaveCount(0);
+  // a kept prompt: shown on the tap; accepted, the row says installed and the button goes
+  await page.evaluate(() => {
+    window.prompted = 0;
+    globalThis.coreInstallPrompt = { prompt: async () => { window.prompted++; }, userChoice: Promise.resolve({ outcome: 'accepted' }) };
+  });
+  await install.click();
+  await expect(about).toContainText('Installed.');
+  await expect(install).toBeHidden();
+  expect(await page.evaluate(() => [window.prompted, globalThis.coreInstallPrompt])).toEqual([1, null]);
+  expect(await AxeBuilder(page)).toEqual([]);
+});
