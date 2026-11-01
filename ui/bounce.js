@@ -144,6 +144,11 @@ export function bounce(root = document) {
     if (!way) {
       way = swipeIntent(t.clientX - x0, t.clientY - y0);
       if (way === 'x') { id = null; return; }   // sideways: the pager's or a drawer's
+      // a finger starting out past an end (the browser decides on the first moves whether it scrolls this touch): hold
+      // the browser's scroll back now, so the stretch can take the finger and give it back
+      const dy = t.clientY - y0, dx = t.clientX - x0;
+      if (!held && e.cancelable && Math.abs(dy) >= Math.abs(dx)
+        && (dy > 0 && top && posOf(box) <= 0 || dy < 0 && posOf(box) >= maxOf(box) - 1)) { e.preventDefault(); held = true; }
       if (!way) return;
     }
     const d = t.clientY - last;
@@ -161,7 +166,9 @@ export function bounce(root = document) {
       // back on its own instead of shrinking under the finger while the page scrolls too
       if (!e.cancelable && Math.abs(r) < Math.abs(raw)) { const y = rubber(raw, span); raw = 0; if (cur && !cur.run) letGo(y, 0); return; }
       raw = r;
-    } else if (d > 0 && top && posOf(box) <= 0) raw = d;
+    } else if (!held && !e.cancelable) return;   // the browser scrolls this touch: it stops at the end (a stretch on top
+    // of its scroll moved the list twice, a jump; the next finger, or a fling's bounce, stretches)
+    else if (d > 0 && top && posOf(box) <= 0) raw = d;
     else if (d < 0 && posOf(box) >= maxOf(box) - 1) raw = d;
     else { if (held) { e.preventDefault(); scrollOn(box, d); } return; }
     if (!claim('bounce')) { id = null; raw = 0; return; }   // another part has this touch

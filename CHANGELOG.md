@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.78
+- Bounce: a finger that scrolls a page into its end now stops there. Before, once the browser was scrolling the
+  touch it could not be held back, and the stretch moved the list on top of the browser's own scroll (the list
+  jumped and flew off, not following the finger). A finger that starts at an end and pulls on is held from its first
+  move, so it stretches and follows; a fling into the end still bounces.
+
 ## 1.0.0-rc.77
 - Look C and E side gaps: their list inset was a bare `0`, which makes every `calc()` it is added into invalid, so
   the settings headings and search box (and an app's own `calc(var(--pad) + var(--list-inset))`) sat on the screen
