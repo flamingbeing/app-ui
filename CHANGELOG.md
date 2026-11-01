@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.77
+- Look C and E side gaps: their list inset was a bare `0`, which makes every `calc()` it is added into invalid, so
+  the settings headings and search box (and an app's own `calc(var(--pad) + var(--list-inset))`) sat on the screen
+  edge. Now `0px` (also theme.css's default); a looks test holds it.
+- Same top gap on every page under a slim bar: the settings search box is a block (an inline box's margin never met
+  the title's, so it sat 32 px under the bar, not 16), and `.ui-phone-search` keeps the page's top gap (8 px before).
+- Snappier tab changes: the collapsing title measures in the next frame instead of during the tab change (it laid
+  the new page out at once, and a touch straight after the tap waited for it). A finger landing on a page still
+  sliding in lands the slide at once, so the scroll it starts moves a page that stands still.
+
 ## 1.0.0-rc.76
 - Bounce: let go of a stretch and the list springs back from where it is. Before, it showed for one frame at rest and
   then jumped back out to start the spring (the list flicked down and up on every let-go).

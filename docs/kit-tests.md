@@ -89,7 +89,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | No zoom | `html` and `body` are `touch-action: pan-x pan-y` with overscroll `none` | |
 | Reduce Motion | the pages still follow the finger, the next one beside, and glide on (rc.30 switched with nothing moved); also in WebKit | |
 | Pressed at once | a touch on a button or tab marks it `data-pressed` at once (jank gate); the tab bar, buttons and glass buttons show it as they show `:active` | |
-| Tab slide | a tapped tab's page slides in from its side (280 ms, clipped); Reduce Motion or `data-slide="off"` just switches | |
+| Tab slide | a tapped tab's page slides in from its side (180 ms, clipped); a finger landing on it while it slides lands it at once; Reduce Motion or `data-slide="off"` just switches | |
 | Bar on a tab change | between two scrolled pages the bar stays tinted (collapsed) all the way; to a page at the top it clears once (no flash) | |
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Back with tabs | leaving the first tab adds one history entry, the other tabs none; Back on another tab goes to the first, Back there leaves; a tap on the first tab takes the entry away | |

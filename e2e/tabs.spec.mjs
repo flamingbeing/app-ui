@@ -532,7 +532,7 @@ test('a right swipe on the first page never pulls the side bar out; its button o
   expect(await side.evaluate(e => e.getAnimations().length)).toBe(0);
 });
 
-test('a tapped tab slides its page in from its side; Reduce Motion or data-slide="off" just switches', async ({ sized }) => {
+test('a tapped tab slides its page in from its side; Reduce Motion or data-slide="off" just switches', async ({ sized, browserName }) => {
   const page = await load(sized);
   // the page's running slide: where it starts (px, signed) and how long it takes, or null
   const slide = id => page.evaluate(id => {
@@ -548,6 +548,23 @@ test('a tapped tab slides its page in from its side; Reduce Motion or data-slide
   await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
   await tap('Plants');
   await expect.poll(() => slide('home')).toEqual({ from: -1, ms: 180 });
+  await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
+  // a finger landing on the page while it slides lands it at once (nothing waits on a finger: the scroll it starts
+  // moves a page that stands still)
+  // (Chromium: the others have no Touch to make one from)
+  if (browserName === 'chromium') expect(await page.evaluate(async () => {
+    document.querySelector('nav.ui-tabbar [data-tab-page="#rooms"]').click();
+    for (let i = 0; i < 2; i++) await new Promise(r => requestAnimationFrame(r));
+    const el = document.getElementById('rooms'), before = el.getAnimations().some(a => a.playState === 'running');
+    const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + 40;
+    const t = new Touch({ identifier: 1, target: el, clientX: x, clientY: y });
+    el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [t], targetTouches: [t], changedTouches: [t] }));
+    el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], targetTouches: [], changedTouches: [t] }));
+    const after = el.getAnimations().some(a => a.playState === 'running');
+    await new Promise(r => setTimeout(r));   // (the slide's finished promise clears is-sliding)
+    return { before, after, sliding: document.querySelector('.ui-screens').classList.contains('is-sliding') };
+  })).toEqual({ before: true, after: false, sliding: false });
+  await tap('Plants');
   await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await tap('Rooms');

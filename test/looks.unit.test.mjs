@@ -16,6 +16,9 @@ test('every look: a unique id, a name, every variant picked from VARIANTS, the s
     for (const [k, v] of Object.entries(look.variants)) assert.ok(/** @type {Record<string, string[]>} */ (VARIANTS)[k].includes(v), `${look.id} ${k}=${v}`);
     assert.deepEqual(Object.keys(look.tokens).sort(), keys, `${look.id}: the same tokens as ${LOOKS[0].id}`);
     for (const [k, v] of Object.entries(look.tokens)) assert.match(`${k}: ${v}`, /^[a-z-]+: [^;{}<>]+$/, `${look.id} ${k}: one plain value`);
+    // the sizes the CSS adds up in calc(): a bare 0 there makes the whole calc() invalid (look E's '0' list inset left
+    // the settings headings and search box, and an app's own calc(var(--pad) + var(--list-inset)), on the screen edge)
+    for (const k of ['list-inset', 'card-r']) assert.notEqual(look.tokens[k].trim(), '0', `${look.id} ${k}: 0px, not a bare 0`);
   }
 });
 
@@ -52,7 +55,7 @@ test('look E "Workspace": flat (no glass), slim bar, flush lists on the page, me
   const e = lookOf('e');
   assert.equal(e.name, 'Workspace');
   assert.deepEqual(e.variants, { header: 'slim', menu: 'sheet', glass: 'none', tick: 'round', tabbar: 'edge', family: 'core' });
-  assert.equal(e.tokens['list-inset'], '0', 'flush with the screen edges');
+  assert.equal(e.tokens['list-inset'], '0px', 'flush with the screen edges (a length: a bare 0 makes every calc() it is in invalid)');
   assert.equal(e.tokens['list-bg'], 'transparent', 'rows on the page, no card');
 });
 
