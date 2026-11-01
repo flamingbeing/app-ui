@@ -65,7 +65,11 @@ export const swipeEdge = width => Math.max(EDGE, Math.min(32, width / 14));
 const idle = fn => (typeof requestIdleCallback === 'function' ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 300));
 
 /** How long a tapped tab's page takes to slide in, in ms. */
-export const SLIDE_MS = 280;
+export const SLIDE_MS = 180;
+
+/** How quickly a let-go tab swipe settles (the spring's response in s): quicker than sheets' SPRING_S, so a page
+ * change lands in about 0.3 s (owner 1 Nov: tab changes felt slow). */
+export const PAGE_SPRING_S = 0.22;
 
 /** A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
  * release(x, v) lets it go there at v px/ms, to open or closed. (No swipe pulls it any more: the drawer option is
@@ -408,7 +412,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     }
     for (const f of faders) parts.push([f, x => ({ filter: `opacity(${fadeShows(x)})` })]);
     if (small) parts.push([small, x => ({ filter: `opacity(${titleShows(x)})` })]);
-    const run = springGlide(parts, dx, to0, stretched ? 0 : v);
+    const run = springGlide(parts, dx, to0, stretched ? 0 : v, { response: PAGE_SPRING_S });
     /** @type {Gliding} */
     const g = glide = { run, to, missing, timer: 0 };
     mark(to ?? current);   // the tab lights at the let-go, as Android's does, not when the pages land

@@ -57,7 +57,10 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
 export const FLICK_V: 0.4;
 export function swipeEdge(width: number): number;
 /** How long a tapped tab's page takes to slide in, in ms. */
-export const SLIDE_MS: 280;
+export const SLIDE_MS: 180;
+/** How quickly a let-go tab swipe settles (the spring's response in s): quicker than sheets' SPRING_S, so a page
+ * change lands in about 0.3 s (owner 1 Nov: tab changes felt slow). */
+export const PAGE_SPRING_S: 0.22;
 /**
  * A drawer a finger can pull (the shell's side bar on a phone, shell.js): pull(x) shows it x px out (0 closed),
  * release(x, v) lets it go there at v px/ms, to open or closed. (No swipe pulls it any more: the drawer option is
