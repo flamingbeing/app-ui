@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.81
+- Sync button: a tap also looks for a newer version of the app (the service worker registration's `update()`, at
+  most once per 30 s). The app's update module installs what it finds and reloads when allowed, as for its own
+  checks; before, a tap only synced, and a phone kept open saw a new deploy only on its next return to the app or
+  from Settings. `checkUpdate` swaps the check (`false`: none).
+
 ## 1.0.0-rc.80
 - Settings pages as screens of their own: settingsScreen's `menu.onPage(page)` is told the open page's title (and
   `close`, what Back does), or null when the menu is back, so the screen around it can show the page's title in its

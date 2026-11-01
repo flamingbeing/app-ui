@@ -13,15 +13,19 @@ export function syncLook(state: string, count: number, spinning: boolean, words:
 /**
  * @param {HTMLElement} host  a <button> becomes the sync button (the app's markup places it before the script runs);
  *   any other element gets one added
- * @param {{ sync: import('./types').SyncApi, syncNow?: () => unknown, labels?: Record<string, string>, idPrefix?: string }} o
- *   syncNow: what a tap does (default: the sync module's nudge('wake') then flush()); labels: words over LABELS;
- *   idPrefix: put before the button's id
+ * @param {{ sync: import('./types').SyncApi, syncNow?: () => unknown, checkUpdate?: false | (() => unknown),
+ *   labels?: Record<string, string>, idPrefix?: string }} o
+ *   syncNow: what a tap does (default: the sync module's nudge('wake') then flush()); checkUpdate: what a tap also
+ *   does, at most once per UPDATE_GAP_MS (default: the service worker registration's update(); false: nothing);
+ *   labels: words over LABELS; idPrefix: put before the button's id
  * @returns {() => void} stop: unsubscribes, and removes the button if this part added it
  */
-export function syncButton(host: HTMLElement, { sync, syncNow, labels, idPrefix }: {
+export function syncButton(host: HTMLElement, { sync, syncNow, checkUpdate, labels, idPrefix }: {
     sync: import("./types").SyncApi;
     syncNow?: () => unknown;
+    checkUpdate?: false | (() => unknown);
     labels?: Record<string, string>;
     idPrefix?: string;
 }): () => void;
 export const MIN_SPIN_MS: 700;
+export const UPDATE_GAP_MS: 30000;
