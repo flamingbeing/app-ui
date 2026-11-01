@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.74
+- Snappier tab changes: a tapped tab's page slides in over 180 ms (was 280 ms), and a let-go tab swipe settles on a
+  quicker spring (`PAGE_SPRING_S`, 0.22 s response, was the shared 0.3 s), landing in about 0.3 s instead of 0.4 s.
+  Sheets and other glides keep `SPRING_S`.
+- Settings menu: a page opened from the menu slides in from the right, and Back slides the menu in from the left
+  (180 ms, the tab slide's motion). Before, the page just appeared. Less motion: it just switches.
+
 ## 1.0.0-rc.73
 - Bounce: a finger that catches the spring back (or drags back from a stretch) moves the page once, as on iOS: the
   stretch takes the finger first and the scroll only once it is gone. Before, both moved and the page skipped. The

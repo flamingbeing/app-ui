@@ -535,11 +535,11 @@ test('a tapped tab slides its page in from its side; Reduce Motion or data-slide
   }, id);
   const tap = name => page.locator('nav.ui-tabbar .ui-tab', { hasText: name }).click();
   await tap('Rooms');
-  await expect.poll(() => slide('rooms')).toEqual({ from: 1, ms: 280 });   // Rooms sits to the right of Plants
+  await expect.poll(() => slide('rooms')).toEqual({ from: 1, ms: 180 });   // Rooms sits to the right of Plants
   await expect(page.locator('.ui-screens')).toHaveClass(/is-sliding/);
   await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
   await tap('Plants');
-  await expect.poll(() => slide('home')).toEqual({ from: -1, ms: 280 });
+  await expect.poll(() => slide('home')).toEqual({ from: -1, ms: 180 });
   await expect(page.locator('.ui-screens')).not.toHaveClass(/is-sliding/);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await tap('Rooms');

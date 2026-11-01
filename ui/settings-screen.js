@@ -6,12 +6,14 @@
 // the About sheet; it also retries an owed reload once a field is left or a sheet closes (as updatePrompt does).
 // With menu (from the logbook's Settings), the screen opens on a menu instead: a search box over every row, then one
 // row per section (its icon, title and one line, ›) under the sections' group headings; a row opens that section as a
-// page of its own with a Back button. Given steps (createTransients), each page is a history entry, so Back closes it.
+// page of its own with a Back button. The page slides in from the right, and Back slides the menu in from the left
+// (SLIDE_MS, as a tapped tab; less motion: it just switches). Given steps (createTransients), each page is a history entry, so Back closes it.
 // Styles: ui/gestures.css (lists), "settings screen".
 import { el, button, plural } from './dom.js';
 import { LABELS } from './labels.js';
 import { aboutSheet } from './about-sheet.js';
 import { gate } from './section-gate.js';
+import { still, SLIDE_MS, SLIDE_EASE } from './gesture.js';
 import { icon, info as infoIcon, chevronLeft, chevronRight } from '../icons/lucide.js';
 
 /**
@@ -334,11 +336,25 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
     let step = null;
     /** @type {HTMLElement | null} */
     let shown = null;
+    /** @type {Animation | null} */
+    let sliding = null;
+    /** the page or menu coming in slides from its side (dir 1: the right, -1: the left), clipped so it can't widen
+     * the screen @param {HTMLElement} part @param {number} dir */
+    function slideIn(part, dir) {
+      sliding?.cancel();
+      if (still() || typeof part.animate !== 'function') return;
+      box.classList.add('is-sliding');
+      const a = sliding = part.animate([{ transform: `translateX(${dir * Math.round(innerWidth * .3)}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
+        { duration: SLIDE_MS, easing: SLIDE_EASE });
+      const done = () => { if (sliding === a) { sliding = null; box.classList.remove('is-sliding'); } };
+      a.finished.then(done, done);
+    }
     /** @param {typeof pages[number]} p @param {Element | null} [row]  a search result's row: scrolled to */
     function open(p, row = null) {
       if (shown) { shown.hidden = true; } else step = steps ? steps.open(() => { step = null; shut(); }) : null;
       front.hidden = true;
       p.section.hidden = false;
+      if (shown !== p.section) slideIn(p.section, 1);
       shown = p.section;
       (row || p.section).scrollIntoView?.({ block: row ? 'center' : 'nearest' });
       if (row) { row.classList.add('ui-found'); setTimeout(() => row.classList.remove('ui-found'), 1600); }
@@ -349,7 +365,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       if (shown) shown.hidden = true;
       shown = null;
       front.hidden = false;
-      if (was) gos.get(was)?.focus({ preventScroll: true });
+      if (was) { slideIn(front, -1); gos.get(was)?.focus({ preventScroll: true }); }
     }
     /** the rows whose words hold the query, as buttons to their page @param {string} text */
     function find(text) {

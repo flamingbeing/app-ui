@@ -26,6 +26,29 @@ test('the menu: a row per page under its group; a row opens its page; Back and t
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });
 
+test('a menu row slides its page in from the right, Back slides the menu in from the left; Less motion just switches', async ({ sized }) => {
+  const page = await sized(390);
+  await page.goto(PAGE);
+  await expect.poll(() => page.evaluate(() => !!window.kit)).toBe(true);
+  // the part's running slide: which side it starts on and how long it takes, or null
+  const slide = sel => page.evaluate(sel => {
+    const a = document.querySelector(sel)?.getAnimations().find(x => x.playState === 'running');
+    if (!a) return null;
+    const k = /** @type {KeyframeEffect} */ (a.effect).getKeyframes()[0];
+    return { from: Math.sign(new DOMMatrix(String(k.transform)).m41), ms: a.effect.getTiming().duration };
+  }, sel);
+  const menu = page.locator('.ui-settings-menu');
+  await menu.getByRole('button', { name: /Reminders/ }).click();
+  await expect.poll(() => slide('.ui-settings-group:not([hidden])')).toEqual({ from: 1, ms: 180 });
+  await page.locator('.ui-settings-group:not([hidden]) .ui-settings-back').click();
+  await expect.poll(() => slide('.ui-settings-menu')).toEqual({ from: -1, ms: 180 });
+  await expect(page.locator('.ui-settings')).not.toHaveClass(/is-sliding/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await menu.getByRole('button', { name: /Reminders/ }).click();
+  expect(await slide('.ui-settings-group:not([hidden])')).toBeNull();
+});
+
 test('search finds a row on its page and opens it there', async ({ sized }) => {
   const page = await sized(390);
   await page.goto(PAGE);

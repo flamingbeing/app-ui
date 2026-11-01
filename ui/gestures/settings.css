@@ -43,6 +43,7 @@
 .ui-settings-back { display: inline-flex; align-items: center; gap: .2rem; min-height: var(--tap); margin: var(--gap) calc(var(--list-inset) + var(--pad) / 2) 0;
   padding: 0 var(--gap) 0 0; border: 0; background: none; color: var(--link); font: inherit; cursor: pointer; }
 .ui-settings-menu[hidden], .ui-settings-group[hidden], .ui-settings-results[hidden], .ui-settings-menu-groups[hidden] { display: none; }
+.ui-settings.is-sliding { overflow-x: clip; }
 .ui-found { animation: ui-found 1.6s ease-out; }
 @keyframes ui-found { from { background: color-mix(in srgb, var(--accent) 22%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .ui-found { animation: none; outline: 2px solid var(--accent); } }
