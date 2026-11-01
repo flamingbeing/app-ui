@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.76
+- Bounce: let go of a stretch and the list springs back from where it is. Before, it showed for one frame at rest and
+  then jumped back out to start the spring (the list flicked down and up on every let-go).
+
 ## 1.0.0-rc.75
 - Tab swipe from a text box: a swipe that starts on a textarea nobody is typing in now changes tab, as on the rest of
   the page (a tall box, such as the notes app's Haiku tab, left little page to swipe on). While the box is focused

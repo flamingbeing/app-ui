@@ -188,6 +188,34 @@ test.describe('through the real input path', () => {
     expect(await shifted(page)).toEqual([]);
   });
 
+  test('let go, the stretch springs back from where it is: its style holds the stretch under the spring', async ({ sized }) => {
+    const page = await load(sized);
+    const cdp = await page.context().newCDPSession(page);
+    const send = (type, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: 200, y }] });
+    const top = () => page.evaluate(() => document.querySelector('.ui-screen:not([hidden]) .ui-list').getBoundingClientRect().top);
+    // 60 px short of the end: the browser scrolls the touch there, then it stretches (the browser's scroll, not held back)
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight - innerHeight - 60));
+    await page.evaluate(() => new Promise(r => setTimeout(r, 100)));
+    const rest = await top() - 60;
+    await send('touchStart', 700);
+    for (let i = 1; i <= 6; i++) { await new Promise(r => setTimeout(r, 8)); await send('touchMove', 700 - i * 50); }
+    const pulled = rest - await top();
+    expect(pulled, 'stretched').toBeGreaterThan(30);
+    // as the spring starts (straight after the bounce's own touchend), the list still holds the stretch under its
+    // animation: before, its style went back to rest at once, and a frame could show it there before the spring's first
+    await page.evaluate(() => {
+      const list = document.querySelector('.ui-screen:not([hidden]) .ui-list');
+      document.addEventListener('touchend', () => { window.__held = [list.style.transform, list.getAnimations().length]; }, { once: true });
+    });
+    await send('touchEnd', 400);
+    await expect.poll(() => page.evaluate(() => !!window.__held)).toBe(true);
+    const [held, runs] = await page.evaluate(() => window.__held);
+    expect(runs, 'the spring runs').toBe(1);
+    expect(-Number(/translateY\((-?[\d.]+)px\)/.exec(held)?.[1] ?? 0), 'the stretch held under it').toBeGreaterThan(pulled * 0.8);
+    await page.evaluate(() => window.__settled());
+    expect(await shifted(page)).toEqual([]);
+  });
+
   test('a mouse wheel to the end never bounces', async ({ sized }) => {
     const page = await load(sized);
     await page.mouse.move(200, 400);
