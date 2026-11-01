@@ -2,7 +2,8 @@
 // @core/settings (same api, same option rules from its schema and file code, kept in this tab's sessionStorage), so the
 // page works signed out. window.kit is { settings, stop, retries } for the tests. With ?menu at the end of the address
 // it opens on the menu (search, a row per page, Back closes a page), with a Tab bar page: the tab arranger over a
-// made-up tab bar (its order and the tabs off it kept in the tabs option, on this device).
+// made-up tab bar (its order and the tabs off it kept in the tabs option, on this device). With ?menu&titled the
+// open page is shown as a screen of its own (menu.onPage): its title in the large title, no Back on the page.
 import { settingsScreen, createTransients, tabArranger, arrangeTabs, applyTabs, cleanTabs } from '../../ui/index.js';
 import { slidersHorizontal, info, menu as menuIcon, refreshCw } from '../../icons/lucide.js';
 import { themeSwitch } from '../../theme/index.js';
@@ -89,6 +90,10 @@ const update = { versionLabel: async () => '1.2.3', checkNow: async () => ++chec
 const kit = { settings, stop: () => {}, retries: 0 };
 // ?menu: the menu, and the Tab bar page (a made-up app's tabs; Settings always stays on the bar)
 const MENU = new URLSearchParams(location.search).has('menu');
+const TITLED = MENU && new URLSearchParams(location.search).has('titled');
+const bigTitle = /** @type {HTMLElement} */ (document.querySelector('main > .ui-large-title'));
+/** ?titled: the open page's title over the screen (null: the menu's) @param {{ title: string } | null} p */
+const onPage = p => { bigTitle.textContent = p ? p.title : 'Settings'; };
 const TABS = [{ id: 'plants', label: 'Plants' }, { id: 'rooms', label: 'Rooms' }, { id: 'calendar', label: 'Calendar' },
   { id: 'shop', label: 'Shop' }, { id: 'diary', label: 'Diary' }, { id: 'settings', label: 'Settings' }];
 const RULES = { max: 4, fixed: ['settings'] };
@@ -112,7 +117,7 @@ function tabBarPage(host) {
 }
 const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById('screen')), {
   settings,
-  menu: MENU ? { steps: createTransients({ history, location, events: window }) } : undefined,
+  menu: MENU ? { steps: createTransients({ history, location, events: window }), ...(TITLED ? { onPage } : {}) } : undefined,
   file: 'plants-settings.json',
   sections: [
     { title: 'Plants', icon: slidersHorizontal, sub: 'Sorting and units', group: 'Your plants', rows: [

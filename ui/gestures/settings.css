@@ -43,6 +43,9 @@
 .ui-chev { flex: none; color: var(--muted); }
 .ui-settings-back { display: inline-flex; align-items: center; gap: .2rem; min-height: var(--tap); margin: var(--gap) calc(var(--list-inset) + var(--pad) / 2) 0;
   padding: 0 var(--gap) 0 0; border: 0; background: none; color: var(--link); font: inherit; cursor: pointer; }
+/* a page whose title the screen shows (settingsScreen's menu.onPage): its own heading only for screen readers */
+.ui-settings-group.is-titled > .ui-settings-title { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; }
 .ui-settings-menu[hidden], .ui-settings-group[hidden], .ui-settings-results[hidden], .ui-settings-menu-groups[hidden] { display: none; }
 .ui-settings.is-sliding { overflow-x: clip; }
 .ui-found { animation: ui-found 1.6s ease-out; }

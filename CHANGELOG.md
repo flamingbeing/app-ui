@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.80
+- Settings pages as screens of their own: settingsScreen's `menu.onPage(page)` is told the open page's title (and
+  `close`, what Back does), or null when the menu is back, so the screen around it can show the page's title in its
+  large title and bar and let its own Back close the page (a history step, given `steps`). With it a page has no
+  "‹ Settings" button of its own (two Backs before) and its heading is left to screen readers. Without it nothing
+  changes. Gallery: `/kit/settings/?menu&titled`.
+
 ## 1.0.0-rc.79
 - Bounce: a finger that scrolls a page into its end now stops there. Before, once the browser was scrolling the
   touch it could not be held back, and the stretch moved the list on top of the browser's own scroll (the list

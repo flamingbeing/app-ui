@@ -8,6 +8,9 @@
 // row per section (its icon, title and one line, ›) under the sections' group headings; a row opens that section as a
 // page of its own with a Back button. The page slides in from the right, and Back slides the menu in from the left
 // (SLIDE_MS, as a tapped tab; less motion: it just switches). Given steps (createTransients), each page is a history entry, so Back closes it.
+// Given onPage, the screen around it shows the open page as its own pushed screen: it is told the page's title (null:
+// the menu again) to put in its large title and bar, the page has no Back of its own (the bar's Back, a history step,
+// closes it) and its heading is left to screen readers.
 // Styles: ui/gestures.css (lists), "settings screen".
 import { el, button, plural } from './dom.js';
 import { LABELS } from './labels.js';
@@ -29,9 +32,12 @@ import { icon, info as infoIcon, chevronLeft, chevronRight } from '../icons/luci
  *   visible: a function or an option key (read with settings.get): shown only while true, live (a key is watched, a
  *   function re-runs on any change); a hidden page leaves the menu and the search, and closes if open (default: shown)
  * @typedef {{ steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } },
- *   top?: (host: HTMLElement) => (() => void) | void, search?: boolean }} SettingsMenu
+ *   top?: (host: HTMLElement) => (() => void) | void, search?: boolean,
+ *   onPage?: (page: { title: string, close: () => void } | null) => void }} SettingsMenu
  *   steps: createTransients' api (Back closes a page); top: the app's own part above the menu (such as the tabs off
- *   the bar); search: the search box (default on)
+ *   the bar); search: the search box (default on); onPage: told each time a page opens (its title, and close: what
+ *   Back does) and when the menu is back (null), so the screen's own title and Back stand for the page's; with it, a
+ *   page has no Back button of its own and its heading is visually hidden (pass steps too, so history Back closes it)
  */
 
 /** @type {Readonly<Record<string, string>>} */
@@ -289,7 +295,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
   return () => { off(); stops.forEach(s => s()); box.remove(); };
 
   /** The menu over the pages (each built above as a group); one shows at a time. @param {SettingsMenu} m */
-  function pageMenu({ steps, top, search = true }) {
+  function pageMenu({ steps, top, search = true, onPage }) {
     const front = el('div', { class: 'ui-settings-menu' });
     /** @type {(() => void)[]} */
     const ends = [];
@@ -330,23 +336,29 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       go.addEventListener('click', () => open(p));
       gos.set(p.section, go);
       list.append(el('li', {}, go));
-      // each page gets a Back to the menu, above its title
-      const back = el('button', { type: 'button', class: 'ui-settings-back' }, icon(chevronLeft), words.settings);
-      back.addEventListener('click', () => { if (step?.active) void step.close(); else shut(); });
-      p.section.prepend(back);
+      // each page gets a Back to the menu, above its title (with onPage the screen's own Back stands for it, and its
+      // title for the page's heading)
+      if (onPage) p.section.classList.add('is-titled');
+      else {
+        const back = el('button', { type: 'button', class: 'ui-settings-back' }, icon(chevronLeft), words.settings);
+        back.addEventListener('click', close);
+        p.section.prepend(back);
+      }
       p.section.hidden = true;
       if (!p.shown) go.parentElement?.setAttribute('hidden', '');
     }
     gated = p => {
       const li = gos.get(p.section)?.parentElement;
       if (li) li.hidden = !p.shown;
-      if (!p.shown && shown === p.section) { if (step?.active) void step.close(); else shut(); }
+      if (!p.shown && shown === p.section) close();
       if (!p.shown) p.section.hidden = true;
       if (q && q.value.trim()) find(q.value);
     };
     box.prepend(front);
     /** @type {{ readonly active: boolean, close: () => Promise<void> } | null} */
     let step = null;
+    /** back to the menu: the page's history step, or at once */
+    function close() { if (step?.active) void step.close(); else shut(); }
     /** @type {HTMLElement | null} */
     let shown = null;
     /** @type {Animation | null} */
@@ -372,6 +384,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       (row || p.section).scrollIntoView?.({ block: row ? 'center' : 'nearest' });
       if (row) { row.classList.add('ui-found'); setTimeout(() => row.classList.remove('ui-found'), 1600); }
       /** @type {HTMLElement | null} */ (p.section.querySelector('.ui-settings-back'))?.focus({ preventScroll: true });
+      onPage?.({ title: p.meta.title, close });
     }
     function shut() {
       const was = shown;
@@ -379,6 +392,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       shown = null;
       front.hidden = false;
       if (was) { slideIn(front, -1); gos.get(was)?.focus({ preventScroll: true }); }
+      if (was) onPage?.(null);
     }
     /** the rows whose words hold the query, as buttons to their page @param {string} text */
     function find(text) {
