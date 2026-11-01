@@ -92,8 +92,9 @@ export function bounce(root = document) {
   const letGo = (y, v) => {
     if (!cur) return;
     const c = cur;
+    // the glide draws it from here, over the stretch the parts still hold (an animation wins over their style): put
+    // back now, a frame could show them at rest before the glide's first one (the list jumped down and back)
     const run = c.run = glide(c.parts.map(p => [p, x => ({ transform: `translateY(${x}px)` })]), y, 0, v);
-    show(0);   // the glide draws it from here; the parts' own styles are its resting place
     void run.done.then(landed => { if (landed && cur === c) clear(); });
   };
 
@@ -134,7 +135,7 @@ export function bounce(root = document) {
       show(y);
       raw = unrubber(y, span);
       way = 'y';
-    } else if (cur?.run?.running()) cur.run.stop();
+    } else if (cur?.run?.running()) clear();   // another scroller's: put away (its parts still hold the stretch)
   }, { passive: true });
 
   l.on(root, 'touchmove', (/** @type {TouchEvent} */ e) => {

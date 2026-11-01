@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.75
+- Bounce: let go of a stretch and the list springs back from where it is. Before, it showed for one frame at rest and
+  then jumped back out to start the spring (the list flicked down and up on every let-go).
+
 ## 1.0.0-rc.74
 - Snappier tab changes: a tapped tab's page slides in over 180 ms (was 280 ms), and a let-go tab swipe settles on a
   quicker spring (`PAGE_SPRING_S`, 0.22 s response, was the shared 0.3 s), landing in about 0.3 s instead of 0.4 s.
