@@ -22,7 +22,7 @@
 // move scrolls instead. Less motion doesn't stop it: the pages move with the finger (direct touch, as iOS's paging
 // with Reduce Motion). Off: data-swipe="off" on the tab bar (or <html>), or { swipe: false }.
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
-// page motion), at every width. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
+// page motion), at every width; a finger landing on the page while it slides lands it at once. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
 // { slide: false }.
 // Drawn ahead (opt-in, from the logbook: { ahead }): so a swipe never brings in an empty or out-of-date page, not even
 // in quick flicks in a row (each catches the glide and goes on from the page it was going to), ahead(page) asks the
@@ -337,6 +337,9 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   }
   l.on(document, 'touchstart', (/** @type {TouchEvent} */ e) => {
     x0 = null;
+    // a finger on a page still sliding in (a tapped tab): it lands now, so the scroll (or swipe) the finger starts
+    // moves a page that stands still under it, not one still drifting in sideways and fading up
+    if (sliding && host.contains(/** @type {Node} */ (e.target))) sliding.finish();
     const t = e.touches[0];
     const caught = !!glide && e.touches.length === 1 && host.contains(/** @type {Node} */ (e.target));
     if (glide && !caught) settle();

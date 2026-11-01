@@ -72,7 +72,7 @@
   /* the look's tokens (palette-css.js puts the picked look's over these) */
   --look-font-head: inherit;
   --title-size: 2rem; --title-weight: 700; --title-track: 0; --bar-line: transparent;
-  --card-r: 0px; --list-inset: 0; --list-edge: var(--line); --list-sep: color-mix(in srgb, var(--line) 40%, transparent); --list-shadow: none;
+  --card-r: 0px; --list-inset: 0px; --list-edge: var(--line); --list-sep: color-mix(in srgb, var(--line) 40%, transparent); --list-shadow: none;
   --row-weight: 400; --control-r: var(--radius); --pill-r: calc(var(--radius-l) * 2); --menu-r: var(--radius-l);
   --sheet-r: var(--radius-l); --tick-size: 22px; --tab-active: var(--selection); --glass-tint: 0%;
 }
