@@ -207,6 +207,7 @@ stand-in for `@core/settings` on the page.
 | Settings file | Export downloads the account options only, under the app's file name; Import says "Imported: N changes, M left out", "Nothing to change", or why the file isn't one | |
 | Switch | Space flips it, named by its row; Less motion (`data-motion="still"`) takes its slide away | |
 | About | the last group: the Version row shows the update api's version; Check for updates says "newest", then "Updated."; the About row opens the About sheet (name, version); closing it retries the owed update | sheet open |
+| Install this app | first row of About while not installed: a tap with no kept prompt opens the how-to (browser menu; iPhone: Share, Add to Home Screen); with `coreInstallPrompt` kept it shows that prompt once, and accepted says "Installed." and hides the button; `installMode` (unit) | |
 
 ### Looks, density and the glass guard (`e2e/looks.spec.mjs`)
 

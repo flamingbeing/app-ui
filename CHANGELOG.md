@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.78
+- Install this app (owner 1 Nov 2026): settingsScreen's About group starts with an "Install this app" row while the
+  app isn't installed. A tap shows the browser's own install prompt if boot.js kept it (Chrome, Edge, Samsung:
+  `beforeinstallprompt` cancelled and stored in `globalThis.coreInstallPrompt`), else a short how-to (iPhone and iPad:
+  Share, then Add to Home Screen; other browsers: the menu). Opened from the home screen: no row. Never shown unasked.
+  `about.install: false` leaves it out; words in `INSTALL_WORDS` (labels override). Also `installApp`, `installMode`.
+
 ## 1.0.0-rc.77
 - Look C and E side gaps: their list inset was a bare `0`, which makes every `calc()` it is added into invalid, so
   the settings headings and search box (and an app's own `calc(var(--pad) + var(--list-inset))`) sat on the screen

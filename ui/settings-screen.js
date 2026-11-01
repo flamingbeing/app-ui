@@ -2,8 +2,8 @@
 // picker and the settings file (export, import), in a host the page gives it. It reads only the settings api it is
 // handed and follows it: a change on another device or by a profile shows at once. The app names the rows and their
 // words; a section can also hold the app's own part (mount), such as @core/theme's themeSwitch for "This device".
-// With about (the app's name and its update api), an About group comes last: the Version row, Check for updates and
-// the About sheet; it also retries an owed reload once a field is left or a sheet closes (as updatePrompt does).
+// With about (the app's name and its update api), an About group comes last: Install this app (until installed), the
+// Version row, Check for updates and the About sheet; it also retries an owed reload once a field is left or a sheet closes (as updatePrompt does).
 // With menu (from the logbook's Settings), the screen opens on a menu instead: a search box over every row, then one
 // row per section (its icon, title and one line, ›) under the sections' group headings; a row opens that section as a
 // page of its own with a Back button. The page slides in from the right, and Back slides the menu in from the left
@@ -12,6 +12,7 @@
 import { el, button, plural } from './dom.js';
 import { LABELS } from './labels.js';
 import { aboutSheet } from './about-sheet.js';
+import { installApp, installMode, INSTALL_WORDS } from './install.js';
 import { gate } from './section-gate.js';
 import { still, SLIDE_MS, SLIDE_EASE } from './gesture.js';
 import { icon, info as infoIcon, chevronLeft, chevronRight } from '../icons/lucide.js';
@@ -70,14 +71,15 @@ export const SETTINGS_WORDS = Object.freeze({
  * @param {HTMLElement} host  the screen is added here
  * @param {{ settings: import('../settings/types').SettingsApi, sections: SettingSection[], file?: string | false,
  *   labels?: Record<string, string>, about?: { name: string, update: import('./types').UpdateApi | null,
- *   licences?: Record<string, string>, importMap?: { imports?: Record<string, string> } | null },
+ *   licences?: Record<string, string>, importMap?: { imports?: Record<string, string> } | null, install?: boolean },
  *   menu?: SettingsMenu | boolean }} o  file: the exported file's name (false: no file rows); labels: words over
- *   SETTINGS_WORDS (and LABELS); about: the About group (update null: the version reads "dev", no check); menu: open
- *   on the menu (true: with no steps)
+ *   SETTINGS_WORDS (and LABELS, INSTALL_WORDS); about: the About group (update null: the version reads "dev", no
+ *   check; install false: no Install this app row, else it shows until installed); menu: open on the menu (true: with
+ *   no steps)
  * @returns {() => void} stop: unwatches and removes the screen
  */
 export function settingsScreen(host, { settings, sections, file = 'settings.json', labels = {}, about, menu }) {
-  const words = { ...LABELS, ...SETTINGS_WORDS, ...labels };
+  const words = { ...LABELS, ...SETTINGS_WORDS, ...INSTALL_WORDS, ...labels };
   const box = el('div', { class: 'ui-settings' });
   const status = el('p', { class: 'ui-settings-status ui-small small', role: 'status', 'aria-live': 'polite' });
   /** @type {Map<string, (v: unknown) => void>} */
@@ -247,6 +249,17 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
     const version = el('span', { class: 'ui-setting-value', id: id() }, update ? '…' : words.dev);
     const vrow = el('li', { class: 'ui-row ui-setting ui-version' }, el('span', { class: 'ui-row-main' }, words.version), version);
     const list = el('ul', { class: 'ui-list' }, vrow);
+    // Install this app (install.js): first, and only while it isn't installed; a tap shows the browser's prompt or the how-to
+    if (about.install !== false && installMode() !== 'installed') {
+      const sub = el('span', { class: 'ui-row-sub' }, words.installSub);
+      const done = () => { sub.textContent = words.installed; go.hidden = true; };
+      const go = button(words.installButton, async () => {
+        if (await installApp({ words: labels }) === 'accepted') done();
+      }, { class: 'ui-install', 'aria-label': words.installRow });
+      list.prepend(el('li', { class: 'ui-row ui-setting' }, el('span', { class: 'ui-row-main' }, words.installRow, sub), go));
+      addEventListener('appinstalled', done);
+      stops.push(() => removeEventListener('appinstalled', done));
+    }
     if (update) {
       update.versionLabel().then(v => { version.textContent = v || words.notInstalled; }, () => { version.textContent = words.notInstalled; });
       const answer = el('span', { class: 'ui-row-sub', role: 'status' });
@@ -265,7 +278,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       importMap: about.importMap, labels }), { class: 'ui-about-open', 'aria-label': `${words.open} ${words.aboutRow.toLowerCase()}` });
     list.append(el('li', { class: 'ui-row ui-setting' },
       el('span', { class: 'ui-row-main' }, words.aboutRow, el('span', { class: 'ui-row-sub' }, words.aboutSub)), open));
-    group(words.about, list, { sub: words.aboutSub2, group: words.appGroup });
+    group(words.about, list, { sub: words.aboutSub2, group: words.appGroup, find: `${words.installRow} ${words.installSub}` });
   }
 
   box.append(status);

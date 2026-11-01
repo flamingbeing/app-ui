@@ -19,6 +19,7 @@ export { undoToast } from './undo-toast.js';
 export { loadState, cachedPaint, holdEmpty, swapWhenReady, SNAP_ROWS } from './load-state.js';
 export { aboutSheet, packagesFromImportMap } from './about-sheet.js';
 export { settingsScreen, SETTINGS_WORDS } from './settings-screen.js';
+export { installApp, installMode, INSTALL_WORDS } from './install.js';
 // logbook parts (opt-in, named exports; nothing runs on import): drafts, drag-reorder, arrange tabs, share out, Back closes the top
 // dialog (transients) and screen history (navigation), Back with tabs (tab back), hide mode
 export { draftSlot, listDrafts } from './drafts.js';

@@ -2,10 +2,11 @@
  * @param {HTMLElement} host  the screen is added here
  * @param {{ settings: import('../settings/types').SettingsApi, sections: SettingSection[], file?: string | false,
  *   labels?: Record<string, string>, about?: { name: string, update: import('./types').UpdateApi | null,
- *   licences?: Record<string, string>, importMap?: { imports?: Record<string, string> } | null },
+ *   licences?: Record<string, string>, importMap?: { imports?: Record<string, string> } | null, install?: boolean },
  *   menu?: SettingsMenu | boolean }} o  file: the exported file's name (false: no file rows); labels: words over
- *   SETTINGS_WORDS (and LABELS); about: the About group (update null: the version reads "dev", no check); menu: open
- *   on the menu (true: with no steps)
+ *   SETTINGS_WORDS (and LABELS, INSTALL_WORDS); about: the About group (update null: the version reads "dev", no
+ *   check; install false: no Install this app row, else it shows until installed); menu: open on the menu (true: with
+ *   no steps)
  * @returns {() => void} stop: unwatches and removes the screen
  */
 export function settingsScreen(host: HTMLElement, { settings, sections, file, labels, about, menu }: {
@@ -20,6 +21,7 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
         importMap?: {
             imports?: Record<string, string>;
         } | null;
+        install?: boolean;
     };
     menu?: SettingsMenu | boolean;
 }): () => void;
