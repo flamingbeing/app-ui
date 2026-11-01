@@ -21,11 +21,16 @@ export function still() {
  * Places a gesture never starts from: fields, dialogs (outside the sheet part's own handling), drag handles, things
  * that scroll sideways, and anything marked data-no-gesture.
  * @param {EventTarget | null} target
- * @param {{ inDialog?: boolean }} [opts]  inDialog: the caller is a dialog's own part, so dialogs don't count
+ * @param {{ inDialog?: boolean, idleText?: boolean }} [opts]  inDialog: the caller is a dialog's own part, so dialogs
+ *   don't count; idleText: a text box (textarea) that isn't being typed in (not focused) doesn't count either, so a
+ *   tab swipe can start on a big box (owner, 1 Nov 2026: a tall box left little page to swipe on). Typing in it, or
+ *   holding to select (that focuses it), keeps the finger for the text.
  */
-export function noGesture(target, { inDialog = false } = {}) {
-  const t = /** @type {Element | null} */ (target instanceof Element ? target : null);
+export function noGesture(target, { inDialog = false, idleText = false } = {}) {
+  let t = /** @type {Element | null} */ (target instanceof Element ? target : null);
   if (!t) return true;
+  const box = idleText ? t.closest('textarea') : null;
+  if (box && box !== document.activeElement) { t = box.parentElement; if (!t) return true; }
   if (t.closest(`input,textarea,select,[contenteditable],[data-no-gesture],[data-drag-handle],.ui-scroll-x${inDialog ? '' : ',dialog'}`)) return true;
   // anything between the target and the page that scrolls sideways keeps the finger
   for (let n = t.parentElement; n && n !== document.body; n = n.parentElement) {
