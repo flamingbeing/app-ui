@@ -24,9 +24,11 @@ repo; never copy anything from there into this repo, a PR or an issue (neutral p
 
 ## App defaults
 
-- Installable web apps cancel the browser's automatic install prompt: add
-  `<script>addEventListener('beforeinstallprompt', e => e.preventDefault());</script>` to the `<head>` of every page
-  that links a manifest. Keep the manifest, icons and service worker: installable, never prompted. No install buttons.
+- Installable web apps cancel the browser's automatic install prompt on every page that links a manifest, and keep
+  it for the Settings row: `addEventListener('beforeinstallprompt', e => { e.preventDefault(); globalThis.coreInstallPrompt = e; })`
+  (in boot.js, or a file in the `<head>`). Keep the manifest, icons and service worker: installable, never prompted.
+  The only install button is settingsScreen's "Install this app" row in About (ui/install.js; owner 1 Nov 2026): no
+  banners, cards or nags.
 
 ## Checks before merging
 
