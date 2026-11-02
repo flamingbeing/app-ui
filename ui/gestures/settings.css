@@ -51,3 +51,11 @@
 .ui-found { animation: ui-found 1.6s ease-out; }
 @keyframes ui-found { from { background: color-mix(in srgb, var(--accent) 22%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .ui-found { animation: none; outline: 2px solid var(--accent); } }
+/* a subheading between a page's rows (a row object { heading }): small, quiet, over the rows after it */
+.ui-setting-subhead { list-style: none; padding: calc(var(--pad) * 1.25) var(--pad) calc(var(--pad) * .35); }
+.ui-setting-subhead-title { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .02em; color: var(--muted); }
+/* the theme list (theme/switch.js themeList): the picked style ticked at the end of its row */
+.theme-style { display: flex; align-items: center; justify-content: space-between; gap: var(--pad); width: 100%; border: 0; background: none;
+  color: inherit; font: inherit; text-align: start; }
+.theme-style .ui-row-sub { display: block; }
+.theme-tick { width: 1.25rem; height: 1.25rem; flex: none; color: var(--accent); margin-inline-start: auto; }

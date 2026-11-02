@@ -332,3 +332,9 @@ over a made-up tab bar; the pure order rules by `test/tab-arrange.unit.test.mjs`
 | Order rules | saved order wins, a new tab after the ones before it, fixed last, off by default, over the limit, at least min, replace, move, a bad saved value | |
 
 | Section visible | `gate()` (`test/section-gate.unit.test.mjs`): default shown and unwatched; a key is watched by that key and only a flip reports; a function re-runs on any change; a throwing function counts as hidden; stop unwatches | |
+
+| Options (rc.83, `e2e/options.spec.mjs`) | `.ui-screens[data-depth]` follows pushes and pops; with `html[data-push-bar="hide"]` the tab bar is hidden on a pushed screen and back after | |
+| Options | tap menu: a title, a nested list with Back, Esc steps out then closes, a pick runs and closes | |
+| Options | `data-bar="slim"` hides the large title; `.ui-bar-title[data-sub]` shows its line under the name | |
+| Options | theme list: the switch starts on Sync with system, a pick ticks one style, turning the switch off leaves the theme fixed | |
+| Options | settings: a `{ heading }` row is a title with no control; `about.rows` adds a link and a button to About | |

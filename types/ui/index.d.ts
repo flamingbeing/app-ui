@@ -15,6 +15,7 @@ export { createNavigation } from "./navigation.js";
 export { startGestures } from "./gestures.js";
 export { largeTitle } from "./large-title.js";
 export { holdMenus } from "./hold-menu.js";
+export { openMenu } from "./tap-menu.js";
 export { stepsSettled } from "./steps.js";
 export { lazyModules } from "./lazy-modules.js";
 export { screenStack } from "./screens.js";

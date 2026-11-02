@@ -35,6 +35,7 @@ export { startGestures } from './gestures.js';
 export { largeTitle } from './large-title.js';
 export { shrinkingTabBar, tabBarRoom } from './tab-bar.js';
 export { holdMenus } from './hold-menu.js';
+export { openMenu } from './tap-menu.js';
 export { detentSheet, sheetsSettled } from './detent-sheet.js';
 export { stepsSettled } from './steps.js';
 export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD, caretShift } from './keyboard.js';

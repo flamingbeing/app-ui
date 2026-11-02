@@ -1,6 +1,6 @@
 /**
  * @param {ParentNode} [root]
- * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, ahead?: (page: HTMLElement) => void, press?: boolean, bounce?: boolean, keyboard?: boolean, ticks?: boolean }} [o]  drawer:
+ * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, ahead?: (page: HTMLElement) => void, press?: boolean, bounce?: boolean, keyboard?: boolean, ticks?: boolean, tabs?: { swipe?: boolean, slide?: boolean, backToFirst?: boolean, backToClose?: boolean } }} [o]  tabs: options passed on to tabPages (swipe: false turns the sideways page swipe off, tapping a tab still works; the same as data-swipe="off", but per app); drawer:
  *   ignored (a swipe no longer pulls the side bar out; still taken so apps that pass it need no change);
  *   onPrevMissing: told after a right swipe on the first tab page; ahead: draws a still copy of a tab page off screen (tab-pages.js, "Drawn ahead"); press: false leaves out the instant pressed state; bounce: false
  *   leaves out the rubber band at the scroll's ends; keyboard: false leaves out the keyboard watch; ticks: false
@@ -9,7 +9,7 @@
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root?: ParentNode, { onPrevMissing, ahead, press, bounce, keyboard, ticks }?: {
+export function startGestures(root?: ParentNode, { onPrevMissing, ahead, press, bounce, keyboard, ticks, tabs: tabOptions }?: {
     drawer?: () => import("./tab-pages.js").PullDrawer | null;
     onPrevMissing?: () => void;
     ahead?: (page: HTMLElement) => void;
@@ -17,6 +17,12 @@ export function startGestures(root?: ParentNode, { onPrevMissing, ahead, press, 
     bounce?: boolean;
     keyboard?: boolean;
     ticks?: boolean;
+    tabs?: {
+        swipe?: boolean;
+        slide?: boolean;
+        backToFirst?: boolean;
+        backToClose?: boolean;
+    };
 }): {
     title: ReturnType<typeof largeTitle> | null;
     menus: ReturnType<typeof holdMenus> | null;

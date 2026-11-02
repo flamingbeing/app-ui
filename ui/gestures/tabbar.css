@@ -45,3 +45,8 @@
 
 /* the keyboard up (ui/keyboard.js): the tab bar steps aside, as Android apps do it */
 .ui-keyboard-open .ui-tabbar { display: none; }
+
+/* opt-in (html[data-push-bar="hide"]): a pushed screen (a Settings page, a detail) has the tab bar to itself no longer;
+   the bar is gone and the room kept for it too (ui/screens.js sets .ui-screens[data-depth], 0 = none pushed) */
+[data-push-bar="hide"]:has(.ui-screens:not([data-depth="0"])) .ui-tabbar { display: none; }
+[data-push-bar="hide"]:has(.ui-screens:not([data-depth="0"])) .ui-screen::after { display: none; }

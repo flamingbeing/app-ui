@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.0-rc.83
+Six opt-in options (all off unless an app asks), from the todo app's UX pass:
+- Tab bar hidden on pushed screens: `html[data-push-bar="hide"]`. `screenStack` now sets `.ui-screens[data-depth]`
+  (0: none pushed); with the option a pushed screen (a Settings page) has no tab bar, and no room kept for it.
+- Theme as a list: `themeList(host)` (`@core/theme`), a "Sync with system" switch over the styles with a tick on the
+  picked one. `themeSwitch` is unchanged.
+- Tap menu: `openMenu(anchor, items, { title, sheet, note, back, classes })` (`@core/ui`, `ui/tap-menu.js`). A `title`
+  over the list; an item with `items` opens a nested list under a Back row (Esc steps out, then closes).
+- Settings pages: a row object `{ heading }` is a subheading between rows; `about.rows` adds the app's own rows to About
+  (a value, a link `href`, or a button `run`).
+- Slim bar: `html[data-bar="slim"]` is `data-header="slim"` whatever the look; a `.ui-bar-title[data-sub]` shows that
+  line small under the name.
+- Tab swipe off: `startGestures(root, { tabs: { swipe: false } })` passes options on to `tabPages` (swipe, slide,
+  backToFirst, backToClose).
+
 ## 1.0.0-rc.82
 - Bounce: a sticky part (a week strip under a title, a section header) moves with the stretch while it is still in
   its place, as on iOS; only one stuck to an edge stays (a header held at the top during the foot's bounce, a bar

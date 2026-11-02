@@ -8,6 +8,7 @@ import { PRESETS, SURFACES } from './presets.js';
 import { LOOKS } from './looks.js';
 import { kept } from './guard.js';
 import { GRID, SHADES, snap } from './grid.js';
+import { icon, check } from '../icons/lucide.js';
 
 /** @type {Record<string, string>} */
 const WORDS = {
@@ -110,4 +111,49 @@ function guardNote() {
   };
   sync();
   return { part, sync };
+}
+
+/**
+ * The theme as a list (opt-in, instead of themeSwitch's selects when an app wants one page of choices): a "Sync with
+ * system" switch (on: the theme follows the phone's light or dark; off: it stays as it is now) over a list of the
+ * styles (presets.js) with a tick on the picked one. A pick sets the style, nothing else. Re-draws when it changes.
+ * @param {HTMLElement} host  the list is added here
+ * @param {{ syncLabel?: string }} [o]
+ * @returns {() => void} stop: removes it
+ */
+export function themeList(host, { syncLabel = 'Sync with system' } = {}) {
+  const box = document.createElement('div');
+  box.className = 'theme-list';
+  const sw = Object.assign(document.createElement('input'), { type: 'checkbox', className: 'ui-switch', id: 'theme-sync' });
+  sw.setAttribute('role', 'switch');
+  const label = Object.assign(document.createElement('label'), { className: 'ui-row ui-setting theme-sync-row', htmlFor: sw.id });
+  label.append(Object.assign(document.createElement('span'), { className: 'ui-row-main', textContent: syncLabel }), sw);
+  const syncList = Object.assign(document.createElement('ul'), { className: 'ui-list' });
+  const li = document.createElement('li');
+  li.append(label);
+  syncList.append(li);
+  const list = Object.assign(document.createElement('ul'), { className: 'ui-list theme-styles', role: 'radiogroup' });
+  list.setAttribute('aria-label', 'Style');
+  box.append(syncList, list);
+  const dark = () => typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches;
+  const draw = () => {
+    const c = themeChoice();
+    sw.checked = c.theme === 'auto';
+    list.replaceChildren(...PRESETS.map(p => {
+      const on = c.preset === p.id;
+      const row = Object.assign(document.createElement('li'), { className: 'ui-row' });
+      const b = Object.assign(document.createElement('button'), { type: 'button', className: 'ui-row-main theme-style' });
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(on));
+      b.append(p.name, Object.assign(document.createElement('span'), { className: 'ui-row-sub', textContent: p.desc }));
+      if (on) b.append(icon(check, { class: 'theme-tick' }));
+      b.addEventListener('click', () => { chooseTheme({ preset: p.id }); draw(); });
+      row.append(b);
+      return row;
+    }));
+  };
+  sw.addEventListener('change', () => { chooseTheme({ theme: sw.checked ? 'auto' : dark() ? 'dark' : 'light' }); draw(); });
+  draw();
+  host.append(box);
+  return () => box.remove();
 }

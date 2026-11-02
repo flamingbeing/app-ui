@@ -38,6 +38,9 @@ export function screenStack(host, { onChange } = {}) {
   const stack = [{ screen: all()[0], from: null, y: 0 }];
   all().forEach((s, i) => { s.hidden = i > 0; });
   const top = () => stack[stack.length - 1].screen;
+  // how many screens are pushed over the base: host[data-depth] (0: none), which CSS options read (data-push-bar="hide")
+  const mark = () => { host.dataset.depth = String(stack.length - 1); };
+  mark();
 
   /** @param {HTMLElement} s */
   function focusIn(s) {
@@ -67,6 +70,7 @@ export function screenStack(host, { onChange } = {}) {
     const under = top();
     stack[stack.length - 1].y = scrollY;
     stack.push({ screen: s, from, y: 0 });
+    mark();
     try { history.pushState({ ...(history.state || {}), uiScreens: stack.length - 1 }, ''); } catch { /* none */ }
     // the new screen slides in over the old one, which leaves the flow and stays where it was on screen
     s.classList.add('is-top');
@@ -87,6 +91,7 @@ export function screenStack(host, { onChange } = {}) {
   async function popShown(animate = true) {
     if (stack.length < 2) return;
     const gone = /** @type {{ screen: HTMLElement, from: HTMLElement | null, y: number }} */ (stack.pop());
+    mark();
     const s = top();
     // the leaving screen slides off over the one coming back, which is scrolled back to where it was
     s.classList.add('is-top');
