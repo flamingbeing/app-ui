@@ -148,12 +148,13 @@ stand-in `navigator.vibrate` that writes down each pattern.
 ## Bounce
 
 `ui/bounce.js` in Node (`test/bounce.unit.test.mjs`): nothing runs on import; `rubberSlope` is the rubber band's
-slope. `e2e/bounce.spec.mjs` on `/kit/shell/` at 390 px, in Chromium and WebKit with page-sent touch events, then in
+slope; `stuck` tells a sticky part stuck to an edge from one still in its place. `e2e/bounce.spec.mjs` on `/kit/shell/` at 390 px, in Chromium and WebKit with page-sent touch events, then in
 Chromium through DevTools protocol touch and the mouse wheel.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
 | Pull at the top | the list stretches by `rubber(160, screen height)` ±1 px; the bar and the action bar stay; let go, one spring a part, it lands with no transform left | |
+| Sticky | a sticky part in its place moves with a pull at the top; stuck to the top after a scroll to the end, it stays at the pull at the bottom | |
 | Pull at the bottom | stretches up; a finger landing on the spring back catches it where it is (no animation left) and it lands after | |
 | No stretch | a sideways swipe (the pager's) and a screen with `data-no-bounce` | |
 | Sheet | the sheet body at large stretches past its bottom, never past its top (the sheet's own drag) | |

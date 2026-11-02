@@ -3,7 +3,7 @@
 // node --test test/bounce.unit.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rubberSlope } from '../ui/bounce.js';
+import { rubberSlope, stuck } from '../ui/bounce.js';
 import { rubber } from '../ui/gesture.js';
 
 test('bounce: importing it touches no page (Node has none)', async () => {
@@ -19,4 +19,18 @@ test('bounce: the rubber band\'s slope is its rate of change, about half at the 
   }
   assert.equal(rubberSlope(0, 800), 0.55);
   assert.ok(rubberSlope(300, 800) < rubberSlope(100, 800));
+});
+
+test('bounce: a sticky part moves with the content unless it is stuck to an edge', () => {
+  const port = { top: 0, bottom: 800 }, top0 = { top: '0px', bottom: 'auto' }, foot0 = { top: 'auto', bottom: '0px' };
+  // a strip under a title at the top: in its place, so it goes with the content
+  assert.equal(stuck(top0, { top: 120, bottom: 200 }, port, 0, 1000), false);
+  // scrolled down, held at the top: stuck, it stays at the foot's bounce
+  assert.equal(stuck(top0, { top: 0, bottom: 80 }, port, 1000, 1000), true);
+  assert.equal(stuck({ top: '44px', bottom: 'auto' }, { top: 44, bottom: 124 }, port, 300, 1000), true);
+  // a bar stuck to the foot while the list is longer: stays; at the end, in its place: moves
+  assert.equal(stuck(foot0, { top: 744, bottom: 800 }, port, 0, 1000), true);
+  assert.equal(stuck(foot0, { top: 744, bottom: 800 }, port, 1000, 1000), false);
+  // not sticky to either edge: never stuck
+  assert.equal(stuck({ top: 'auto', bottom: 'auto' }, { top: 0, bottom: 80 }, port, 500, 1000), false);
 });

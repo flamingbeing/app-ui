@@ -60,6 +60,28 @@ test('a pull past the top stretches the list under the finger, rubber-banded; le
   expect((await moved(page)).every(([, , n]) => n === 0)).toBe(true);
 });
 
+test('a sticky part goes with a stretch at the top (still in its place); stuck to the top, it stays at the foot\'s', async ({ sized }) => {
+  const page = await load(sized);
+  await page.evaluate(() => {
+    const list = document.querySelector('.ui-screen:not([hidden]) > .ui-list');
+    const s = document.createElement('div');
+    s.className = 'test-sticky';
+    s.style.cssText = 'position: sticky; top: 0; height: 40px; background: #888';
+    list.before(s);
+  });
+  await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(200, 300, 160, 10));
+  expect((await shifted(page)).map(([c]) => c), 'in its place: it moves').toContain('test-sticky');
+  await page.evaluate(() => window.__lift(200, 460));
+  await page.evaluate(() => window.__settled());
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(200, 500, -160, 10));
+  const parts = (await shifted(page)).map(([c]) => c);
+  expect(parts, 'the content moves').toContain('ui-list');
+  expect(parts, 'stuck to the top: it stays').not.toContain('test-sticky');
+  await page.evaluate(() => window.__lift(200, 340));
+  await page.evaluate(() => window.__settled());
+});
+
 test('a pull past the bottom stretches it up, and a finger catches the spring back where it is', async ({ sized }) => {
   const page = await load(sized);
   await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.82
+- Bounce: a sticky part (a week strip under a title, a section header) moves with the stretch while it is still in
+  its place, as on iOS; only one stuck to an edge stays (a header held at the top during the foot's bounce, a bar
+  held at the foot). Before, every sticky part stayed, so at the top the content slid under it. `stuck()` is the test.
+
 ## 1.0.0-rc.81
 - Sync button: a tap also looks for a newer version of the app (the service worker registration's `update()`, at
   most once per 30 s). The app's update module installs what it finds and reloads when allowed, as for its own
