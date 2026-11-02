@@ -94,9 +94,9 @@
   .ui-pane-detail { padding: calc(env(safe-area-inset-top, 0px) + var(--pad)) calc(var(--pad) * 2) var(--pad); }
   .ui-pane-detail .ui-large-title { margin-inline: 0; font-size: 1.6rem; }
   /* a slim-bar look hides large titles under its bar; a wide pane or tab page has no bar, so its title shows */
-  [data-header="slim"] :is(.ui-pane-detail, .ui-tab-page) .ui-large-title { position: static; width: auto; height: auto;
+  :is([data-header="slim"], [data-bar="slim"]) :is(.ui-pane-detail, .ui-tab-page) .ui-large-title { position: static; width: auto; height: auto;
     margin: var(--pad); overflow: visible; clip-path: none; white-space: normal; }
-  [data-header="slim"] .ui-pane-detail .ui-large-title { margin-inline: 0; }
+  :is([data-header="slim"], [data-bar="slim"]) .ui-pane-detail .ui-large-title { margin-inline: 0; }
   /* a band look: the band runs to the pane's edges and top, as the phone's runs to the screen's, not a floating card */
   [data-header="band"] .ui-pane-detail .ui-large-title { margin: calc(-1 * (env(safe-area-inset-top, 0px) + var(--pad))) calc(var(--pad) * -2) var(--pad);
     padding: calc(env(safe-area-inset-top, 0px) + var(--pad)) calc(var(--pad) * 2) var(--pad); }

@@ -2,10 +2,12 @@
  * @param {HTMLElement} host  the screen is added here
  * @param {{ settings: import('../settings/types').SettingsApi, sections: SettingSection[], file?: string | false,
  *   labels?: Record<string, string>, about?: { name: string, update: import('./types').UpdateApi | null,
- *   licences?: Record<string, string>, importMap?: { imports?: Record<string, string> } | null, install?: boolean },
+ *   licences?: Record<string, string>, importMap?: { imports?: Record<string, string> } | null, install?: boolean,
+ *   rows?: { label: string, sub?: string, value?: string, href?: string, run?: () => unknown }[] },
  *   menu?: SettingsMenu | boolean }} o  file: the exported file's name (false: no file rows); labels: words over
  *   SETTINGS_WORDS (and LABELS, INSTALL_WORDS); about: the About group (update null: the version reads "dev", no
- *   check; install false: no Install this app row, else it shows until installed); menu: open on the menu (true: with
+ *   check; install false: no Install this app row, else it shows until installed; rows: the app's own rows at the end
+ *   of About, each with a value or a link (href) or a button (run), e.g. Privacy, Terms); menu: open on the menu (true: with
  *   no steps)
  * @returns {() => void} stop: unwatches and removes the screen
  */
@@ -22,6 +24,13 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
             imports?: Record<string, string>;
         } | null;
         install?: boolean;
+        rows?: {
+            label: string;
+            sub?: string;
+            value?: string;
+            href?: string;
+            run?: () => unknown;
+        }[];
     };
     menu?: SettingsMenu | boolean;
 }): () => void;
@@ -30,7 +39,8 @@ export function settingsScreen(host: HTMLElement, { settings, sections, file, la
  * @typedef {{ key: string, label: string, sub?: string, more?: string, choices?: [unknown, string][], min?: number,
  *   max?: number, step?: number }} SettingRow  sub: one line of help; more: the rest, behind an info button; choices:
  *   [value, word] pairs (a picker); a boolean default is a switch; a number one a number field (min, max, step)
- * @typedef {{ title: string, rows?: SettingRow[], reset?: boolean, mount?: (host: HTMLElement) => (() => void) | void,
+ * @typedef {{ heading: string }} SettingHeading  a subheading between rows (a small title; no control, no key)
+ * @typedef {{ title: string, rows?: (SettingRow | SettingHeading)[], reset?: boolean, mount?: (host: HTMLElement) => (() => void) | void,
  *   icon?: IconNodes, sub?: string, group?: string, find?: string, visible?: (() => boolean) | string }} SettingSection
  *   reset: adds "Reset this page", which puts this section's rows back to their defaults and offers Undo; with menu:
  *   icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by;
@@ -62,6 +72,12 @@ export type SettingRow = {
     step?: number;
 };
 /**
+ * a subheading between rows (a small title; no control, no key)
+ */
+export type SettingHeading = {
+    heading: string;
+};
+/**
  * reset: adds "Reset this page", which puts this section's rows back to their defaults and offers Undo; with menu:
  * icon, sub (its one line) and group (the menu heading it sits under), find: more words the search finds it by;
  * visible: a function or an option key (read with settings.get): shown only while true, live (a key is watched, a
@@ -69,7 +85,7 @@ export type SettingRow = {
  */
 export type SettingSection = {
     title: string;
-    rows?: SettingRow[];
+    rows?: (SettingRow | SettingHeading)[];
     reset?: boolean;
     mount?: (host: HTMLElement) => (() => void) | void;
     icon?: IconNodes;

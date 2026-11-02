@@ -12,3 +12,14 @@ export function themeSwitch(host: HTMLElement, { name }?: {
  * @returns {() => void} stop: removes them
  */
 export function lookSwitch(host: HTMLElement, after?: () => void): () => void;
+/**
+ * The theme as a list (opt-in, instead of themeSwitch's selects when an app wants one page of choices): a "Sync with
+ * system" switch (on: the theme follows the phone's light or dark; off: it stays as it is now) over a list of the
+ * styles (presets.js) with a tick on the picked one. A pick sets the style, nothing else. Re-draws when it changes.
+ * @param {HTMLElement} host  the list is added here
+ * @param {{ syncLabel?: string }} [o]
+ * @returns {() => void} stop: removes it
+ */
+export function themeList(host: HTMLElement, { syncLabel }?: {
+    syncLabel?: string;
+}): () => void;

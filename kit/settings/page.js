@@ -87,7 +87,7 @@ const settings = fakeSettings();
 // a stand-in update api: the first check finds nothing, the next one updates (window.kit.retries counts the retries)
 let checks = 0;
 const update = { versionLabel: async () => '1.2.3', checkNow: async () => ++checks % 2 === 0, retryUpdate: () => { kit.retries++; } };
-const kit = { settings, stop: () => {}, retries: 0 };
+const kit = { settings, stop: () => {}, retries: 0, rated: false };
 // ?menu: the menu, and the Tab bar page (a made-up app's tabs; Settings always stays on the bar)
 const MENU = new URLSearchParams(location.search).has('menu');
 const TITLED = MENU && new URLSearchParams(location.search).has('titled');
@@ -125,6 +125,7 @@ const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById(
       { key: 'units', label: 'Units', sub: 'For pot sizes and water', choices: [['metric', 'Litres and cm'], ['imperial', 'Cups and inches']] },
     ] },
     { title: 'Reminders', icon: refreshCw, sub: 'When to water', group: 'Your plants', reset: true, rows: [
+      { heading: 'Daily' },
       { key: 'reminders', label: 'Watering reminders', more: 'Reminders arrive once a day, at the hour below, and only for plants that are due.' },
       { key: 'reminderHour', label: 'Remind at', sub: 'Hour of the day, 0 to 23', min: 0, max: 23, step: 1 },
     ] },
@@ -133,7 +134,7 @@ const stop = settingsScreen(/** @type {HTMLElement} */ (document.getElementById(
       { key: 'photos', label: 'Keep photos on this phone', sub: 'Only here, not on your other devices' },
     ], mount: host => themeSwitch(host) },
   ],
-  about: { name: 'Plants', update, licences: {} },
+  about: { name: 'Plants', update, licences: {}, rows: [{ label: 'Privacy', sub: 'Made-up sample page', href: '#privacy' }, { label: 'Rate Plants', value: 'Rate', run: () => { kit.rated = true; } }] },
 });
 kit.stop = stop;
 Object.assign(window, { kit });
