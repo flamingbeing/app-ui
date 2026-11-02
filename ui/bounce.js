@@ -7,8 +7,9 @@
 // Where: the page's scroll and any element that scrolls up and down (a sheet's body, a data grid), not where the
 // finger can't scroll up and down (touch-action), not past a sheet body's top (that pull is the sheet's own drag,
 // detent-sheet.js), not while a hold menu is open, and not inside [data-no-bounce]. What moves: the scroller's
-// children (the page's: those of the touched .ui-screen, else the top one's, else main's, else body's), transform only; fixed and
-// sticky ones (the bars, an action bar) stay where they are.
+// children (the page's: those of the touched .ui-screen, else the top one's, else main's, else body's), transform only; fixed
+// ones (the bars, an action bar) stay where they are, and so do sticky ones while stuck to an edge (a stuck header at the
+// foot's bounce); a sticky one still in its place (a week strip under a title, at the top) goes with the content, as on iOS.
 // Nothing runs on import: bounce() adds the listeners; startGestures() calls it ({ bounce: false } leaves it out).
 import { glide, tracker } from './motion.js';
 import { rubber, unrubber, swipeIntent, still, listeners, claim } from './gesture.js';
@@ -47,13 +48,32 @@ function pansY(t, box) {
   return true;
 }
 
+/** A sticky part is stuck to an edge (pure): its top at its `top` inset from the scrollport's top once the scroller has
+ * left its top, or its bottom at its `bottom` inset from the port's foot before the scroller's end. Not stuck, it is
+ * where the content puts it, so it moves with the content.
+ * @param {{ top: string, bottom: string }} inset its computed `top` and `bottom` ('auto' or px)
+ * @param {{ top: number, bottom: number }} rect where it is @param {{ top: number, bottom: number }} port the scrollport
+ * @param {number} pos the scroller's scroll @param {number} max its furthest scroll */
+export function stuck(inset, rect, port, pos, max) {
+  const t = parseFloat(inset.top), b = parseFloat(inset.bottom);
+  return !Number.isNaN(t) && pos > 0.5 && rect.top - port.top <= t + 1
+    || !Number.isNaN(b) && pos < max - 1 && port.bottom - rect.bottom <= b + 1;
+}
+
 /** What moves for a scroller: its children (the page's: the touched screen's, else the top one's, main's, body's), leaving
- * fixed and sticky ones. @param {Element} t @param {HTMLElement | null} box @returns {HTMLElement[]} */
+ * fixed ones and sticky ones stuck to an edge. @param {Element} t @param {HTMLElement | null} box @returns {HTMLElement[]} */
 function partsOf(t, box) {
   const host = box ?? t.closest('.ui-screen') ?? document.querySelector('.ui-screen.is-top, .ui-screen:not([hidden])')
     ?? document.querySelector('main') ?? document.body;
-  return /** @type {HTMLElement[]} */ ([...host.children]).filter(c => c instanceof HTMLElement && c.offsetParent !== null
-    && !/^(fixed|sticky)$/.test(getComputedStyle(c).position));   // (offsetParent: not shown, or fixed)
+  const b = box?.getBoundingClientRect();
+  const port = box && b ? { top: b.top + box.clientTop, bottom: b.top + box.clientTop + box.clientHeight } : { top: 0, bottom: innerHeight };
+  const pos = posOf(box), max = maxOf(box);
+  return /** @type {HTMLElement[]} */ ([...host.children]).filter(c => {
+    if (!(c instanceof HTMLElement) || c.offsetParent === null) return false;   // (offsetParent: not shown, or fixed)
+    const cs = getComputedStyle(c);
+    if (cs.position === 'fixed') return false;
+    return cs.position !== 'sticky' || !stuck(cs, c.getBoundingClientRect(), port, pos, max);
+  });
 }
 
 /** scrolls by a finger's move of d px (down: back up the page) @param {HTMLElement | null} box @param {number} d */
