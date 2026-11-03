@@ -76,6 +76,13 @@ export function afterGesture(fn: () => void, { maxWait }?: {
  */
 export function inScroller(el: Element): boolean;
 /**
+ * Where a press paints: the control itself, or for a `data-press-parent` control (a row's main button that doesn't
+ * span the row, e.g. it starts after a checkbox) its parent, so the shade and the ripple cover the whole row with the
+ * row's own corners instead of a pill on part of it (theme.css shades the parent).
+ * @param {Element} el @returns {HTMLElement}
+ */
+export function pressHost(el: Element): HTMLElement;
+/**
  * Marks the control a finger (or pen) lands on pressed (data-pressed; theme.css styles it), without the browser's
  * wait to see whether the touch is a scroll: at once, or after PRESS_DELAY inside something that scrolls (a scroll
  * that starts by then never shows it; a tap lifted sooner shows it at the lift). A scroll, a move past SLOP or the
