@@ -290,6 +290,16 @@ function unripple(el) {
 }
 
 /**
+ * Where a press paints: the control itself, or for a `data-press-parent` control (a row's main button that doesn't
+ * span the row, e.g. it starts after a checkbox) its parent, so the shade and the ripple cover the whole row with the
+ * row's own corners instead of a pill on part of it (theme.css shades the parent).
+ * @param {Element} el @returns {HTMLElement}
+ */
+export function pressHost(el) {
+  return /** @type {HTMLElement} */ (el.hasAttribute('data-press-parent') && el.parentElement ? el.parentElement : el);
+}
+
+/**
  * Marks the control a finger (or pen) lands on pressed (data-pressed; theme.css styles it), without the browser's
  * wait to see whether the touch is a scroll: at once, or after PRESS_DELAY inside something that scrolls (a scroll
  * that starts by then never shows it; a tap lifted sooner shows it at the lift). A scroll, a move past SLOP or the
@@ -310,9 +320,9 @@ export function pressFeedback(root = document) {
   const show = (/** @type {HTMLElement} */ el) => {
     el.setAttribute('data-pressed', '');
     shownAt = performance.now();
-    ripple(el, x0, y0);
+    ripple(pressHost(el), x0, y0);
   };
-  const unpress = (/** @type {Element} */ el) => { el.removeAttribute('data-pressed'); unripple(el); };
+  const unpress = (/** @type {Element} */ el) => { el.removeAttribute('data-pressed'); unripple(pressHost(el)); };
   const clear = (/** @type {boolean} */ now) => {
     const el = on;
     on = null;

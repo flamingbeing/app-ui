@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0-rc.86
+- `data-press-parent` on a row's main button (opt-in): its press shade and ripple paint on the parent row, square to the row, never as a rounded pill on the button (the ripple of rc.84/85 brought the pill back in an app that had turned off only the button's shade).
+
 ## 1.0.0-rc.85
 - Finger let-go two-stage close (opt-in `data-release-motion="settle"`); the tap-menu bottom panel rises like a sheet and tap menus animate out (fix); fade-through push is a cut then a 150 ms block fade, pop 150 ms; tab switch `slide: 'rise'` (opt-in) and fade out 67 ms; `--ui-sheet-rise` for a softer sheet open; `html[data-sheet-bar="fade"]` fades the tab bar under an open sheet (opt-in); `html[data-ripple]` turns the ripple on for any family (opt-in).
 
