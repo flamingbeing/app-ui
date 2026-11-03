@@ -9,13 +9,12 @@ test('a sheet opens with the short rise and a backdrop fade, no spring', async (
     const s = document.querySelector('dialog.ui-sheet');
     s.showModal();
     const a = s.getAnimations().find(x => x.animationName === 'ui-sheet-in');
-    const b = s.getAnimations({ subtree: true }).find(x => x.pseudoElement === '::backdrop');
-    const out = { rise: a && a.effect.getTiming().duration, fade: b && b.effect.getTiming().duration };
+    const out = { rise: a && a.effect.getTiming().duration, fade: getComputedStyle(s, '::backdrop').animationDuration };
     s.close();
     return out;
   });
   expect(info.rise).toBe(280);
-  expect(info.fade).toBe(280);
+  expect(info.fade).toBe('0.28s');   // the backdrop's animation is not in getAnimations(); read its style
 });
 
 test('data-close-motion="drop": a button close holds, then drops and fades, then closes', async ({ phone }) => {

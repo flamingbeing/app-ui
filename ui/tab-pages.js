@@ -143,14 +143,16 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     asked.delete(page);   // (live now: once left, the app may empty it)
     mark();
     const y = ys.get(page) ?? 0;
-    const out = tab && dir && slideKind() === 'fade' && !still() ? fadeOut(from) : Promise.resolve();
-    void out.then(() => screens.base(page)).then(() => {
+    const fade = tab && dir && slideKind() === 'fade' && !still();
+    // (not through a Promise unless fading: the page change itself stays synchronous, as a caught glide's landing expects)
+    const change = () => screens.base(page).then(() => {
       scrollTo(0, y);
       if (current === page) drawAhead();
       if (tab && dir && !still()) { const k = slideKind(); if (k === 'fade') fadeIn(page); else if (k === 'slide') slideIn(page, dir); }
       if (current === page) back?.went(page === stops()[0]);
       host.dispatchEvent(new CustomEvent('ui-tab', { bubbles: true, detail: { page, tab } }));
     });
+    if (fade) void fadeOut(from).then(change); else void change();
   }
   // Back on another page goes to the first page (the address is the first page's already)
   // (the pages keep their own scroll: the browser's would land a page at the scroll it had when the entry was added)
