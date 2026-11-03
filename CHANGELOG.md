@@ -10,6 +10,12 @@
 - Snackbar timing: every toast fades in 150 ms ease-out (`--d-toast-in`); `toaster(host, { exit })` fades it out (300 suggested,
   default 0 = hard cut); `show(msg, { swap: true })` cross-fades the text of the toast showing (80 ms); `undoToast` stays 5000 ms
   (was 6000). Still / Reduce Motion cut all of it.
+- Page push / pop (new default; was 340 ms, nothing under): push 250 ms, pop 300 ms decelerate; the screen under shifts left 22% and
+  dims (the swipe's shade) while the page slides. Only transform and opacity; Still / Reduce Motion cut it.
+- Fade-through option: `screens.push(target, { motion: 'fade' })` fades the screen in over 100 ms with no slide; its pop fades the
+  screen under back over 200 ms ease-out, its blocks 40 ms apart (apps pass it for tab-level pages such as Search). Default stays the slide.
+- Settings sub-page (new default; was a 30% slide with a fade, 180 ms): the page slides in full width over 250 ms ease-out with no opacity
+  ramp while the menu shifts left 22%; going back is the reverse.
 
 ## 1.0.0-rc.83
 Six opt-in options (all off unless an app asks), from the todo app's UX pass:

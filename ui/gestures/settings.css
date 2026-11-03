@@ -47,7 +47,11 @@
 .ui-settings-group.is-titled > .ui-settings-title { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap; }
 .ui-settings-menu[hidden], .ui-settings-group[hidden], .ui-settings-results[hidden], .ui-settings-menu-groups[hidden] { display: none; }
-.ui-settings.is-sliding { overflow-x: clip; }
+.ui-settings.is-sliding { position: relative; overflow-x: clip; }
+/* a page moving (rc.84): the one leaving or under sits out of the flow so the two overlap, as pushed screens do */
+.ui-settings.is-sliding > .is-slide-out { position: absolute; inset: 0 0 auto; z-index: 0; }
+.ui-settings.is-sliding > .is-slide-in { position: relative; }
+.ui-settings.is-sliding > .is-slide-top { z-index: 1; background: var(--bg); }
 .ui-found { animation: ui-found 1.6s ease-out; }
 @keyframes ui-found { from { background: color-mix(in srgb, var(--accent) 22%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .ui-found { animation: none; outline: 2px solid var(--accent); } }

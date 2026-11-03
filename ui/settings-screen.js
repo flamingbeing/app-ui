@@ -7,7 +7,7 @@
 // With menu (from the logbook's Settings), the screen opens on a menu instead: a search box over every row, then one
 // row per section (its icon, title and one line, ›) under the sections' group headings; a row opens that section as a
 // page of its own with a Back button. The page slides in from the right, and Back slides the menu in from the left
-// (SLIDE_MS, as a tapped tab; less motion: it just switches). Given steps (createTransients), each page is a history entry, so Back closes it.
+// (250 ms like a pushed screen; less motion: it just switches). Given steps (createTransients), each page is a history entry, so Back closes it.
 // Given onPage, the screen around it shows the open page as its own pushed screen: it is told the page's title (null:
 // the menu again) to put in its large title and bar, the page has no Back of its own (the bar's Back, a history step,
 // closes it) and its heading is left to screen readers.
@@ -17,7 +17,7 @@ import { LABELS } from './labels.js';
 import { aboutSheet } from './about-sheet.js';
 import { installApp, installMode, INSTALL_WORDS } from './install.js';
 import { gate } from './section-gate.js';
-import { still, SLIDE_MS, SLIDE_EASE } from './gesture.js';
+import { still, PUSH_MS, PAGE_EASE, PARALLAX } from './gesture.js';
 import { icon, info as infoIcon, chevronLeft, chevronRight } from '../icons/lucide.js';
 
 /**
@@ -373,25 +373,46 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
     function close() { if (step?.active) void step.close(); else shut(); }
     /** @type {HTMLElement | null} */
     let shown = null;
-    /** @type {Animation | null} */
-    let sliding = null;
-    /** the page or menu coming in slides from its side (dir 1: the right, -1: the left), clipped so it can't widen
-     * the screen @param {HTMLElement} part @param {number} dir */
-    function slideIn(part, dir) {
-      sliding?.cancel();
+    /** @type {(() => void) | null}  ends the slide running (a new one cancels it) */
+    let endSlide = null;
+    /** A page moves like a pushed screen (rc.84): the new page slides in over the old one, full width, 250 ms decelerate,
+     * no fade, while the one under shifts left 22% and dims; going back is the reverse. Clipped so it can't widen the screen.
+     * @param {HTMLElement} part  the page or menu now showing @param {number} dir  1: forward, -1: back
+     * @param {HTMLElement | null} [other]  the one just hidden: kept on screen while it moves */
+    function slideIn(part, dir, other = null) {
+      endSlide?.();
       if (still() || typeof part.animate !== 'function') return;
       box.classList.add('is-sliding');
-      const a = sliding = part.animate([{ transform: `translateX(${dir * Math.round(innerWidth * .3)}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
-        { duration: SLIDE_MS, easing: SLIDE_EASE });
-      const done = () => { if (sliding === a) { sliding = null; box.classList.remove('is-sliding'); } };
-      a.finished.then(done, done);
+      const topPart = dir > 0 ? part : other, under = dir > 0 ? other : part;
+      if (other) other.hidden = false;
+      part.classList.add('is-slide-in');
+      other?.classList.add('is-slide-out');
+      topPart?.classList.add('is-slide-top');
+      const o = { duration: PUSH_MS, easing: PAGE_EASE };
+      const shift = `translateX(${-PARALLAX * 100}%)`;
+      /** @type {Animation[]} */
+      const anims = [];
+      if (topPart) anims.push(topPart.animate(dir > 0 ? [{ transform: 'translateX(100%)' }, { transform: 'none' }] : [{ transform: 'none' }, { transform: 'translateX(100%)' }], o));
+      if (under) anims.push(under.animate(dir > 0 ? [{ transform: 'none' }, { transform: shift }] : [{ transform: shift }, { transform: 'none' }], o));
+      const end = () => {
+        if (endSlide !== end) return;
+        endSlide = null;
+        anims.forEach(x => x.cancel());
+        box.classList.remove('is-sliding');
+        for (const x of [part, other]) x?.classList.remove('is-slide-in', 'is-slide-out', 'is-slide-top');
+        if (other && other !== shown && other !== front) other.hidden = true;
+        else if (other === front && shown) front.hidden = true;
+      };
+      endSlide = end;
+      Promise.all(anims.map(x => x.finished)).then(end, end);
     }
     /** @param {typeof pages[number]} p @param {Element | null} [row]  a search result's row: scrolled to */
     function open(p, row = null) {
+      const wasShown = shown;
       if (shown) { shown.hidden = true; } else step = steps ? steps.open(() => { step = null; shut(); }) : null;
       front.hidden = true;
       p.section.hidden = false;
-      if (shown !== p.section) slideIn(p.section, 1);
+      if (shown !== p.section) slideIn(p.section, 1, wasShown ?? front);
       shown = p.section;
       (row || p.section).scrollIntoView?.({ block: row ? 'center' : 'nearest' });
       if (row) { row.classList.add('ui-found'); setTimeout(() => row.classList.remove('ui-found'), 1600); }
@@ -403,7 +424,7 @@ export function settingsScreen(host, { settings, sections, file = 'settings.json
       if (shown) shown.hidden = true;
       shown = null;
       front.hidden = false;
-      if (was) { slideIn(front, -1); gos.get(was)?.focus({ preventScroll: true }); }
+      if (was) { slideIn(front, -1, was); gos.get(was)?.focus({ preventScroll: true }); }
       if (was) onPage?.(null);
     }
     /** the rows whose words hold the query, as buttons to their page @param {string} text */
