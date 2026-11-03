@@ -89,6 +89,10 @@ export function pressFeedback(root?: ParentNode & EventTarget): () => void;
 export const PRESSABLE: "button, [role=\"button\"], .ui-tab, .ui-menu-item, a.ui-row, .ui-row[tabindex], .ui-row[data-push], summary, [data-press]";
 /** How long a press inside something that scrolls waits before it shows (Android's tap timeout): the touch may be a scroll. */
 export const PRESS_DELAY: 100;
+/** The ripple grows in this long (ms; android.css --ui-ripple-ms; the reference's 100-160). */
+export const RIPPLE_IN: 130;
+/** html[data-ripple="hold"]: after the lift the tint stays this long unless a touch lands first (ms). */
+export const RIPPLE_HOLD_MS: 1200;
 /**
  * at: where it is now; stop: stops it there (a finger caught it) and gives that place; done: true once it lands,
  * false if stopped first. A landed glide holds its last frame until stop() (set the resting styles, then stop).

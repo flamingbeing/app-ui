@@ -9,7 +9,10 @@ export function edgeBackOn(nav?: Navigator, media?: (q: string) => boolean, attr
 export function screenStack(host: HTMLElement, { onChange }?: {
     onChange?: (top: HTMLElement) => void;
 }): {
-    push: (target: string | HTMLElement, from?: HTMLElement | null | { from?: HTMLElement | null, motion?: 'slide' | 'fade' }) => void;
+    push: (target: string | HTMLElement, from?: HTMLElement | null | {
+        from?: HTMLElement | null;
+        motion?: "slide" | "fade";
+    }) => void;
     pop: (animate?: boolean) => void;
     depth: () => number;
     baseY: () => number;
