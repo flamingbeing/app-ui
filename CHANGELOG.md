@@ -5,6 +5,11 @@
   with a fade-in, and the `::backdrop` fades in over the same time. Still / Reduce Motion cut both.
 - Sheet close option: `dialog.ui-sheet[data-close-motion="drop"]` makes a button, Esc, backdrop or Back close hold 100 ms, then
   ease in-out 270 ms down 40px (`data-close-drop` for more) while fading, backdrop with it. A finger's let-go keeps the spring.
+- Dialog and menu motion (new default; the old 340 ms spring overshot): enter 120 ms ease-out from scale .9 (`--d-pop-in`), exit 80 ms
+  ease-in (`--d-pop-out`); alert / confirm modals now animate too (they leave via `.is-leaving`); bottom-sheet menus keep their rise.
+- Snackbar timing: every toast fades in 150 ms ease-out (`--d-toast-in`); `toaster(host, { exit })` fades it out (300 suggested,
+  default 0 = hard cut); `show(msg, { swap: true })` cross-fades the text of the toast showing (80 ms); `undoToast` stays 5000 ms
+  (was 6000). Still / Reduce Motion cut all of it.
 
 ## 1.0.0-rc.83
 Six opt-in options (all off unless an app asks), from the todo app's UX pass:

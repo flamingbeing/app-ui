@@ -13,7 +13,7 @@
 .ui-menu-preview.is-lifted { transform: scale(1.03); }
 .ui-menu { position: absolute; display: grid; min-width: 14rem; max-width: calc(100vw - 32px); padding: 4px;
   background: var(--surface); color: var(--text); border: var(--border) solid var(--line); border-radius: var(--menu-r);
-  transform-origin: var(--ui-menu-origin, 50% 0); animation: ui-pop var(--d-quick) var(--spring-snappy); outline: none; }
+  transform-origin: var(--ui-menu-origin, 50% 0); animation: ui-pop var(--d-pop-in, 120ms) cubic-bezier(0, 0, .2, 1); outline: none; }   /* 120 ms ease-out from scale .9, no overshoot */
 .glass .ui-menu { background: var(--glass-bg-thick); border-color: transparent; box-shadow: var(--glass-rim), var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur-thick); backdrop-filter: var(--glass-blur-thick); }
 .ui-menu-item { display: flex; align-items: center; justify-content: space-between; gap: var(--pad); width: 100%;
@@ -25,7 +25,7 @@
 .ui-menu hr { width: 100%; margin: 4px 0; border: 0; border-top: var(--border) solid var(--line); }
 /* a look whose menus come up as a sheet on phones (data-menu="sheet"; hold-menu.js adds is-sheet under 840 px) */
 .ui-menu.is-sheet { left: 8px; right: 8px; min-width: 0; max-width: none; padding: 28px 8px 8px;
-  border-radius: var(--sheet-r); transform-origin: 50% 100%; animation-name: ui-rise; }
+  border-radius: var(--sheet-r); transform-origin: 50% 100%; animation: ui-rise var(--d-quick) var(--spring-snappy); }
 .ui-menu.is-sheet::before { content: ""; position: absolute; left: 50%; top: 10px; width: 36px; height: 5px;
   transform: translateX(-50%); border-radius: 3px; background: var(--line); }
 .ui-menu.is-sheet .ui-menu-item { padding-inline: var(--pad); }
@@ -38,8 +38,8 @@
 /* a closed menu on its way out (hold-menu.js moves it to a layer of its own): a sheet sinks, a popover fades and
    shrinks, the veil fades; quicker than the way in */
 .ui-menu-layer.is-leaving { pointer-events: none; }
-.ui-menu-layer.is-leaving .ui-menu-veil { animation: ui-fade-out calc(var(--d-quick) * .7) ease-in forwards; }
-.ui-menu-layer.is-leaving .ui-menu { animation: ui-shrink calc(var(--d-quick) * .6) ease-in forwards; }
+.ui-menu-layer.is-leaving .ui-menu-veil { animation: ui-fade-out var(--d-pop-out, 80ms) ease-in forwards; }
+.ui-menu-layer.is-leaving .ui-menu { animation: ui-shrink var(--d-pop-out, 80ms) ease-in forwards; }
 .ui-menu-layer.is-leaving .ui-menu.is-sheet { animation: ui-sink calc(var(--d-quick) * .7) cubic-bezier(.4, 0, 1, 1) forwards; }
 /* the tap menu (tap-menu.js): its title, a nested list's Back row, and the bottom panel it opens as with `sheet` */
 .ui-menu-title { padding: 8px var(--pad) 4px; font-size: .85rem; font-weight: 600; color: var(--muted); }

@@ -42,7 +42,7 @@ test('undoToast shows the message with an Undo that runs the undo', () => {
   const [t] = toasts.shown;
   assert.equal(t.message, 'Deleted a');
   assert.equal(t.o.action.label, 'Undo');
-  assert.equal(t.o.ms, 6000);
+  assert.equal(t.o.ms, 5000);
   t.o.action.run();
   assert.deepEqual(ran, ['a']);
 });

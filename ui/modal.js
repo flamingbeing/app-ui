@@ -2,6 +2,7 @@
 // answer), focus goes back to whatever had it. Each returns a promise and removes its dialog when answered.
 import { LABELS } from './labels.js';
 import { el } from './dom.js';
+import { still } from './gesture.js';
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])';
 
@@ -26,7 +27,14 @@ function ask(message, { title = '', buttons }) {
   box.append(row);
   return new Promise(resolve => {
     /** @param {boolean} value */
-    const done = value => { box.close(); box.remove(); back?.focus(); resolve(value); };
+    const done = value => {
+      back?.focus(); resolve(value);
+      const gone = () => { box.close(); box.remove(); };
+      if (still()) return gone();
+      box.classList.add('is-leaving');                 // leaves in 80 ms (--d-pop-out), then goes
+      box.addEventListener('animationend', gone, { once: true });
+      setTimeout(gone, 200);
+    };
     for (const b of buttons) {
       const btn = el('button', { type: 'button', ...(b.danger ? { class: 'ui-danger danger' } : {}) }, b.label);
       btn.addEventListener('click', () => done(b.value));
