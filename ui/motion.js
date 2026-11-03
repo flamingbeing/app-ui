@@ -253,11 +253,12 @@ export function inScroller(el) {
 }
 
 /**
- * The Android look's ripple (android.css): a circle grows from where the finger landed to el's farthest corner.
+ * The Android look's ripple (android.css; any family with html[data-ripple="on"|"hold"]): a circle grows from where the finger landed to el's farthest corner.
  * @param {HTMLElement} el @param {number} x @param {number} y
  */
 function ripple(el, x, y) {
-  if (document.documentElement.dataset.family !== 'android') return;
+  const d = document.documentElement.dataset;
+  if (d.family !== 'android' && d.ripple !== 'on' && d.ripple !== 'hold') return;
   const r = el.getBoundingClientRect(), px = x - r.left, py = y - r.top;
   el.style.setProperty('--ui-ripple-x', `${Math.round(px)}px`);
   el.style.setProperty('--ui-ripple-y', `${Math.round(py)}px`);

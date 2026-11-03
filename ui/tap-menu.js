@@ -6,6 +6,7 @@
 // the menu shows that list under a Back row named after the item; Back or Esc steps out, Esc at the top closes), a bottom
 // panel (`sheet`, with `note` as its first line), and class names so an app can skin the parts (`classes`).
 import { icon } from '../icons/lucide.js';
+import { still } from './gesture.js';
 
 /** @typedef {{ label: string, icon?: import('../icons/lucide.js').IconNodes, color?: string, danger?: boolean, checked?: boolean,
  *   run?: () => unknown, items?: (MenuItem | null)[] }} MenuItem  items: a nested list (run is then not called); checked: a radio
@@ -110,14 +111,26 @@ export function openMenu(anchor, items, { label = '', title = '', sheet = false,
       buttons[(i + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length]?.focus();
     }
   };
+  // the closed menu animates out on its own layer (CSS .is-leaving: a bottom panel sinks and fades 200 ms, a popover
+  // shrinks 80 ms), which takes no input; gone on animationend, or by a timer when none comes; Still: at once
+  function leave() {
+    if (still() || !layer.isConnected) { layer.remove(); return; }
+    layer.classList.add('is-leaving');
+    layer.inert = true;
+    layer.setAttribute('aria-hidden', 'true');
+    layer.querySelectorAll('[role], [id]').forEach(n => { n.removeAttribute('role'); n.removeAttribute('id'); });
+    const done = () => layer.remove();
+    veil.addEventListener('animationend', done);
+    setTimeout(done, 320);
+  }
   const close = () => {
     if (closeOpen !== close) return;
     closeOpen = null;
-    layer.remove();
+    leave();
     document.documentElement.classList.remove('ui-menu-open');
     anchor.setAttribute('aria-expanded', 'false');
     document.removeEventListener('keydown', onKey, true);
-    if (document.activeElement === document.body || !document.activeElement) anchor.focus({ preventScroll: true });
+    if (document.activeElement === document.body || !document.activeElement || layer.contains(document.activeElement)) anchor.focus({ preventScroll: true });
   };
   veil.addEventListener('pointerdown', e => { e.preventDefault(); close(); });
   document.addEventListener('keydown', onKey, true);

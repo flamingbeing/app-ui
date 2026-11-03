@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0-rc.85
+- Finger let-go two-stage close (opt-in `data-release-motion="settle"`); the tap-menu bottom panel rises like a sheet and tap menus animate out (fix); fade-through push is a cut then a 150 ms block fade, pop 150 ms; tab switch `slide: 'rise'` (opt-in) and fade out 67 ms; `--ui-sheet-rise` for a softer sheet open; `html[data-sheet-bar="fade"]` fades the tab bar under an open sheet (opt-in); `html[data-ripple]` turns the ripple on for any family (opt-in).
+
 ## 1.0.0-rc.84
 - Sheet open (new default; the old 480 ms spring overshot): 280 ms decelerate (`cubic-bezier(.2,0,0,1)`, `--d-sheet-in`), a 40px rise
   with a fade-in, and the `::backdrop` fades in over the same time. Still / Reduce Motion cut both.

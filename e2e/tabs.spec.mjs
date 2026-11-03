@@ -731,3 +731,28 @@ test('zoom and overscroll are off on the page', async ({ sized }) => {
     return [c.touchAction, c.overscrollBehaviorY, c.overscrollBehaviorX];
   }))).toEqual([['pan-x pan-y', 'none', 'none'], ['pan-x pan-y', 'none', 'none']]);
 });
+
+test('slide "rise" (opt-in): the old page fades out 67 ms, then blocks fade and rise by transform and opacity, the last landing by ~317 ms', async ({ phone }) => {
+  const page = await phone();
+  await page.goto('/ui/0.0.0-dev/kit/shell/');
+  const r = await page.evaluate(async () => {
+    const bar = document.querySelector('nav.ui-tabbar');
+    if (!bar || !bar.querySelector('[data-tab-page]')) return null;
+    bar.dataset.slide = 'rise';
+    const tabs = [...bar.querySelectorAll('[data-tab-page]')];
+    tabs[tabs.length - 1].click();
+    const wait = ms => new Promise(res => setTimeout(res, ms));
+    await wait(30);
+    const out = document.getAnimations().find(a => a.effect.getTiming().duration === 67);
+    await wait(150);
+    const ins = document.getAnimations().filter(a => a.effect.getTiming().duration === 150);
+    const props = [...new Set(ins.flatMap(a => a.effect.getKeyframes().flatMap(k => Object.keys(k).filter(n => !['offset', 'easing', 'composite', 'computedOffset'].includes(n)))))];
+    const ends = ins.map(a => a.effect.getTiming().delay + 150);
+    return { out: !!out, n: ins.length, props: props.sort(), last: Math.max(0, ...ends) };
+  });
+  test.skip(!r, 'no tab bar in this gallery page');
+  expect(r.out).toBe(true);
+  expect(r.n).toBeGreaterThan(0);
+  expect(r.props).toEqual(['opacity', 'transform']);
+  expect(r.last).toBeLessThanOrEqual(320);
+});

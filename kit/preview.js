@@ -30,6 +30,12 @@ export function galleryPreview() {
   /** @type {Record<string, string>} */
   const preview = {};
   for (const k of ['look', 'density']) { const v = params.get(k); if (v) preview[k] = v; }
+  // opt-in motion demos (rc.85): ?slide=rise|fade, ?sheet-bar=fade, ?ripple=on|hold, ?release=settle (every sheet), ?sheet-rise=16px
+  const root = document.documentElement;
+  for (const [q, a] of [['slide', 'slide'], ['sheet-bar', 'sheetBar'], ['ripple', 'ripple']]) { const v = params.get(q); if (v) root.dataset[a] = v; }
+  if (params.get('release') === 'settle') document.querySelectorAll('dialog.ui-sheet').forEach(d => d.setAttribute('data-release-motion', 'settle'));
+  const rise = params.get('sheet-rise');
+  if (rise && /^\d{1,3}px$/.test(rise)) root.style.setProperty('--ui-sheet-rise', rise);
   const edge = params.get('edge');
   if (edge === 'always' || edge === 'off') document.documentElement.dataset.edgeBack = edge;
   return Object.keys(preview).length ? previewTheme(preview) : themeChoice();

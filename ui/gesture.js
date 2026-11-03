@@ -178,10 +178,10 @@ export const SLIDE_MS = 180;
 /** The slide's curve: quick out of the start, gentle landing. */
 export const SLIDE_EASE = 'cubic-bezier(.2, .7, .2, 1)';
 /** Pushed pages (screens.js, settings-screen.js; rc.84): push 250 ms, pop 300 ms, decelerate; the page underneath shifts
- * PARALLAX of its width and dims. Fade-through (push(target, { motion: 'fade' })): in 100 ms, back 200 ms ease-out, the
+ * PARALLAX of its width and dims. Fade-through (push(target, { motion: 'fade' })): a cut then the blocks fade in 150 ms (20 ms apart), back 150 ms ease-out, the
  * content's blocks 40 ms apart. */
 export const PUSH_MS = 250, POP_MS = 300, PAGE_EASE = 'cubic-bezier(0, 0, .2, 1)', PARALLAX = 0.22;
-export const FADE_IN_MS = 100, FADE_OUT_MS = 200, FADE_STAGGER_MS = 40, FADE_EASE = 'cubic-bezier(0, 0, .2, 1)';
+export const FADE_IN_MS = 150, FADE_OUT_MS = 150, FADE_STAGGER_MS = 20, FADE_EASE = 'cubic-bezier(0, 0, .2, 1)';
 
 /** How quickly a let-go glide settles: the spring's response in s (iOS's paging feel). */
 export const SPRING_S = 0.3;

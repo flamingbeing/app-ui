@@ -1,4 +1,19 @@
 /**
+ * The finger-release close of data-release-motion="settle" (pure): keyframes for one animation from the finger's y
+ * (px down): a jump along the finger's direction for 60 ms (v px/ms, at most 24 px), a 130 ms hold, then an ease-in
+ * down to `out` for the rest of 650 ms.
+ * @param {number} y @param {number} v @param {number} out
+ * @returns {{ duration: number, keyframes: { transform: string, offset: number, easing?: string }[] }}
+ */
+export function releasePlan(y: number, v: number, out: number): {
+    duration: number;
+    keyframes: {
+        transform: string;
+        offset: number;
+        easing?: string;
+    }[];
+};
+/**
  * Where a drag lands (pure): the height nearest where the sheet would come to rest, or 'close'. A clear flick goes
  * on to the next height its way; well below the lowest height it closes.
  * @param {string[]} detents @param {Record<string, number>} sizes  each detent's height (px)

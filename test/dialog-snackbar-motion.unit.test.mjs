@@ -60,3 +60,15 @@ test('undoToast stays 5000 ms by default, and ms still overrides', () => {
   assert.equal(seen[0].ms, 5000);
   assert.equal(seen[1].ms, 8000);
 });
+
+test('tap menu: the bottom panel rises like a sheet (ui-sheet-in 280 ms), sinks 200 ms; the close goes through is-leaving unless Still', async () => {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync(new URL('../ui/gestures/menu.css', import.meta.url), 'utf8');
+  const js = readFileSync(new URL('../ui/tap-menu.js', import.meta.url), 'utf8');
+  assert.match(css, /\.ui-menu\.ui-menu-panel \{[^}]*animation: ui-sheet-in var\(--d-sheet-in, 280ms\) cubic-bezier\(\.2, 0, 0, 1\)/s);
+  assert.match(css, /\.ui-menu-layer:has\(\.ui-menu-panel\) \.ui-menu-veil \{ animation: ui-fade var\(--d-sheet-in, 280ms\)/);
+  assert.match(css, /\.ui-menu-layer\.is-leaving \.ui-menu\.ui-menu-panel \{ animation: ui-sheet-out 200ms ease-in forwards/);
+  assert.match(js, /classList\.add\('is-leaving'\)/);
+  assert.match(js, /if \(still\(\)[^)]*\) \{ layer\.remove\(\); return; \}/);
+  assert.match(js, /addEventListener\('animationend', done\)/);
+});

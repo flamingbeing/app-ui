@@ -26,7 +26,8 @@
 // { slide: false }. Fade mode (opt-in: data-slide="fade" on the tab bar or <html>, or { slide: 'fade' }; the reference
 // apps' tab switch): the page leaves with a TAB_FADE_OUT_MS fade, TAB_FADE_GAP_MS of nothing, then the page's blocks
 // (its direct children) fade in top-down, TAB_FADE_STAGGER_MS apart, no translate; the lit tab's pill fades
-// (gestures/tabbar.css). Opacity only; Less motion: it just switches.
+// (gestures/tabbar.css). Opacity only; Less motion: it just switches. Rise mode (opt-in: data-slide="rise" or { slide: 'rise' }):
+// the page leaves with the same fade, then its blocks fade in and rise 12px top-down, the last landing ~317 ms in.
 // Drawn ahead (opt-in, from the logbook: { ahead }): so a swipe never brings in an empty or out-of-date page, not even
 // in quick flicks in a row (each catches the glide and goes on from the page it was going to), ahead(page) asks the
 // app to draw a still copy of a page that isn't on screen, in that page. Each time a page lands, every other page on
@@ -45,11 +46,19 @@ import { TABLET_MIN } from './shell/shell.js';
 export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath, SLIDE_MS } from './gesture.js';
 
 /** Fade mode (above): the leaving page fades out, a gap, then each block fades in (ms). */
-export const TAB_FADE_OUT_MS = 80, TAB_FADE_GAP_MS = 100, TAB_FADE_IN_MS = 120, TAB_FADE_STAGGER_MS = 20, TAB_FADE_BLOCKS = 12;
+export const TAB_FADE_OUT_MS = 67, TAB_FADE_GAP_MS = 100, TAB_FADE_IN_MS = 120, TAB_FADE_STAGGER_MS = 20, TAB_FADE_BLOCKS = 12;
+/** Rise mode (opt-in slide 'rise'): after TAB_RISE_GAP_MS each block fades in and rises TAB_RISE_PX over TAB_RISE_IN_MS; the
+ * last block lands TAB_RISE_END_MS after the switch (the stagger between blocks is at most TAB_RISE_MAX_STAGGER_MS). */
+export const TAB_RISE_GAP_MS = 10, TAB_RISE_IN_MS = 150, TAB_RISE_PX = 12, TAB_RISE_END_MS = 317, TAB_RISE_MAX_STAGGER_MS = 40;
 
 /** The start delay of each of n blocks in fade mode (pure): after the gap, top-down, one stagger apart, the blocks past TAB_FADE_BLOCKS with the last.
- * @param {number} n @returns {number[]} */
-export function tabFadeDelays(n) {
+ * With `rise`: spread so the last block (of at most TAB_FADE_BLOCKS + 1) ends at TAB_RISE_END_MS, no more than TAB_RISE_MAX_STAGGER_MS apart.
+ * @param {number} n @param {boolean} [rise] @returns {number[]} */
+export function tabFadeDelays(n, rise = false) {
+  if (rise) {
+    const seen = Math.min(n, TAB_FADE_BLOCKS + 1), step = seen > 1 ? Math.min(TAB_RISE_MAX_STAGGER_MS, (TAB_RISE_END_MS - TAB_RISE_IN_MS - TAB_RISE_GAP_MS) / (seen - 1)) : 0;
+    return Array.from({ length: n }, (_, i) => Math.round(TAB_RISE_GAP_MS + Math.min(i, TAB_FADE_BLOCKS) * step));
+  }
   return Array.from({ length: n }, (_, i) => TAB_FADE_GAP_MS + Math.min(i, TAB_FADE_BLOCKS) * TAB_FADE_STAGGER_MS);
 }
 
@@ -91,7 +100,7 @@ export const PAGE_SPRING_S = 0.22;
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
  *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
@@ -143,12 +152,12 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     asked.delete(page);   // (live now: once left, the app may empty it)
     mark();
     const y = ys.get(page) ?? 0;
-    const fade = tab && dir && slideKind() === 'fade' && !still();
+    const fade = tab && dir && ['fade', 'rise'].includes(slideKind()) && !still();
     // (not through a Promise unless fading: the page change itself stays synchronous, as a caught glide's landing expects)
     const change = () => screens.base(page).then(() => {
       scrollTo(0, y);
       if (current === page) drawAhead();
-      if (tab && dir && !still()) { const k = slideKind(); if (k === 'fade') fadeIn(page); else if (k === 'slide') slideIn(page, dir); }
+      if (tab && dir && !still()) { const k = slideKind(); if (k === 'fade' || k === 'rise') fadeIn(page, k === 'rise'); else if (k === 'slide') slideIn(page, dir); }
       if (current === page) back?.went(page === stops()[0]);
       host.dispatchEvent(new CustomEvent('ui-tab', { bubbles: true, detail: { page, tab } }));
     });
@@ -169,9 +178,10 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     onClose: backToClose ? onClose : undefined, first: current === stops()[0] }) : null;
   /** @type {Animation | null} */
   let sliding = null;
-  /** how a tapped tab changes the page now: 'off', 'slide' (default) or 'fade' (data-slide on the bar or <html>, else the option) */
+  /** how a tapped tab changes the page now: 'off', 'slide' (default), 'fade' or 'rise' (data-slide on the bar or <html>, else the option) */
   function slideKind() {
     if (!slide || bar.dataset.slide === 'off' || html.dataset.slide === 'off') return 'off';
+    if (bar.dataset.slide === 'rise' || html.dataset.slide === 'rise' || slide === 'rise') return 'rise';
     return bar.dataset.slide === 'fade' || html.dataset.slide === 'fade' || slide === 'fade' ? 'fade' : 'slide';
   }
   /** fade mode, out: the leaving page fades (opacity only); it is put away by the switch @param {HTMLElement} from @returns {Promise<void>} */
@@ -180,14 +190,16 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const a = from.animate([{ opacity: 1 }, { opacity: 0 }], { duration: TAB_FADE_OUT_MS, easing: 'ease-in', fill: 'forwards' });
     return a.finished.then(() => { a.cancel(); }, () => {});
   }
-  /** fade mode, in: after the gap each block of the page fades in, top-down @param {HTMLElement} page */
-  function fadeIn(page) {
+  /** fade mode, in: after the gap each block of the page fades in, top-down; `rise`: and rises from 12px below, spread over ~317 ms
+   * @param {HTMLElement} page @param {boolean} [rise] */
+  function fadeIn(page, rise = false) {
     if (typeof page.animate !== 'function') return;
     sliding?.cancel();
     const blocks = [...page.children].filter(c => c instanceof HTMLElement).slice(0, TAB_FADE_BLOCKS + 1);
-    const delays = tabFadeDelays(blocks.length);
-    const as = blocks.map((b, i) => b.animate([{ opacity: 0 }, { opacity: 1 }],
-      { duration: TAB_FADE_IN_MS, delay: delays[i], easing: 'ease-out', fill: 'backwards' }));
+    const delays = tabFadeDelays(blocks.length, rise);
+    const frames = rise ? [{ opacity: 0, transform: `translateY(${TAB_RISE_PX}px)` }, { opacity: 1, transform: 'none' }] : [{ opacity: 0 }, { opacity: 1 }];
+    const as = blocks.map((b, i) => b.animate(frames,
+      { duration: rise ? TAB_RISE_IN_MS : TAB_FADE_IN_MS, delay: delays[i], easing: 'ease-out', fill: 'backwards' }));
     const a = sliding = as[as.length - 1] ?? null;
     if (!a) return;
     const done = () => { if (sliding === a) sliding = null; };
