@@ -15,10 +15,14 @@ test('timings: push 250, pop 300, the page under shifts 22%', () => {
   assert.equal(PARALLAX, 0.22);
 });
 
-test('fade-through: 100 ms in, 200 ms back, blocks 33-50 ms apart', () => {
-  assert.equal(FADE_IN_MS, 100);
-  assert.equal(FADE_OUT_MS, 200);
-  assert.ok(FADE_STAGGER_MS >= 33 && FADE_STAGGER_MS <= 50);
+test('fade-through: a cut then blocks fade in over 150 ms, 20 ms apart; the pop fades back over 150 ms', () => {
+  assert.equal(FADE_IN_MS, 150);
+  assert.equal(FADE_OUT_MS, 150);
+  assert.equal(FADE_STAGGER_MS, 20);
+  // a push (cut) leaves the screen itself unfaded; only its blocks fade
+  assert.match(screens, /const done = cut \? \[\] : \[slide\(s/);
+  assert.match(screens, /fadeIn\(s, FADE_IN_MS, true\)/);
+  assert.match(screens, /fadeIn\(s, FADE_OUT_MS, false\)/);
 });
 
 test('screens.js: only opacity and transform move; fade is opt-in; still() cuts it', () => {

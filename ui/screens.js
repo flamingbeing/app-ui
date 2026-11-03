@@ -62,11 +62,13 @@ export function screenStack(host, { onChange } = {}) {
     const f = [{ opacity: 0 }, { opacity: 1 }];
     return slide(d, dimIn ? f : f.slice().reverse(), dur).then(() => d.remove());
   }
-  /** Fade-through: the screen fades in, its blocks (children) a little apart. @param {HTMLElement} s @param {number} ms @param {boolean} stagger */
-  function fadeIn(s, ms, stagger) {
-    const done = [slide(s, [{ opacity: 0 }, { opacity: 1 }], ms, FADE_EASE)];
-    if (stagger) [...s.children].slice(0, 8).forEach((c, i) => {
-      if (i) done.push(slide(/** @type {HTMLElement} */ (c), [{ opacity: 0 }, { opacity: 1 }], ms, FADE_EASE, i * FADE_STAGGER_MS));
+  /** Fade-through. A pop (`cut` false): the screen under fades in, its blocks (children) a little apart. A push (`cut`
+   * true): the screen shows at once and its blocks fade in, each FADE_STAGGER_MS after the one before.
+   * @param {HTMLElement} s @param {number} ms @param {boolean} cut */
+  function fadeIn(s, ms, cut) {
+    const done = cut ? [] : [slide(s, [{ opacity: 0 }, { opacity: 1 }], ms, FADE_EASE)];
+    [...s.children].slice(0, 8).forEach((c, i) => {
+      if (cut || i) done.push(slide(/** @type {HTMLElement} */ (c), [{ opacity: 0 }, { opacity: 1 }], ms, FADE_EASE, i * FADE_STAGGER_MS));
     });
     return Promise.all(done);
   }
@@ -82,8 +84,8 @@ export function screenStack(host, { onChange } = {}) {
   }
 
   /** @param {string | HTMLElement} target @param {HTMLElement | null | { from?: HTMLElement | null, motion?: 'slide' | 'fade' }} [arg]
-   *  an element (what was tapped: focus goes back to it) or { from, motion }: motion 'fade' fades the screen in over 100 ms
-   *  with no slide, and its pop fades the screen under back in over 200 ms (tab-level pages: Search, Filters) */
+   *  an element (what was tapped: focus goes back to it) or { from, motion }: motion 'fade' shows the screen at once and fades its blocks in over 150 ms
+   *  (20 ms apart) with no slide, and its pop fades the screen under back in over 150 ms (tab-level pages: Search, Filters) */
   function push(target, arg = null) {
     const o = arg && !(/** @type {any} */ (arg).nodeType) ? /** @type {{ from?: HTMLElement | null, motion?: string }} */ (arg) : { from: /** @type {HTMLElement | null} */ (arg) };
     const from = o.from ?? null, fade = o.motion === 'fade';
@@ -101,7 +103,7 @@ export function screenStack(host, { onChange } = {}) {
     if (still()) { show(); under.hidden = true; focusIn(s); return; }   // (no class changes: nothing to transition)
     if (fade) {   // no slide: the screen under goes at once, this one fades in
       show(); under.hidden = true;
-      void fadeIn(s, FADE_IN_MS, false);
+      void fadeIn(s, FADE_IN_MS, true);
       focusIn(s);
       return;
     }
@@ -132,7 +134,7 @@ export function screenStack(host, { onChange } = {}) {
     if (animate && !still() && gone.fade) {   // fade-through: the pushed screen goes at once, the one under fades in
       gone.screen.hidden = true;
       back();
-      await fadeIn(s, FADE_OUT_MS, true);
+      await fadeIn(s, FADE_OUT_MS, false);
     } else if (animate && !still()) {
       lift(gone.screen, 'is-leaving', back);
       void dim(gone.screen, POP_MS, false);
