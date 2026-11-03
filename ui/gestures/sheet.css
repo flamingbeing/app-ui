@@ -8,12 +8,14 @@ dialog.ui-sheet { position: fixed; inset: auto 0 0; margin: 0 auto; width: 100%;
   transition: height var(--d-spring) var(--spring-snappy), transform var(--d-spring) var(--spring-snappy); }
 /* on a phone a drag and the settle after it move the sheet by transform only (detent-sheet.js); the height
    transition is for the centred dialog */
-/* open: 280 ms decelerate (no overshoot), rises 40px while fading in; the backdrop fades in with it */
-dialog.ui-sheet[open] { display: flex; animation: ui-sheet-in var(--d-sheet-in, 280ms) cubic-bezier(.2, 0, 0, 1); }
+/* open: rises 40px over 280 ms decelerate (no overshoot, transform only) while the card turns solid in its first 80 ms
+   (--d-sheet-fade, linear), so the page under it never shows through; the backdrop fades in over the rise */
+dialog.ui-sheet[open] { display: flex; animation: ui-sheet-rise var(--d-sheet-in, 280ms) cubic-bezier(.2, 0, 0, 1), ui-fade var(--d-sheet-fade, 80ms) linear; }
 dialog.ui-sheet[open]::backdrop { animation: ui-fade var(--d-sheet-in, 280ms) cubic-bezier(.2, 0, 0, 1); }
 dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - 12px); }
 dialog.ui-sheet.is-dragging { transition: none; }
-/* the keyboard up (ui/keyboard.js): the sheet sits on it and fits above it */
+/* the keyboard up (ui/keyboard.js): the sheet sits on it and fits above it; as the keyboard comes or goes keyboard.js
+   glides it from where it was by `translate` (KEYBOARD_FOLLOW_MS decelerate), so it rides on the keyboard's top */
 .ui-keyboard-open dialog.ui-sheet { bottom: var(--ui-keyboard-h, 0px); max-height: calc(100dvh - var(--ui-keyboard-h, 0px) - 12px); }
 .ui-keyboard-open dialog.ui-sheet[data-detent="large"] { height: calc(100dvh - var(--ui-keyboard-h, 0px) - 12px); }
 .ui-keyboard-open .ui-sheet-body { padding-bottom: var(--pad); }

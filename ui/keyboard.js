@@ -11,9 +11,47 @@
 // In a page with its own scroller (.ui-page-scroll, ui/layout.css), the page ends above the keyboard; when the keyboard
 // opens (or grows) over the caret of the field being typed in there, the scroller brings the caret into sight
 // (caretShift), clear of the bars over the keyboard.
+// As the keyboard comes, goes or changes height, a bottom sheet (not a large one: its top stays put) and the bars over
+// the keyboard ride on its top instead of jumping there: each is put back where its bottom edge was, by the individual
+// `translate` property (so a sheet's own transform, a drag or its open rise, is untouched), and glides to its new place
+// over KEYBOARD_FOLLOW_MS, decelerating (keyboardFollow). The moves add up, so a change mid-glide carries on from
+// where the bar is. On a wide screen (840 px+) only the bars follow (a sheet is a centred dialog there). Less motion:
+// they just move.
 // Nothing runs on import: startGestures starts it ({ keyboard: false } leaves it out).
+import { still } from './gesture.js';
 
 export const KEYBOARD_MIN = 150;
+/** The glide of a sheet or bar following the keyboard's top (ms, decelerate). */
+export const KEYBOARD_FOLLOW_MS = 190, KEYBOARD_FOLLOW_EASE = 'cubic-bezier(0, 0, .2, 1)';
+/** What follows the keyboard's top on a phone; on a wide screen only OVER_KEYBOARD. */
+export const FOLLOWS_KEYBOARD = 'dialog.ui-sheet[open]:not([data-detent="large"])';
+
+/**
+ * How far a sheet or bar docked over the keyboard jumped (pure): the layout's bottom edge above the keyboard is the
+ * page's height less the lift (with resizes-content the page shrinks and the lift stays 0; without it the lift grows).
+ * Positive: it went up, so it starts that far down. 0 when the width changed (turned) or the keyboard was not involved,
+ * or only the visible part scrolled (the keyboard's cover unchanged).
+ * @param {{ inner: number, lift: number, open: boolean, covered: number, width: number }} was
+ * @param {{ inner: number, lift: number, open: boolean, covered: number, width: number }} now
+ * @returns {number}
+ */
+export function keyboardFollow(was, now) {
+  if (was.width !== now.width || (!was.open && !now.open)) return 0;
+  if (was.open === now.open && Math.abs(was.covered - now.covered) <= 1) return 0;
+  const by = Math.round((was.inner - was.lift) - (now.inner - now.lift));
+  return Math.abs(by) >= 1 ? by : 0;
+}
+
+/** Puts each sheet and bar over the keyboard `by` px down and glides it back (adds to any glide still running). @param {number} by */
+function follow(by) {
+  if (!by || still()) return;
+  const wide = typeof matchMedia === 'function' && matchMedia('(min-width: 840px)').matches;
+  for (const el of document.querySelectorAll(wide ? OVER_KEYBOARD : `${FOLLOWS_KEYBOARD}, ${OVER_KEYBOARD}`)) {
+    if (!(el instanceof HTMLElement) || typeof el.animate !== 'function') continue;
+    el.animate([{ translate: `0 ${by}px` }, { translate: '0 0' }],
+      { duration: KEYBOARD_FOLLOW_MS, easing: KEYBOARD_FOLLOW_EASE, composite: 'add' });
+  }
+}
 
 /**
  * Whether the keyboard is up and how far it covers the layout (pure).
@@ -84,6 +122,8 @@ export function watchKeyboard() {
   if (!vv) return () => {};
   const html = document.documentElement;
   let width = innerWidth, base = innerHeight, was = false, lifted = 0;
+  // the last state, for the glide (keyboardFollow)
+  let last = { inner: innerHeight, lift: 0, open: false, covered: 0, width: innerWidth };
   /** @type {ReturnType<typeof setTimeout> | undefined} */
   let later;
   function update() {
@@ -105,6 +145,9 @@ export function watchKeyboard() {
     const covered = open ? base - view.height : 0;
     if (open && covered > lifted + 1) requestAnimationFrame(() => caretIntoView(document.activeElement, cover));
     lifted = covered;
+    const now = { inner: innerHeight, lift, open, covered, width: innerWidth };
+    follow(keyboardFollow(last, now));
+    last = now;
     if (open !== was) {
       was = open;
       html.classList.toggle('ui-keyboard-open', open);

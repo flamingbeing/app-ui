@@ -20,6 +20,8 @@ export const sheetsSettled = stepsSettled;
 // how much taller than the screen the sheet is made for a move on a phone, hidden below the bottom edge: room for
 // the pull past full height and the spring's overshoot
 const SPARE = 48;
+/** The drop close (data-close-motion="drop"): the card stays solid until this share of its move, then fades out. */
+export const DROP_FADE_AT = .6;
 
 /**
  * The finger-release close of data-release-motion="settle" (pure): keyframes for one animation from the finger's y
@@ -132,16 +134,18 @@ export function detentSheet(sheet) {
     unstyle(); sheet.classList.remove('is-dragging');
   }
   // Opt-in close for a button, Esc, the backdrop or Back (data-close-motion="drop"; a finger's let-go keeps the spring):
-  // holds 100 ms, then eases in-out 270 ms down by data-close-drop px (default 40) while fading; the backdrop fades with it.
-  // transform and opacity only.
+  // holds 100 ms, then eases in-out 270 ms down by data-close-drop px (default 40); the card stays solid until DROP_FADE_AT
+  // of the move, then fades out over the rest (~108 ms), so the page under it never shows through; the backdrop fades
+  // over the whole move. transform and opacity only.
   const HOLD = 100, MOVE = 270;
   /** @param {number} y  where the sheet is now (px down) */
   function drop(y) {
-    const total = HOLD + MOVE, at = HOLD / total;
+    const total = HOLD + MOVE, at = HOLD / total, fadeAt = (HOLD + MOVE * DROP_FADE_AT) / total;
     const by = Number(sheet.getAttribute('data-close-drop')) || 40;
     const run = sheet.animate([
       { transform: `translateY(${y}px)`, opacity: 1, offset: 0 },
-      { transform: `translateY(${y}px)`, opacity: 1, offset: at, easing: 'cubic-bezier(.4,0,.2,1)' },
+      { transform: `translateY(${y}px)`, offset: at, easing: 'cubic-bezier(.4,0,.2,1)' },
+      { opacity: 1, offset: fadeAt, easing: 'linear' },
       { transform: `translateY(${y + by}px)`, opacity: 0, offset: 1 }], { duration: total, fill: 'forwards' });
     leaving = /** @type {any} */ ({ stop: () => run.cancel() });
     const me = leaving, k = unshade(true);
