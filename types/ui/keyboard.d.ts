@@ -1,4 +1,26 @@
 /**
+ * How far a sheet or bar docked over the keyboard jumped (pure): the layout's bottom edge above the keyboard is the
+ * page's height less the lift (with resizes-content the page shrinks and the lift stays 0; without it the lift grows).
+ * Positive: it went up, so it starts that far down. 0 when the width changed (turned) or the keyboard was not involved,
+ * or only the visible part scrolled (the keyboard's cover unchanged).
+ * @param {{ inner: number, lift: number, open: boolean, covered: number, width: number }} was
+ * @param {{ inner: number, lift: number, open: boolean, covered: number, width: number }} now
+ * @returns {number}
+ */
+export function keyboardFollow(was: {
+    inner: number;
+    lift: number;
+    open: boolean;
+    covered: number;
+    width: number;
+}, now: {
+    inner: number;
+    lift: number;
+    open: boolean;
+    covered: number;
+    width: number;
+}): number;
+/**
  * Whether the keyboard is up and how far it covers the layout (pure).
  * @param {{ base: number, inner: number, height: number, top: number, editing: boolean }} s
  *   base: the tallest innerHeight seen at this width; inner: innerHeight now; height, top: the visual viewport's
@@ -38,5 +60,9 @@ export function caretShift(caret: {
 /** Watches the keyboard; gives back the function that stops it. @returns {() => void} */
 export function watchKeyboard(): () => void;
 export const KEYBOARD_MIN: 150;
+export const KEYBOARD_FOLLOW_MS: 190;
+export const KEYBOARD_FOLLOW_EASE: "cubic-bezier(0, 0, .2, 1)";
+/** What follows the keyboard's top on a phone; on a wide screen only OVER_KEYBOARD. */
+export const FOLLOWS_KEYBOARD: "dialog.ui-sheet[open]:not([data-detent=\"large\"])";
 /** The fixed bars that sit above the keyboard. */
 export const OVER_KEYBOARD: ".ui-action-bar, [data-over-keyboard]";

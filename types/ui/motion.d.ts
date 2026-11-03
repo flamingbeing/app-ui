@@ -92,7 +92,7 @@ export function pressHost(el: Element): HTMLElement;
  * @returns {() => void} stop
  */
 export function pressFeedback(root?: ParentNode & EventTarget): () => void;
-/** What shows pressed: buttons, tabs, menu items, rows that open something, and anything marked data-press. */
+/** What shows pressed: buttons, tabs, menu items, rows that open something, and anything marked data-press (not one marked data-no-press). */
 export const PRESSABLE: "button, [role=\"button\"], .ui-tab, .ui-menu-item, a.ui-row, .ui-row[tabindex], .ui-row[data-push], summary, [data-press]";
 /** How long a press inside something that scrolls waits before it shows (Android's tap timeout): the touch may be a scroll. */
 export const PRESS_DELAY: 100;

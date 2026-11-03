@@ -4,18 +4,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { releasePlan } from '../ui/detent-sheet.js';
+import { releasePlan, DROP_FADE_AT } from '../ui/detent-sheet.js';
 
 const read = f => readFileSync(new URL(`../ui/${f}`, import.meta.url), 'utf8');
 const sheetCss = read('gestures/sheet.css'), motionCss = read('gestures/motion.css'), js = read('detent-sheet.js');
 
-test('sheet open: 280 ms decelerate with no spring, a 40px rise that fades in', () => {
+test('sheet open: a 40px rise, 280 ms decelerate, transform only, while the card turns solid in 80 ms linear (rc.87)', () => {
   const rule = sheetCss.match(/dialog\.ui-sheet\[open\] \{[^}]*\}/)[0];
-  assert.match(rule, /animation: ui-sheet-in var\(--d-sheet-in, 280ms\) cubic-bezier\(\.2, 0, 0, 1\)/);
+  assert.match(rule, /animation: ui-sheet-rise var\(--d-sheet-in, 280ms\) cubic-bezier\(\.2, 0, 0, 1\), ui-fade var\(--d-sheet-fade, 80ms\) linear/);
   assert.doesNotMatch(rule, /spring/);
-  const frames = motionCss.match(/@keyframes ui-sheet-in \{[^\n]*\}/)[0];
-  assert.match(frames, /opacity: 0/);
+  const frames = motionCss.match(/@keyframes ui-sheet-rise \{[^\n]*\}/)[0];
+  assert.doesNotMatch(frames, /opacity/);   // the rise never makes the card see-through
   assert.match(frames, /translateY\(var\(--ui-sheet-rise, 40px\)\)/);
+  // ui-sheet-in (rise + fade together) stays for the tap menu's panel
+  assert.match(motionCss, /@keyframes ui-sheet-in \{ from \{ opacity: 0;/);
 });
 
 test('sheet open: the backdrop fades in over the same time', () => {
@@ -31,6 +33,11 @@ test('sheet close: data-close-motion="drop" is for non-touch closes only; a fing
   assert.match(js, /!touch && sheet\.getAttribute\('data-close-motion'\) === 'drop'/);
   assert.match(js, /const HOLD = 100, MOVE = 270/);
   assert.match(js, /data-close-drop/);
+  // the card stays solid until 60% of the move, then fades over the last ~108 ms (rc.87)
+  assert.equal(DROP_FADE_AT, .6);
+  assert.ok(Math.abs(270 * (1 - DROP_FADE_AT) - 108) < 1);
+  assert.match(js, /\{ opacity: 1, offset: fadeAt, easing: 'linear' \}/);
+  assert.match(js, /\{ transform: `translateY\(\$\{y\}px\)`, offset: at, easing/);   // no fade during the hold-to-move keyframe
   // the still check comes before it, so Still closes at once
   assert.ok(js.indexOf("(still() && !touch)") < js.indexOf("=== 'drop'"));
 });

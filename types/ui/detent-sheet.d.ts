@@ -33,4 +33,6 @@ export function detentSheet(sheet: HTMLDialogElement): {
 };
 /** Resolves once every sheet's (and the drawer's) step back has landed: push a page after it. @returns {Promise<void>} */
 export const sheetsSettled: () => Promise<void>;
+/** The drop close (data-close-motion="drop"): the card stays solid until this share of its move, then fades out. */
+export const DROP_FADE_AT: 0.6;
 export function topDetent(ds: string[]): string;

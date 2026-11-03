@@ -1,3 +1,9 @@
+/** Dip mode's one page animation (pure): blank for the gap, then (unless `cut`) a linear fade from TAB_DIP_FROM to 1.
+ * @param {boolean} [cut] @returns {{ keyframes: Keyframe[], duration: number }} */
+export function tabDip(cut?: boolean): {
+    keyframes: Keyframe[];
+    duration: number;
+};
 /** The start delay of each of n blocks in fade mode (pure): after the gap, top-down, one stagger apart, the blocks past TAB_FADE_BLOCKS with the last.
  * With `rise`: spread so the last block (of at most TAB_FADE_BLOCKS + 1) ends at TAB_RISE_END_MS, no more than TAB_RISE_MAX_STAGGER_MS apart.
  * @param {number} n @param {boolean} [rise] @returns {number[]} */
@@ -18,7 +24,7 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise' | 'dip', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
  *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
@@ -39,7 +45,7 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
     host: HTMLElement;
     root?: ParentNode;
     swipe?: boolean;
-    slide?: boolean | "fade" | "rise";
+    slide?: boolean | "fade" | "rise" | "dip";
     drawer?: () => PullDrawer | null;
     onPrevMissing?: () => void;
     backToFirst?: boolean;
@@ -67,6 +73,10 @@ export const TAB_RISE_IN_MS: 150;
 export const TAB_RISE_PX: 12;
 export const TAB_RISE_END_MS: 317;
 export const TAB_RISE_MAX_STAGGER_MS: 40;
+export const TAB_DIP_GAP_MS: 100;
+export const TAB_DIP_IN_MS: 80;
+export const TAB_DIP_FROM: 0.15;
+export const TAB_CUT_GAP_MS: 50;
 /** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
 export const FLICK_V: 0.4;
 export function swipeEdge(width: number): number;

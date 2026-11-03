@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.87
+- Tab switch `data-slide="dip"` (opt-in, or `tabPages(..., { slide: 'dip' })`): the old page goes at once (a cut), 100 ms of nothing (`TAB_DIP_GAP_MS`), then the whole page fades in as one block from .15 to 1 over 80 ms linear (`TAB_DIP_IN_MS`); no rise, no stagger, the lit tab switches at once. A tab (or page) marked `data-tab-motion="cut"` gets only a 50 ms blank (`TAB_CUT_GAP_MS`). Still / Reduce Motion: it just switches. Other modes unchanged.
+- Sheets and bars ride on the keyboard (new default; they jumped to its final top in one step while the keyboard slid under them): as the keyboard comes, goes or changes height, an open bottom sheet (not a large one) and the bars over the keyboard (`.ui-action-bar`, `[data-over-keyboard]`) start where they were and glide to its top over 190 ms decelerate (`KEYBOARD_FOLLOW_MS`), by the individual `translate` property (a sheet's own drag transform is untouched); on a wide screen only the bars. Still / Reduce Motion: at once. `keyboardFollow` (pure) gives the jump.
+- Sheet open no longer shows the page through the card (fix): the 40px rise (280 ms decelerate, `ui-sheet-rise`) is transform only and the card turns solid in its first 80 ms (`--d-sheet-fade`, linear); the backdrop still fades over 280 ms. The tap menu's panel keeps `ui-sheet-in`.
+- `data-no-press` on a button (opt-in): the press feedback skips it, no shade and no ripple (a drag handle that should stay bare, like a calendar's pull handle).
+- `data-close-motion="drop"` (fix): the card stays solid through the hold and 60% of the move (`DROP_FADE_AT`), then fades out over the last ~108 ms (it faded over the whole move).
+
 ## 1.0.0-rc.86
 - `data-press-parent` on a row's main button (opt-in): its press shade and ripple paint on the parent row, square to the row, never as a rounded pill on the button (the ripple of rc.84/85 brought the pill back in an app that had turned off only the button's shade).
 

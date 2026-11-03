@@ -1,20 +1,29 @@
-// Sheet open (280 ms, 40px rise + fade, backdrop fade) and the opt-in drop close (rc.84). Runs on GitHub.
+// Sheet open (280 ms 40px rise, an 80 ms fade to solid, backdrop fade) and the opt-in drop close (rc.84). Runs on GitHub.
 import { test, expect } from './fixtures.mjs';
 import { BASE } from './fixtures.mjs';
 
-test('a sheet opens with the short rise and a backdrop fade, no spring', async ({ phone }) => {
+test('a sheet opens with the short rise and a backdrop fade, no spring; the card is solid within 100 ms', async ({ phone }) => {
   const page = await phone();
   await page.goto(`${BASE}kit/`);
-  const info = await page.evaluate(() => {
+  const info = await page.evaluate(async () => {
     const s = document.querySelector('dialog.ui-sheet');
     s.showModal();
-    const a = s.getAnimations().find(x => x.animationName === 'ui-sheet-in');
-    const out = { rise: a && a.effect.getTiming().duration, fade: getComputedStyle(s, '::backdrop').animationDuration };
+    const a = s.getAnimations().find(x => x.animationName === 'ui-sheet-rise');
+    const f = s.getAnimations().find(x => x.animationName === 'ui-fade');
+    const out = { rise: a && a.effect.getTiming().duration, riseOpacity: a && a.effect.getKeyframes().some(k => 'opacity' in k),
+      fadeIn: f && f.effect.getTiming().duration, fade: getComputedStyle(s, '::backdrop').animationDuration, samples: [] };
+    // opacity per frame (rc.87: the page under it never shows through for long)
+    const frame = () => new Promise(res => requestAnimationFrame(() => res(undefined)));
+    const t0 = performance.now();
+    while (performance.now() - t0 < 200) { out.samples.push([performance.now() - t0, Number(getComputedStyle(s).opacity)]); await frame(); }
     s.close();
     return out;
   });
   expect(info.rise).toBe(280);
+  expect(info.riseOpacity).toBe(false);
+  expect(info.fadeIn).toBe(80);
   expect(info.fade).toBe('0.28s');   // the backdrop's animation is not in getAnimations(); read its style
+  for (const [t, o] of info.samples) if (t >= 100) expect(o, `opacity at ${Math.round(t)} ms`).toBeGreaterThanOrEqual(.9);
 });
 
 test('data-close-motion="drop": a button close holds, then drops and fades, then closes', async ({ phone }) => {
@@ -30,12 +39,17 @@ test('data-close-motion="drop": a button close holds, then drops and fades, then
     await new Promise(r => requestAnimationFrame(r));
     const open1 = s.open;
     const run = s.getAnimations().find(a => a.effect.getTiming().duration === 370);
-    await new Promise(r => setTimeout(r, 600));
-    return { open1, ran: !!run, open2: s.open };
+    // rc.87: solid through the hold and most of the move, fading only in its last ~108 ms
+    const frame = () => new Promise(res => requestAnimationFrame(() => res(undefined)));
+    const samples = [];
+    while (run && run.playState === 'running') { samples.push([run.currentTime, Number(getComputedStyle(s).opacity)]); await frame(); }
+    await new Promise(r => setTimeout(r, 300));
+    return { open1, ran: !!run, open2: s.open, samples };
   });
   expect(r.open1).toBe(true);
   expect(r.ran).toBe(true);
   expect(r.open2).toBe(false);
+  for (const [t, o] of r.samples) if (t < 250) expect(o, `opacity at ${Math.round(t)} ms`).toBe(1);
 });
 
 test('data-release-motion="settle": a finger let-go past the close line jumps, holds, eases off in 650 ms and pops history once', async ({ sized }) => {
@@ -88,7 +102,7 @@ test('--ui-sheet-rise sets the rise; data-sheet-bar="fade" fades the tab bar und
   const rise = await page.evaluate(() => {
     const s = document.querySelector('#sheet');
     s.close(); s.style.setProperty('--ui-sheet-rise', '16px'); s.showModal();
-    const a = s.getAnimations().find(x => x.animationName === 'ui-sheet-in');
+    const a = s.getAnimations().find(x => x.animationName === 'ui-sheet-rise');
     const f = a.effect.getKeyframes()[0];
     return f.transform;
   });

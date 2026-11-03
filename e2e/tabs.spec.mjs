@@ -756,3 +756,47 @@ test('slide "rise" (opt-in): the old page fades out 67 ms, then blocks fade and 
   expect(r.props).toEqual(['opacity', 'transform']);
   expect(r.last).toBeLessThanOrEqual(320);
 });
+
+test('slide "dip" (opt-in, rc.87): the old page cut, ~100 ms blank, the whole page fades in .15 -> 1 over 80 ms; a "cut" tab: 50 ms blank, no fade', async ({ phone }) => {
+  const page = await phone();
+  await page.goto('/ui/0.0.0-dev/kit/shell/');
+  const r = await page.evaluate(async () => {
+    const bar = document.querySelector('nav.ui-tabbar');
+    if (!bar || bar.querySelectorAll('[data-tab-page]').length < 2) return null;
+    bar.dataset.slide = 'dip';
+    const tabs = [...bar.querySelectorAll('[data-tab-page]')];
+    const frame = () => new Promise(res => requestAnimationFrame(() => res(undefined)));
+    const shown = () => [...document.querySelectorAll('.ui-screens > .ui-screen')].filter(s => !s.hidden);
+    const before = shown()[0];
+    tabs[tabs.length - 1].click();
+    await frame();
+    const now = shown();
+    const target = now[0];
+    const own = target.getAnimations();
+    const blocks = [...target.children].flatMap(c => c.getAnimations());
+    const props = [...new Set(own.flatMap(a => a.effect.getKeyframes().flatMap(k => Object.keys(k).filter(n => !['offset', 'easing', 'composite', 'computedOffset'].includes(n)))))];
+    const t0 = performance.now(), samples = [];
+    while (performance.now() - t0 < 260) { samples.push([performance.now() - t0, Number(getComputedStyle(target).opacity)]); await frame(); }
+    const out = { cut: now.length === 1 && now[0] !== before && before.getAnimations().length === 0, n: own.length, blocks: blocks.length, props,
+      duration: own[0]?.effect.getTiming().duration, blankAt60: samples.filter(([t]) => t < 60).every(([, o]) => o === 0),
+      end: samples[samples.length - 1][1], max: Math.max(...samples.map(s => s[1])) };
+    // a tab marked "cut": the short blank only
+    tabs[0].setAttribute('data-tab-motion', 'cut');
+    tabs[0].click();
+    await frame();
+    const back = shown()[0].getAnimations();
+    out.cutTab = back.map(a => a.effect.getTiming().duration);
+    out.cutOps = back.flatMap(a => a.effect.getKeyframes().map(k => Number(k.opacity)));
+    return out;
+  });
+  test.skip(!r, 'fewer than two tab pages in this gallery page');
+  expect(r.cut, 'the old page goes at once, with no fade of its own').toBe(true);
+  expect(r.n, 'one animation on the page itself').toBe(1);
+  expect(r.blocks, 'no per-block stagger').toBe(0);
+  expect(r.props).toEqual(['opacity']);
+  expect(r.duration).toBe(180);
+  expect(r.blankAt60).toBe(true);
+  expect(r.end).toBe(1);
+  expect(r.cutTab).toEqual([50]);
+  expect(r.cutOps).toEqual([0, 0]);
+});

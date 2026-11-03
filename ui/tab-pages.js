@@ -28,6 +28,10 @@
 // (its direct children) fade in top-down, TAB_FADE_STAGGER_MS apart, no translate; the lit tab's pill fades
 // (gestures/tabbar.css). Opacity only; Less motion: it just switches. Rise mode (opt-in: data-slide="rise" or { slide: 'rise' }):
 // the page leaves with the same fade, then its blocks fade in and rise 12px top-down, the last landing ~317 ms in.
+// Dip mode (opt-in: data-slide="dip" or { slide: 'dip' }; a one-piece page fade): the leaving page goes at once (a cut),
+// TAB_DIP_GAP_MS of nothing, then the whole page fades in as one block from TAB_DIP_FROM to 1 over TAB_DIP_IN_MS, linear;
+// no rise, no stagger, the lit tab switches at once. A tab (or the page) marked data-tab-motion="cut" has a TAB_CUT_GAP_MS
+// blank and no fade. Opacity only; Less motion: it just switches.
 // Drawn ahead (opt-in, from the logbook: { ahead }): so a swipe never brings in an empty or out-of-date page, not even
 // in quick flicks in a row (each catches the glide and goes on from the page it was going to), ahead(page) asks the
 // app to draw a still copy of a page that isn't on screen, in that page. Each time a page lands, every other page on
@@ -50,6 +54,17 @@ export const TAB_FADE_OUT_MS = 67, TAB_FADE_GAP_MS = 100, TAB_FADE_IN_MS = 120, 
 /** Rise mode (opt-in slide 'rise'): after TAB_RISE_GAP_MS each block fades in and rises TAB_RISE_PX over TAB_RISE_IN_MS; the
  * last block lands TAB_RISE_END_MS after the switch (the stagger between blocks is at most TAB_RISE_MAX_STAGGER_MS). */
 export const TAB_RISE_GAP_MS = 10, TAB_RISE_IN_MS = 150, TAB_RISE_PX = 12, TAB_RISE_END_MS = 317, TAB_RISE_MAX_STAGGER_MS = 40;
+/** Dip mode (opt-in slide 'dip'): the old page cut, TAB_DIP_GAP_MS blank, then the whole page fades in from TAB_DIP_FROM over
+ * TAB_DIP_IN_MS (linear); a data-tab-motion="cut" tab: TAB_CUT_GAP_MS blank, no fade. */
+export const TAB_DIP_GAP_MS = 100, TAB_DIP_IN_MS = 80, TAB_DIP_FROM = .15, TAB_CUT_GAP_MS = 50;
+
+/** Dip mode's one page animation (pure): blank for the gap, then (unless `cut`) a linear fade from TAB_DIP_FROM to 1.
+ * @param {boolean} [cut] @returns {{ keyframes: Keyframe[], duration: number }} */
+export function tabDip(cut = false) {
+  if (cut) return { keyframes: [{ opacity: 0 }, { opacity: 0 }], duration: TAB_CUT_GAP_MS };
+  const duration = TAB_DIP_GAP_MS + TAB_DIP_IN_MS, at = TAB_DIP_GAP_MS / duration;
+  return { keyframes: [{ opacity: 0, offset: 0 }, { opacity: 0, offset: at }, { opacity: TAB_DIP_FROM, offset: at }, { opacity: 1, offset: 1 }], duration };
+}
 
 /** The start delay of each of n blocks in fade mode (pure): after the gap, top-down, one stagger apart, the blocks past TAB_FADE_BLOCKS with the last.
  * With `rise`: spread so the last block (of at most TAB_FADE_BLOCKS + 1) ends at TAB_RISE_END_MS, no more than TAB_RISE_MAX_STAGGER_MS apart.
@@ -100,7 +115,7 @@ export const PAGE_SPRING_S = 0.22;
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise' | 'dip', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
  *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
@@ -157,7 +172,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const change = () => screens.base(page).then(() => {
       scrollTo(0, y);
       if (current === page) drawAhead();
-      if (tab && dir && !still()) { const k = slideKind(); if (k === 'fade' || k === 'rise') fadeIn(page, k === 'rise'); else if (k === 'slide') slideIn(page, dir); }
+      if (tab && dir && !still()) { const k = slideKind(); if (k === 'fade' || k === 'rise') fadeIn(page, k === 'rise'); else if (k === 'dip') dipIn(page, tab); else if (k === 'slide') slideIn(page, dir); }
       if (current === page) back?.went(page === stops()[0]);
       host.dispatchEvent(new CustomEvent('ui-tab', { bubbles: true, detail: { page, tab } }));
     });
@@ -178,9 +193,10 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     onClose: backToClose ? onClose : undefined, first: current === stops()[0] }) : null;
   /** @type {Animation | null} */
   let sliding = null;
-  /** how a tapped tab changes the page now: 'off', 'slide' (default), 'fade' or 'rise' (data-slide on the bar or <html>, else the option) */
+  /** how a tapped tab changes the page now: 'off', 'slide' (default), 'fade', 'rise' or 'dip' (data-slide on the bar or <html>, else the option) */
   function slideKind() {
     if (!slide || bar.dataset.slide === 'off' || html.dataset.slide === 'off') return 'off';
+    if (bar.dataset.slide === 'dip' || html.dataset.slide === 'dip' || slide === 'dip') return 'dip';
     if (bar.dataset.slide === 'rise' || html.dataset.slide === 'rise' || slide === 'rise') return 'rise';
     return bar.dataset.slide === 'fade' || html.dataset.slide === 'fade' || slide === 'fade' ? 'fade' : 'slide';
   }
@@ -202,6 +218,16 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       { duration: rise ? TAB_RISE_IN_MS : TAB_FADE_IN_MS, delay: delays[i], easing: 'ease-out', fill: 'backwards' }));
     const a = sliding = as[as.length - 1] ?? null;
     if (!a) return;
+    const done = () => { if (sliding === a) sliding = null; };
+    a.finished.then(done, done);
+  }
+  /** dip mode, in: the page (already switched: the old one is cut) stays blank for the gap, then fades in as one block;
+   * a data-tab-motion="cut" tab or page: only the short blank @param {HTMLElement} page @param {Element} tab */
+  function dipIn(page, tab) {
+    if (typeof page.animate !== 'function') return;
+    sliding?.cancel();
+    const { keyframes, duration } = tabDip(tab.getAttribute('data-tab-motion') === 'cut' || page.getAttribute('data-tab-motion') === 'cut');
+    const a = sliding = page.animate(keyframes, { duration, easing: 'linear' });
     const done = () => { if (sliding === a) sliding = null; };
     a.finished.then(done, done);
   }

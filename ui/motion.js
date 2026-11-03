@@ -225,7 +225,7 @@ function flush() {
 
 // --- pressed at once
 
-/** What shows pressed: buttons, tabs, menu items, rows that open something, and anything marked data-press. */
+/** What shows pressed: buttons, tabs, menu items, rows that open something, and anything marked data-press (not one marked data-no-press). */
 export const PRESSABLE = 'button, [role="button"], .ui-tab, .ui-menu-item, a.ui-row, .ui-row[tabindex], .ui-row[data-push], summary, [data-press]';
 
 /** How long a press inside something that scrolls waits before it shows (Android's tap timeout): the touch may be a scroll. */
@@ -342,7 +342,7 @@ export function pressFeedback(root = document) {
     clear(true);
     for (const h of [...holds]) { holds.delete(h); if (h.getAttribute('data-ripple') === 'hold') unripple(h); }
     const t = /** @type {HTMLElement | null} */ (e.target instanceof Element ? e.target.closest(PRESSABLE) : null);
-    if (!t || t.matches(':disabled, [aria-disabled="true"]')) return;
+    if (!t || t.matches(':disabled, [aria-disabled="true"], [data-no-press]')) return;
     on = t; x0 = e.clientX; y0 = e.clientY; shownAt = 0;
     if (inScroller(t)) wait = setTimeout(() => { if (on === t) show(t); }, PRESS_DELAY);
     else show(t);
