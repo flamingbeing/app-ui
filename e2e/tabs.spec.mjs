@@ -800,3 +800,23 @@ test('slide "dip" (opt-in, rc.87): the old page cut, ~100 ms blank, the whole pa
   expect(r.cutTab).toEqual([50]);
   expect(r.cutOps).toEqual([0, 0]);
 });
+
+test('a bar\'s own data-slide beats <html>\'s (rc.88): html "dip" with a "fade" bar fades the blocks, the page itself has no animation', async ({ phone }) => {
+  const page = await phone();
+  await page.goto('/ui/0.0.0-dev/kit/shell/');
+  const r = await page.evaluate(async () => {
+    const bar = document.querySelector('nav.ui-tabbar');
+    if (!bar || bar.querySelectorAll('[data-tab-page]').length < 2) return null;
+    document.documentElement.dataset.slide = 'dip';
+    bar.dataset.slide = 'fade';
+    const tabs = [...bar.querySelectorAll('[data-tab-page]')];
+    tabs[tabs.length - 1].click();
+    // (after the leaving page's fade-out: the page now shown is the new one)
+    await new Promise(res => setTimeout(res, 120));
+    const target = [...document.querySelectorAll('.ui-screens > .ui-screen')].filter(s => !s.hidden)[0];
+    return { own: target.getAnimations().length, blocks: [...target.children].flatMap(c => c.getAnimations()).length };
+  });
+  test.skip(!r, 'fewer than two tab pages in this gallery page');
+  expect(r.own, 'dip would animate the page as one piece').toBe(0);
+  expect(r.blocks, 'fade animates the blocks').toBeGreaterThan(0);
+});
