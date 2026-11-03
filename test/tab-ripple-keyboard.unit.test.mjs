@@ -25,8 +25,8 @@ test('tab fade: out 67 ms, 100 ms gap, blocks 15-30 ms apart, top-down', () => {
 test('tab fade: opt-in, opacity only, still() cuts it, default stays the slide', () => {
   assert.match(tabs, /slide === 'fade'/);
   assert.match(tabs, /data-slide="fade"/);
-  assert.match(tabs, /return bar\.dataset\.slide === 'fade' \|\| html\.dataset\.slide === 'fade' \|\| slide === 'fade' \? 'fade' : 'slide'/);
-  assert.match(tabs, /bar\.dataset\.slide === 'rise' \|\| html\.dataset\.slide === 'rise' \|\| slide === 'rise'/);
+  assert.match(tabs, /const own = \[bar\.dataset\.slide, html\.dataset\.slide\]\.find\(v => v === 'dip' \|\| v === 'rise' \|\| v === 'fade' \|\| v === 'slide'\)/);
+  assert.match(tabs, /slide === 'dip' \|\| slide === 'rise' \|\| slide === 'fade' \? slide : 'slide'/);
   assert.match(tabs, /!still\(\)/);
   const fn = tabs.match(/function fadeOut[\s\S]*?\n  \}\n/)[0] + ': [{ opacity: 0 }, { opacity: 1 }]';
   assert.match(tabs.match(/function fadeIn[\s\S]*?\n  \}\n/)[0], /: \[\{ opacity: 0 \}, \{ opacity: 1 \}\];/);   // fade mode: opacity only (rise adds the 12px)
@@ -94,7 +94,7 @@ test('tab dip (rc.87, opt-in): old page cut, 100 ms blank, one page fade .15 -> 
 });
 
 test('tab dip: opt-in, no leaving fade, one animation on the page (not its blocks), linear; Still cuts it; other modes unchanged', () => {
-  assert.match(tabs, /bar\.dataset\.slide === 'dip' \|\| html\.dataset\.slide === 'dip' \|\| slide === 'dip'\) return 'dip'/);
+  assert.match(tabs, /\[bar\.dataset\.slide, html\.dataset\.slide\]\.find/);   // (the bar's own beats <html>'s)
   assert.match(tabs, /\['fade', 'rise'\]\.includes\(slideKind\(\)\)/);   // the leaving fade stays fade/rise only
   const fn = tabs.match(/function dipIn[\s\S]*?\n  \}\n/)[0];
   assert.match(fn, /page\.animate\(keyframes, \{ duration, easing: 'linear' \}\)/);

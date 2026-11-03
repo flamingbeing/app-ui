@@ -196,9 +196,9 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   /** how a tapped tab changes the page now: 'off', 'slide' (default), 'fade', 'rise' or 'dip' (data-slide on the bar or <html>, else the option) */
   function slideKind() {
     if (!slide || bar.dataset.slide === 'off' || html.dataset.slide === 'off') return 'off';
-    if (bar.dataset.slide === 'dip' || html.dataset.slide === 'dip' || slide === 'dip') return 'dip';
-    if (bar.dataset.slide === 'rise' || html.dataset.slide === 'rise' || slide === 'rise') return 'rise';
-    return bar.dataset.slide === 'fade' || html.dataset.slide === 'fade' || slide === 'fade' ? 'fade' : 'slide';
+    // (the bar's own data-slide beats <html>'s, which beats the option: one app can give one bar its own motion)
+    const own = [bar.dataset.slide, html.dataset.slide].find(v => v === 'dip' || v === 'rise' || v === 'fade' || v === 'slide');
+    return own ?? (slide === 'dip' || slide === 'rise' || slide === 'fade' ? slide : 'slide');
   }
   /** fade mode, out: the leaving page fades (opacity only); it is put away by the switch @param {HTMLElement} from @returns {Promise<void>} */
   function fadeOut(from) {

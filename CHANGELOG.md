@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0-rc.88
+- Tab switch (fix): a bar's own `data-slide` now beats `<html>`'s, which beats the `tabPages` option (a `dip` on `<html>` used to override a bar's own `fade` or `rise`).
+
 ## 1.0.0-rc.87
 - Tab switch `data-slide="dip"` (opt-in, or `tabPages(..., { slide: 'dip' })`): the old page goes at once (a cut), 100 ms of nothing (`TAB_DIP_GAP_MS`), then the whole page fades in as one block from .15 to 1 over 80 ms linear (`TAB_DIP_IN_MS`); no rise, no stagger, the lit tab switches at once. A tab (or page) marked `data-tab-motion="cut"` gets only a 50 ms blank (`TAB_CUT_GAP_MS`). Still / Reduce Motion: it just switches. Other modes unchanged.
 - Sheets and bars ride on the keyboard (new default; they jumped to its final top in one step while the keyboard slid under them): as the keyboard comes, goes or changes height, an open bottom sheet (not a large one) and the bars over the keyboard (`.ui-action-bar`, `[data-over-keyboard]`) start where they were and glide to its top over 190 ms decelerate (`KEYBOARD_FOLLOW_MS`), by the individual `translate` property (a sheet's own drag transform is untouched); on a wide screen only the bars. Still / Reduce Motion: at once. `keyboardFollow` (pure) gives the jump.
