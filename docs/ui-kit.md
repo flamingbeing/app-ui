@@ -105,7 +105,8 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   something that scrolls (`inScroller`), so a scroll that starts by then never flashes a row. A tap lifted sooner
   shows it at the lift; it stays one painted frame at least (80 ms).
 - The Android look (`data-family="android"`) adds Material's ripple: a circle grows from where the finger landed to
-  the control's farthest corner (225 ms), and fades after the lift (150 ms). Motion Still: no growth, no fade.
+  the control's farthest corner (130 ms), and fades after the lift (150 ms). Motion Still: no growth, no fade.
+  `html[data-ripple="hold"]` (opt-in) keeps the tint after the lift until the next touch or 1200 ms.
 
 ## One gesture owns a touch (`ui/gesture.js` `claim`)
 

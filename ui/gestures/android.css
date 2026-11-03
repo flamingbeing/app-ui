@@ -189,7 +189,9 @@
   background-image: radial-gradient(circle at var(--ui-ripple-x) var(--ui-ripple-y),
     color-mix(in srgb, currentColor var(--ui-ripple-a), transparent) calc(var(--ui-ripple-max) * var(--ui-ripple-k)),
     transparent calc(var(--ui-ripple-max) * var(--ui-ripple-k) + .5px)); }
-[data-family="android"] [data-ripple="in"] { animation: ui-ripple-in 225ms cubic-bezier(.2, 0, 0, 1) forwards; }
+[data-family="android"] [data-ripple="in"] { animation: ui-ripple-in var(--ui-ripple-ms, 130ms) cubic-bezier(.2, 0, 0, 1) forwards; }
+/* opt-in (html[data-ripple="hold"], ui/motion.js): after the lift the tint stays (a row that opens a page is still tinted as it goes) until the next touch or RIPPLE_HOLD_MS */
+[data-family="android"] [data-ripple="hold"] { --ui-ripple-k: 1; }
 [data-family="android"] [data-ripple="out"] { --ui-ripple-k: 1; animation: ui-ripple-out 150ms linear forwards; }
 :root[data-motion="still"][data-family="android"] [data-ripple] { --ui-ripple-k: 1; animation: none; }
 @keyframes ui-ripple-in { from { --ui-ripple-k: 0; } to { --ui-ripple-k: 1; } }

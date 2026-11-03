@@ -90,6 +90,7 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | Reduce Motion | the pages still follow the finger, the next one beside, and glide on (rc.30 switched with nothing moved); also in WebKit | |
 | Pressed at once | a touch on a button or tab marks it `data-pressed` at once (jank gate); the tab bar, buttons and glass buttons show it as they show `:active` | |
 | Tab slide | a tapped tab's page slides in from its side (180 ms, clipped); a finger landing on it while it slides lands it at once; Reduce Motion or `data-slide="off"` just switches | |
+| Tab fade (opt-in) | `data-slide="fade"` (or `{ slide: 'fade' }`): the leaving page fades out 80 ms, a 100 ms gap, the new page's blocks fade in 20 ms apart, opacity only, no translate; the lit tab's pill background fades 150 ms; Still / `data-slide="off"` just switches (`test/tab-ripple-keyboard.unit.test.mjs`, `e2e/tab-ripple-keyboard.spec.mjs`) | |
 | Bar on a tab change | between two scrolled pages the bar stays tinted (collapsed) all the way; to a page at the top it clears once (no flash) | |
 | Scroll and Back | each page keeps its scroll, also when left from a pushed screen; the current tab over a pushed screen goes back to it; another tab goes back first, leaving no history entry | |
 | Back with tabs | leaving the first tab adds one history entry, the other tabs none; Back on another tab goes to the first, Back there leaves; a tap on the first tab takes the entry away | |
@@ -101,6 +102,8 @@ engine) with a finger of page-sent touch events, one per frame, timed as a 60 Hz
 | One owner | a tab swipe started on a pressed row takes the touch (`captured()` is `tabs`): the press shade clears, no hold menu after 650 ms; once the finger lifts the touch is free (`null`); Chromium and WebKit (`swipe-feel`); `claim` order in `test/gestures.unit.test.mjs` | |
 
 ## Keyboard
+
+Tab bar and FAB with the keyboard up (opt-in `html[data-keyboard-bar]`): unset = the tab bar hides at once (as before); `stay` leaves both; `fade` fades both out in 100 ms (opacity, not tappable) and back; Still / Reduce Motion: at once (`test/tab-ripple-keyboard.unit.test.mjs`, `e2e/tab-ripple-keyboard.spec.mjs`).
 
 `ui/keyboard.js`: `keyboardState` and `barCover`, and `ui/keep-keyboard.js` `holdKeyboard` on a computer, in Node (`test/gestures.unit.test.mjs`). `e2e/keyboard.spec.mjs` on `/kit/shell/`
 at 390 px, in Chromium and WebKit, with the keyboard played (no browser here shows one): the viewport made shorter
@@ -121,6 +124,7 @@ page-sent touch pointer events.
 | In a scroller | a row in the scrolling page (`inScroller`): not pressed at 40 ms, pressed by 160 ms; a move past the slop at 40 ms: never; a tap lifted at 30 ms: shown at the lift, then cleared | |
 | On a fixed bar | a tab on the tab bar (`inScroller` false): pressed at once; cleared after the lift | |
 | Ripple | look M: `data-ripple="in"` from the finger (`--ui-ripple-x` 30 px), to the farthest corner, a radial gradient; after the lift `out`, then gone with its properties; the plain look: none | |
+| Ripple timing | look M: grows in 130 ms ease-out (was 225); opt-in `html[data-ripple="hold"]`: after the lift the tint stays until the next touch or 1200 ms, then fades 150 ms; Still: no hold (`test/tab-ripple-keyboard.unit.test.mjs`) | |
 
 ## Sheet drag
 

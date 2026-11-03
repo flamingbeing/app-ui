@@ -16,6 +16,12 @@
   screen under back over 200 ms ease-out, its blocks 40 ms apart (apps pass it for tab-level pages such as Search). Default stays the slide.
 - Settings sub-page (new default; was a 30% slide with a fade, 180 ms): the page slides in full width over 250 ms ease-out with no opacity
   ramp while the menu shifts left 22%; going back is the reverse.
+- Tab switch fade (opt-in: `data-slide="fade"` on the tab bar or `<html>`, or `tabPages(..., { slide: 'fade' })`): the page leaves with an
+  80 ms fade, 100 ms gap, its blocks fade in top-down 20 ms apart (no translate), the lit tab's pill fades 150 ms. Default stays the slide.
+- Ripple (new default timing): grows in 130 ms ease-out (was 225 ms); opt-in `html[data-ripple="hold"]` keeps the tint after the lift until
+  the next touch or 1200 ms. The ripple needs `data-family="android"` on the page (apps set it for Android phones).
+- Keyboard and the tab bar (opt-in `html[data-keyboard-bar]`): `stay` leaves the tab bar and FAB under the keyboard, `fade` fades them out
+  in 100 ms (opacity); unset = hidden at once as before. Still / Reduce Motion: at once.
 
 ## 1.0.0-rc.83
 Six opt-in options (all off unless an app asks), from the todo app's UX pass:
