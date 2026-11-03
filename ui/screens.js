@@ -6,7 +6,7 @@
 // on Android the system's swipe would fire as well). html[data-edge-back="always"] turns it on everywhere (testing).
 // It starts within EDGE px of the left edge and only when the finger moves mostly sideways; past a third of the width
 // or a flick, it goes back.
-import { still, noGesture, listeners, claim } from './gesture.js';
+import { still, noGesture, listeners, claim, PUSH_MS, POP_MS, PAGE_EASE, PARALLAX, FADE_IN_MS, FADE_OUT_MS, FADE_STAGGER_MS, FADE_EASE } from './gesture.js';
 import { glide, tracker } from './motion.js';
 
 export const EDGE = 24;
@@ -27,14 +27,14 @@ export const swipeGoesBack = (dx, v, width) => dx > width / 3 || (v > 0.5 && dx 
 /**
  * @param {HTMLElement} host  .ui-screens
  * @param {{ onChange?: (top: HTMLElement) => void }} [opts]  onChange: after each push or pop (e.g. largeTitle.watch)
- * @returns {{ push: (target: string | HTMLElement, from?: HTMLElement | null) => void, pop: (animate?: boolean) => void,
+ * @returns {{ push: (target: string | HTMLElement, from?: HTMLElement | null | { from?: HTMLElement | null, motion?: 'slide' | 'fade' }) => void, pop: (animate?: boolean) => void,
  *   depth: () => number, baseY: () => number, base: (screen: HTMLElement) => Promise<void>, stop: () => void }}  base: tab pages (tab-pages.js)
  */
 export function screenStack(host, { onChange } = {}) {
   const l = listeners();
   const all = () => /** @type {HTMLElement[]} */ ([...host.querySelectorAll(':scope > .ui-screen')]);
   // y: where the page was scrolled when the next screen was pushed over this one (back there on the pop)
-  /** @type {{ screen: HTMLElement, from: HTMLElement | null, y: number }[]} */
+  /** @type {{ screen: HTMLElement, from: HTMLElement | null, y: number, fade?: boolean }[]} */
   const stack = [{ screen: all()[0], from: null, y: 0 }];
   all().forEach((s, i) => { s.hidden = i > 0; });
   const top = () => stack[stack.length - 1].screen;
@@ -49,9 +49,27 @@ export function screenStack(host, { onChange } = {}) {
     if (!t.hasAttribute('tabindex')) t.tabIndex = -1;
     t.focus({ preventScroll: true });
   }
-  /** @param {HTMLElement} el @param {Keyframe[]} frames */
-  const slide = (el, frames) => still() ? Promise.resolve()
-    : el.animate(frames, { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)' }).finished.catch(() => {});
+  /** @param {HTMLElement} el @param {Keyframe[]} frames @param {number} [duration] @param {string} [easing] @param {number} [delay] */
+  const slide = (el, frames, duration = PUSH_MS, easing = PAGE_EASE, delay = 0) => still() || typeof el.animate !== 'function' ? Promise.resolve()
+    : el.animate(frames, { duration, easing, delay, fill: 'backwards' }).finished.catch(() => {});
+  const shift = `translateX(${-PARALLAX * 100}%)`;
+  /** the dim between the two screens, fading over `dur` (the swipe's shade, so a pop looks like a let-go swipe)
+   * @param {HTMLElement} before @param {number} dur @param {boolean} dimIn */
+  function dim(before, dur, dimIn) {
+    const d = document.createElement('div');
+    d.className = 'ui-swipe-shade';
+    before.before(d);
+    const f = [{ opacity: 0 }, { opacity: 1 }];
+    return slide(d, dimIn ? f : f.slice().reverse(), dur).then(() => d.remove());
+  }
+  /** Fade-through: the screen fades in, its blocks (children) a little apart. @param {HTMLElement} s @param {number} ms @param {boolean} stagger */
+  function fadeIn(s, ms, stagger) {
+    const done = [slide(s, [{ opacity: 0 }, { opacity: 1 }], ms, FADE_EASE)];
+    if (stagger) [...s.children].slice(0, 8).forEach((c, i) => {
+      if (i) done.push(slide(/** @type {HTMLElement} */ (c), [{ opacity: 0 }, { opacity: 1 }], ms, FADE_EASE, i * FADE_STAGGER_MS));
+    });
+    return Promise.all(done);
+  }
 
   /** Takes `el` out of the flow (class `cls`) and keeps its content where it was on screen across `change` (a scroll).
    * @param {HTMLElement} el @param {string} cls @param {() => void} change */
@@ -63,13 +81,17 @@ export function screenStack(host, { onChange } = {}) {
     el.style.top = `${y0 - probe.getBoundingClientRect().top}px`;
   }
 
-  /** @param {string | HTMLElement} target @param {HTMLElement | null} [from] */
-  function push(target, from = null) {
+  /** @param {string | HTMLElement} target @param {HTMLElement | null | { from?: HTMLElement | null, motion?: 'slide' | 'fade' }} [arg]
+   *  an element (what was tapped: focus goes back to it) or { from, motion }: motion 'fade' fades the screen in over 100 ms
+   *  with no slide, and its pop fades the screen under back in over 200 ms (tab-level pages: Search, Filters) */
+  function push(target, arg = null) {
+    const o = arg && !(/** @type {any} */ (arg).nodeType) ? /** @type {{ from?: HTMLElement | null, motion?: string }} */ (arg) : { from: /** @type {HTMLElement | null} */ (arg) };
+    const from = o.from ?? null, fade = o.motion === 'fade';
     const s = typeof target === 'string' ? /** @type {HTMLElement | null} */ (host.querySelector(target)) : target;
     if (!s || s === top() || stack.some(x => x.screen === s)) return;
     const under = top();
     stack[stack.length - 1].y = scrollY;
-    stack.push({ screen: s, from, y: 0 });
+    stack.push({ screen: s, from, y: 0, fade });
     mark();
     try { history.pushState({ ...(history.state || {}), uiScreens: stack.length - 1 }, ''); } catch { /* none */ }
     // the new screen slides in over the old one, which leaves the flow and stays where it was on screen
@@ -77,8 +99,17 @@ export function screenStack(host, { onChange } = {}) {
     under.classList.remove('is-top');
     const show = () => { s.hidden = false; scrollTo(0, 0); onChange?.(s); };   // (onChange may reset the bar)
     if (still()) { show(); under.hidden = true; focusIn(s); return; }   // (no class changes: nothing to transition)
+    if (fade) {   // no slide: the screen under goes at once, this one fades in
+      show(); under.hidden = true;
+      void fadeIn(s, FADE_IN_MS, false);
+      focusIn(s);
+      return;
+    }
     s.classList.add('is-entering');
     lift(under, 'is-under', show);
+    // the screen under shifts left and dims while this one slides in
+    void dim(s, PUSH_MS, true);
+    void slide(under, [{ transform: 'none' }, { transform: shift }]);
     void slide(s, [{ transform: 'translateX(100%)' }, { transform: 'none' }]).then(() => {
       s.classList.remove('is-entering');
       under.classList.remove('is-under');
@@ -90,7 +121,7 @@ export function screenStack(host, { onChange } = {}) {
   // one step back, shown (the history entry is already gone: popstate, or the caller went back)
   async function popShown(animate = true) {
     if (stack.length < 2) return;
-    const gone = /** @type {{ screen: HTMLElement, from: HTMLElement | null, y: number }} */ (stack.pop());
+    const gone = /** @type {{ screen: HTMLElement, from: HTMLElement | null, y: number, fade?: boolean }} */ (stack.pop());
     mark();
     const s = top();
     // the leaving screen slides off over the one coming back, which is scrolled back to where it was
@@ -98,9 +129,15 @@ export function screenStack(host, { onChange } = {}) {
     gone.screen.classList.remove('is-top');
     // (onChange first: it may change the bar above the screens, which would move them)
     const back = () => { s.hidden = false; onChange?.(s); scrollTo(0, stack[stack.length - 1].y); };
-    if (animate && !still()) {
+    if (animate && !still() && gone.fade) {   // fade-through: the pushed screen goes at once, the one under fades in
+      gone.screen.hidden = true;
+      back();
+      await fadeIn(s, FADE_OUT_MS, true);
+    } else if (animate && !still()) {
       lift(gone.screen, 'is-leaving', back);
-      await slide(gone.screen, [{ transform: 'none' }, { transform: 'translateX(100%)' }]);
+      void dim(gone.screen, POP_MS, false);
+      void slide(s, [{ transform: shift }, { transform: 'none' }], POP_MS);
+      await slide(gone.screen, [{ transform: 'none' }, { transform: 'translateX(100%)' }], POP_MS);
     } else back();
     gone.screen.hidden = true;
     gone.screen.classList.remove('is-leaving');

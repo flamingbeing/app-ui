@@ -3,13 +3,16 @@ export function edgeBackOn(nav?: Navigator, media?: (q: string) => boolean, attr
 /**
  * @param {HTMLElement} host  .ui-screens
  * @param {{ onChange?: (top: HTMLElement) => void }} [opts]  onChange: after each push or pop (e.g. largeTitle.watch)
- * @returns {{ push: (target: string | HTMLElement, from?: HTMLElement | null) => void, pop: (animate?: boolean) => void,
+ * @returns {{ push: (target: string | HTMLElement, from?: HTMLElement | null | { from?: HTMLElement | null, motion?: 'slide' | 'fade' }) => void, pop: (animate?: boolean) => void,
  *   depth: () => number, baseY: () => number, base: (screen: HTMLElement) => Promise<void>, stop: () => void }}  base: tab pages (tab-pages.js)
  */
 export function screenStack(host: HTMLElement, { onChange }?: {
     onChange?: (top: HTMLElement) => void;
 }): {
-    push: (target: string | HTMLElement, from?: HTMLElement | null) => void;
+    push: (target: string | HTMLElement, from?: HTMLElement | null | {
+        from?: HTMLElement | null;
+        motion?: "slide" | "fade";
+    }) => void;
     pop: (animate?: boolean) => void;
     depth: () => number;
     baseY: () => number;

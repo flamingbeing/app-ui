@@ -43,8 +43,21 @@
 /* each screen keeps room under its last row for a showing tab bar (tab-bar.js tabBarRoom sets the room; 0 while hidden) */
 :root:has(.ui-tabbar:not([hidden])) .ui-screen::after { content: ""; display: block; height: var(--ui-tabbar-room, 0px); }
 
+/* fade mode (data-slide="fade", ui/tab-pages.js): the lit tab's pill fades in and out instead of switching */
+[data-slide="fade"] .ui-tab { transition: background-color 150ms ease-out, color 150ms ease-out; }
+:root[data-motion="still"] .ui-tab { transition: none; }
+@media (prefers-reduced-motion: reduce) { [data-slide="fade"] .ui-tab { transition: none; } }
+
 /* the keyboard up (ui/keyboard.js): the tab bar steps aside, as Android apps do it */
-.ui-keyboard-open .ui-tabbar { display: none; }
+.ui-keyboard-open:not([data-keyboard-bar]) .ui-tabbar { display: none; }
+/* opt-in (html[data-keyboard-bar], ui/keyboard.js): "stay" leaves the tab bar and the FAB (.ui-fab) alone, so the keyboard
+   covers them (or the page resizing lifts them above it); "fade" fades them out in 100 ms and back in when it goes, not
+   tappable meanwhile. Opacity only; Still / Reduce Motion: at once. */
+:root[data-keyboard-bar="fade"] :is(.ui-tabbar, .ui-fab) { transition: opacity 100ms ease-out, visibility 0s linear 0s; }
+:root[data-keyboard-bar="fade"].ui-keyboard-open :is(.ui-tabbar, .ui-fab) { opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 100ms ease-out, visibility 0s linear 100ms; }
+:root[data-motion="still"][data-keyboard-bar="fade"] :is(.ui-tabbar, .ui-fab) { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-keyboard-bar="fade"] :is(.ui-tabbar, .ui-fab) { transition: none !important; } }
 
 /* opt-in (html[data-push-bar="hide"]): a pushed screen (a Settings page, a detail) has the tab bar to itself no longer;
    the bar is gone and the room kept for it too (ui/screens.js sets .ui-screens[data-depth], 0 = none pushed) */

@@ -4,16 +4,31 @@
 @keyframes ui-fade { from { opacity: 0; } }
 @keyframes ui-pop { from { opacity: 0; transform: scale(.9); } }
 @keyframes ui-rise { from { transform: translateY(100%); } }
+@keyframes ui-sheet-in { from { opacity: 0; transform: translateY(40px); } }
 @keyframes ui-fade-out { to { opacity: 0; } }
 @keyframes ui-shrink { to { opacity: 0; transform: scale(.94); } }
 @keyframes ui-sink { to { transform: translateY(100%); } }
 
+/* Dialogs and menus (rc.84): in 120 ms (--d-pop-in) ease-out from scale .9, no overshoot; out 80 ms (--d-pop-out).
+   Snackbars: fade in 150 ms (--d-toast-in), no slide; an opt-in exit fade (toaster `exit`) */
+dialog.modal[open] { animation: ui-pop var(--d-pop-in, 120ms) cubic-bezier(0, 0, .2, 1); }
+dialog.modal[open]::backdrop { animation: ui-fade var(--d-pop-in, 120ms) cubic-bezier(0, 0, .2, 1); }
+dialog.modal.is-leaving { pointer-events: none; animation: ui-shrink var(--d-pop-out, 80ms) ease-in forwards; }
+dialog.modal.is-leaving::backdrop { animation: ui-fade-out var(--d-pop-out, 80ms) ease-in forwards; }
+.toast { animation: ui-fade var(--d-toast-in, 150ms) cubic-bezier(0, 0, .2, 1); }
+.toast.is-leaving { pointer-events: none; animation: ui-fade-out var(--d-toast-out, 300ms) ease-in forwards; }
+
 /* Still (this device) or the device's Reduce Motion: things appear and go, nothing slides, springs or lifts */
-:root[data-motion="still"] :is(.ui-menu, .ui-menu-veil, dialog.ui-sheet[open], .ui-menu-preview, .ui-bar, .ui-bar-title, .ui-tabbar, dialog.ui-sheet, [data-hold-menu]) {
+:root[data-motion="still"] :is(.ui-menu, .ui-menu-veil, dialog.ui-sheet[open], .ui-menu-preview, .ui-bar, .ui-bar-title, .ui-tabbar, dialog.ui-sheet, [data-hold-menu], dialog.modal, .toast) {
   animation: none !important; transition: none !important; }
+:root[data-motion="still"] dialog.ui-sheet[open]::backdrop { animation: none !important; }
+:root[data-motion="still"] dialog.modal::backdrop { animation: none !important; }
 :root[data-motion="still"] .ui-menu-preview.is-lifted, :root[data-motion="still"] [data-hold-menu].is-holding { transform: none; }
 :root[data-motion="still"] .ui-switch, :root[data-motion="still"] .ui-switch::before { transition: none; }
 @media (prefers-reduced-motion: reduce) {
+  dialog.ui-sheet[open]::backdrop { animation: none !important; }
+  dialog.modal::backdrop { animation: none !important; }
+  dialog.modal, .toast { animation: none !important; }
   .ui-switch, .ui-switch::before { transition: none; }
   .ui-menu, .ui-menu-veil, dialog.ui-sheet[open], .ui-menu-preview, .ui-bar, .ui-bar-title, .ui-tabbar, dialog.ui-sheet, [data-hold-menu] {
     animation: none !important; transition: none !important; }

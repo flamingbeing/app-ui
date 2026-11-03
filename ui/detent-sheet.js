@@ -115,6 +115,27 @@ export function detentSheet(sheet) {
     leaving?.stop(); fading?.cancel(); leaving = null; fading = null; unshade(true);
     unstyle(); sheet.classList.remove('is-dragging');
   }
+  // Opt-in close for a button, Esc, the backdrop or Back (data-close-motion="drop"; a finger's let-go keeps the spring):
+  // holds 100 ms, then eases in-out 270 ms down by data-close-drop px (default 40) while fading; the backdrop fades with it.
+  // transform and opacity only.
+  const HOLD = 100, MOVE = 270;
+  /** @param {number} y  where the sheet is now (px down) */
+  function drop(y) {
+    const total = HOLD + MOVE, at = HOLD / total;
+    const by = Number(sheet.getAttribute('data-close-drop')) || 40;
+    const run = sheet.animate([
+      { transform: `translateY(${y}px)`, opacity: 1, offset: 0 },
+      { transform: `translateY(${y}px)`, opacity: 1, offset: at, easing: 'cubic-bezier(.4,0,.2,1)' },
+      { transform: `translateY(${y + by}px)`, opacity: 0, offset: 1 }], { duration: total, fill: 'forwards' });
+    leaving = /** @type {any} */ ({ stop: () => run.cancel() });
+    const me = leaving, k = unshade(true);
+    try {
+      fading = sheet.animate([{ opacity: k, offset: 0 }, { opacity: k, offset: at, easing: 'cubic-bezier(.4,0,.2,1)' }, { opacity: 0, offset: 1 }],
+        { duration: total, pseudoElement: '::backdrop', fill: 'forwards' });
+    } catch { /* no ::backdrop animation */ }
+    void run.finished.then(() => { if (leaving === me && sheet.open) sheet.close(); }, () => {});
+    if (pushed) { pushed = false; back(); }
+  }
   // v: a finger's let-go speed (px/ms, down), which the slide starts at (a finger's let-go slides with Less motion too)
   const close = (v = 0, touch = false) => {
     if (!sheet.open || leaving) return;
@@ -123,6 +144,7 @@ export function detentSheet(sheet) {
     const y = glider ? box0 - glider.stop() : t && t !== 'none' ? new DOMMatrixReadOnly(t).m42 : 0;
     glider = null;
     sheet.classList.add('is-dragging');   // (no CSS transition while the animation moves it)
+    if (!touch && sheet.getAttribute('data-close-motion') === 'drop') { drop(y); return; }
     const out = sheet.getBoundingClientRect().height + 8;
     // a phone: a spring down from where it is; a centred dialog: a fade (0 to 100 is how far gone)
     const run = leaving = wide.matches

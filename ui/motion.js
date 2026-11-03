@@ -231,6 +231,10 @@ export const PRESSABLE = 'button, [role="button"], .ui-tab, .ui-menu-item, a.ui-
 /** How long a press inside something that scrolls waits before it shows (Android's tap timeout): the touch may be a scroll. */
 export const PRESS_DELAY = 100;
 const RIPPLE_OUT = 150;
+/** The ripple grows in this long (ms; android.css --ui-ripple-ms; the reference's 100-160). */
+export const RIPPLE_IN = 130;
+/** html[data-ripple="hold"]: after the lift the tint stays this long unless a touch lands first (ms). */
+export const RIPPLE_HOLD_MS = 1200;
 
 /**
  * Whether el sits in something that scrolls now (an overflowing auto or scroll box, or the page); a fixed or sticky
@@ -260,9 +264,22 @@ function ripple(el, x, y) {
   el.style.setProperty('--ui-ripple-max', `${Math.ceil(Math.hypot(Math.max(px, r.width - px), Math.max(py, r.height - py)))}px`);
   el.setAttribute('data-ripple', 'in');
 }
+/** @type {Set<Element>} */
+const holds = new Set();
+/** a held ripple fades out now @param {Element} el */
+function letGo(el) {
+  if (!holds.delete(el) || el.getAttribute('data-ripple') !== 'hold') return;
+  unripple(el);
+}
 /** The ripple fades out (RIPPLE_OUT), then goes. @param {Element} el */
 function unripple(el) {
   if (!el.hasAttribute('data-ripple')) return;
+  if (document.documentElement.dataset.ripple === 'hold' && document.documentElement.dataset.motion !== 'still' && el.getAttribute('data-ripple') === 'in') {
+    el.setAttribute('data-ripple', 'hold');   // the tint stays until the next touch or RIPPLE_HOLD_MS
+    holds.add(el);
+    setTimeout(() => letGo(el), RIPPLE_HOLD_MS);
+    return;
+  }
   el.setAttribute('data-ripple', 'out');
   setTimeout(() => {
     if (el.getAttribute('data-ripple') !== 'out') return;   // pressed again meanwhile
@@ -312,6 +329,7 @@ export function pressFeedback(root = document) {
   l.on(root, 'pointerdown', (/** @type {PointerEvent} */ e) => {
     if (e.pointerType === 'mouse' || !e.isPrimary) return;
     clear(true);
+    for (const h of [...holds]) { holds.delete(h); if (h.getAttribute('data-ripple') === 'hold') unripple(h); }
     const t = /** @type {HTMLElement | null} */ (e.target instanceof Element ? e.target.closest(PRESSABLE) : null);
     if (!t || t.matches(':disabled, [aria-disabled="true"]')) return;
     on = t; x0 = e.clientX; y0 = e.clientY; shownAt = 0;

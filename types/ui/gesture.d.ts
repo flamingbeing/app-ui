@@ -101,5 +101,13 @@ export function unrubber(r: number, w: number): number;
 export const SLIDE_MS: 180;
 /** The slide's curve: quick out of the start, gentle landing. */
 export const SLIDE_EASE: "cubic-bezier(.2, .7, .2, 1)";
+export const PUSH_MS: 250;
+export const POP_MS: 300;
+export const PAGE_EASE: "cubic-bezier(0, 0, .2, 1)";
+export const PARALLAX: 0.22;
+export const FADE_IN_MS: 100;
+export const FADE_OUT_MS: 200;
+export const FADE_STAGGER_MS: 40;
+export const FADE_EASE: "cubic-bezier(0, 0, .2, 1)";
 /** How quickly a let-go glide settles: the spring's response in s (iOS's paging feel). */
 export const SPRING_S: 0.3;

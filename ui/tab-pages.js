@@ -23,7 +23,10 @@
 // with Reduce Motion). Off: data-swipe="off" on the tab bar (or <html>), or { swipe: false }.
 // A tapped tab (or side link) slides its page in from the side it sits on in the tab bar (SLIDE_MS, the logbook's
 // page motion), at every width; a finger landing on the page while it slides lands it at once. Less motion: it just switches. Off: data-slide="off" on the tab bar (or <html>), or
-// { slide: false }.
+// { slide: false }. Fade mode (opt-in: data-slide="fade" on the tab bar or <html>, or { slide: 'fade' }; the reference
+// apps' tab switch): the page leaves with a TAB_FADE_OUT_MS fade, TAB_FADE_GAP_MS of nothing, then the page's blocks
+// (its direct children) fade in top-down, TAB_FADE_STAGGER_MS apart, no translate; the lit tab's pill fades
+// (gestures/tabbar.css). Opacity only; Less motion: it just switches.
 // Drawn ahead (opt-in, from the logbook: { ahead }): so a swipe never brings in an empty or out-of-date page, not even
 // in quick flicks in a row (each catches the glide and goes on from the page it was going to), ahead(page) asks the
 // app to draw a still copy of a page that isn't on screen, in that page. Each time a page lands, every other page on
@@ -40,6 +43,15 @@ import { EDGE, swipeGoesBack } from './screens.js';
 import { TABLET_MIN } from './shell/shell.js';
 
 export { swipeIntent, THROW_MS, rubber, SPRING_S, springPath, SLIDE_MS } from './gesture.js';
+
+/** Fade mode (above): the leaving page fades out, a gap, then each block fades in (ms). */
+export const TAB_FADE_OUT_MS = 80, TAB_FADE_GAP_MS = 100, TAB_FADE_IN_MS = 120, TAB_FADE_STAGGER_MS = 20, TAB_FADE_BLOCKS = 12;
+
+/** The start delay of each of n blocks in fade mode (pure): after the gap, top-down, one stagger apart, the blocks past TAB_FADE_BLOCKS with the last.
+ * @param {number} n @returns {number[]} */
+export function tabFadeDelays(n) {
+  return Array.from({ length: n }, (_, i) => TAB_FADE_GAP_MS + Math.min(i, TAB_FADE_BLOCKS) * TAB_FADE_STAGGER_MS);
+}
 
 /** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
 export const FLICK_V = 0.4;
@@ -79,7 +91,7 @@ export const PAGE_SPRING_S = 0.22;
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean, drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
  *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
@@ -126,17 +138,21 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     ys.set(current, screens.depth() > 0 && screens.baseY ? screens.baseY() : scrollY);   // a pushed screen's scroll isn't the tab's
     const order = stops();
     const dir = Math.sign(order.indexOf(page) - order.indexOf(current));
+    const from = current;
     current = page;
     asked.delete(page);   // (live now: once left, the app may empty it)
     mark();
     const y = ys.get(page) ?? 0;
-    void screens.base(page).then(() => {
+    const fade = tab && dir && slideKind() === 'fade' && !still();
+    // (not through a Promise unless fading: the page change itself stays synchronous, as a caught glide's landing expects)
+    const change = () => screens.base(page).then(() => {
       scrollTo(0, y);
       if (current === page) drawAhead();
-      if (tab && dir && slide && bar.dataset.slide !== 'off' && html.dataset.slide !== 'off' && !still()) slideIn(page, dir);
+      if (tab && dir && !still()) { const k = slideKind(); if (k === 'fade') fadeIn(page); else if (k === 'slide') slideIn(page, dir); }
       if (current === page) back?.went(page === stops()[0]);
       host.dispatchEvent(new CustomEvent('ui-tab', { bubbles: true, detail: { page, tab } }));
     });
+    if (fade) void fadeOut(from).then(change); else void change();
   }
   // Back on another page goes to the first page (the address is the first page's already)
   // (the pages keep their own scroll: the browser's would land a page at the scroll it had when the entry was added)
@@ -153,6 +169,30 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     onClose: backToClose ? onClose : undefined, first: current === stops()[0] }) : null;
   /** @type {Animation | null} */
   let sliding = null;
+  /** how a tapped tab changes the page now: 'off', 'slide' (default) or 'fade' (data-slide on the bar or <html>, else the option) */
+  function slideKind() {
+    if (!slide || bar.dataset.slide === 'off' || html.dataset.slide === 'off') return 'off';
+    return bar.dataset.slide === 'fade' || html.dataset.slide === 'fade' || slide === 'fade' ? 'fade' : 'slide';
+  }
+  /** fade mode, out: the leaving page fades (opacity only); it is put away by the switch @param {HTMLElement} from @returns {Promise<void>} */
+  function fadeOut(from) {
+    if (typeof from.animate !== 'function') return Promise.resolve();
+    const a = from.animate([{ opacity: 1 }, { opacity: 0 }], { duration: TAB_FADE_OUT_MS, easing: 'ease-in', fill: 'forwards' });
+    return a.finished.then(() => { a.cancel(); }, () => {});
+  }
+  /** fade mode, in: after the gap each block of the page fades in, top-down @param {HTMLElement} page */
+  function fadeIn(page) {
+    if (typeof page.animate !== 'function') return;
+    sliding?.cancel();
+    const blocks = [...page.children].filter(c => c instanceof HTMLElement).slice(0, TAB_FADE_BLOCKS + 1);
+    const delays = tabFadeDelays(blocks.length);
+    const as = blocks.map((b, i) => b.animate([{ opacity: 0 }, { opacity: 1 }],
+      { duration: TAB_FADE_IN_MS, delay: delays[i], easing: 'ease-out', fill: 'backwards' }));
+    const a = sliding = as[as.length - 1] ?? null;
+    if (!a) return;
+    const done = () => { if (sliding === a) sliding = null; };
+    a.finished.then(done, done);
+  }
   /** the tapped page comes in from its side (clipped, so the start offset can't widen the page) @param {HTMLElement} page @param {number} dir */
   function slideIn(page, dir) {
     sliding?.cancel();
