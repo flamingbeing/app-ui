@@ -342,7 +342,7 @@ export function pressFeedback(root = document) {
     clear(true);
     for (const h of [...holds]) { holds.delete(h); if (h.getAttribute('data-ripple') === 'hold') unripple(h); }
     const t = /** @type {HTMLElement | null} */ (e.target instanceof Element ? e.target.closest(PRESSABLE) : null);
-    if (!t || t.matches(':disabled, [aria-disabled="true"]')) return;
+    if (!t || t.matches(':disabled, [aria-disabled="true"], [data-no-press]')) return;
     on = t; x0 = e.clientX; y0 = e.clientY; shownAt = 0;
     if (inScroller(t)) wait = setTimeout(() => { if (on === t) show(t); }, PRESS_DELAY);
     else show(t);
