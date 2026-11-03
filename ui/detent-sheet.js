@@ -22,6 +22,22 @@ export const sheetsSettled = stepsSettled;
 const SPARE = 48;
 
 /**
+ * The finger-release close of data-release-motion="settle" (pure): keyframes for one animation from the finger's y
+ * (px down): a jump along the finger's direction for 60 ms (v px/ms, at most 24 px), a 130 ms hold, then an ease-in
+ * down to `out` for the rest of 650 ms.
+ * @param {number} y @param {number} v @param {number} out
+ * @returns {{ duration: number, keyframes: { transform: string, offset: number, easing?: string }[] }}
+ */
+export function releasePlan(y, v, out) {
+  const duration = 650, jump = Math.max(-24, Math.min(24, v * 60)), j = y + jump;
+  return { duration, keyframes: [
+    { transform: `translateY(${y}px)`, offset: 0, easing: 'cubic-bezier(.2,0,0,1)' },
+    { transform: `translateY(${j}px)`, offset: 60 / duration },
+    { transform: `translateY(${j}px)`, offset: 190 / duration, easing: 'cubic-bezier(.4,0,1,1)' },
+    { transform: `translateY(${Math.max(out, j)}px)`, offset: 1 }] };
+}
+
+/**
  * Where a drag lands (pure): the height nearest where the sheet would come to rest, or 'close'. A clear flick goes
  * on to the next height its way; well below the lowest height it closes.
  * @param {string[]} detents @param {Record<string, number>} sizes  each detent's height (px)
@@ -136,6 +152,17 @@ export function detentSheet(sheet) {
     void run.finished.then(() => { if (leaving === me && sheet.open) sheet.close(); }, () => {});
     if (pushed) { pushed = false; back(); }
   }
+  // Opt-in finger let-go close (data-release-motion="settle"): a short jump, a hold, then an ease-in off the bottom (releasePlan)
+  /** @param {number} y @param {number} v @param {number} out */
+  function release(y, v, out) {
+    const plan = releasePlan(y, v, out);
+    const run = sheet.animate(plan.keyframes, { duration: plan.duration, fill: 'forwards' });
+    leaving = /** @type {any} */ ({ stop: () => run.cancel() });
+    const me = leaving, k = unshade(true);
+    try { fading = sheet.animate([{ opacity: k }, { opacity: 0 }], { duration: plan.duration, pseudoElement: '::backdrop', fill: 'forwards' }); } catch { /* no ::backdrop animation */ }
+    void run.finished.then(() => { if (leaving === me && sheet.open) sheet.close(); }, () => {});
+    if (pushed) { pushed = false; back(); }
+  }
   // v: a finger's let-go speed (px/ms, down), which the slide starts at (a finger's let-go slides with Less motion too)
   const close = (v = 0, touch = false) => {
     if (!sheet.open || leaving) return;
@@ -146,6 +173,7 @@ export function detentSheet(sheet) {
     sheet.classList.add('is-dragging');   // (no CSS transition while the animation moves it)
     if (!touch && sheet.getAttribute('data-close-motion') === 'drop') { drop(y); return; }
     const out = sheet.getBoundingClientRect().height + 8;
+    if (touch && !wide.matches && sheet.getAttribute('data-release-motion') === 'settle') { release(y, v, out); return; }
     // a phone: a spring down from where it is; a centred dialog: a fade (0 to 100 is how far gone)
     const run = leaving = wide.matches
       ? springGlide([[sheet, x => ({ opacity: 1 - x / 100, transform: `scale(${1 - x * .0003})` })]], 0, 100, 0)
