@@ -106,7 +106,8 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   shows it at the lift; it stays one painted frame at least (80 ms).
 - The Android look (`data-family="android"`) adds Material's ripple: a circle grows from where the finger landed to
   the control's farthest corner (130 ms), and fades after the lift (150 ms). Motion Still: no growth, no fade.
-  `html[data-ripple="hold"]` (opt-in) keeps the tint after the lift until the next touch or 1200 ms.
+  `html[data-ripple="hold"]` (opt-in) keeps the tint after the lift until the next touch or 1200 ms. `html[data-ripple="on"|"hold"]`
+  also turns the ripple on for any other family.
 
 ## One gesture owns a touch (`ui/gesture.js` `claim`)
 
