@@ -132,6 +132,7 @@ page-sent touch pointer events.
 | --- | --- | --- |
 | In a scroller | a row in the scrolling page (`inScroller`): not pressed at 40 ms, pressed by 160 ms; a move past the slop at 40 ms: never; a tap lifted at 30 ms: shown at the lift, then cleared | |
 | On a fixed bar | a tab on the tab bar (`inScroller` false): pressed at once; cleared after the lift | |
+| Skipped (`data-no-press`, rc.87) | a tab marked `data-no-press`: never pressed, no ripple; unmarked again: pressed at once | |
 | Ripple | look M: `data-ripple="in"` from the finger (`--ui-ripple-x` 30 px), to the farthest corner, a radial gradient; after the lift `out`, then gone with its properties; the plain look: none | |
 | Ripple timing | look M: grows in 130 ms ease-out (was 225); opt-in `html[data-ripple="hold"]`: after the lift the tint stays until the next touch or 1200 ms, then fades 150 ms; Still: no hold (`test/tab-ripple-keyboard.unit.test.mjs`) | |
 

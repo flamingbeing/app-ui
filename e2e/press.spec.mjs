@@ -59,6 +59,16 @@ test('a tab on the fixed tab bar shows pressed at once', async ({ sized }) => {
   await expect(tab).not.toHaveAttribute('data-pressed');
 });
 
+test('data-no-press: a button the press feedback skips (no shade, no ripple), the next press elsewhere still works', async ({ sized }) => {
+  const page = await load(sized);
+  const tab = page.locator('nav.ui-tabbar .ui-tab').nth(1);
+  await tab.evaluate(el => el.setAttribute('data-no-press', ''));
+  expect(await tab.evaluate(el => window.__press(el, [[20, null], [0, 'up']]))).toEqual([false, false, false]);
+  expect(await tab.getAttribute('data-ripple')).toBeNull();
+  await tab.evaluate(el => el.removeAttribute('data-no-press'));
+  expect(await tab.evaluate(el => window.__press(el, [[20, null], [0, 'up']]))).toEqual([true, true, true]);
+});
+
 test('the Android look: a ripple grows from the finger and fades after the lift; other looks have none', async ({ sized }) => {
   const page = await load(sized, `${SHELL}?look=m`);
   await expect(page.locator('html')).toHaveAttribute('data-family', 'android');
