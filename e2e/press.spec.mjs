@@ -84,3 +84,33 @@ test('the Android look: a ripple grows from the finger and fades after the lift;
   const t2 = plain.locator('nav.ui-tabbar .ui-tab').nth(1);
   expect(await t2.evaluate(async el => { await window.__press(el, [[20, null]]); return el.getAttribute('data-ripple'); })).toBe(null);
 });
+
+test('a data-press-parent button presses its whole row: shade and ripple on the row, none on the button', async ({ sized }) => {
+  const page = await load(sized);
+  const seen = await page.evaluate(async () => {
+    document.documentElement.dataset.ripple = 'on';
+    const row = document.createElement('div');
+    row.style.cssText = 'position:fixed;top:200px;left:0;width:360px;display:flex;border-radius:0;z-index:99';
+    const box = document.createElement('button'), main = document.createElement('button');   // (styles by CSSOM: the CSP refuses style attributes)
+    box.textContent = 'o'; box.style.width = '44px';
+    main.textContent = 'words'; main.setAttribute('data-press-parent', ''); main.style.flex = '1'; main.style.borderRadius = '36px';
+    row.append(box, main);
+    document.body.append(row);
+    await window.__press(main, [[40, null]]);
+    const m = getComputedStyle(main), r = getComputedStyle(row);
+    const out = { pressed: main.hasAttribute('data-pressed'), mainRipple: main.getAttribute('data-ripple'), mainShadow: m.boxShadow,
+      mainImage: m.backgroundImage, rowRipple: row.getAttribute('data-ripple'), rowShadow: r.boxShadow, rowImage: r.backgroundImage };
+    main.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 5, pointerType: 'touch', isPrimary: true }));
+    await new Promise(res => setTimeout(res, 300));
+    return { ...out, after: row.getAttribute('data-ripple'), afterShadow: getComputedStyle(row).boxShadow };
+  });
+  expect(seen.pressed).toBe(true);
+  expect(seen.mainRipple).toBe(null);
+  expect(seen.mainShadow).toBe('none');
+  expect(seen.mainImage).toBe('none');
+  expect(seen.rowRipple).toBe('in');
+  expect(seen.rowImage).toMatch(/radial-gradient/);
+  expect(seen.rowShadow).toMatch(/inset/);
+  expect(seen.after).toBe(null);
+  expect(seen.afterShadow).toBe('none');
+});
