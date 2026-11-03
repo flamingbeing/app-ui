@@ -811,10 +811,12 @@ test('a bar\'s own data-slide beats <html>\'s (rc.88): html "dip" with a "fade" 
     bar.dataset.slide = 'fade';
     const tabs = [...bar.querySelectorAll('[data-tab-page]')];
     tabs[tabs.length - 1].click();
-    await new Promise(res => requestAnimationFrame(() => res(undefined)));
+    // (after the leaving page's fade-out: the page now shown is the new one)
+    await new Promise(res => setTimeout(res, 120));
     const target = [...document.querySelectorAll('.ui-screens > .ui-screen')].filter(s => !s.hidden)[0];
     return { own: target.getAnimations().length, blocks: [...target.children].flatMap(c => c.getAnimations()).length };
   });
   test.skip(!r, 'fewer than two tab pages in this gallery page');
   expect(r.own, 'dip would animate the page as one piece').toBe(0);
+  expect(r.blocks, 'fade animates the blocks').toBeGreaterThan(0);
 });
