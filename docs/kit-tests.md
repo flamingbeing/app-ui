@@ -338,3 +338,5 @@ over a made-up tab bar; the pure order rules by `test/tab-arrange.unit.test.mjs`
 | Options | `data-bar="slim"` hides the large title; `.ui-bar-title[data-sub]` shows its line under the name | |
 | Options | theme list: the switch starts on Sync with system, a pick ticks one style, turning the switch off leaves the theme fixed | |
 | Options | settings: a `{ heading }` row is a title with no control; `about.rows` adds a link and a button to About | |
+| Sheet motion (rc.84, `test/sheet-motion.unit.test.mjs`, `e2e/sheet-motion.spec.mjs`) | a sheet opens in 280 ms decelerate, rising 40px while fading in, with its backdrop fading in; Still / Reduce Motion cut both | |
+| Sheet motion | `data-close-motion="drop"`: a button / Esc / backdrop / Back close holds 100 ms then eases 270 ms down 40px (`data-close-drop`) while fading, backdrop with it; a finger let-go keeps the spring; Still closes at once | |

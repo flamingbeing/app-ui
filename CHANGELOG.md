@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.84
+- Sheet open (new default; the old 480 ms spring overshot): 280 ms decelerate (`cubic-bezier(.2,0,0,1)`, `--d-sheet-in`), a 40px rise
+  with a fade-in, and the `::backdrop` fades in over the same time. Still / Reduce Motion cut both.
+- Sheet close option: `dialog.ui-sheet[data-close-motion="drop"]` makes a button, Esc, backdrop or Back close hold 100 ms, then
+  ease in-out 270 ms down 40px (`data-close-drop` for more) while fading, backdrop with it. A finger's let-go keeps the spring.
+
 ## 1.0.0-rc.83
 Six opt-in options (all off unless an app asks), from the todo app's UX pass:
 - Tab bar hidden on pushed screens: `html[data-push-bar="hide"]`. `screenStack` now sets `.ui-screens[data-depth]`
