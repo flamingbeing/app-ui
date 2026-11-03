@@ -4,7 +4,8 @@
 @keyframes ui-fade { from { opacity: 0; } }
 @keyframes ui-pop { from { opacity: 0; transform: scale(.9); } }
 @keyframes ui-rise { from { transform: translateY(100%); } }
-@keyframes ui-sheet-in { from { opacity: 0; transform: translateY(40px); } }
+@keyframes ui-sheet-in { from { opacity: 0; transform: translateY(var(--ui-sheet-rise, 40px)); } }
+@keyframes ui-sheet-out { to { opacity: 0; transform: translateY(var(--ui-sheet-rise, 40px)); } }
 @keyframes ui-fade-out { to { opacity: 0; } }
 @keyframes ui-shrink { to { opacity: 0; transform: scale(.94); } }
 @keyframes ui-sink { to { transform: translateY(100%); } }

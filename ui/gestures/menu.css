@@ -41,12 +41,17 @@
 .ui-menu-layer.is-leaving .ui-menu-veil { animation: ui-fade-out var(--d-pop-out, 80ms) ease-in forwards; }
 .ui-menu-layer.is-leaving .ui-menu { animation: ui-shrink var(--d-pop-out, 80ms) ease-in forwards; }
 .ui-menu-layer.is-leaving .ui-menu.is-sheet { animation: ui-sink calc(var(--d-quick) * .7) cubic-bezier(.4, 0, 1, 1) forwards; }
+/* a tap menu's bottom panel on its way out (tap-menu.js): sinks and fades 200 ms ease-in, the veil with it */
+.ui-menu-layer.is-leaving:has(.ui-menu-panel) .ui-menu-veil { animation: ui-fade-out 200ms ease-in forwards; }
+.ui-menu-layer.is-leaving .ui-menu.ui-menu-panel { animation: ui-sheet-out 200ms ease-in forwards; }
 /* the tap menu (tap-menu.js): its title, a nested list's Back row, and the bottom panel it opens as with `sheet` */
 .ui-menu-title { padding: 8px var(--pad) 4px; font-size: .85rem; font-weight: 600; color: var(--muted); }
 .ui-menu-back { justify-content: flex-start; gap: .5ch; }
 .ui-menu-back::before { content: "‹"; font-size: 1.25em; line-height: 1; }
 .ui-menu-icon { width: 1.25rem; height: 1.25rem; flex: none; }
 .ui-menu.ui-menu-panel { position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: auto; max-width: 40rem; margin: 0 auto;
-  border-radius: var(--sheet-r) var(--sheet-r) 0 0; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); transform-origin: 50% 100%; }
+  border-radius: var(--sheet-r) var(--sheet-r) 0 0; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); transform-origin: 50% 100%;
+  animation: ui-sheet-in var(--d-sheet-in, 280ms) cubic-bezier(.2, 0, 0, 1); }   /* rises like a sheet (280 ms decelerate), not the popover's pop */
+.ui-menu-layer:has(.ui-menu-panel) .ui-menu-veil { animation: ui-fade var(--d-sheet-in, 280ms) cubic-bezier(.2, 0, 0, 1); }
 .ui-menu-grab { width: 36px; height: 5px; margin: 8px auto 4px; border-radius: 3px; background: var(--line); }
 .ui-menu-note { padding: 12px var(--pad); font-size: .85rem; color: var(--muted); border-bottom: var(--border) solid var(--line); }
