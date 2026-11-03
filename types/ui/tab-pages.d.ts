@@ -1,6 +1,7 @@
 /** The start delay of each of n blocks in fade mode (pure): after the gap, top-down, one stagger apart, the blocks past TAB_FADE_BLOCKS with the last.
- * @param {number} n @returns {number[]} */
-export function tabFadeDelays(n: number): number[];
+ * With `rise`: spread so the last block (of at most TAB_FADE_BLOCKS + 1) ends at TAB_RISE_END_MS, no more than TAB_RISE_MAX_STAGGER_MS apart.
+ * @param {number} n @param {boolean} [rise] @returns {number[]} */
+export function tabFadeDelays(n: number, rise?: boolean): number[];
 /** Where a let-go swipe goes (pure): 1 the next page, -1 the previous one, 0 back to this one. Like iOS's paging,
  * the page goes when where it is plus its throw (v x THROW_MS) is past half the width (a slow drag past half), or on
  * a flick (FLICK_V or faster) that way; a finger that turns back at the end takes it back. So quick flicks one after
@@ -17,7 +18,7 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
 /**
  * @param {HTMLElement} bar  nav.ui-tabbar
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
- *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
+ *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
  *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
@@ -38,7 +39,7 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
     host: HTMLElement;
     root?: ParentNode;
     swipe?: boolean;
-    slide?: boolean | "fade";
+    slide?: boolean | "fade" | "rise";
     drawer?: () => PullDrawer | null;
     onPrevMissing?: () => void;
     backToFirst?: boolean;
@@ -56,11 +57,16 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
     stop: () => void;
     drawAhead: () => void;
 };
-export const TAB_FADE_OUT_MS: 80;
+export const TAB_FADE_OUT_MS: 67;
 export const TAB_FADE_GAP_MS: 100;
 export const TAB_FADE_IN_MS: 120;
 export const TAB_FADE_STAGGER_MS: 20;
 export const TAB_FADE_BLOCKS: 12;
+export const TAB_RISE_GAP_MS: 10;
+export const TAB_RISE_IN_MS: 150;
+export const TAB_RISE_PX: 12;
+export const TAB_RISE_END_MS: 317;
+export const TAB_RISE_MAX_STAGGER_MS: 40;
 /** A let-go this fast (px/ms) is a flick: it goes a page that way however short it was. */
 export const FLICK_V: 0.4;
 export function swipeEdge(width: number): number;

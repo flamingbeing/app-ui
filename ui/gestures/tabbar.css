@@ -44,9 +44,9 @@
 :root:has(.ui-tabbar:not([hidden])) .ui-screen::after { content: ""; display: block; height: var(--ui-tabbar-room, 0px); }
 
 /* fade mode (data-slide="fade", ui/tab-pages.js): the lit tab's pill fades in and out instead of switching */
-[data-slide="fade"] .ui-tab { transition: background-color 150ms ease-out, color 150ms ease-out; }
+:is([data-slide="fade"], [data-slide="rise"]) .ui-tab { transition: background-color 150ms ease-out, color 150ms ease-out; }
 :root[data-motion="still"] .ui-tab { transition: none; }
-@media (prefers-reduced-motion: reduce) { [data-slide="fade"] .ui-tab { transition: none; } }
+@media (prefers-reduced-motion: reduce) { :is([data-slide="fade"], [data-slide="rise"]) .ui-tab { transition: none; } }
 
 /* the keyboard up (ui/keyboard.js): the tab bar steps aside, as Android apps do it */
 .ui-keyboard-open:not([data-keyboard-bar]) .ui-tabbar { display: none; }
@@ -63,3 +63,9 @@
    the bar is gone and the room kept for it too (ui/screens.js sets .ui-screens[data-depth], 0 = none pushed) */
 [data-push-bar="hide"]:has(.ui-screens:not([data-depth="0"])) .ui-tabbar { display: none; }
 [data-push-bar="hide"]:has(.ui-screens:not([data-depth="0"])) .ui-screen::after { display: none; }
+/* Opt-in html[data-sheet-bar="fade"]: the bar fades out under an open sheet or tap-menu panel (over --d-sheet-in) and
+   back when it closes; opacity only, untappable meanwhile. Still / Reduce Motion: no fade, the bar goes at once. */
+:root[data-sheet-bar="fade"] .ui-tabbar { transition: opacity var(--d-sheet-in, 280ms) cubic-bezier(.2, 0, 0, 1); }
+:root[data-sheet-bar="fade"]:has(dialog.ui-sheet[open], .ui-menu-layer:not(.is-leaving) .ui-menu-panel) .ui-tabbar { opacity: 0; pointer-events: none; }
+:root[data-motion="still"][data-sheet-bar="fade"] .ui-tabbar { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-sheet-bar="fade"] .ui-tabbar { transition: none !important; } }
