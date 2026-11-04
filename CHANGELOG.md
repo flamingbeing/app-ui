@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-rc.97
+
+- Shell: an opt-in wide side bar, `<html data-wide-side>`, from 840 px only. The side bar is 280 px on its own fill
+  (`--side-bg`), no line; links are left aligned (icon, label, an optional `.ui-side-count` at the end), 34 px tall and
+  inset 12 px; a head row (`.ui-side-head`) ends in a hide button (`.ui-side-toggle`, panel-left icon). Hidden, the
+  column goes, the content takes the room and the button stays at the page's top-left; the slide takes about 270 ms,
+  transform only (at once with less motion). The FAB hides; a list-only shell's screens are centred at
+  `--shell-page-max` (800 px). New `adaptiveShell` option `wide` (`{ get(): boolean, set(v) }`, the store for the hidden
+  state; default localStorage `ui-side-hidden`) and `shell.side()`; html gets `data-wide-ready` (loaded) and
+  `data-side-hidden`; the shell sends `ui-side` (`detail.hidden`). The code (`ui/shell/wide-side.js`) is imported only
+  with the attribute at laptop width: without it, or under 840 px (the 600-839 px tablet side bar too), nothing changes.
+  `wantsWideSide(html, width)` is exported. Gallery: `/kit/shell/?wide=1`.
+
 ## 1.0.0-rc.96
 
 - Tab pages (fix): a `data-tab-keep` part stays still only while swiping towards a page beside that has its copy.
