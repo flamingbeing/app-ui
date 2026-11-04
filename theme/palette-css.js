@@ -66,14 +66,19 @@ export function shapeTokens(choice) {
 /** @param {number} a  0 to 1 */
 const cardAt = a => `color-mix(in srgb, var(--surface) ${Math.round(a * 100)}%, transparent)`;
 
+/** a look's --glass-tint ('7%') as 0 to 1 @param {string | undefined} v */
+const tintOf = v => Math.min(1, Math.max(0, (parseFloat(v ?? '') || 0) / 100));
+
 /**
  * The glass colours for a palette (glass.css): the card colour at the strengths that keep its text readable over
- * anything scrolling under it (colour.js glassStrengths).
- * @param {Palette} p @param {Partial<Choice>} choice @returns {Record<string, string>}
+ * anything scrolling under it, and the look's accent tint where it costs no contrast (colour.js glassStrengths).
+ * @param {Palette} p @param {Partial<Choice>} choice @param {AppTheme} [app] @returns {Record<string, string>}
  */
-export function glassTokens(p, choice) {
-  const { glass, thick, clear } = glassStrengths(p, { strong: !!presetOf(cleanChoice(choice)).strong });
-  return { glass: cardAt(glass), 'glass-thick': cardAt(thick), 'glass-clear': cardAt(clear) };
+export function glassTokens(p, choice, app = {}) {
+  const c = cleanChoice(choice), want = tintOf(lookOf(c.look, app.look).tokens?.['glass-tint']);
+  const { glass, thick, clear, tint } = glassStrengths(p, { strong: !!presetOf(c).strong, tint: want });
+  return { glass: cardAt(glass), 'glass-thick': cardAt(thick), 'glass-clear': cardAt(clear),
+    ...(want ? { 'glass-tint': `${Math.round(tint * 100)}%` } : {}) };
 }
 
 /** @param {Record<string, string>} t */
@@ -86,7 +91,7 @@ const decl = t => Object.entries(t).map(([k, v]) => `--${k}: ${v};`).join(' ');
  */
 export function paletteCss(choice, app = {}) {
   const { light, dark } = palettes(choice, app);
-  const l = decl({ ...light, ...glassTokens(light, choice) }), d = decl({ ...dark, ...glassTokens(dark, choice) });
+  const l = decl({ ...light, ...glassTokens(light, choice, app) }), d = decl({ ...dark, ...glassTokens(dark, choice, app) });
   const look = lookOf(cleanChoice(choice).look, app.look);
   return [
     `:root { ${decl(look.tokens)} ${decl(shapeTokens(choice))} ${l} }`,

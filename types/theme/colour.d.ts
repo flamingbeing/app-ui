@@ -34,25 +34,42 @@ export function glassSamples(p: Palette, shaded?: boolean): string[];
  * every pair that sits on the page or a card (text, status, lines: pairs) reaches its floor over every sample. Always
  * reached by 1 (the solid card colour), which floor() already brought up to every pair. linesOnly: only lines and the
  * focus ring count (glass that carries no text).
- * @param {string[]} samples @param {Palette} p @param {{ strong?: boolean, least?: number, linesOnly?: boolean }} [opts]
+ * @param {string[]} samples @param {Palette} p @param {{ strong?: boolean, least?: number, linesOnly?: boolean, tint?: number }} [opts]
  * @returns {number}
  */
-export function frostAlpha(samples: string[], p: Palette, { strong, least, linesOnly }?: {
+export function frostAlpha(samples: string[], p: Palette, { strong, least, linesOnly, tint }?: {
     strong?: boolean;
     least?: number;
     linesOnly?: boolean;
+    tint?: number;
 }): number;
 /**
- * The glass strengths for a palette: glass (bars, toasts), thick (sheets, over the backdrop) and clear (icon-only
- * controls: lines and the focus ring only, no text).
- * @param {Palette} p @param {{ strong?: boolean }} [opts] @returns {{ glass: number, thick: number, clear: number }}
+ * Whether every pair that sits on a card passes on the glass at strength a over every sample. The glass is the card
+ * colour at a, then the accent at tint over it (glass.css --glass-bg: a look's --glass-tint, 7% on look A).
+ * @param {string[]} samples @param {Palette} p @param {number} a
+ * @param {{ strong?: boolean, linesOnly?: boolean, tint?: number }} [opts] @returns {boolean}
  */
-export function glassStrengths(p: Palette, { strong }?: {
+export function glassPasses(samples: string[], p: Palette, a: number, { strong, linesOnly, tint }?: {
     strong?: boolean;
+    linesOnly?: boolean;
+    tint?: number;
+}): boolean;
+/**
+ * The glass strengths for a palette: glass (bars, toasts), thick (sheets, over the backdrop) and clear (icon-only
+ * controls: lines and the focus ring only, no text), and the accent tint the glass may take (at most the look's
+ * `tint`, 0 to 1): lowered in 1% steps until the text still passes on solid glass (a violet link on a violet-tinted
+ * bar fell under 4.5:1 at 7%), so the tint never costs contrast.
+ * @param {Palette} p @param {{ strong?: boolean, tint?: number }} [opts]
+ * @returns {{ glass: number, thick: number, clear: number, tint: number }}
+ */
+export function glassStrengths(p: Palette, { strong, tint }?: {
+    strong?: boolean;
+    tint?: number;
 }): {
     glass: number;
     thick: number;
     clear: number;
+    tint: number;
 };
 export function cleanHex(c: unknown): string | null;
 export function mix(a: string, b: string, t: number): string;
