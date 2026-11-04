@@ -57,8 +57,9 @@ export function glassPasses(samples: string[], p: Palette, a: number, { strong, 
 /**
  * The glass strengths for a palette: glass (bars, toasts), thick (sheets, over the backdrop) and clear (icon-only
  * controls: lines and the focus ring only, no text), and the accent tint the glass may take (at most the look's
- * `tint`, 0 to 1): lowered in 1% steps until the text still passes on solid glass (a violet link on a violet-tinted
- * bar fell under 4.5:1 at 7%), so the tint never costs contrast.
+ * `tint`, 0 to 1): lowered in 1% steps until the text still passes on glass at 98% (a violet link on a violet-tinted bar
+ * fell under 4.5:1 at 7%, and a tint that only passed on solid glass made the bar solid), so the tint never costs
+ * contrast and the glass stays see-through.
  * @param {Palette} p @param {{ strong?: boolean, tint?: number }} [opts]
  * @returns {{ glass: number, thick: number, clear: number, tint: number }}
  */

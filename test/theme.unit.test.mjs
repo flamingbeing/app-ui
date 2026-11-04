@@ -339,9 +339,14 @@ test('tinted glass: every look x theme x light/dark/OLED keeps its floor on the 
         const at = glassStrengths(p, { strong, tint: parseFloat(look.tokens['glass-tint']) / 100 });
         assert.equal(tint, at.tint);
         assert.ok(glassPasses(glassSamples(p), p, at.glass, { strong, tint }), `${look.id} ${preset} ${dark} ${mode}: ${tint}`);
+        // and never makes it solid: a tint is only taken where the glass stays at 98% or less
+        if (tint > 0) assert.ok(at.glass <= 0.98, `${look.id} ${preset} ${dark} ${mode}: frost ${at.glass}`);
       }
     }
   }
+  // an app's own accent too: violet on ink went solid (100%) on look A's light glass at 4%; now it takes less
+  const ink = palettes({ look: 'a' }, { accent: '#7c5cd6', look: 'e', surface: 'ink' }).light;
+  assert.ok(glassStrengths(ink, { tint: 0.07 }).glass < 1);
   const violet = palettes({ preset: 'violet', look: 'a' }).light;
   const tint = parseFloat(glassTokens(violet, { preset: 'violet', look: 'a' })['glass-tint']);
   assert.ok(tint < 7, `violet light on look A: ${tint}%`);
