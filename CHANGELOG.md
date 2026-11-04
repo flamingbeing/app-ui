@@ -5,6 +5,9 @@
 - Bounce: `data-bounce-stay` on a screen's child (opt-in) keeps it put on a pull past the top, so only the content under
   it stretches (a title and a date strip over a day's list stay; the list slides down from under them). At the foot it
   moves with the content as before.
+- Tab pages (fix): the pages laid out beside the current one at a touch no longer make the page taller. A pull up at the
+  end of a short page beside a longer one scrolled on into the longer one's length, then jumped back on lift (a skip,
+  in place of the bounce); the paging host now clips at its foot (`overflow-y: clip` while `.is-paging`).
 
 ## 1.0.0-rc.90
 

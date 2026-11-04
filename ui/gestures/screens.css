@@ -14,6 +14,9 @@
 /* the tab pager (tab-pages.js): the browser keeps vertical pans; sideways moves come to the pager, cancelable */
 .ui-screens.is-pager { touch-action: pan-y; }
 .ui-screens.is-paging > .ui-screen.is-beside { position: absolute; inset: 0 0 auto; }
+/* ...and clipped at the foot of the pages: a longer page beside would make the page taller under the finger, so a pull at
+   its end scrolled on into the page beside's length and jumped back on lift (in place of a bounce) */
+.ui-screens.is-paging { overflow-y: clip; }
 /* once the finger moves them, the pages get their own layers, so each frame only moves them */
 .ui-screens.is-moving > .ui-screen:not([hidden]) { will-change: transform; }
 /* a tapped tab's page slides in (tab-pages.js): clipped, so its start offset can't widen the page */
