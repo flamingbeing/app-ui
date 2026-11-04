@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.91
+
+- Bounce: `data-bounce-stay` on a screen's child (opt-in) keeps it put on a pull past the top, so only the content under
+  it stretches (a title and a date strip over a day's list stay; the list slides down from under them). At the foot it
+  moves with the content as before.
+- Tab pages (fix): the pages laid out beside the current one at a touch no longer make the page taller. A pull up at the
+  end of a short page beside a longer one scrolled on into the longer one's length, then jumped back on lift (a skip,
+  in place of the bounce); each page beside now ends at the foot of the pages (`bottom: 0`, `overflow-y: clip`).
+
 ## 1.0.0-rc.90
 
 - Sign-in screen: the section holding it now covers the page too, so `#signed-out` counts as showing (Playwright's

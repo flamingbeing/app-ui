@@ -120,6 +120,22 @@ test('tapping a tab shows its page, marks both bars and names the bar; New opens
   await expect(page.locator('.ui-bar-title')).toHaveText('Plants');
 });
 
+test('a touch lays the pages beside out without making the page taller: a pull at the end can\'t scroll into a longer one', async ({ sized }) => {
+  const page = await load(sized);
+  await page.evaluate(() => {
+    for (const s of document.querySelectorAll('.ui-screens > .ui-screen.ui-tab-page[hidden]')) {
+      const d = document.createElement('div'); d.className = 'test-tall'; d.style.height = '20000px'; s.append(d);
+    }
+    scrollTo(0, document.documentElement.scrollHeight);
+  });
+  const before = await page.evaluate(() => document.documentElement.scrollHeight);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 200, y: 420 }] });
+  expect(await page.evaluate(() => document.querySelectorAll('.is-beside').length), 'the pages beside are laid out').toBeGreaterThan(0);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight), 'the page is no taller').toBe(before);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+});
+
 test('swipe: left goes to the next tab page (skipping the sheet tab), right comes back; the ends hold', async ({ sized }) => {
   const page = await load(sized);
   const events = page.evaluate(() => new Promise(r => { const got = []; addEventListener('ui-tab', e => { got.push(e.detail.page.id); if (got.length === 3) r(got); }); }));

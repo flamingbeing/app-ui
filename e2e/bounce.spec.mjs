@@ -82,6 +82,30 @@ test('a sticky part goes with a stretch at the top (still in its place); stuck t
   await page.evaluate(() => window.__settled());
 });
 
+test('[data-bounce-stay] stays put on a pull at the top (only the content under it moves); at the foot it moves', async ({ sized }) => {
+  const page = await load(sized);
+  await page.evaluate(() => {
+    const list = document.querySelector('.ui-screen:not([hidden]) > .ui-list');
+    const s = document.createElement('div');
+    s.className = 'test-stay';
+    s.dataset.bounceStay = '';
+    s.style.cssText = 'height: 40px; background: #888';
+    list.before(s);
+  });
+  await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(200, 300, 160, 10));
+  let parts = (await shifted(page)).map(([c]) => c);
+  expect(parts, 'the content moves').toContain('ui-list');
+  expect(parts, 'marked: it stays').not.toContain('test-stay');
+  await page.evaluate(() => window.__lift(200, 460));
+  await page.evaluate(() => window.__settled());
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(async steps => { await window.__finger(steps, { lift: false }); }, line(200, 500, -160, 10));
+  parts = (await shifted(page)).map(([c]) => c);
+  expect(parts, 'at the foot it goes with the content').toContain('test-stay');
+  await page.evaluate(() => window.__lift(200, 340));
+  await page.evaluate(() => window.__settled());
+});
+
 test('a pull past the bottom stretches it up, and a finger catches the spring back where it is', async ({ sized }) => {
   const page = await load(sized);
   await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
