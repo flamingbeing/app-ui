@@ -93,13 +93,30 @@ dialog.modal p { margin: 0 0 var(--pad); }
 .load-state[hidden] { display: none; }
 /* a view laid out but unseen until it is ready (load-state.js swapWhenReady): the one before it stays up */
 .ui-swap-in { position: absolute; inset: 0 0 auto; visibility: hidden; pointer-events: none; }
-.load-note { margin: 0 0 var(--gap); color: var(--muted); font-size: .85rem; }
-.load-row { height: var(--row); margin-bottom: var(--gap); border-radius: var(--control-r); background: linear-gradient(90deg, var(--line), var(--surface), var(--line)) 0 0 / 200% 100%;
-  animation: load-shimmer 1.4s linear infinite; }
+/* the words are for screen readers (role=status); the rows say it to the eye */
+.load-note { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* skeleton rows shaped like list rows: a title line and a shorter one, a soft light sweeping across, row after row.
+   They fade in only after a moment, so a list that comes quickly never flashes them. */
+.load-row { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 7px;
+  height: var(--row); margin-bottom: var(--gap); padding: 0 var(--pad); border-radius: var(--control-r);
+  background: color-mix(in srgb, var(--text) 5%, var(--surface)); animation: load-in .35s ease-out .25s both; }
+.load-line { display: block; width: 62%; height: .7em; border-radius: 99px; background: color-mix(in srgb, var(--text) 11%, var(--surface)); }
+.load-line + .load-line { width: 34%; height: .55em; opacity: .7; }
+.load-row:nth-child(3n) .load-line:first-child { width: 48%; }
+.load-row:nth-child(3n+1) .load-line:first-child { width: 71%; }
+.load-row:nth-child(3n) .load-line + .load-line { width: 26%; }
+.load-row::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / .09) 50%, transparent 80%); mix-blend-mode: plus-lighter;
+  animation: load-sweep 1.6s ease-in-out infinite; }
+.load-row:nth-child(3)::after { animation-delay: .12s; }
+.load-row:nth-child(4)::after { animation-delay: .24s; }
+.load-row:nth-child(5)::after { animation-delay: .36s; }
+.load-row:nth-child(n+6)::after { animation-delay: .48s; }
 .load-error { margin: 0 0 var(--gap); color: var(--danger); }
-@keyframes load-shimmer { to { background-position: -200% 0; } }
-:root[data-motion="still"] .load-row { animation: none; }
-@media (prefers-reduced-motion: reduce) { .load-row { animation: none; } }
+@keyframes load-in { from { opacity: 0; } }
+@keyframes load-sweep { 60%, to { transform: translateX(100%); } }
+:root[data-motion="still"] .load-row::after { animation: none; display: none; }
+@media (prefers-reduced-motion: reduce) { .load-row::after { animation: none; display: none; } }
 
 /* about sheet */
 .about-licences { margin: 0 0 var(--pad); padding-left: 1.2rem; font-size: .85rem; color: var(--muted); }

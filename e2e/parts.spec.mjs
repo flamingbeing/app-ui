@@ -37,6 +37,9 @@ for (const width of [390, 1280]) {
       await page.goto(PARTS);
       await page.locator('#load-fail').click();
       await expect(page.locator('.load-row')).toHaveCount(3);
+      await expect(page.locator('.load-row .load-line')).toHaveCount(6);   // a title line and a shorter one
+      await expect(page.locator('.load-row').first()).toHaveAttribute('aria-hidden', 'true');
+      await expect(page.locator('#load-host .load-note')).toHaveText('Loading…');   // (the words are for screen readers)
       await expect(page.locator('#load-host')).toHaveAttribute('aria-busy', 'true');
       expect(await AxeBuilder(page), 'axe while loading').toEqual([]);
       await expect(page.locator('.load-error')).toHaveText('Could not load the list.');

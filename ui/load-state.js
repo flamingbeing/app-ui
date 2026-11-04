@@ -1,4 +1,4 @@
-// Loading and error states for a list: grey skeleton rows while it loads, or the error with a Retry button.
+// Loading and error states for a list: skeleton rows (a title line and a shorter one) while it loads, or the error with a Retry button.
 // The page says which (loading / failed / done); nothing is shown once done.
 import { LABELS } from './labels.js';
 import { el, button } from './dom.js';
@@ -17,7 +17,8 @@ export function loadState(host, { rows = 4, labels = {} } = {}) {
   return {
     loading() {
       const hadFocus = box.contains(document.activeElement);
-      const skeleton = Array.from({ length: rows }, () => el('div', { class: 'load-row' }));
+      const skeleton = Array.from({ length: rows }, () => el('div', { class: 'load-row', 'aria-hidden': 'true' },
+        el('span', { class: 'load-line' }), el('span', { class: 'load-line' })));
       box.replaceChildren(el('p', { class: 'load-note', role: 'status', tabindex: '-1' }, words.loading), ...skeleton);
       box.hidden = false;
       if (hadFocus) /** @type {HTMLElement} */ (box.firstElementChild).focus();   // Try again was pressed: focus stays in the block
