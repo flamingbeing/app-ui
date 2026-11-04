@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.95
+
+- Loading rows (`loadState`): the four grey gradient pills are now rows shaped like list rows, a title line and a
+  shorter one on a soft card, with a light sweeping across them one after another. They fade in only after 250 ms, so
+  a list that comes quickly never flashes them. The "Loading…" words stay for screen readers (role=status) but are no
+  longer shown; the rows are aria-hidden. Still / Reduce Motion: no sweep.
+
 ## 1.0.0-rc.94
 
 - Tab pages: `data-tab-keep="<name>"` (opt-in) on a part that two pages side by side both have (a date bar they share)

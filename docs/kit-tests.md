@@ -283,7 +283,7 @@ stand-in for `@core/settings` on the page.
 |---|---|---|
 | Undo toast | Undo puts a deleted row back where it was; a second delete replaces the first toast; axe with a toast showing | |
 | Undo toast (unit) | the message and Undo run the undo; one at a time; own words and time | |
-| Loading and errors | skeleton rows with `aria-busy` while loading, then the list; the error shows with Try again, which recovers; axe in each state | |
+| Loading and errors | skeleton rows with `aria-busy` while loading (rc.95: each a title line and a shorter one, hidden from screen readers, which hear the status words instead; they fade in after 250 ms, a light sweeps across, none under Still), then the list; the error shows with Try again, which recovers; axe in each state | |
 | About sheet | version, the newest-version answer, outside code listed from the import map with versions and licences; Esc closes and focus returns; axe with the sheet open | |
 | About sheet (unit) | `packagesFromImportMap` leaves out the app's own files and reads versions from addresses | |
 | Drafts | typing is kept and a reload finds it again; Send clears it; axe | |
