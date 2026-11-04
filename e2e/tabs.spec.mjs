@@ -201,6 +201,38 @@ test('swipe: the page follows the finger, the next one beside it', async ({ size
   expect(await shown(page)).toEqual(['home']);
 });
 
+test('a kept part (data-tab-keep) on two pages side by side stays still on screen through a swipe; the coming copy takes over at halfway', async ({ sized }) => {
+  const page = await load(sized);
+  await page.evaluate(() => {
+    for (const [id, top] of [['home', 0], ['rooms', 30]]) {
+      const b = document.createElement('div'); b.className = 'test-keep'; b.dataset.tabKeep = 'dates';
+      b.style.cssText = `height: 40px; margin-top: ${top}px; background: teal`;
+      document.getElementById(id).prepend(b);
+    }
+  });
+  const keep = id => page.evaluate(id => { const e = document.querySelector(`#${id} .test-keep`), r = e.getBoundingClientRect();
+    return { x: Math.round(r.x), y: Math.round(r.y), shows: getComputedStyle(e).filter !== 'opacity(0)' }; }, id);
+  const before = await keep('home');
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  await send('touchStart', 300, 420);
+  for (const x of [290, 270, 240, 200]) await send('touchMove', x, 420);
+  for (let i = 0; i < 6; i++) { await page.waitForTimeout(40); await send('touchMove', 200 + (i % 2), 420); }   // held, short of half
+  let [h, r] = [await keep('home'), await keep('rooms')];
+  expect(Math.abs(h.x - before.x), 'held still while its page moves').toBeLessThanOrEqual(1);
+  expect(h.shows && !r.shows, 'the current copy shows').toBe(true);
+  expect(Math.abs(r.x - before.x) + Math.abs(r.y - before.y), 'the coming copy lined up with it').toBeLessThanOrEqual(2);
+  for (const x of [150, 100, 60]) await send('touchMove', x, 420);
+  for (let i = 0; i < 4; i++) { await page.waitForTimeout(40); await send('touchMove', 60 + (i % 2), 420); }   // past half
+  [h, r] = [await keep('home'), await keep('rooms')];
+  expect(!h.shows && r.shows, 'the coming copy takes over').toBe(true);
+  expect(Math.abs(r.x - before.x), 'still in place').toBeLessThanOrEqual(1);
+  await send('touchEnd', 0, 0);
+  await settled(page);
+  expect(await shown(page)).toEqual(['rooms']);
+  expect(await page.locator('#rooms .test-keep').evaluate(e => e.style.transform + e.style.filter), 'nothing left on it').toBe('');
+});
+
 test('swipe: the page beside comes in level with the current one (its title too), in a plain-header look and in the band', async ({ sized }) => {
   for (const look of ['a', 'b']) {
     const page = await load(sized, `&look=${look}`);

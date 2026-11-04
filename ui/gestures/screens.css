@@ -16,6 +16,8 @@
 /* ...each clipped at the foot of the pages (bottom: 0): a longer page beside made the page taller under the finger, so a
    pull at its end scrolled on into the page beside's length and jumped back on lift (in place of a bounce) */
 .ui-screens.is-paging > .ui-screen.is-beside { position: absolute; inset: 0; min-height: 0; overflow-y: clip; }
+/* ...and the current one is positioned, so a page holding a kept part (data-tab-keep) can sit on top */
+.ui-screens.is-paging > .ui-screen:not(.is-beside) { position: relative; }
 /* once the finger moves them, the pages get their own layers, so each frame only moves them */
 .ui-screens.is-moving > .ui-screen:not([hidden]) { will-change: transform; }
 /* a tapped tab's page slides in (tab-pages.js): clipped, so its start offset can't widen the page */
