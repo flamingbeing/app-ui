@@ -133,6 +133,8 @@ li.dragging { position: relative; z-index: 2; box-shadow: var(--list-shadow); ba
 
 /* sign-in screen (sign-in-screen.js): the whole signed-out page, over the bars. The app's mark in the middle on a glow
    of its colour (--ui-signin-glow, default the accent); the ways in at the bottom, clear of the home indicator. */
+/* the section holding the screen covers the page too, so it has a box of its own ("is the signed-out page showing?") */
+:where(:has(> .ui-signin)) { position: fixed; inset: 0; z-index: 30; }
 .ui-signin { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; overflow: hidden auto;
   background: var(--bg); color: var(--text); text-align: center;
   padding: env(safe-area-inset-top) max(1.5rem, env(safe-area-inset-right)) max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem)) max(1.5rem, env(safe-area-inset-left)); }
