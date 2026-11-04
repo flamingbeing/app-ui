@@ -237,7 +237,7 @@ stand-in for `@core/settings` on the page.
 | Wide bar | 1280 px, looks A to D, gallery and dense page: the top bar is full width, its title centred and its start in line with the large title's words; an edge tab bar keeps its tabs together in the middle | |
 | Density | rows 60 / 50 / 44 px; taps never under 44; a link's `?look=` is a preview, a pick is kept after reload | |
 | Glass guard | little memory turns glass off, kept, with the reason in Settings; Solid and "Glass, even here" still win | yes |
-| Tinted glass | `test/theme.unit.test.mjs`: every look with a `--glass-tint` (A: 7%), every theme, light/dark/OLED: text, status and lines keep their floor on the accent-tinted bar glass; the tint is lowered per palette where it would cost contrast (violet light on A: 4%) | (unit) |
+| Tinted glass | `test/theme.unit.test.mjs`: every look with a `--glass-tint` (A: 7%), every theme, light/dark/OLED: text, status and lines keep their floor on the accent-tinted bar glass; the tint is lowered per palette where it would cost contrast or take the frost past 98% (violet light on A: 2%; an app accent on ink stays see-through) | (unit) |
 | Design kits | `?kit=ntf` swaps the page's `/v1/tokens.css` to `design.anantf.com` and sets wine on the linen ground; `?kit=nuhs` to `design.anawj.com`, navy on white; no `?kit` keeps the default kit | |
 
 ### Android look (`e2e/android.spec.mjs`, `test/m3.unit.test.mjs`)

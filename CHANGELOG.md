@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.93
+
+- Glass (fix): the accent tint never makes the bar solid. rc.92 lowered it only until text passed on solid glass, so
+  violet light (and an app's violet accent on look A) went to 100% frost. Now the tint must pass at 98% frost (look
+  A's default light), else it gives way: violet light takes 2%, the default keeps 7%.
+
 ## 1.0.0-rc.92
 
 - Glass (fix): a look's accent tint on the bar glass (`--glass-tint`, look A 7%) now counts in the contrast maths. The

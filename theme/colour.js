@@ -161,18 +161,23 @@ export function glassPasses(samples, p, a, { strong = false, linesOnly = false, 
   });
 }
 
+/** the most frost a tinted glass may take: past it the tint gives way, so the bar stays see-through */
+const TINTED_MOST = 0.98;
+
 /**
  * The glass strengths for a palette: glass (bars, toasts), thick (sheets, over the backdrop) and clear (icon-only
  * controls: lines and the focus ring only, no text), and the accent tint the glass may take (at most the look's
- * `tint`, 0 to 1): lowered in 1% steps until the text still passes on solid glass (a violet link on a violet-tinted
- * bar fell under 4.5:1 at 7%), so the tint never costs contrast.
+ * `tint`, 0 to 1): lowered in 1% steps until the text still passes on glass at 98% (a violet link on a violet-tinted bar
+ * fell under 4.5:1 at 7%, and a tint that only passed on solid glass made the bar solid), so the tint never costs
+ * contrast and the glass stays see-through.
  * @param {Palette} p @param {{ strong?: boolean, tint?: number }} [opts]
  * @returns {{ glass: number, thick: number, clear: number, tint: number }}
  */
 export function glassStrengths(p, { strong = false, tint = 0 } = {}) {
   const samples = glassSamples(p);
+  // the tint costs no contrast and never makes the glass solid: it must pass at 98% at most (look A's default light)
   let t = Math.round(tint * 100) / 100;
-  while (t > 0 && !glassPasses(samples, p, 1, { strong, tint: t })) t = Math.round((t - 0.01) * 100) / 100;
+  while (t > 0 && !glassPasses(samples, p, TINTED_MOST, { strong, tint: t })) t = Math.round((t - 0.01) * 100) / 100;
   return {
     glass: frostAlpha(samples, p, { strong, least: 0.86, tint: t }),
     thick: frostAlpha(glassSamples(p, true), p, { strong, least: 0.88 }),
