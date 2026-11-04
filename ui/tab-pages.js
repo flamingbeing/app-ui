@@ -43,6 +43,7 @@
 // a swipe slides the pages, the part stays still on screen, lined up with the current page's copy; the coming page's
 // copy takes over at halfway (as the bar's title does), and on landing glides the last few px to its own place. The page
 // beside is scrolled so its copy lines up where it can (a bar pinned at the top stays pinned on the page that comes).
+// Towards a page beside without a copy, the part slides away with its page like the rest of it.
 import { tabBack, CLOSE_MS } from './tab-back.js';
 import { toaster } from './toast.js';
 import { LABELS } from './labels.js';
@@ -344,8 +345,13 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const c = coming(x), half = gone(x) >= .5 && keeps.some(k => k.page === c);
     return page === current ? !half : page === c && half;
   };
+  /** whether the part is held still at x: only towards a page that has its copy; towards one without, the current copy
+   * goes with its page (else it hung over the page coming in and vanished as it landed)
+   * @param {number} x */
+  const keepHeld = x => keeps.some(k => k.page === coming(x));
   /** @param {{ off: number, dy: number, page: HTMLElement }} k @param {number} x @returns {Keyframe} */
-  const keepAt = (k, x) => ({ transform: `translate(${-(x + k.off)}px, ${k.dy}px)`, filter: `opacity(${keepShows(k.page, x) ? 1 : 0})` });
+  const keepAt = (k, x) => k.page === current && !keepHeld(x) ? { transform: 'translate(0px, 0px)', filter: 'opacity(1)' }
+    : { transform: `translate(${-(x + k.off)}px, ${k.dy}px)`, filter: `opacity(${keepShows(k.page, x) ? 1 : 0})` };
   /** the page whose copy shows sits on top, so the page beside (painted later, over it) can't hide the part
    * @param {HTMLElement} page @param {number} x @returns {Keyframe} */
   const liftAt = (page, x) => ({ zIndex: keepShows(page, x) ? '1' : '0' });

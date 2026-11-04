@@ -233,6 +233,32 @@ test('a kept part (data-tab-keep) on two pages side by side stays still on scree
   expect(await page.locator('#rooms .test-keep').evaluate(e => e.style.transform + e.style.filter), 'nothing left on it').toBe('');
 });
 
+test('a kept part slides away with its page towards a page beside that has no copy (no hanging over it)', async ({ sized }) => {
+  const page = await load(sized);
+  await page.evaluate(() => {
+    for (const id of ['home', 'rooms']) {
+      const b = document.createElement('div'); b.className = 'test-keep'; b.dataset.tabKeep = 'dates';
+      b.style.cssText = 'height: 40px; background: teal';
+      document.getElementById(id).prepend(b);
+    }
+  });
+  await page.locator('.ui-tab[data-tab-page="#rooms"]').click();
+  await settled(page);
+  const x0 = await page.locator('#rooms .test-keep').evaluate(e => e.getBoundingClientRect().x);
+  const cdp = await page.context().newCDPSession(page);
+  const send = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  await send('touchStart', 300, 420);   // towards Jobs (no copy)
+  for (const x of [290, 270, 240, 200]) await send('touchMove', x, 420);
+  for (let i = 0; i < 6; i++) { await page.waitForTimeout(40); await send('touchMove', 200 + (i % 2), 420); }
+  const r = await page.locator('#rooms .test-keep').evaluate(e => ({ x: e.getBoundingClientRect().x, shows: getComputedStyle(e).filter !== 'opacity(0)' }));
+  const pg = await page.locator('#rooms').evaluate(e => e.getBoundingClientRect().x);
+  expect(r.shows, 'still showing').toBe(true);
+  expect(x0 - r.x, 'moved with its page').toBeGreaterThan(60);
+  expect(Math.abs((r.x - x0) - pg), 'as far as its page').toBeLessThanOrEqual(2);
+  await send('touchEnd', 0, 0);
+  await settled(page);
+});
+
 test('swipe: the page beside comes in level with the current one (its title too), in a plain-header look and in the band', async ({ sized }) => {
   for (const look of ['a', 'b']) {
     const page = await load(sized, `&look=${look}`);
