@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.94
+
+- Tab pages: `data-tab-keep="<name>"` (opt-in) on a part that two pages side by side both have (a date bar they share)
+  keeps it still on screen through a swipe, lined up with the current page's copy; the coming page's copy takes over at
+  halfway, as the bar's title does, and on landing glides the last few px to its own place. The page showing the part
+  sits on top (else the page beside painted over it), and the page beside is scrolled so its copy lines up where it can:
+  a bar pinned at the top stays pinned on the page that comes in.
+
 ## 1.0.0-rc.93
 
 - Glass (fix): the accent tint never makes the bar solid. rc.92 lowered it only until text passed on solid glass, so

@@ -39,6 +39,10 @@
 // as a finger lands, a page about to come in beside that hasn't been asked since it was last on screen is asked at
 // once (a caught glide's new neighbours). The app keeps it cheap (a page it has just drawn ahead can return at once) and,
 // if it empties its hidden pages, spares the ones with .is-beside (tabPages has laid them out beside the current one).
+// Kept parts (opt-in: data-tab-keep="<name>" on a part of two pages side by side, such as a date bar both share): while
+// a swipe slides the pages, the part stays still on screen, lined up with the current page's copy; the coming page's
+// copy takes over at halfway (as the bar's title does), and on landing glides the last few px to its own place. The page
+// beside is scrolled so its copy lines up where it can (a bar pinned at the top stays pinned on the page that comes).
 import { tabBack, CLOSE_MS } from './tab-back.js';
 import { toaster } from './toast.js';
 import { LABELS } from './labels.js';
@@ -329,7 +333,42 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       small.style.filter = `opacity(${titleShows(dx)})`;
     }
     for (const f of faders) f.style.filter = `opacity(${fadeShows(dx)})`;
+    for (const k of keeps) { Object.assign(k.el.style, keepAt(k, dx)); Object.assign(k.page.style, liftAt(k.page, dx)); }
   };
+  /** parts kept still while the pages slide (data-tab-keep): the part, its page, the page's offset, its lift to line up
+   * @type {{ el: HTMLElement, page: HTMLElement, off: number, dy: number }[]} */
+  let keeps = [];
+  /** whether a kept part's copy shows with the pages at x: the current page's until the coming page's takes over at halfway
+   * @param {HTMLElement} page @param {number} x */
+  const keepShows = (page, x) => {
+    const c = coming(x), half = gone(x) >= .5 && keeps.some(k => k.page === c);
+    return page === current ? !half : page === c && half;
+  };
+  /** @param {{ off: number, dy: number, page: HTMLElement }} k @param {number} x @returns {Keyframe} */
+  const keepAt = (k, x) => ({ transform: `translate(${-(x + k.off)}px, ${k.dy}px)`, filter: `opacity(${keepShows(k.page, x) ? 1 : 0})` });
+  /** the page whose copy shows sits on top, so the page beside (painted later, over it) can't hide the part
+   * @param {HTMLElement} page @param {number} x @returns {Keyframe} */
+  const liftAt = (page, x) => ({ zIndex: keepShows(page, x) ? '1' : '0' });
+  function findKeeps() {
+    keeps = [];
+    const mine = /** @type {HTMLElement | null} */ (current.querySelector('[data-tab-keep]'));
+    if (!mine) return;
+    const name = CSS.escape(mine.dataset.tabKeep ?? ''), top = mine.getBoundingClientRect().top;
+    for (const [n, off] of /** @type {[HTMLElement | null, number][]} */ ([[prev, -w], [next, w]])) {
+      const o = /** @type {HTMLElement | null} */ (n?.querySelector(`[data-tab-keep="${name}"]`) ?? null);
+      if (!n || !o) continue;
+      // the page beside scrolls (as far as it can) so its copy lines up: a bar stuck at the top stays stuck there
+      let dy = top - o.getBoundingClientRect().top;
+      if (Math.abs(dy) >= 1) {
+        // (a stuck sticky part: 1px further, so the copy is stuck too, not just touching where it sticks)
+        const y = Math.max(0, (ys.get(n) ?? 0) - dy + (dy < 0 && getComputedStyle(mine).position === 'sticky' ? 1 : 0));
+        ys.set(n, y); n.style.top = `${readyY - y}px`;
+        dy = top - o.getBoundingClientRect().top;
+      }
+      keeps.push({ el: o, page: n, off, dy });
+    }
+    if (keeps.length) keeps.push({ el: mine, page: current, off: 0, dy: 0 });
+  }
   // the pages beside are laid out, out of sight, at the first move that looks sideways
   function prepare() {
     if (ready) return;
@@ -352,6 +391,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       n.style.top = `${readyY - (ys.get(n) ?? 0)}px`;
       n.style.transform = `translateX(${off}px)`;
     }
+    findKeeps();
   }
   /** the touch is a swipe: the pages get their own layers, so each frame only moves them */
   const lift = () => host.classList.add('is-moving');
@@ -367,6 +407,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     }
     for (const f of faders) f.style.filter = '';
     if (small) small.style.filter = '';
+    for (const k of keeps) { k.el.style.transform = ''; k.el.style.filter = ''; k.page.style.zIndex = ''; }
+    keeps = [];
   }
   // the pages laid out for a touch that became a scroll are put away once the scroll is done, not on its first frame
   const putAway = () => afterGesture(() => { if (x0 === null && !glide && ready) unpage(); });
@@ -374,9 +416,12 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
   function land(g) {
     clearTimeout(g.timer);
     if (small) small.textContent = own;   // the landing (go) names the bar; back, it keeps its own
+    const kept = g.to ? keeps.find(k => k.page === g.to) : undefined;
     unpage();
     if (g.to) go(g.to); else if (g.missing) onPrevMissing?.();
     g.run.stop();
+    // the new page's kept part glides from where it was held to its own place
+    if (kept && Math.abs(kept.dy) >= 1 && !still()) kept.el.animate([{ transform: `translateY(${kept.dy}px)` }, { transform: 'none' }], { duration: 240, easing: SLIDE_EASE });
     // the new page's bar parts come in
     if (g.to && !still()) for (const f of faders) f.animate([{ filter: 'opacity(0)' }, { filter: 'opacity(1)' }], { duration: 200, easing: 'ease-out' });
   }
@@ -489,6 +534,7 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       if (el) parts.push([el, x => ({ transform: `translateX(${x + off}px)` })]);
     }
     for (const f of faders) parts.push([f, x => ({ filter: `opacity(${fadeShows(x)})` })]);
+    for (const k of keeps) parts.push([k.el, x => keepAt(k, x)], [k.page, x => liftAt(k.page, x)]);
     if (small) parts.push([small, x => ({ filter: `opacity(${titleShows(x)})` })]);
     const run = springGlide(parts, dx, to0, stretched ? 0 : v, { response: PAGE_SPRING_S });
     /** @type {Gliding} */
