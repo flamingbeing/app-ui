@@ -7,6 +7,7 @@ export { icon } from '../icons/lucide.js';
 export { syncChip } from './sync-chip.js';
 export { syncButton } from './sync-button.js';
 export { signInSheet } from './sign-in-sheet.js';
+export { signInScreen, holdsSyncCopy } from './sign-in-screen.js';
 export { conflictSheet } from './conflict-sheet.js';
 export { updatePrompt } from './update-prompt.js';
 export { refusedList } from './refused-list.js';

@@ -130,3 +130,33 @@ li.dragging { position: relative; z-index: 2; box-shadow: var(--list-shadow); ba
 .ui-info { flex: none; min-width: var(--tap); min-height: var(--tap); padding: 0; border: 0; background: none; color: var(--link); }
 .ui-row-more { flex-basis: 100%; margin: 0; }
 .ui-reset, .ui-undo { min-height: var(--tap); padding: 0 var(--gap); border: 0; background: none; color: var(--link); }
+
+/* sign-in screen (sign-in-screen.js): the whole signed-out page, over the bars. The app's mark in the middle on a glow
+   of its colour (--ui-signin-glow, default the accent); the ways in at the bottom, clear of the home indicator. */
+.ui-signin { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; overflow: hidden auto;
+  background: var(--bg); color: var(--text); text-align: center;
+  padding: env(safe-area-inset-top) max(1.5rem, env(safe-area-inset-right)) max(2.5rem, calc(env(safe-area-inset-bottom) + 1.5rem)) max(1.5rem, env(safe-area-inset-left)); }
+.ui-signin::before { content: ''; position: absolute; inset: -20% -30% auto; height: 70%; pointer-events: none;
+  background: radial-gradient(closest-side, var(--ui-signin-glow, var(--accent)), transparent); opacity: .24; }
+.ui-signin-hero { position: relative; flex: 1 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .5rem; padding: 3rem 1rem 2rem; }
+.ui-signin-icon { width: 96px; height: 96px; border-radius: 22px; margin-bottom: 1.25rem; box-shadow: 0 12px 40px rgb(0 0 0 / .35); }
+.ui-signin-name { font-family: var(--font-head, inherit); font-size: 1.9rem; font-weight: 650; letter-spacing: -.02em; line-height: 1.15; margin: 0; }
+.ui-signin-tagline { color: var(--muted); font-size: 1rem; line-height: 1.4; margin: 0; max-width: 18rem; }
+.ui-signin-hero :is(ul, ol) { text-align: start; color: var(--muted); max-width: 20rem; margin: .75rem 0 0; padding-inline-start: 1.25rem; }
+.ui-signin-actions { position: relative; display: flex; flex-direction: column; gap: .75rem; width: 100%; max-width: 24rem; margin: 0 auto; }
+.ui-signin-actions :is(button, input:not([type="checkbox"]):not([type="radio"])) { min-height: 52px; font-size: 1rem; box-sizing: border-box; width: 100%; }
+.ui-signin-actions button { border-radius: 26px; border: 0; font-weight: 600; }
+.ui-signin-google { display: flex; align-items: center; justify-content: center; gap: .75rem;
+  background: #fff; color: #1f1f1f; box-shadow: 0 0 0 1px light-dark(#dadce0, transparent); }
+.ui-signin-more { background: light-dark(rgb(0 0 0 / .06), rgb(255 255 255 / .08)); color: var(--text); font-weight: 500 !important; }
+.ui-signin-actions button[type="submit"], .ui-signin-actions .ui-signin-primary { background: var(--accent); color: var(--on-accent); }
+.ui-signin-actions input:not([type="checkbox"]):not([type="radio"]) { border-radius: 14px; border: 1px solid var(--line); padding: 0 1.1rem;
+  background: var(--surface); color: var(--text); }
+.ui-signin-actions form { display: flex; flex-direction: column; gap: .75rem; margin: 0; }
+.ui-signin-actions .ui-error:empty, .ui-signin-note:empty { display: none; }
+.ui-signin-actions .ui-error { margin: 0; }
+.ui-signin-note, .ui-signin-device { color: var(--muted); font-size: .8rem; line-height: 1.4; margin: 0; }
+.ui-signin-actions .ui-signin-forget { display: inline; min-height: 0; width: auto; padding: .25rem; margin: -.25rem; border-radius: 4px;
+  background: none; color: var(--danger); font-size: inherit; font-weight: 500; text-decoration: underline; text-underline-offset: 2px; }
+.ui-signin-actions [hidden] { display: none !important; }

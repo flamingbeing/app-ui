@@ -97,3 +97,13 @@ test('sync button: each state its shown state and label; a tap spins at least MI
   assert.equal(syncLook('unknown', 0, false, words).label, 'Connecting…');
   assert.equal(syncLook('synced', 0, false, { ...words, synced: 'Synced', syncNow: 'Tap to sync' }).label, 'Synced. Tap to sync');
 });
+
+test('holdsSyncCopy: true only for a stored app-sync owner; blocked or empty storage is false', async () => {
+  const { holdsSyncCopy } = await import('../ui/sign-in-screen.js');
+  const fake = (/** @type {Record<string, string>} */ o) => ({ length: Object.keys(o).length, key: (/** @type {number} */ i) => Object.keys(o)[i] ?? null, getItem: (/** @type {string} */ k) => o[k] ?? null });
+  assert.equal(holdsSyncCopy(fake({ 'notes:auth/owner': '{"uid":"u1"}' })), true);
+  assert.equal(holdsSyncCopy(fake({ 'notes:sync/scope': 'x', 'other': '1' })), false);
+  assert.equal(holdsSyncCopy(fake({})), false);
+  assert.equal(holdsSyncCopy(null), false);
+  assert.equal(holdsSyncCopy({ get length() { throw new Error('blocked'); }, key: () => null, getItem: () => null }), false);
+});
