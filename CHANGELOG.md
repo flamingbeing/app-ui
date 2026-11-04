@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0-rc.92
+
+- Glass (fix): a look's accent tint on the bar glass (`--glass-tint`, look A 7%) now counts in the contrast maths. The
+  tint is lowered per palette, in 1% steps, until every text colour still passes on the glass it makes; a violet link
+  on a violet-tinted bar was 4.4:1 (axe, an app's "New" button). Only violet light on look A changes (4%); every other
+  theme keeps 7%. `glassStrengths` takes `tint` and returns the tint used; `glassTokens` takes the app (its look).
+
 ## 1.0.0-rc.91
 
 - Bounce: `data-bounce-stay` on a screen's child (opt-in) keeps it put on a pull past the top, so only the content under

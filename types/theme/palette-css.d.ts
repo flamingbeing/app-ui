@@ -10,10 +10,10 @@ export function palettes(choice: Partial<Choice>, app?: AppTheme): {
 export function shapeTokens(choice: Partial<Choice>): Record<string, string>;
 /**
  * The glass colours for a palette (glass.css): the card colour at the strengths that keep its text readable over
- * anything scrolling under it (colour.js glassStrengths).
- * @param {Palette} p @param {Partial<Choice>} choice @returns {Record<string, string>}
+ * anything scrolling under it, and the look's accent tint where it costs no contrast (colour.js glassStrengths).
+ * @param {Palette} p @param {Partial<Choice>} choice @param {AppTheme} [app] @returns {Record<string, string>}
  */
-export function glassTokens(p: Palette, choice: Partial<Choice>): Record<string, string>;
+export function glassTokens(p: Palette, choice: Partial<Choice>, app?: AppTheme): Record<string, string>;
 /**
  * The CSS text for a choice: the look's tokens and the theme's shapes, light on :root, dark when chosen or when Auto
  * meets a dark device.

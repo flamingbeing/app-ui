@@ -139,28 +139,44 @@ export function glassSamples(p, shaded = false) {
  * every pair that sits on the page or a card (text, status, lines: pairs) reaches its floor over every sample. Always
  * reached by 1 (the solid card colour), which floor() already brought up to every pair. linesOnly: only lines and the
  * focus ring count (glass that carries no text).
- * @param {string[]} samples @param {Palette} p @param {{ strong?: boolean, least?: number, linesOnly?: boolean }} [opts]
+ * @param {string[]} samples @param {Palette} p @param {{ strong?: boolean, least?: number, linesOnly?: boolean, tint?: number }} [opts]
  * @returns {number}
  */
-export function frostAlpha(samples, p, { strong = false, least = 0, linesOnly = false } = {}) {
-  const onCards = pairs(strong).filter(([fg, on]) => on.includes('surface') && (!linesOnly || fg === 'line' || fg === 'focus'));
-  const ok = (/** @type {number} */ a) => samples.every(s => {
-    const glass = mix(s, p.surface, a);
-    return onCards.every(([fg, , ratio]) => contrast(p[fg], glass) >= ratio - 1e-9);
-  });
-  for (let i = Math.ceil(least * 100); i < 100; i++) if (ok(i / 100)) return i / 100;
+export function frostAlpha(samples, p, { strong = false, least = 0, linesOnly = false, tint = 0 } = {}) {
+  for (let i = Math.ceil(least * 100); i < 100; i++) if (glassPasses(samples, p, i / 100, { strong, linesOnly, tint })) return i / 100;
   return 1;
 }
 
 /**
- * The glass strengths for a palette: glass (bars, toasts), thick (sheets, over the backdrop) and clear (icon-only
- * controls: lines and the focus ring only, no text).
- * @param {Palette} p @param {{ strong?: boolean }} [opts] @returns {{ glass: number, thick: number, clear: number }}
+ * Whether every pair that sits on a card passes on the glass at strength a over every sample. The glass is the card
+ * colour at a, then the accent at tint over it (glass.css --glass-bg: a look's --glass-tint, 7% on look A).
+ * @param {string[]} samples @param {Palette} p @param {number} a
+ * @param {{ strong?: boolean, linesOnly?: boolean, tint?: number }} [opts] @returns {boolean}
  */
-export function glassStrengths(p, { strong = false } = {}) {
+export function glassPasses(samples, p, a, { strong = false, linesOnly = false, tint = 0 } = {}) {
+  const onCards = pairs(strong).filter(([fg, on]) => on.includes('surface') && (!linesOnly || fg === 'line' || fg === 'focus'));
+  return samples.every(s => {
+    const glass = mix(mix(s, p.surface, a), p.accent, tint);
+    return onCards.every(([fg, , ratio]) => contrast(p[fg], glass) >= ratio - 1e-9);
+  });
+}
+
+/**
+ * The glass strengths for a palette: glass (bars, toasts), thick (sheets, over the backdrop) and clear (icon-only
+ * controls: lines and the focus ring only, no text), and the accent tint the glass may take (at most the look's
+ * `tint`, 0 to 1): lowered in 1% steps until the text still passes on solid glass (a violet link on a violet-tinted
+ * bar fell under 4.5:1 at 7%), so the tint never costs contrast.
+ * @param {Palette} p @param {{ strong?: boolean, tint?: number }} [opts]
+ * @returns {{ glass: number, thick: number, clear: number, tint: number }}
+ */
+export function glassStrengths(p, { strong = false, tint = 0 } = {}) {
+  const samples = glassSamples(p);
+  let t = Math.round(tint * 100) / 100;
+  while (t > 0 && !glassPasses(samples, p, 1, { strong, tint: t })) t = Math.round((t - 0.01) * 100) / 100;
   return {
-    glass: frostAlpha(glassSamples(p), p, { strong, least: 0.86 }),
+    glass: frostAlpha(samples, p, { strong, least: 0.86, tint: t }),
     thick: frostAlpha(glassSamples(p, true), p, { strong, least: 0.88 }),
-    clear: frostAlpha(glassSamples(p), p, { strong, least: 0.5, linesOnly: true }),
+    clear: frostAlpha(samples, p, { strong, least: 0.5, linesOnly: true }),
+    tint: t,
   };
 }

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { parseChoice, chooseTheme, themeChoice, applyTheme, THEMES, DENSITIES } from '../theme/choice.js';
 import { LOOKS } from '../theme/looks.js';
 import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS } from '../theme/schema.js';
-import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, BACKDROP } from '../theme/colour.js';
+import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, glassPasses, BACKDROP } from '../theme/colour.js';
 import { palettes, paletteCss, shapeTokens, accentOf, glassTokens, DEFAULT_ACCENT } from '../theme/palette-css.js';
 import { PRESETS, SURFACES } from '../theme/presets.js';
 import { GRID, HUES, SHADES, gridIndex, snap } from '../theme/grid.js';
@@ -213,7 +213,7 @@ test('text on glass: every look x light/dark/OLED keeps its floor over the page,
       assert.deepEqual(glassMisses(p, glassSamples(p), at.glass, strong), [], `${where}: glass`);
       assert.deepEqual(glassMisses(p, glassSamples(p, true), at.thick, strong), [], `${where}: thick glass over the backdrop`);
       // see-through on every look (no palette change needed): never the solid card colour
-      for (const [tier, a] of Object.entries(at)) assert.ok(a >= 0.5 && a < 1, `${where}: ${tier} ${a}`);
+      for (const tier of /** @type {const} */ (['glass', 'thick', 'clear'])) assert.ok(at[tier] >= 0.5 && at[tier] < 1, `${where}: ${tier} ${at[tier]}`);
       assert.ok(at.thick >= 0.88 && at.glass >= 0.86, `${where}: the least strength of each tier`);
     }
   }
@@ -233,13 +233,14 @@ test('frostAlpha (from logbook): the lowest passing strength, never under least,
   assert.equal(glassSamples(p, true)[1], mix(p.surface, '#000000', BACKDROP));
 });
 
-test('glass tokens: the card colour see-through at the palette strengths', () => {
-  const p = palettes({}).light, at = glassStrengths(p);
-  assert.deepEqual(glassTokens(p, {}), {
+test('glass tokens: the card colour see-through at the palette strengths, and the look\'s tint where it costs nothing', () => {
+  const p = palettes({ look: 'b' }).light, at = glassStrengths(p);
+  assert.deepEqual(glassTokens(p, { look: 'b' }), {
     glass: `color-mix(in srgb, var(--surface) ${Math.round(at.glass * 100)}%, transparent)`,
     'glass-thick': `color-mix(in srgb, var(--surface) ${Math.round(at.thick * 100)}%, transparent)`,
     'glass-clear': `color-mix(in srgb, var(--surface) ${Math.round(at.clear * 100)}%, transparent)`,
-  });
+  }, 'a look with no tint sets none');
+  assert.equal(glassTokens(palettes({ look: 'a' }).light, { look: 'a' })['glass-tint'], '7%', 'look A keeps its 7% on the default accent');
   assert.match(paletteCss({}), /--glass: color-mix\(in srgb, var\(--surface\) \d+%, transparent\);/);
 });
 
@@ -325,4 +326,24 @@ test('linen ground: the NTF kit\'s paper and ink in light, its own dark; a serif
   assert.equal(p.light.surface, '#fbfaf6');
   assert.equal(p.dark.bg, '#151412');
   assert.match(String(LOOKS.find(l => l.id === 'a')?.tokens['look-font-head']), /^var\(--home-serif, ui-serif\)/);
+});
+
+// glass.css --glass-bg tints the bar's glass with the accent (look A: 7%): a violet link on a violet-tinted bar measured
+// 4.4:1 in an app's axe run. The tint is lowered per palette until every pair passes on the glass it makes.
+test('tinted glass: every look x theme x light/dark/OLED keeps its floor on the tinted glass; violet takes less tint', () => {
+  for (const look of LOOKS.filter(l => parseFloat(l.tokens['glass-tint']) > 0)) {
+    for (const preset of PRESET_IDS) for (const dark of DARK_STYLES) {
+      const strong = !!PRESETS.find(p => p.id === preset)?.strong;
+      for (const [mode, p] of Object.entries(palettes({ preset, dark, look: look.id }))) {
+        const t = glassTokens(p, { preset, dark, look: look.id }), tint = parseFloat(t['glass-tint']) / 100;
+        const at = glassStrengths(p, { strong, tint: parseFloat(look.tokens['glass-tint']) / 100 });
+        assert.equal(tint, at.tint);
+        assert.ok(glassPasses(glassSamples(p), p, at.glass, { strong, tint }), `${look.id} ${preset} ${dark} ${mode}: ${tint}`);
+      }
+    }
+  }
+  const violet = palettes({ preset: 'violet', look: 'a' }).light;
+  const tint = parseFloat(glassTokens(violet, { preset: 'violet', look: 'a' })['glass-tint']);
+  assert.ok(tint < 7, `violet light on look A: ${tint}%`);
+  assert.ok(contrast(violet.link, mix(violet.surface, violet.accent, tint / 100)) >= 4.5);
 });
