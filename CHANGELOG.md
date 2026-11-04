@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.90
+
+- Sign-in screen: the section holding it now covers the page too, so `#signed-out` counts as showing (Playwright's
+  `toBeVisible`, any visibility check) while the screen shows. Before, the fixed screen left it with no size.
+
 ## 1.0.0-rc.89
 - `signInScreen` (new): the whole signed-out page in one part, for every app. The app's icon, name and one line on what it is in the middle on a soft glow of its colour (`accent`); at the bottom a white "Continue with Google" button with the G mark, the app's own form (`fields`, a passcode), more plain buttons (`more`, "Try the demo") and a small `note`. It covers the page, tab bar included, while its section shows. "Forget this device" shows only while this phone holds a signed-out copy (`holdsCopy`, default `holdsSyncCopy()`: an app-sync owner is stored), so a stranger never sees it. Same ids and words as `signInSheet` (`#sign-in`, `#sign-in-error`, `#forget`, `#forget-force`, `#forget-msg`), so an app's tests carry over. Gallery: `/kit/sign-in/`. `signInSheet` stays for now.
 

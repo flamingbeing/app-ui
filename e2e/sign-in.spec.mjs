@@ -11,6 +11,7 @@ for (const width of [390, 1280]) {
       const page = await sized(width);
       await page.goto(PAGE);
       await expect(page.locator('.ui-signin-name')).toHaveText('Garden');
+      await expect(page.locator('#signed-out'), 'the section holding the screen counts as showing').toBeVisible();
       await expect(page.locator('.ui-signin-tagline')).toBeVisible();
       await expect(page.locator('#sign-in')).toHaveText('Continue with Google');
       await expect(page.locator('#forget')).toBeHidden();
@@ -24,6 +25,7 @@ for (const width of [390, 1280]) {
       await page.locator('#sign-in').click();
       await expect(page.locator('#signed-in')).toBeVisible();
       await expect(page.locator('.ui-signin')).toBeHidden();
+      await expect(page.locator('#signed-out')).toBeHidden();
     });
 
     test('Forget shows while this phone holds a copy, and goes once forgotten', async ({ sized }) => {
