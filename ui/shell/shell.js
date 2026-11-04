@@ -18,6 +18,9 @@
 //                (.ui-shell.is-drawer-open, over a .ui-drawer-shade); a side link, a tap on the shade, Esc or growing
 //                past phone width closes it. Open, it is a history entry (Back closes it) and the page behind is inert. No swipe opens it (it took swipes meant to change
 //                page); a left swipe on the open drawer or the shade pushes it back with the finger
+//   wide side   opt-in: html[data-wide-side] at >= 840 px gives the side bar its wide look and a hide button
+//                (ui/shell/wide-side.js, imported only then, also when the window grows to it later); `wide` is the
+//                store for its hidden state (default localStorage)
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
 import { claim, haptic, listeners, still, swipeIntent, THROW_MS } from '../gesture.js';
 import { glide as springGlide, tracker } from '../motion.js';
@@ -28,6 +31,10 @@ export const LAPTOP_MIN = 840;
 
 /** The window size class for a width in px (pure). @param {number} w */
 export const sizeClass = w => w < TABLET_MIN ? 'phone' : w < LAPTOP_MIN ? 'tablet' : 'laptop';
+
+/** Whether the wide side bar (wide-side.js) is wanted: the page opted in and the window is laptop wide (pure).
+ * @param {{ hasAttribute: (name: string) => boolean }} html @param {number} width */
+export const wantsWideSide = (html, width) => html.hasAttribute('data-wide-side') && width >= LAPTOP_MIN;
 
 /** Whether a row's text matches a search: every word, any case (pure). @param {string} text @param {string} query */
 export function matchesSearch(text, query) {
@@ -44,12 +51,16 @@ function defaultRender(row, detail) {
 /**
  * @param {HTMLElement} shell  .ui-shell
  * @param {{ screens?: { push: (t: string | HTMLElement, from?: HTMLElement | null) => void, pop: (a?: boolean) => void, depth: () => number } | null,
- *   render?: (row: HTMLElement, detail: HTMLElement) => void }} [opts]  screens: the page's screen stack (startGestures().screens)
+ *   render?: (row: HTMLElement, detail: HTMLElement) => void,
+ *   wide?: import('./wide-side.js').SideStore | null }} [opts]  screens: the page's screen stack (startGestures().screens);
+ *   wide: where the wide side bar's hidden state is kept (html[data-wide-side] only; default localStorage)
  * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string,
- *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null, stop: () => void }}
- *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more
+ *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null,
+ *   side: () => { toggle: (hide?: boolean) => void, hidden: () => boolean } | null, stop: () => void }}
+ *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more.
+ *   side: the wide side bar's hide button once wide-side.js has loaded (null before, and on phones and tablets)
  */
-export function adaptiveShell(shell, { screens = null, render = defaultRender } = {}) {
+export function adaptiveShell(shell, { screens = null, render = defaultRender, wide = null } = {}) {
   const l = listeners();
   const html = document.documentElement;
   const list = /** @type {HTMLElement} */ (shell.querySelector('.ui-list'));
@@ -73,6 +84,20 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
   }
   for (const q of queries) l.on(q, 'change', applySize);
   applySize();
+
+  // the wide side bar: its file loads once, only when the page opted in and the window is laptop wide
+  /** @type {ReturnType<typeof import('./wide-side.js').wideSide> | null} */
+  let wideCtl = null;
+  let wideAsked = false, stopped = false;
+  function wideCheck() {
+    if (wideAsked || !shell.querySelector('.ui-sidebar') || !wantsWideSide(html, innerWidth)) return;
+    wideAsked = true;
+    void import('./wide-side.js').then(m => { if (!stopped) wideCtl = m.wideSide(shell, { store: wide }); });
+  }
+  l.on(queries[1], 'change', wideCheck);
+  const optIn = new MutationObserver(wideCheck);
+  optIn.observe(html, { attributes: true, attributeFilter: ['data-wide-side'] });
+  wideCheck();
 
   /** @type {HTMLElement | null} */
   let current = null;
@@ -317,5 +342,6 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender } 
     }
   });
 
-  return { open, current: () => current, size: () => size, drawer: pull, stop() { gone.disconnect(); l.stop(); hold(); entry(false); shade?.remove(); } };
+  return { open, current: () => current, size: () => size, drawer: pull, side: () => wideCtl,
+    stop() { stopped = true; gone.disconnect(); optIn.disconnect(); wideCtl?.stop(); l.stop(); hold(); entry(false); shade?.remove(); } };
 }

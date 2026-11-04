@@ -44,7 +44,12 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 ## Shell gallery
 
 `/kit/shell/` is tested by `e2e/shell.spec.mjs` at 390, 820 and 1280 px (axe and CSP reports as above). Pure parts
-(`sizeClass`, `matchesSearch`) are in `test/shell.unit.test.mjs`.
+(`sizeClass`, `matchesSearch`, `wantsWideSide`, the wide side bar's `sideStore`) are in `test/shell.unit.test.mjs`.
+`/kit/shell/?wide=1` (the opt-in wide side bar) is tested by `e2e/shell-wide.spec.mjs`: at 1280 px a 280 px side bar
+with left-aligned 34 px links and a count at the end, no FAB, axe clean; its button hides and shows it (click and
+Enter), the list takes the room, the button stays on top at the top-left, the state survives a reload, the slide moves
+only transforms and sends `ui-side`; without `?wide=1` the old 14rem side bar and no `wide-side.js`; at 390 and 700 px
+`?wide=1` changes no computed look and loads nothing.
 
 | Part | What is tested | axe |
 | --- | --- | --- |
