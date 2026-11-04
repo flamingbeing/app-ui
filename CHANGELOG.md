@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.96
+
+- Tab pages (fix): a `data-tab-keep` part stays still only while swiping towards a page beside that has its copy.
+  Towards a page without one it now slides away with its own page, like the rest of it; before, it hung still over
+  the page coming in and vanished as that page landed.
+
 ## 1.0.0-rc.95
 
 - Loading rows (`loadState`): the four grey gradient pills are now rows shaped like list rows, a title line and a
