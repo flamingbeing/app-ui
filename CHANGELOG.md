@@ -7,7 +7,7 @@
   moves with the content as before.
 - Tab pages (fix): the pages laid out beside the current one at a touch no longer make the page taller. A pull up at the
   end of a short page beside a longer one scrolled on into the longer one's length, then jumped back on lift (a skip,
-  in place of the bounce); the paging host now clips at its foot (`overflow-y: clip` while `.is-paging`).
+  in place of the bounce); each page beside now ends at the foot of the pages (`bottom: 0`, `overflow-y: clip`).
 
 ## 1.0.0-rc.90
 
