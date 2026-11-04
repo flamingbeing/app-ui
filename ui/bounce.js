@@ -10,6 +10,8 @@
 // children (the page's: those of the touched .ui-screen, else the top one's, else main's, else body's), transform only; fixed
 // ones (the bars, an action bar) stay where they are, and so do sticky ones while stuck to an edge (a stuck header at the
 // foot's bounce); a sticky one still in its place (a week strip under a title, at the top) goes with the content, as on iOS.
+// A child marked [data-bounce-stay] (opt-in: a title and a date strip over a day's list) stays put on a pull at the top,
+// so only the content under it moves; at the foot it moves as usual.
 // Nothing runs on import: bounce() adds the listeners; startGestures() calls it ({ bounce: false } leaves it out).
 import { glide, tracker } from './motion.js';
 import { rubber, unrubber, swipeIntent, still, listeners, claim } from './gesture.js';
@@ -61,8 +63,9 @@ export function stuck(inset, rect, port, pos, max) {
 }
 
 /** What moves for a scroller: its children (the page's: the touched screen's, else the top one's, main's, body's), leaving
- * fixed ones and sticky ones stuck to an edge. @param {Element} t @param {HTMLElement | null} box @returns {HTMLElement[]} */
-function partsOf(t, box) {
+ * fixed ones, sticky ones stuck to an edge and, at the top, [data-bounce-stay] ones.
+ * @param {Element} t @param {HTMLElement | null} box @param {boolean} atTop @returns {HTMLElement[]} */
+function partsOf(t, box, atTop) {
   const host = box ?? t.closest('.ui-screen') ?? document.querySelector('.ui-screen.is-top, .ui-screen:not([hidden])')
     ?? document.querySelector('main') ?? document.body;
   const b = box?.getBoundingClientRect();
@@ -70,6 +73,7 @@ function partsOf(t, box) {
   const pos = posOf(box), max = maxOf(box);
   return /** @type {HTMLElement[]} */ ([...host.children]).filter(c => {
     if (!(c instanceof HTMLElement) || c.offsetParent === null) return false;   // (offsetParent: not shown, or fixed)
+    if (atTop && c.hasAttribute('data-bounce-stay')) return false;
     const cs = getComputedStyle(c);
     if (cs.position === 'fixed') return false;
     return cs.position !== 'sticky' || !stuck(cs, c.getBoundingClientRect(), port, pos, max);
@@ -193,7 +197,7 @@ export function bounce(root = document) {
     else { if (held) { e.preventDefault(); scrollOn(box, d); } return; }
     if (!claim('bounce')) { id = null; raw = 0; return; }   // another part has this touch
     if (e.cancelable) { e.preventDefault(); held = true; }
-    if (!cur || cur.box !== box || cur.run) take(box, partsOf(/** @type {Element} */ (target), box));
+    if (!cur || cur.box !== box || cur.run) take(box, partsOf(/** @type {Element} */ (target), box, raw > 0));
     show(rubber(raw, span));
   }, { passive: false });   // not passive: a stretch holds the browser's scroll back (above)
 
@@ -238,7 +242,7 @@ export function bounce(root = document) {
     const t = target && document.contains(target) ? target : null;
     if (b ? !b.contains(t) && !t?.contains(b) : t && scrollerOf(t) !== null) return;   // not the scroll the finger flung
     if (t?.closest('[data-no-bounce]') || atTop && b?.closest('dialog.ui-sheet')) return;
-    take(b, partsOf(t ?? document.body, b));
+    take(b, partsOf(t ?? document.body, b, atTop));
     letGo(0, -Math.sign(speed) * Math.min(MAX_V, Math.abs(speed)));
   }, { passive: true, capture: true });
 

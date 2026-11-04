@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.91
+
+- Bounce: `data-bounce-stay` on a screen's child (opt-in) keeps it put on a pull past the top, so only the content under
+  it stretches (a title and a date strip over a day's list stay; the list slides down from under them). At the foot it
+  moves with the content as before.
+
 ## 1.0.0-rc.90
 
 - Sign-in screen: the section holding it now covers the page too, so `#signed-out` counts as showing (Playwright's

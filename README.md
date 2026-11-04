@@ -46,7 +46,8 @@ holds the kit to them):
   springs back with the finger's speed; a fling into an end bounces past it and back (not with Less motion). Drawn by
   `ui/bounce.js` (touch only; a wheel never bounces), since the page keeps `overscroll-behavior: none` (no pull to
   reload) and Android has no bounce of its own. `startGestures()` starts it; `{ bounce: false }` or `data-no-bounce`
-  on a part leaves it out. A sheet body's top pull stays the sheet's.
+  on a part leaves it out; `data-bounce-stay` on a screen's child keeps it put on a pull at the top (only the content
+  under it moves). A sheet body's top pull stays the sheet's.
 - **Pressed at once**: `startGestures()` marks a touched button, tab, menu item or row `data-pressed` on the touch
   (no wait for `:active`), cleared on lift, scroll or cancel.
 - **The budget** (the jank gate, in Full checks): on a 390 px phone with the CPU slowed 4x (Chromium, DevTools protocol touch,
