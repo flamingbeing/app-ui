@@ -6,7 +6,7 @@
 import { el, button } from './dom.js';
 
 /** @param {unknown} err  a failed sign-in -> why, in plain words (never the raw error text) */
-function whyFailed(err) {
+export function whyFailed(err) {
   const code = String(/** @type {{ code?: unknown } | null} */ (err)?.code || '');
   if (/popup-closed-by-user|cancelled-popup-request|user-cancelled/.test(code)) return 'Sign-in was cancelled.';
   if (/network-request-failed|unavailable|deadline-exceeded/.test(code)) return 'No signal, so that didn’t work. Try again when you’re online.';
@@ -23,7 +23,7 @@ export function whyRefused({ reason, from }) {
 }
 
 /** @param {{ ok: boolean, reason: string, failed?: string[] }} r  auth.forget()'s answer, in words */
-function forgetWords({ ok, reason, failed = [] }) {
+export function forgetWords({ ok, reason, failed = [] }) {
   if (ok && failed.length) return `Signed out, but some of this app's data could not be cleared (${failed.join(', ')}). Close every tab of this app and forget again.`;
   if (ok) return 'Forgotten: this device holds nothing of this app now.';
   return reason === 'unsent' ? 'Some changes on this device are not sent yet. Sign in to send them, or forget anyway and lose them.' : 'Forget didn’t work. Try again.';

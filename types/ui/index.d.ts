@@ -22,6 +22,7 @@ export { screenStack } from "./screens.js";
 export { selectMode } from "./select-mode.js";
 export { cardPager } from "./card-pager.js";
 export { bounce } from "./bounce.js";
+export { signInScreen, holdsSyncCopy } from "./sign-in-screen.js";
 export { alertModal, confirmModal } from "./modal.js";
 export { hoverCard, placeCard } from "./hover-card.js";
 export { loadState, cachedPaint, holdEmpty, swapWhenReady, SNAP_ROWS } from "./load-state.js";
