@@ -128,7 +128,12 @@ test('a touch lays the pages beside out without making the page taller: a pull a
     }
     scrollTo(0, document.documentElement.scrollHeight);
   });
-  const before = await page.evaluate(() => document.documentElement.scrollHeight);
+  // (the height once the scroll has settled: the bar collapsing at the end moves it a few px a moment later)
+  const before = await page.evaluate(async () => {
+    let h = -1;
+    while (h !== document.documentElement.scrollHeight) { h = document.documentElement.scrollHeight; await new Promise(r => setTimeout(r, 150)); }
+    return h;
+  });
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 200, y: 420 }] });
   expect(await page.evaluate(() => document.querySelectorAll('.is-beside').length), 'the pages beside are laid out').toBeGreaterThan(0);
