@@ -4,6 +4,12 @@ import { galleryPreview } from '../preview.js';
 
 galleryPreview();   // ?look=, ?density=, ?edge= as on the other gallery pages
 
+// ?wide=1: the opt-in wide side bar (html[data-wide-side]; from 840 px: left-aligned links, a count at the end, a hide button)
+if (new URLSearchParams(location.search).get('wide') === '1') {
+  document.documentElement.setAttribute('data-wide-side', '');
+  document.getElementById('count-side')?.classList.add('ui-side-count');
+}
+
 // the tabs are pages of this one (ui/tab-pages.js); ?tab=rooms opens on another one (for the tests and screenshots)
 const tab = new URLSearchParams(location.search).get('tab');
 if (tab && document.getElementById(tab)?.classList.contains('ui-tab-page')) {

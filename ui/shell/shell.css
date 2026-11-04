@@ -116,3 +116,43 @@
   dialog.ui-sheet[data-wide="panel"][open] { animation-name: ui-slide-in; }
 }
 @keyframes ui-slide-in { from { transform: translateX(100%); } }
+
+/* ---------- opt-in wide side bar (html[data-wide-side], laptop only; ui/shell/wide-side.js) ----------
+   Without the attribute, or under 840 px, nothing here applies. The side bar is 280 px on its own fill (--side-bg),
+   no line; its links are left aligned (icon, label, then an optional .ui-side-count at the end); the head row
+   (.ui-side-head) ends in the hide button (.ui-side-toggle); hidden, the column is gone and the button stays at the
+   page's top-left. The FAB hides (the app's side bar holds its main action). --shell-page-max: the centred reading width. */
+.ui-side-head { display: contents; }
+.ui-side-toggle { display: none; }
+@media (min-width: 840px) {
+  :root[data-wide-side] { --shell-side-open: 280px; --shell-side: var(--shell-side-open); --shell-page-max: 800px; }
+  :root[data-wide-side][data-side-hidden] { --shell-side: 0px; }
+  :root[data-wide-side] .ui-fab { display: none; }
+  :root[data-wide-side] .ui-sidebar { gap: 0; padding: calc(env(safe-area-inset-top, 0px) + 12px) 0 12px;
+    background: var(--side-bg, var(--surface)); border-inline-end: 0; }
+  :root[data-wide-side] .ui-sidebar .ui-search { margin: 0 12px 12px; }
+  :root[data-wide-side] .ui-side-link { flex: none; justify-content: flex-start; gap: 10px; min-height: 34px; padding: 0 8px;
+    margin: 0 12px; border-radius: 6px; }
+  :root[data-wide-side] .ui-side-count { margin-inline-start: auto; color: var(--muted); font-size: .8rem; font-weight: 400; }
+  :root[data-wide-side] .ui-side-link[aria-current="page"] .ui-side-count { color: inherit; }
+  :root[data-wide-side] .ui-side-head { display: flex; align-items: center; gap: 8px; min-height: 36px; margin: 0 12px 12px; padding-inline-start: 4px; }
+  :root[data-wide-side] .ui-side-head .ui-sidebar-name { flex: 1; min-width: 0; margin: 0; padding: 0; }
+  :root[data-wide-side] .ui-side-toggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 32px; height: 32px;
+    min-width: 0; min-height: 0; margin-inline-start: auto; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--muted); cursor: pointer; }
+  :root[data-wide-side] .ui-side-toggle > svg { width: 20px; height: 20px; }
+  :root[data-wide-side] .ui-side-toggle:is(:hover, :active, [data-pressed]) { background: var(--selection); color: var(--text); }
+  /* a list-only shell (no panes): its screens keep a readable width, centred in the room left */
+  :root[data-wide-side] .ui-shell:not(:has(> .ui-panes)) > .ui-screens > .ui-screen { max-width: var(--shell-page-max); }
+  /* hidden: the column is 0 wide and the side bar out of reach (Tab skips it); the button stays, fixed top-left, and the
+     bar or list head beside it makes room for it */
+  /* (z-index: a sticky side bar is a stacking context, so it lifts the button above a raised bar) */
+  :root[data-wide-side][data-side-hidden]:not([data-side-moving]) .ui-sidebar { visibility: hidden; padding-inline: 0; overflow: hidden; z-index: 30; }
+  :root[data-wide-side][data-side-hidden]:not([data-side-moving]) .ui-side-toggle { visibility: visible; position: fixed; z-index: 30;
+    inset-inline-start: 24px; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+  :root[data-wide-side][data-side-hidden] .ui-shell > .ui-bar,
+  :root[data-wide-side][data-side-hidden] .ui-pane-list > .ui-pane-head { padding-inline-start: 64px; }
+  /* sliding out: the side bar lies over the page at its open width while it goes (wide-side.js animates the transforms) */
+  :root[data-wide-side][data-side-hidden][data-side-moving] .ui-sidebar { position: fixed; z-index: 30; inset-block: 0; inset-inline-start: 0;
+    width: var(--shell-side-open); height: 100dvh; box-sizing: border-box; }
+  :root[data-wide-side][data-side-moving] .ui-shell { overflow: clip; }
+}

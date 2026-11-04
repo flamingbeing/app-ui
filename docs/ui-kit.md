@@ -27,6 +27,17 @@ const shell = adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.
   so the screen stack's history entries (`{ uiScreens }`, `{ uiSheet }`) are unchanged.
 - `shell.open(row)` selects a row (`aria-current="true"`) and fills the detail. Several rows ticked show a summary
   (`.ui-detail-multi`) instead of one item (`.ui-detail-one`).
+- **Wide side bar** (opt-in, 840 px and up): `<html data-wide-side>` gives the side bar a 280 px column on its own
+  fill (`--side-bg`, default `--surface`), no line, links left aligned (icon, label, then an optional
+  `<span class="ui-side-count">` at the end), 34 px rows inset 12 px, and a hide button (`.ui-side-toggle`, a
+  panel-left icon) at the end of the head row `.ui-side-head` (made, holding a leading `.ui-sidebar-name`, when the
+  side bar has none). Hidden, the column is gone, the content takes the room and the button stays at the top-left;
+  it slides about 270 ms (transform only; at once with less motion). The FAB hides; `--shell-page-max` (800 px) is the
+  centred width of a list-only shell's screens. `adaptiveShell(shell, { wide: { get, set } })` keeps the hidden state
+  in the app's store (default localStorage `ui-side-hidden`); `shell.side()` is the button's controller once loaded.
+  Marks: `html[data-wide-ready]` (loaded), `html[data-side-hidden]`; event `ui-side` (`detail.hidden`).
+  `ui/shell/wide-side.js` is imported only when the attribute is set and the window is laptop wide, so phones and
+  tablets load nothing more and look exactly as without it.
 - **Tab pages.** A tab bar button (or side link) with `data-tab-page="#id"` shows that `.ui-screen` of the
   `.ui-screens` host as the bottom screen; the one with `aria-current="page"` starts. In the shell, give the extra
   pages `class="ui-screen ui-tab-page" hidden` beside the panes (from 600 px a tab page takes both columns). A tab

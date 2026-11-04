@@ -42,6 +42,6 @@ export { holdKeyboard, HOLD_MS } from "./keep-keyboard.js";
 export { tabPages, swipeIntent, pageStep } from "./tab-pages.js";
 export { still, haptic, HAPTIC_PATTERNS, toggleTicks, claim, release, captured, onCaptured, PRIORITY } from "./gesture.js";
 export { glide, spring, tracker, drag, afterGesture, gesturing, pressFeedback, PRESSABLE, PRESS_DELAY, inScroller, rubber } from "./motion.js";
-export { adaptiveShell, sizeClass, matchesSearch } from "./shell/shell.js";
+export { adaptiveShell, sizeClass, matchesSearch, wantsWideSide } from "./shell/shell.js";
 export { startLayout, stepper, toolbar, clearableSegments, stepValue } from "./layout.js";
 export { dataGrid, gridMove, gridStarts } from "./data-grid.js";
