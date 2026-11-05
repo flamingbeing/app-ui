@@ -14,7 +14,7 @@
 .ui-search input::-webkit-search-cancel-button { display: none; }
 /* the gap above it is the page's own top gap: under a large title the two margins meet (one gap); under a slim bar,
    where the title is hidden, it still keeps the gap every other page has (it sat 8 px under the bar) */
-.ui-phone-search { margin: var(--pad) var(--pad) var(--pad); }
+.ui-phone-search { margin: var(--pad) var(--pad) max(var(--pad), 12px); }   /* (merges with the next block's top margin: fills a too-small gap, never widens a bigger one) */
 /* look E: the search is a quiet filled box, no line round it */
 :root[data-look="e"] .ui-search { border-color: transparent; background: color-mix(in srgb, var(--text) 6%, transparent); }
 :root[data-look="e"] .ui-search:focus-within { border-color: var(--accent); }

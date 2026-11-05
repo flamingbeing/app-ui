@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.99
+
+- Warm start keeps every tab page's own scroll, not only the one showing: `keepPlace` takes `ys` (the other pages'
+  scrolls by id), `placeToOpen` returns it, `tabPages` hands them out and seeds them on a resume, so a tab you come
+  back to is where you left it. Same `ui-resume` key; an old kept place still reads as before.
+- Empty state: its action sits on its own centred line (`.empty-state > button`), never beside the words.
+- Phone search bar: bottom margin at least 12px (it merges with the next block's top margin, so it fills too small a
+  gap and never widens a bigger one).
+
 ## 1.0.0-rc.98
 
 - Warm start (opt-in: `startGestures(document, { resume: true })`, or `tabPages`' `resume` option, `{ minutes }` to
