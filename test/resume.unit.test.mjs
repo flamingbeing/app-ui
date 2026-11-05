@@ -117,3 +117,11 @@ test('resumeTabs without the pre-paint mark opens the kept tab itself; blocked s
   assert.deepEqual(none, []);
   r2.stop();
 });
+
+test('keepPlace / placeToOpen keep each other tab page\'s scroll too, and drop anything odd', () => {
+  const kept = keepPlace({ path: '/app/', tab: 'inbox', y: 10, now: T, ys: { later: 412.6, top: 0, 'bad id': 5, big: NaN } });
+  assert.deepEqual(kept?.ys, { later: 413 });
+  assert.equal(keepPlace({ path: '/app/', tab: 'inbox', y: 10, now: T, ys: {} })?.ys, undefined);
+  assert.deepEqual(placeToOpen(JSON.stringify(kept), at), { tab: 'inbox', y: 10, ys: { later: 413 } });
+  assert.deepEqual(placeToOpen(JSON.stringify({ ...kept, ys: 'x' }), at), { tab: 'inbox', y: 10 });
+});

@@ -574,7 +574,8 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     const start = current;
     const tabY = () => (screens.depth() > 0 && screens.baseY ? screens.baseY() : scrollY);
     /** @param {string} tab @param {number} y @returns {boolean} whether it opened */
-    const open = (tab, y) => {
+    const open = (/** @type {string} */ tab, /** @type {number} */ y, /** @type {Record<string, number> | undefined} */ others) => {
+      for (const [id, oy] of Object.entries(others ?? {})) { const p = find(`#${id}`); if (p && p !== current && stops().includes(p) && !ys.has(p)) ys.set(p, oy); }   // the other pages' own places
       const page = find(`#${tab}`);
       if (!page || !stops().includes(page)) return false;
       if (page === current) scrollTo(0, y);
@@ -582,13 +583,17 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
       return true;
     };
     /** @type {{ page: HTMLElement, y: number } | null} */
-    const resumed = keptTab && open(keptTab, keptY) ? { page: current, y: keptY } : null;
+    /** @type {Record<string, number> | undefined} */
+    let keptYs;
+    try { keptYs = keptTab ? JSON.parse(localStorage.getItem('ui-resume') || 'null')?.ys : undefined; } catch { /* none */ }
+    const resumed = keptTab && open(keptTab, keptY, keptYs) ? { page: current, y: keptY } : null;
+    const othersY = () => Object.fromEntries([...ys].filter(([p]) => p !== current && p.id).map(([p, y]) => [p.id, y]));
     const minutes = typeof resume === 'object' ? resume.minutes : undefined;
     // (without early.js's mark: opened when the module comes, unless the person has moved on by then)
-    const late = (/** @type {string} */ tab, /** @type {number} */ y) => current === start && screens.depth() === 0 && scrollY < 1 && open(tab, y);
+    const late = (/** @type {string} */ tab, /** @type {number} */ y, /** @type {Record<string, number> | undefined} */ others) => current === start && screens.depth() === 0 && scrollY < 1 && open(tab, y, others);
     void import('./resume.js').then(m => {
       if (stopped) return;
-      unresume = m.resumeTabs({ current: () => current, y: tabY, open: resumed ? undefined : late }, { minutes, resumed }).stop;
+      unresume = m.resumeTabs({ current: () => current, y: tabY, ys: othersY, open: resumed ? undefined : late }, { minutes, resumed }).stop;
     }, err => console.warn(err));
   }
 

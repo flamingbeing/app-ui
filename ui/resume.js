@@ -23,17 +23,30 @@ export const RESUME_HOLD_MS = 3000;
 // a tab page's id as kept: plain, so it is safe as a selector and an attribute
 const ID = /^[A-Za-z][\w-]{0,63}$/;
 
-/** @typedef {{ v: 1, path: string, tab: string, y: number, at: number, until: number }} KeptPlace */
+/** @typedef {{ v: 1, path: string, tab: string, y: number, at: number, until: number, ys?: Record<string, number> }} KeptPlace */
 /** @typedef {{ getItem: (k: string) => string | null, setItem: (k: string, v: string) => void }} PlaceStore */
 
 /**
  * The place to keep (pure): which tab, how far down, when, and until when it may be resumed.
- * @param {{ path: string, tab: string, y: number, now: number, minutes?: number }} o
+ * @param {{ path: string, tab: string, y: number, now: number, minutes?: number, ys?: Record<string, number> }} o
+ *   ys: the other tab pages' scrolls (each screen keeps its own place; only plain ids and whole scrolls above 0 are kept)
  * @returns {KeptPlace | null}  null: nothing worth keeping (a page without a plain id)
  */
-export function keepPlace({ path, tab, y, now, minutes = RESUME_MINUTES }) {
+export function keepPlace({ path, tab, y, now, minutes = RESUME_MINUTES, ys }) {
   if (!ID.test(tab)) return null;
-  return { v: 1, path, tab, y: Math.max(0, Math.round(Number.isFinite(y) ? y : 0)), at: now, until: now + Math.max(0, minutes) * 60_000 };
+  const place = /** @type {KeptPlace} */ ({ v: 1, path, tab, y: Math.max(0, Math.round(Number.isFinite(y) ? y : 0)), at: now, until: now + Math.max(0, minutes) * 60_000 });
+  const rest = cleanYs(ys);
+  if (rest) place.ys = rest;
+  return place;
+}
+
+/** the scrolls worth keeping (plain id, a number above 0), or undefined @param {unknown} ys @returns {Record<string, number> | undefined} */
+function cleanYs(ys) {
+  if (!ys || typeof ys !== 'object') return undefined;
+  /** @type {Record<string, number>} */
+  const out = {};
+  for (const [k, v] of Object.entries(ys)) if (ID.test(k) && typeof v === 'number' && Number.isFinite(v) && v > 0) out[k] = Math.round(v);
+  return Object.keys(out).length ? out : undefined;
 }
 
 /**
@@ -42,7 +55,7 @@ export function keepPlace({ path, tab, y, now, minutes = RESUME_MINUTES }) {
  * or query (a deep link wins); else null (a normal start).
  * @param {string | null} raw  what RESUME_KEY holds
  * @param {{ path: string, hash?: string, search?: string, now: number }} at  the address now, and the clock
- * @returns {{ tab: string, y: number } | null}
+ * @returns {{ tab: string, y: number, ys?: Record<string, number> } | null}  ys: the other tab pages' kept scrolls
  */
 export function placeToOpen(raw, { path, hash = '', search = '', now }) {
   if (!raw || hash || search) return null;
@@ -52,7 +65,8 @@ export function placeToOpen(raw, { path, hash = '', search = '', now }) {
   if (!p || p.v !== 1 || p.path !== path || typeof p.tab !== 'string' || !ID.test(p.tab)) return null;
   if (typeof p.at !== 'number' || typeof p.until !== 'number' || !(now >= p.at && now < p.until)) return null;
   const y = typeof p.y === 'number' && Number.isFinite(p.y) && p.y > 0 ? Math.round(p.y) : 0;
-  return { tab: p.tab, y };
+  const ys = cleanYs(p.ys);
+  return ys ? { tab: p.tab, y, ys } : { tab: p.tab, y };
 }
 
 /** localStorage, or null where it can't be reached @returns {PlaceStore | null} */
@@ -63,8 +77,8 @@ function local() {
 /**
  * The browser side (tabPages starts it): keeps the place whenever the page is hidden or left, and holds a resumed
  * scroll while the page grows.
- * @param {{ current: () => HTMLElement, y: () => number, open?: (tab: string, y: number) => boolean }} tabs
- *   current: the tab page showing; y: its scroll (the tab's own under a pushed screen); open: shows a kept tab at a
+ * @param {{ current: () => HTMLElement, y: () => number, ys?: () => Record<string, number>, open?: (tab: string, y: number, ys?: Record<string, number>) => boolean }} tabs
+ *   current: the tab page showing; y: its scroll (the tab's own under a pushed screen); ys: the other pages' scrolls; open: shows a kept tab at a
  *   scroll if nothing has moved yet (used when early.js didn't mark the page; false: not opened)
  * @param {{ minutes?: number, storage?: PlaceStore | null, now?: () => number, location?: Pick<Location, 'pathname' | 'hash' | 'search'>,
  *   events?: Pick<Window, 'addEventListener' | 'removeEventListener'>, doc?: Document, resumed?: { page: HTMLElement, y: number } | null,
@@ -85,13 +99,13 @@ export function resumeTabs(tabs, { minutes = RESUME_MINUTES, storage = local(), 
     let raw = null;
     try { raw = storage?.getItem(RESUME_KEY) ?? null; } catch { /* none */ }
     const place = placeToOpen(raw, { path: location.pathname, hash: location.hash, search: location.search, now: now() });
-    if (place && tabs.open(place.tab, place.y)) held = { page: tabs.current(), y: place.y };
+    if (place && tabs.open(place.tab, place.y, place.ys)) held = { page: tabs.current(), y: place.y };
   }
   if (held && held.y > 0) stops.push(holdScroll(held.page, held.y, { tabs, doc, scrollTo, scrollY }));
 
   const save = () => {
     const page = tabs.current();
-    const place = page && keepPlace({ path: location.pathname, tab: page.id, y: tabs.y(), now: now(), minutes });
+    const place = page && keepPlace({ path: location.pathname, tab: page.id, y: tabs.y(), now: now(), minutes, ys: tabs.ys?.() });
     if (!place) return;
     try { storage?.setItem(RESUME_KEY, JSON.stringify(place)); } catch { /* full or blocked: a normal start next time */ }
   };

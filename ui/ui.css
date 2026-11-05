@@ -87,6 +87,7 @@ dialog.modal p { margin: 0 0 var(--pad); }
 /* empty state */
 .empty-state { text-align: center; padding: calc(var(--pad) * 2) var(--pad); }
 .empty-state[hidden] { display: none; }
+.empty-state > button { display: flex; width: max-content; max-width: 100%; margin: calc(var(--pad) * .9) auto 0; }   /* the action on its own centred line, never beside the words */
 .empty-title { font-family: var(--font-head); font-weight: var(--title-weight); margin: 0 0 var(--gap); }
 
 /* loading and error states */
