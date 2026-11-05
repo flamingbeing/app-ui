@@ -28,4 +28,11 @@ export function icon(nodes: IconNodes, o?: {
 /** @type {IconNodes} */ export const trash2: IconNodes;
 /** @type {IconNodes} */ export const gripVertical: IconNodes;
 /** @type {IconNodes} */ export const slidersHorizontal: IconNodes;
+/** @type {IconNodes} */ export const copy: IconNodes;
+/** @type {IconNodes} */ export const qrCode: IconNodes;
+/** @type {IconNodes} */ export const share2: IconNodes;
+/** @type {IconNodes} */ export const bell: IconNodes;
+/** @type {IconNodes} */ export const mapPin: IconNodes;
+/** @type {IconNodes} */ export const camera: IconNodes;
+/** @type {IconNodes} */ export const mic: IconNodes;
 export type IconNodes = readonly (readonly [string, Readonly<Record<string, string | number>>])[];

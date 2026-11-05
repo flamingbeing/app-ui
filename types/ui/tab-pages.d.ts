@@ -26,17 +26,19 @@ export function pageStep(dx: number, v: number, width: number, hasPrev: boolean,
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise' | 'dip', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
- *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
+ *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void, resume?: boolean | { minutes?: number } }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
  *   page); drawer: ignored (a swipe no longer pulls the side bar out); onPrevMissing: told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
  *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all;
  *   backToClose (default on, with backToFirst): the first Back on the first page stays and shows the backAgain words
  *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS;
- *   ahead: draws a still copy of a page that isn't on screen (above, "Drawn ahead"; left out, nothing is drawn ahead)
+ *   ahead: draws a still copy of a page that isn't on screen (above, "Drawn ahead"; left out, nothing is drawn ahead);
+ *   resume (default off): warm start, a start soon after leaving opens the tab and scroll it was left on (resume.js;
+ *   minutes: the window, default RESUME_MINUTES)
  * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void, drawAhead: () => void }}
  *   drawAhead: asks for every page again, nearest first (the app's data changed); nothing without ahead
  */
-export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, onPrevMissing, backToFirst, backToClose, toasts, labels, ahead }: {
+export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, onPrevMissing, backToFirst, backToClose, toasts, labels, ahead, resume }: {
     screens: {
         base: (s: HTMLElement) => Promise<void>;
         depth: () => number;
@@ -57,6 +59,9 @@ export function tabPages(bar: HTMLElement, { screens, host, root, swipe, slide, 
     };
     labels?: Record<string, string>;
     ahead?: (page: HTMLElement) => void;
+    resume?: boolean | {
+        minutes?: number;
+    };
 }): {
     go: (page: string | HTMLElement) => void;
     current: () => HTMLElement;

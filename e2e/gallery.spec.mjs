@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 import { BASE } from './fixtures.mjs';
 
 // (and the Android look's, whose own CSS draws icons from data: images)
-const PAGES = ['kit/', 'kit/shell/', 'kit/dense/', 'kit/parts/', 'kit/?look=m', 'kit/parts/?look=m', 'kit/ios/'];
+const PAGES = ['kit/', 'kit/shell/', 'kit/dense/', 'kit/parts/', 'kit/?look=m', 'kit/parts/?look=m', 'kit/ios/', 'kit/resume/'];
 
 for (const path of PAGES) {
   test(`${path} starts clean`, async ({ browser, browserName }) => {

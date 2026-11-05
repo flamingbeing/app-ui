@@ -47,3 +47,25 @@ dialog.ui-sheet.is-dragging { transition: none; }
   .ui-sheet-grabber { display: none; }
   .ui-sheet-head { padding-top: var(--pad); }
 }
+/* a sheet made on the spot (pop-sheet.js: the QR sheet, ask first): as tall as what it holds, up to the large height */
+dialog.ui-sheet.ui-sheet-fit:not([data-detent="large"]) { height: auto; }
+/* the QR sheet (qr-sheet.js): dark modules on a light tile in every theme (scanners need it), a softer tile in dark */
+.ui-qr-sheet .ui-sheet-body { display: flex; flex-direction: column; align-items: center; gap: var(--gap); text-align: center; }
+.ui-qr { --ui-qr-ink: #000; --ui-qr-paper: light-dark(#fff, #e6e6e6); width: min(17rem, 70vw); aspect-ratio: 1;
+  box-sizing: border-box; border-radius: calc(var(--radius) * 2); background: var(--ui-qr-paper); color: var(--ui-qr-ink);
+  display: grid; place-items: center; overflow: hidden; }
+.ui-qr svg { display: block; width: 100%; height: 100%; }
+.ui-qr path { fill: var(--ui-qr-ink); }
+.ui-qr.is-failed { padding: var(--pad); color: #3a3a3c; }
+.ui-qr-hint, .ui-qr-url, .ui-qr-said { margin: 0; }
+.ui-qr-url { color: var(--muted); overflow-wrap: anywhere; max-width: 100%; }
+.ui-qr-said:empty { display: none; }
+.ui-qr-copy { display: inline-flex; align-items: center; gap: .5em; }
+/* ask first (ask-first.js): the kind's icon in a circle, the reason, Not now and Allow side by side */
+.ui-ask-sheet .ui-sheet-body { display: flex; flex-direction: column; align-items: center; gap: var(--gap); text-align: center; }
+.ui-ask-sheet .ui-sheet-body p { margin: 0; }
+.ui-ask-icon { width: 3.5rem; height: 3.5rem; border-radius: 50%; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--link) 14%, transparent); color: var(--link); }
+.ui-ask-icon svg { width: 1.75rem; height: 1.75rem; }
+.ui-ask-row { display: flex; gap: var(--gap); width: 100%; margin-top: var(--gap); }
+.ui-ask-row > button { flex: 1; }

@@ -33,6 +33,21 @@ const NS = 'http://www.w3.org/2000/svg';
   ['path', { d: 'M8 12H3' }], ['path', { d: 'M21 20h-5' }], ['path', { d: 'M12 20H3' }], ['path', { d: 'M14 2v4' }], ['path', { d: 'M8 10v4' }],
   ['path', { d: 'M16 18v4' }]];
 
+/** @type {IconNodes} */ export const copy = [['rect', { width: 14, height: 14, x: 8, y: 8, rx: 2, ry: 2 }], ['path', { d: 'M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2' }]];
+/** @type {IconNodes} */ export const qrCode = [['rect', { width: 5, height: 5, x: 3, y: 3, rx: 1 }], ['rect', { width: 5, height: 5, x: 16, y: 3, rx: 1 }],
+  ['rect', { width: 5, height: 5, x: 3, y: 16, rx: 1 }], ['path', { d: 'M21 16h-3a2 2 0 0 0-2 2v3' }], ['path', { d: 'M21 21v.01' }], ['path', { d: 'M12 7v3a2 2 0 0 1-2 2H7' }],
+  ['path', { d: 'M3 12h.01' }], ['path', { d: 'M12 3h.01' }], ['path', { d: 'M12 16v.01' }], ['path', { d: 'M16 12h1' }], ['path', { d: 'M21 12v.01' }], ['path', { d: 'M12 21v-1' }]];
+/** @type {IconNodes} */ export const share2 = [['circle', { cx: 18, cy: 5, r: 3 }], ['circle', { cx: 6, cy: 12, r: 3 }], ['circle', { cx: 18, cy: 19, r: 3 }],
+  ['line', { x1: 8.59, x2: 15.42, y1: 13.51, y2: 17.49 }], ['line', { x1: 15.41, x2: 8.59, y1: 6.51, y2: 10.49 }]];
+/** @type {IconNodes} */ export const bell = [['path', { d: 'M10.268 21a2 2 0 0 0 3.464 0' }],
+  ['path', { d: 'M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326' }]];
+/** @type {IconNodes} */ export const mapPin = [['path', { d: 'M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0' }],
+  ['circle', { cx: 12, cy: 10, r: 3 }]];
+/** @type {IconNodes} */ export const camera = [['path', { d: 'M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z' }],
+  ['circle', { cx: 12, cy: 13, r: 3 }]];
+/** @type {IconNodes} */ export const mic = [['path', { d: 'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z' }], ['path', { d: 'M19 10v2a7 7 0 0 1-14 0v-2' }],
+  ['line', { x1: 12, x2: 12, y1: 19, y2: 22 }]];
+
 /**
  * An icon as an <svg class="ui-icon"> (hidden from screen readers: the button or chip around it carries the name).
  * Sized by `.ui-icon` in ui.css (1.25em); stroke and fill come from the text colour.

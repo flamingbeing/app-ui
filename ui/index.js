@@ -26,7 +26,12 @@ export { installApp, installMode, INSTALL_WORDS } from './install.js';
 export { draftSlot, listDrafts } from './drafts.js';
 export { gripDrag, moveIn } from './drag-list.js';
 export { MAX_TABS, cleanTabs, arrangeTabs, setTabOn, replaceTab, moveTab, applyTabs, tabArranger } from './tab-arrange.js';
-export { shareText, copyText } from './share.js';
+export { shareText, copyText, shareLink } from './share.js';
+// mini-programme parts (opt-in): share this screen as a link or a QR code (the encoder, ui/qr.js, loads on first use),
+// ask first before a browser permission, warm start (startGestures(document, { resume: true }) starts it)
+export { qrSheet, QR_QUIET } from './qr-sheet.js';
+export { askFirst, askStep, laterTimes, permissionState, requestPermission, ASK_KINDS, ASK_LATER_DAYS, ASK_LATER_KEY } from './ask-first.js';
+export { resumeTabs, keepPlace, placeToOpen, RESUME_KEY, RESUME_MINUTES, RESUME_HOLD_MS } from './resume.js';
 export { createTransients } from './transients.js';
 export { createNavigation } from './navigation.js';
 export { tabBack, CLOSE_MS } from './tab-back.js';

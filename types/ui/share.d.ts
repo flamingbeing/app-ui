@@ -18,6 +18,17 @@ export function shareText(text: string, { title, toasts, labels }?: ShareOptions
     title?: string;
 }): Promise<"shared" | "copied" | "cancelled" | "failed">;
 /**
+ * Share this screen: its link through the system share sheet (with a title, and words if given), or the link copied
+ * where there is no share sheet or it can't take a link. A closed sheet is not an error.
+ * @param {ShareOptions & { url?: string, title?: string, text?: string }} [o]  url: default the page's own address
+ * @returns {Promise<'shared' | 'copied' | 'cancelled' | 'failed'>}
+ */
+export function shareLink({ url, title, text, toasts, labels }?: ShareOptions & {
+    url?: string;
+    title?: string;
+    text?: string;
+}): Promise<"shared" | "copied" | "cancelled" | "failed">;
+/**
  * the page's toaster
  */
 export type Notes = {

@@ -1,5 +1,6 @@
 // Share out: some text (one item, or a list as plain text) through the system share sheet, or the clipboard where
-// there is none. The page hands in its toaster to say what happened; the words are overridable like every part's.
+// there is none; or a screen's link (shareLink), the same way. The page hands in its toaster to say what happened; the
+// words are overridable like every part's. A QR code of a link to scan from another phone: qrSheet (qr-sheet.js).
 import { LABELS } from './labels.js';
 
 /**
@@ -35,4 +36,21 @@ export async function shareText(text, { title = '', toasts, labels = {} } = {}) 
   }
   const words = { ...LABELS, ...labels };
   return await copyText(text, { toasts, labels, what: words.copiedPaste }) ? 'copied' : 'failed';
+}
+
+/**
+ * Share this screen: its link through the system share sheet (with a title, and words if given), or the link copied
+ * where there is no share sheet or it can't take a link. A closed sheet is not an error.
+ * @param {ShareOptions & { url?: string, title?: string, text?: string }} [o]  url: default the page's own address
+ * @returns {Promise<'shared' | 'copied' | 'cancelled' | 'failed'>}
+ */
+export async function shareLink({ url = globalThis.location?.href ?? '', title = '', text, toasts, labels = {} } = {}) {
+  /** @type {ShareData} */
+  const data = text ? { title, text, url } : { title, url };
+  if (typeof navigator.share === 'function' && (typeof navigator.canShare !== 'function' || navigator.canShare(data))) {
+    try { await navigator.share(data); return 'shared'; }
+    catch (err) { if (err instanceof Error && err.name === 'AbortError') return 'cancelled'; }
+  }
+  const words = { ...LABELS, ...labels };
+  return await copyText(url, { toasts, labels, what: words.linkCopied }) ? 'copied' : 'failed';
 }

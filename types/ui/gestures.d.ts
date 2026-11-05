@@ -1,15 +1,16 @@
 /**
  * @param {ParentNode} [root]
- * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, ahead?: (page: HTMLElement) => void, press?: boolean, bounce?: boolean, keyboard?: boolean, ticks?: boolean, tabs?: { swipe?: boolean, slide?: boolean, backToFirst?: boolean, backToClose?: boolean } }} [o]  tabs: options passed on to tabPages (swipe: false turns the sideways page swipe off, tapping a tab still works; the same as data-swipe="off", but per app); drawer:
+ * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, ahead?: (page: HTMLElement) => void, press?: boolean, bounce?: boolean, keyboard?: boolean, ticks?: boolean, resume?: boolean | { minutes?: number }, tabs?: { swipe?: boolean, slide?: boolean, backToFirst?: boolean, backToClose?: boolean } }} [o]  tabs: options passed on to tabPages (swipe: false turns the sideways page swipe off, tapping a tab still works; the same as data-swipe="off", but per app); drawer:
  *   ignored (a swipe no longer pulls the side bar out; still taken so apps that pass it need no change);
  *   onPrevMissing: told after a right swipe on the first tab page; ahead: draws a still copy of a tab page off screen (tab-pages.js, "Drawn ahead"); press: false leaves out the instant pressed state; bounce: false
  *   leaves out the rubber band at the scroll's ends; keyboard: false leaves out the keyboard watch; ticks: false
- *   leaves out the switches' and segmented controls' tick
+ *   leaves out the switches' and segmented controls' tick; resume (default off): warm start, an app opened again within
+ *   an hour comes back on the tab and scroll it was left on (resume.js; { minutes } sets the window; tab pages only)
  * @returns {{ title: ReturnType<typeof largeTitle> | null, menus: ReturnType<typeof holdMenus> | null,
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root?: ParentNode, { onPrevMissing, ahead, press, bounce, keyboard, ticks, tabs: tabOptions }?: {
+export function startGestures(root?: ParentNode, { onPrevMissing, ahead, press, bounce, keyboard, ticks, resume, tabs: tabOptions }?: {
     drawer?: () => import("./tab-pages.js").PullDrawer | null;
     onPrevMissing?: () => void;
     ahead?: (page: HTMLElement) => void;
@@ -17,6 +18,9 @@ export function startGestures(root?: ParentNode, { onPrevMissing, ahead, press, 
     bounce?: boolean;
     keyboard?: boolean;
     ticks?: boolean;
+    resume?: boolean | {
+        minutes?: number;
+    };
     tabs?: {
         swipe?: boolean;
         slide?: boolean;
