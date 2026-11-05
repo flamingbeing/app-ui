@@ -122,19 +122,25 @@ export const PAGE_SPRING_S = 0.22;
  * @param {{ screens: { base: (s: HTMLElement) => Promise<void>, depth: () => number, baseY?: () => number }, host: HTMLElement,
  *   root?: ParentNode, swipe?: boolean, slide?: boolean | 'fade' | 'rise' | 'dip', drawer?: () => PullDrawer | null, onPrevMissing?: () => void,
  *   backToFirst?: boolean, backToClose?: boolean, toasts?: { show: (message: string, o?: { ms?: number }) => () => void },
- *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void }} o
+ *   labels?: Record<string, string>, ahead?: (page: HTMLElement) => void, resume?: boolean | { minutes?: number } }} o
  *   screens: the page's screen stack; host: its .ui-screens; root: where the tabs and side links are (default the
  *   page); drawer: ignored (a swipe no longer pulls the side bar out); onPrevMissing: told after a right swipe on the first page (nothing before it); backToFirst (default on): Back
  *   on another page goes to the first, and Back there leaves (tab-back.js); off, the pages add no history at all;
  *   backToClose (default on, with backToFirst): the first Back on the first page stays and shows the backAgain words
  *   in a toast (the app's toaster given as toasts, else one of its own), a second within CLOSE_MS leaves; labels: words over LABELS;
- *   ahead: draws a still copy of a page that isn't on screen (above, "Drawn ahead"; left out, nothing is drawn ahead)
+ *   ahead: draws a still copy of a page that isn't on screen (above, "Drawn ahead"; left out, nothing is drawn ahead);
+ *   resume (default off): warm start, a start soon after leaving opens the tab and scroll it was left on (resume.js;
+ *   minutes: the window, default RESUME_MINUTES)
  * @returns {{ go: (page: string | HTMLElement) => void, current: () => HTMLElement, stop: () => void, drawAhead: () => void }}
  *   drawAhead: asks for every page again, nearest first (the app's data changed); nothing without ahead
  */
-export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, onPrevMissing, backToFirst = true, backToClose = true, toasts, labels = {}, ahead }) {
+export function tabPages(bar, { screens, host, root = document, swipe = true, slide = true, onPrevMissing, backToFirst = true, backToClose = true, toasts, labels = {}, ahead, resume = false }) {
   const l = listeners();
   const html = document.documentElement;
+  // warm start (resume.js): the tab theme/early.js found kept, and its scroll; opened at the end, before the first paint.
+  // The mark comes off either way (an app that has turned resume off since)
+  const keptTab = html.getAttribute('data-resuming'), keptY = Math.max(0, Number(html.getAttribute('data-resume-y')) || 0);
+  html.removeAttribute('data-resuming'); html.removeAttribute('data-resume-y');
   /** one of the host's screens, by selector @param {string | null | undefined} sel @returns {HTMLElement | null} */
   const find = sel => {
     if (!sel) return null;
@@ -561,5 +567,30 @@ export function tabPages(bar, { screens, host, root = document, swipe = true, sl
     if (x0 !== null && dir === 'x' && name !== held) end(/** @type {TouchEvent} */ (/** @type {unknown} */ ({ type: 'touchcancel', timeStamp: performance.now(), cancelable: false })));
   });
 
-  return { go, current: () => current, drawAhead, stop: () => { aheadRun++; l.stop(); standDown(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
+  // warm start (opt-in: resume, resume.js): the kept tab opens now, before anything shows, at its kept scroll; the
+  // module itself (keeping the place, holding the scroll while the rows come) loads with import() only when it is on
+  let unresume = () => {}, stopped = false;
+  if (resume) {
+    const start = current;
+    const tabY = () => (screens.depth() > 0 && screens.baseY ? screens.baseY() : scrollY);
+    /** @param {string} tab @param {number} y @returns {boolean} whether it opened */
+    const open = (tab, y) => {
+      const page = find(`#${tab}`);
+      if (!page || !stops().includes(page)) return false;
+      if (page === current) scrollTo(0, y);
+      else { ys.set(page, y); go(page); }
+      return true;
+    };
+    /** @type {{ page: HTMLElement, y: number } | null} */
+    const resumed = keptTab && open(keptTab, keptY) ? { page: current, y: keptY } : null;
+    const minutes = typeof resume === 'object' ? resume.minutes : undefined;
+    // (without early.js's mark: opened when the module comes, unless the person has moved on by then)
+    const late = (/** @type {string} */ tab, /** @type {number} */ y) => current === start && screens.depth() === 0 && scrollY < 1 && open(tab, y);
+    void import('./resume.js').then(m => {
+      if (stopped) return;
+      unresume = m.resumeTabs({ current: () => current, y: tabY, open: resumed ? undefined : late }, { minutes, resumed }).stop;
+    }, err => console.warn(err));
+  }
+
+  return { go, current: () => current, drawAhead, stop: () => { stopped = true; unresume(); aheadRun++; l.stop(); standDown(); back?.stop(); settle(); unpage(); host.classList.remove('is-pager'); } };
 }

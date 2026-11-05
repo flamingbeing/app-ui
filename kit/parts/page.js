@@ -1,6 +1,6 @@
 // The reference parts gallery: the undo toast, the loading and error states and the About sheet, on made-up data.
 // ?look= and ?density= preview as on the other gallery pages (preview.js). The fake update api and import map stand in for an app's.
-import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, createTransients,
+import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, shareLink, qrSheet, askFirst, ASK_LATER_KEY, createTransients,
   applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard, drag, glide, afterGesture } from '../../ui/index.js';
 import { icon, gripVertical } from '../../icons/lucide.js';
 import { galleryPreview } from '../preview.js';
@@ -87,6 +87,34 @@ drawOrder();
 const notes = toaster(document.body);
 $('share-send').addEventListener('click', () => { void shareText('Fruit list: Apple, Pear, Plum, Fig', { title: 'Fruit', toasts: notes }); });
 $('share-copy').addEventListener('click', () => { void copyText('Fruit list: Apple, Pear, Plum, Fig', { toasts: notes }); });
+
+// share this screen: the link, or a QR code of it (the encoder loads at the first QR sheet)
+$('link-share').addEventListener('click', async () => {
+  $('link-state').textContent = `Share link: ${await shareLink({ url: location.href, title: 'Parts gallery', toasts: notes })}.`;
+});
+$('link-qr').addEventListener('click', async () => {
+  await qrSheet({ url: location.href, title: 'Parts gallery' });
+  $('link-state').textContent = 'QR sheet closed.';
+});
+
+// ask first: each kind with its own reason
+/** @type {Record<string, string>} */
+const why = {
+  notifications: 'To tell you when a plant is due for water.',
+  location: 'To show the garden centres near you.',
+  camera: 'To take a photo of a plant for its page.',
+  microphone: 'To add a spoken note to a plant.',
+};
+for (const b of document.querySelectorAll('[data-ask]')) {
+  const kind = /** @type {import('../../ui/ask-first.js').AskKind} */ (/** @type {HTMLElement} */ (b).dataset.ask);
+  b.addEventListener('click', async () => {
+    $('ask-state').textContent = `${kind}: ${await askFirst(kind, { why: why[kind] })}.`;
+  });
+}
+$('ask-reset').addEventListener('click', () => {
+  try { localStorage.removeItem(ASK_LATER_KEY); } catch { /* none */ }
+  $('ask-state').textContent = 'Not now forgotten: each kind asks again.';
+});
 
 // Back closes the top dialog: each dialog takes one history entry
 const transients = createTransients({ history, location, events: window });

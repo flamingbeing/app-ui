@@ -35,3 +35,8 @@
 .ui-screens.has-bar-back > .ui-screen > .ui-back { display: none; }
 .ui-screen > .ui-back { margin: var(--gap) 0 0; min-height: var(--tap); }
 .ui-bar-back { min-height: var(--tap); margin-inline-start: calc(var(--gap) * -1); white-space: nowrap; }
+/* warm start (ui/resume.js): while theme/early.js's mark is on <html>, the pages and the tabs stay unseen, so the
+   first tab never shows before the kept one; tabPages takes the mark off once that tab is open. If nothing takes it
+   off (a page without tab pages), they show after 1.2 s anyway */
+html[data-resuming] :is(.ui-screens, nav.ui-tabbar, .ui-sidebar, .ui-bar-title) { visibility: hidden; animation: ui-resume-show 0s 1.2s forwards; }
+@keyframes ui-resume-show { to { visibility: visible; } }

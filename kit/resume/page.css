@@ -1,0 +1,6 @@
+/* the warm start gallery page: the bar's two ends, and the short note above the list */
+.kit-bar-side { flex: 1; display: flex; padding-inline: var(--gap); }
+.kit-bar-side:last-child { justify-content: flex-end; }
+.ui-bar .kit-home { text-decoration: none; }
+.kit-lede { margin: 0 0 var(--gap); color: var(--muted); }
+.kit-actions { margin: 0 0 var(--pad); }

@@ -127,6 +127,31 @@ mint    in a pot</code></pre>
       </div>
     </section>
 
+    <section aria-labelledby="screen-title">
+      <h2 id="screen-title">Share this screen</h2>
+      <p class="small">The link to this screen: the system share sheet with the link (else it is copied), or a QR code
+        to scan from another phone, with the link written out and Copy link.</p>
+      <div class="row">
+        <button type="button" id="link-share">Share link</button>
+        <button type="button" id="link-qr">Show QR code</button>
+      </div>
+      <p class="small" id="link-state" role="status">Not shared yet.</p>
+    </section>
+
+    <section aria-labelledby="ask-title">
+      <h2 id="ask-title">Ask first</h2>
+      <p class="small">At the moment of need, a sheet with the app's reason before the browser's own prompt; Not now
+        holds for 7 days on this device, and a blocked one says how to allow it in settings.</p>
+      <div class="row">
+        <button type="button" data-ask="notifications">Notifications</button>
+        <button type="button" data-ask="location">Location</button>
+        <button type="button" data-ask="camera">Camera</button>
+        <button type="button" data-ask="microphone">Microphone</button>
+      </div>
+      <p class="row"><button type="button" id="ask-reset">Forget Not now</button></p>
+      <p class="small" id="ask-state" role="status">Nothing asked yet.</p>
+    </section>
+
     <section aria-labelledby="back-title">
       <h2 id="back-title">Back closes the dialog</h2>
       <button type="button" id="back-open">Open a dialog</button>

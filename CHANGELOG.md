@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.0.0-rc.98
+
+- Warm start (opt-in: `startGestures(document, { resume: true })`, or `tabPages`' `resume` option, `{ minutes }` to
+  change the window): an app opened again within 60 minutes of being left comes back on the same tab page at the same
+  scroll. Kept on this device only (localStorage `ui-resume`): the address path, the tab page's id, the scroll and
+  when; never data or account details, and pushed screens are not kept. A `#hash` or `?query` in the address is a deep
+  link and starts as usual. Saved on `pagehide` and when the page is hidden. No flash: `theme/early.js` marks
+  `<html data-resuming>` before the first paint, the pages stay unseen until `tabPages` has opened the kept tab (at
+  most 1.2 s), and a list drawn a moment later still gets its scroll. The saving part (`ui/resume.js`) loads with
+  `import()` only when the option is on. Exported: `resumeTabs`, `keepPlace`, `placeToOpen`, `RESUME_KEY`,
+  `RESUME_MINUTES`, `RESUME_HOLD_MS`. Gallery: `/kit/resume/`.
+- Share this screen: `shareLink({ url, title, text, toasts, labels })` sends the link to the system share sheet, else
+  copies it ("Link copied"); `qrSheet({ url, title, labels })` opens a sheet with a QR code of the link as inline SVG
+  (dark modules on a light tile in every theme, a softer tile in dark), the link written out and Copy link. The
+  encoder (`ui/qr.js`: byte mode, level M, versions 1 to 40) loads with `import()` when the first sheet opens.
+  Gallery: `/kit/parts/`, "Share this screen".
+- Ask first: `askFirst(kind, { why, labels, laterDays })` before notifications, location, the camera or the
+  microphone. Already allowed: `'granted'`, nothing shown. Blocked: a sheet on how to allow it in settings, then
+  `'denied'`. Otherwise a sheet with the kind's icon, the app's reason, Not now and Allow; Allow asks the browser
+  itself (the camera and microphone are let go at once) and Not now answers `'later'` with no sheet for 7 days, per
+  kind, on this device (`ui-ask-later`). No such thing in the browser: `'unsupported'`. Also exported:
+  `permissionState`, `requestPermission`, `askStep`, `laterTimes`, `ASK_KINDS`, `ASK_LATER_DAYS`, `ASK_LATER_KEY`.
+  Gallery: `/kit/parts/`, "Ask first".
+- Icons: `copy`, `qrCode`, `share2`, `bell`, `mapPin`, `camera`, `mic`. Words (LABELS): `linkCopied`, `done`,
+  `qrTitle`, `qrFor`, `qrHint`, `qrFailed`, `copyLink`, `askTitle`, `askAllow`, `askNotNow`, `askOffTitle`, `askOff`,
+  `askNotifications`, `askLocation`, `askCamera`, `askMicrophone`.
+
 ## 1.0.0-rc.97
 
 - Shell: an opt-in wide side bar, `<html data-wide-side>`, from 840 px only. The side bar is 280 px on its own fill

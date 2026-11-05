@@ -17,6 +17,8 @@
 //                                                           { keyboard: false } leaves it out)
 //   ticks (every page)                                      a tick (gesture.js haptic) when a switch flips or a
 //                                                           segmented control picks ({ ticks: false } leaves it out)
+//   warm start (opt-in)     { resume: true }                a start soon after leaving opens the tab and scroll it
+//                                                           was left on (resume.js; needs tab pages)
 //   pressed at once (every page)                            a touched button, row link or tab shows pressed at once
 //                                                           (motion.js pressFeedback; { press: false } leaves it out)
 // Styles: ui/gestures.css, loaded with <link> after ui.css.
@@ -34,16 +36,17 @@ import { toggleTicks } from './gesture.js';
 
 /**
  * @param {ParentNode} [root]
- * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, ahead?: (page: HTMLElement) => void, press?: boolean, bounce?: boolean, keyboard?: boolean, ticks?: boolean, tabs?: { swipe?: boolean, slide?: boolean, backToFirst?: boolean, backToClose?: boolean } }} [o]  tabs: options passed on to tabPages (swipe: false turns the sideways page swipe off, tapping a tab still works; the same as data-swipe="off", but per app); drawer:
+ * @param {{ drawer?: () => import('./tab-pages.js').PullDrawer | null, onPrevMissing?: () => void, ahead?: (page: HTMLElement) => void, press?: boolean, bounce?: boolean, keyboard?: boolean, ticks?: boolean, resume?: boolean | { minutes?: number }, tabs?: { swipe?: boolean, slide?: boolean, backToFirst?: boolean, backToClose?: boolean } }} [o]  tabs: options passed on to tabPages (swipe: false turns the sideways page swipe off, tapping a tab still works; the same as data-swipe="off", but per app); drawer:
  *   ignored (a swipe no longer pulls the side bar out; still taken so apps that pass it need no change);
  *   onPrevMissing: told after a right swipe on the first tab page; ahead: draws a still copy of a tab page off screen (tab-pages.js, "Drawn ahead"); press: false leaves out the instant pressed state; bounce: false
  *   leaves out the rubber band at the scroll's ends; keyboard: false leaves out the keyboard watch; ticks: false
- *   leaves out the switches' and segmented controls' tick
+ *   leaves out the switches' and segmented controls' tick; resume (default off): warm start, an app opened again within
+ *   an hour comes back on the tab and scroll it was left on (resume.js; { minutes } sets the window; tab pages only)
  * @returns {{ title: ReturnType<typeof largeTitle> | null, menus: ReturnType<typeof holdMenus> | null,
  *   sheets: Map<string, ReturnType<typeof detentSheet>>, screens: ReturnType<typeof screenStack> | null,
  *   selects: Map<string, ReturnType<typeof selectMode>>, tabs: ReturnType<typeof tabPages> | null, stop: () => void }}
  */
-export function startGestures(root = document, { onPrevMissing, ahead, press = true, bounce = true, keyboard = true, ticks = true, tabs: tabOptions = {} } = {}) {
+export function startGestures(root = document, { onPrevMissing, ahead, press = true, bounce = true, keyboard = true, ticks = true, resume = false, tabs: tabOptions = {} } = {}) {
   /** @type {(() => void)[]} */
   const stops = [];
   // iOS shows :active press states only when the page listens for touches
@@ -91,7 +94,7 @@ export function startGestures(root = document, { onPrevMissing, ahead, press = t
   if (back) stops.push(() => { back.remove(); host?.classList.remove('has-bar-back'); });
   const tabBar = /** @type {HTMLElement | null} */ (root.querySelector('nav.ui-tabbar'));
   if (tabBar) stops.push(tabBarRoom(tabBar));
-  const tabs = tabBar && host && screens && tabBar.querySelector('[data-tab-page]') ? tabPages(tabBar, { screens, host, root, onPrevMissing, ahead, ...tabOptions }) : null;
+  const tabs = tabBar && host && screens && tabBar.querySelector('[data-tab-page]') ? tabPages(tabBar, { screens, host, root, onPrevMissing, ahead, resume, ...tabOptions }) : null;
   if (tabs) stops.push(tabs.stop);
   const selects = new Map();
   for (const list of /** @type {NodeListOf<HTMLElement>} */ (root.querySelectorAll('.ui-list[data-select]'))) {

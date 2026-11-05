@@ -214,6 +214,16 @@ is green; the bar collapses on scroll; the sheet goes medium to large by its gra
 and dark on the page and the sheet. Node: the look's variants, tokens, accent and ground fallbacks
 (`test/looks.unit.test.mjs`).
 
+## Warm start (`e2e/resume.spec.mjs`, `kit/resume/`, `test/resume.unit.test.mjs`)
+
+`/kit/resume/` at 390 px (Chromium): Later tab scrolled to 900 px, reloaded: Later opens at 900 px, the first tab is
+never seen in any frame before load, the mark is off `<html>`, the kept place holds only path, tab, scroll and times,
+and Back goes to the first tab. The Done list (drawn 400 ms late) still lands at its kept 2400 px; a hidden page keeps
+its place. A `#hash`, a `?query` and a place over an hour old each start on the first tab. Node: keepPlace,
+placeToOpen's rules (path, window, deep links, bad records), theme/early.js run on a fake page marks exactly what
+placeToOpen opens (and nothing when storage throws), resumeTabs saves on pagehide and hidden only, keeps the last place
+for a page without a plain id, opens the kept tab itself without early.js's mark, and stops cleanly.
+
 ## Settings screen gallery
 
 `/kit/settings/` is tested by `e2e/settings.spec.mjs`: `settingsScreen` on a made-up plant app's options, held by a
@@ -296,6 +306,8 @@ stand-in for `@core/settings` on the page.
 | Drag to reorder | dragging the grip with a finger moves the row to the new place; axe | |
 | Follow the finger | the knob (`drag`, `glide`) goes with a finger and glides to the end it was let go nearer; a short move back glides back; the save (`afterGesture`) shows after each lift; axe | |
 | Share out | Copy and Share (no share sheet) copy and say so; (unit) a closed share sheet is not an error | |
+| Share this screen | Show QR code: the encoder loads only then, a code of the page's link (at least 3 px a module, dark on white; a softer #e6e6e6 tile in dark), the link written out, Copy link copies and says so in the sheet, Done removes the sheet; axe (e2e/share-ask.spec.mjs). (unit) shareLink sends the link to the share sheet, a closed sheet is cancelled, no sheet or one that can't take it copies the link; the encoder matches a reference encoder module for module (version 1) and by digest (versions 7, 10, 13), the standard's error correction example, capacity, alignment, finders and timing, the lowest-penalty mask, too long throws | yes |
+| Ask first | already allowed (location) answers at once with no sheet; a new ask shows the kind's icon, the app's reason, Not now and Allow; Not now keeps 7 days and the next ask answers later with no sheet; Allow asks the browser and lets go of the microphone; blocked (camera) shows how to allow it, then denied; axe (e2e/share-ask.spec.mjs). (unit) every kind's state and prompt on a fake browser, older Safari's callback, a prompt shut without an answer is later, a busy camera is allowed and none at all unsupported, blocked storage, one ask per kind at a time | yes |
 | Back closes the dialog | Back closes the newest dialog first, then the one under it; the page stays (unit: dismissAll, reset) | |
 | Conflict sheet | per-field picks survive a queue change while the sheet is open, and Keep these choices sends them all | |
 | Conflict sheet | `fields` gives a field its label and value format; others keep the path and JSON; no "(undefined)" when a side has no time | |
