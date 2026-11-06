@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.105
+
+- `adaptiveShell` starts on a shell with no `.ui-list` (an app of tab pages without a list and detail): it threw on
+  observing a missing list, so such an app had to add a hidden empty list. Sizes, the side bar and its drawer work;
+  with no rows nothing opens, and a search sends `ui-search` from the shell (0 shown). Test in `e2e/app-shell.spec.mjs`.
+
 ## 1.0.0-rc.104
 
 A photo viewer, lifted from an app into the kit (opt-in, loaded on first use).
