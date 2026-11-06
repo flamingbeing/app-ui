@@ -260,7 +260,9 @@ const openSettings = async () => {
         { rows: [
           { id: 'opt-open-last', label: 'Open the last page', sub: 'At the start, the page that was open when you left.', toggle: { get: () => prefs.openLast, set: on => { prefs.openLast = on; } } },
           { id: 'opt-sync', label: 'Sync with the cloud', sub: 'Keeps the journal the same on every device.', keywords: 'account', toggle: { get: () => false, set: () => { throw new Error('Sign in first to sync (made up)'); } } },
-          { label: 'Journal', value: 'Field journal' },
+          { label: 'Journal', value: 'Field journal', sub: () => `${NAMES.length} pages, counted as it is drawn` },
+          // (a second copy of a module's switch: the search finds only the one on Modules)
+          { id: 'opt-info-2', label: 'Page info', sub: 'Also on Modules.', find: false, toggle: moduleSwitch('info') },
         ] },
         { title: 'Your pages', rows: [
           { id: 'opt-export', label: 'Export', sub: 'Every page as a Markdown file.', button: { text: 'Export pages', run: () => toasts.show('Exported (made up)') } },
@@ -289,6 +291,10 @@ const openSettings = async () => {
       ] },
       { id: 'about', title: 'About', icon: info, cards: [
         { rows: [{ label: 'Version', value: '1.0 (made up)' }, { label: 'Pages', value: () => String(NAMES.length) }] },
+        // (a bare row: the app's control is the whole row; drawn: called once it is on the page)
+        { title: 'Made with', rows: [{ label: 'Made with', keywords: 'credits', bare: true,
+          control: () => Object.assign(document.createElement('p'), { id: 'about-credits', className: 'kit-credits', textContent: 'The kit, Lucide icons and a lot of tea.' }),
+          drawn: row => { row.dataset.drawn = String(row.isConnected); } }] },
       ] },
     ],
   }));

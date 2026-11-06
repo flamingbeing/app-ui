@@ -194,6 +194,7 @@ test('settings search: words find a row on its page, a tap opens the page there;
   await page.locator('#settings-q').fill('nothing like it');
   await expect(page.locator('#settings .ui-vault-set-none')).toBeVisible();
   await page.locator('#settings-q').fill('characters');
+  await expect(hits, 'a row kept out of the search (find: false) is not found twice').toHaveCount(1);
   await page.locator('#settings-results button').first().click();
   await settled(page);
   await expect(page.locator('#settings-title-modules')).toBeVisible();
@@ -256,4 +257,24 @@ test('the footer\'s gear: the sidebar goes, then the settings open; closing them
   await page.waitForTimeout(300);
   await expect(toast(page)).toHaveCount(0);
   expect(await page.evaluate(() => history.state?.uiTabGuard)).toBe(1);
+});
+
+test('settings rows: a live second line, a bare row (no words, drawn hook once in place, found by its label), a row kept out of the search', async ({ phone }) => {
+  const page = await load(phone);
+  await openSettings(page);
+  await page.locator('#settings-go-general').click();
+  await settled(page);
+  await expect(page.locator('#settings [data-page=general] .ui-vault-set-sub', { hasText: 'counted as it is drawn' })).toHaveCount(1);
+  await expect(page.locator('#opt-info-2')).toBeVisible();
+  await back(page);
+  await settled(page);
+  await page.locator('#settings-q').fill('credits');
+  await page.locator('#settings-results button').first().click();
+  await settled(page);
+  const bare = page.locator('#settings [data-page=about] .ui-vault-set-row.is-bare');
+  await expect(bare).toHaveAttribute('data-drawn', 'true');
+  await expect(bare).toHaveAttribute('aria-label', 'Made with');
+  await expect(bare.locator('.ui-vault-set-text')).toHaveCount(0);
+  expect(await bare.evaluate(e => getComputedStyle(e).paddingLeft)).toBe('0px');
+  await expect(page.locator('#about-credits')).toBeVisible();
 });

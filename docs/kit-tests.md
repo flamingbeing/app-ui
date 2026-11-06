@@ -257,7 +257,9 @@ the sidebar's picker. Search: words (and keywords) find a row with its page's na
 hit opens its page with the row flashed, Back keeps the search; a refused switch shows its reason (`is-bad`) and
 stays off; a choice is kept. A swipe right on a page's rows goes Back (`touch-action: pan-y` on the scroll area); a
 drag down on the root's header closes it. None of these says "Press Back again to close" and each leaves the page on
-its own history entry. Axe clean on the root and on Modules, light and dark.
+its own history entry. Axe clean on the root and on Modules, light and dark. Rows: a second line read as the page is drawn
+(`sub` as a function), a bare row (`bare`: no words, no padding, named by its label, found by the search, its
+`drawn` hook run once it is in the page), a second copy of a switch kept out of the search (`find: false`).
 
 ## Settings screen gallery
 

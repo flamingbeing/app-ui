@@ -18,9 +18,13 @@ import { shadeEl } from './shade.js';
 
 /**
  * @typedef {import('../../icons/lucide.js').IconNodes} IconNodes
- * @typedef {{ id?: string, label: string, sub?: string, keywords?: string, shown?: () => boolean }} RowBase
- *   id: the control's (a link's button, a switch's input; default made from the sheet's id); sub: a second line;
- *   keywords: more words the search finds it by; shown: read each time the page is drawn (default shown)
+ * @typedef {{ id?: string, label: string, sub?: string | Node | (() => string | Node), keywords?: string, shown?: () => boolean,
+ *   find?: boolean, drawn?: (row: HTMLElement) => void }} RowBase
+ *   id: the control's (a link's button, a switch's input; default made from the sheet's id); sub: a second line (a
+ *   function: read each time the row is drawn, so it can carry live words such as the signed-in email); keywords: more
+ *   words the search finds it by; shown: read each time the page is drawn (default shown); find: false keeps the row
+ *   out of the search (a second copy of a row shown on another page); drawn: called with the row once it is on the page
+ *   (in the document), each time the page is drawn
  * @typedef {RowBase & { go: string, icon?: IconNodes, hint?: string }} GoRow  opens page `go` (its icon, else the page's)
  * @typedef {RowBase & { toggle: { get: () => boolean, set: (on: boolean) => unknown }, gear?: string }} ToggleRow
  *   a switch; set may throw or reject (the switch shows get() again, the words say why); gear: a page of its options,
@@ -28,8 +32,9 @@ import { shadeEl } from './shade.js';
  * @typedef {RowBase & { choice: { options: [string, string][], get: () => string, set: (value: string) => unknown } }} ChoiceRow
  *   one of a few (a pill with chevrons under the words: the browser's own picker); options: [value, words]; set as a
  *   switch's
- * @typedef {RowBase & { control: () => HTMLElement, under?: boolean }} ControlRow  the app's own control, at the end
- *   of the row or under its words
+ * @typedef {RowBase & { control: () => HTMLElement, under?: boolean, bare?: boolean }} ControlRow  the app's own control,
+ *   at the end of the row or under its words; bare: the control is the whole row, no words, no padding (the label
+ *   still names it to the search and to a screen reader)
  * @typedef {RowBase & { button: { text: string, run: () => unknown, danger?: boolean } }} ButtonRow  a pill button under the words
  * @typedef {RowBase & { value: string | (() => string) }} ValueRow  words at the end (read only)
  * @typedef {GoRow | ToggleRow | ChoiceRow | ControlRow | ButtonRow | ValueRow} SettingsRow
@@ -37,7 +42,7 @@ import { shadeEl } from './shade.js';
  * @typedef {{ id: string, title: string, icon?: IconNodes, cards: SettingsCard[] | (() => SettingsCard[]), shown?: () => boolean }} SettingsPage
  *   cards: read each time the page is drawn; shown: whether its rows are found by the search (default yes)
  * @typedef {{ el: HTMLDialogElement, open: () => void, close: () => Promise<void>, go: (page: string) => Promise<void>,
- *   back: () => Promise<void>, refresh: () => void, isOpen: () => boolean, top: () => string,
+ *   back: () => Promise<void>, refresh: (o?: { ifRowsChanged?: boolean }) => void, isOpen: () => boolean, top: () => string,
  *   say: (text: string, bad?: boolean) => void, destroy: () => void }} SettingsSheet
  * @typedef {{ id: string, el: HTMLElement, x: number, v: number, step: { readonly active: boolean, close: () => Promise<void> } | null, from: string }} Shown
  */
@@ -89,10 +94,15 @@ export function settingsSheet(o) {
   // ---- the rows
   /** @param {string} pageId @param {string} at */
   const autoId = (pageId, at) => `${sid}-${pageId}-${at}`;
-  /** @param {string} label @param {string | undefined} sub @param {string} [forId] */
+  /** a row's second line, read now @param {RowBase['sub']} sub @returns {string | Node | undefined} */
+  const subNow = sub => (typeof sub === 'function' ? sub() : sub);
+  /** @param {string | Node | undefined} sub */
+  const subEl = sub => (sub ? el('span', { className: 'ui-vault-set-sub' }, sub) : null);
+  /** @param {string} label @param {RowBase['sub']} sub @param {string} [forId] */
   const text = (label, sub, forId) => {
     const name = forId ? el('label', { className: 'ui-vault-set-name', htmlFor: forId, textContent: label }) : el('span', { className: 'ui-vault-set-name', textContent: label });
-    return el('div', { className: 'ui-vault-set-text' }, name, sub ? el('div', { className: 'ui-vault-set-sub', textContent: sub }) : null);
+    const s = subNow(sub);
+    return el('div', { className: 'ui-vault-set-text' }, name, s ? el('div', { className: 'ui-vault-set-sub' }, s) : null);
   };
   /** @param {Node} words @param {Node | null} control @param {boolean} [under] */
   const line = (words, control, under = false) => el('div', { className: `ui-vault-set-row${under ? ' is-under' : ''}` }, words, control);
@@ -103,7 +113,7 @@ export function settingsSheet(o) {
       const icon = r.icon || byId.get(r.go)?.icon;
       const b = el('button', { type: 'button', className: 'ui-vault-set-nav', id: r.id || `${sid}-go-${r.go}` },
         icon ? vaultIcon(icon) : null,
-        r.sub ? el('span', { className: 'ui-vault-set-nav-two' }, el('span', { className: 'ui-vault-set-nav-label', textContent: r.label }), el('span', { className: 'ui-vault-set-sub', textContent: r.sub }))
+        r.sub ? el('span', { className: 'ui-vault-set-nav-two' }, el('span', { className: 'ui-vault-set-nav-label', textContent: r.label }), subEl(subNow(r.sub)))
           : el('span', { className: 'ui-vault-set-nav-label', textContent: r.label }),
         r.hint ? el('span', { className: 'ui-vault-set-hint', textContent: r.hint }) : null,
         vaultIcon(chevronRight, 'ui-vault-set-more'));
@@ -147,6 +157,12 @@ export function settingsSheet(o) {
     }
     if ('control' in r) {
       const c = r.control();
+      if (r.bare) {
+        const row = el('div', { className: 'ui-vault-set-row is-bare' }, c);
+        row.setAttribute('role', 'group');
+        row.setAttribute('aria-label', r.label);
+        return row;
+      }
       return line(text(r.label, r.sub, c.id && /^(INPUT|SELECT|TEXTAREA)$/.test(c.tagName) ? c.id : undefined), c, !!r.under);
     }
     if ('button' in r) {
@@ -163,16 +179,29 @@ export function settingsSheet(o) {
   const isShown = r => !r.shown || r.shown();
   /** a page's cards, drawn into its scroll area @param {HTMLElement} scroll @param {SettingsCard[]} cards @param {string} pageId */
   const fill = (scroll, cards, pageId) => {
+    /** @type {[(row: HTMLElement) => void, HTMLElement][]} the rows' drawn hooks, called once they are in place */
+    const hooks = [];
     scroll.replaceChildren(...cards.map((c, ci) => {
       const rows = c.rows.map((r, ri) => ({ r, at: `${ci}-${ri}` })).filter(({ r }) => isShown(r));
       if (!rows.length) return null;
-      const card = el('div', { className: 'ui-vault-set-card' }, ...rows.map(({ r, at }) => { const n = rowEl(r, pageId, at); n.dataset.row = at; return n; }));
+      const card = el('div', { className: 'ui-vault-set-card' }, ...rows.map(({ r, at }) => { const n = rowEl(r, pageId, at); n.dataset.row = at; if (r.drawn) hooks.push([r.drawn, n]); return n; }));
       if (c.title) card.setAttribute('aria-label', c.title);
       card.setAttribute('role', 'group');
       return el('section', { className: 'ui-vault-set-group' },
         c.title ? el('h3', { className: 'ui-vault-set-h', textContent: c.title }) : null,
         c.sub ? el('p', { className: 'ui-vault-set-h-sub', textContent: c.sub }) : null, card);
     }).filter(/** @returns {n is HTMLElement} */ n => !!n));
+    for (const [hook, row] of hooks) hook(row);
+  };
+  /** the places of a page's shown rows, as fill draws them @param {SettingsCard[]} cards */
+  const placesOf = cards => cards.flatMap((c, ci) => c.rows.map((r, ri) => (isShown(r) ? `${ci}-${ri}` : ''))).filter(Boolean).join(' ');
+  /** whether a row of a drawn page came or went since @param {string} pageId */
+  const drifted = pageId => {
+    const def = pageId === ROOT ? null : byId.get(pageId);
+    const cards = pageId === ROOT ? (typeof o.root === 'function' ? o.root() : o.root) : def ? (typeof def.cards === 'function' ? def.cards() : def.cards) : [];
+    const page = made.get(pageId);
+    const drawn = page ? [...page.scroll.querySelectorAll('.ui-vault-set-card > [data-row]')].map(n => /** @type {HTMLElement} */ (n).dataset.row).join(' ') : '';
+    return placesOf(cards) !== drawn;
   };
 
   // ---- the pages: a header over a scroll area
@@ -231,7 +260,7 @@ export function settingsSheet(o) {
     /** @type {{ page: SettingsPage | null, row: SettingsRow, at: string }[]} */
     const out = [];
     /** @param {SettingsPage | null} page @param {SettingsCard[]} cards */
-    const add = (page, cards) => cards.forEach((c, ci) => c.rows.forEach((row, ri) => { if (isShown(row)) out.push({ page, row, at: `${ci}-${ri}` }); }));
+    const add = (page, cards) => cards.forEach((c, ci) => c.rows.forEach((row, ri) => { if (row.find !== false && isShown(row)) out.push({ page, row, at: `${ci}-${ri}` }); }));
     add(null, typeof o.root === 'function' ? o.root() : o.root);
     for (const p of o.pages) if (!p.shown || p.shown()) add(p, typeof p.cards === 'function' ? p.cards() : p.cards);
     return out;
@@ -249,7 +278,7 @@ export function settingsSheet(o) {
     const want = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     menu.hidden = !!want.length;
     if (!want.length) { results.hidden = true; none.hidden = true; results.replaceChildren(); return; }
-    const hits = allRows().filter(({ row }) => { const hay = `${row.label} ${row.sub || ''} ${row.keywords || ''}`.toLowerCase(); return want.every(w => hay.includes(w)); });
+    const hits = allRows().filter(({ row }) => { const sub = subNow(row.sub); const hay = `${row.label} ${typeof sub === 'string' ? sub : sub?.textContent || ''} ${row.keywords || ''}`.toLowerCase(); return want.every(w => hay.includes(w)); });
     results.replaceChildren(...hits.map(({ page, row, at }, i) => {
       const icon = page?.icon || ('go' in row ? row.icon || byId.get(row.go)?.icon : undefined);
       const b = el('button', { type: 'button', className: 'ui-vault-set-nav is-hit', id: `${sid}-hit-${i}` }, icon ? vaultIcon(icon) : null,
@@ -457,11 +486,13 @@ export function settingsSheet(o) {
       o.onClose?.();
     })();
   });
-  /** every page on the stack drawn again, the focus kept on the same control */
-  const refresh = () => {
+  /** every page on the stack drawn again, the focus kept on the same control; ifRowsChanged: only the pages where a row
+   * came or went (a change from elsewhere, so a switch the finger just moved keeps its knob's slide)
+   * @param {{ ifRowsChanged?: boolean }} [opts] */
+  const refresh = (opts = {}) => {
     if (!d.open) return;
     const at = /** @type {HTMLElement | null} */ (document.activeElement)?.id;
-    for (const s of stack) made.get(s.id)?.draw();
+    for (const s of stack) if (!opts.ifRowsChanged || drifted(s.id)) made.get(s.id)?.draw();
     if (q.value.trim()) find();
     if (at) document.getElementById(at)?.focus({ preventScroll: true });
   };

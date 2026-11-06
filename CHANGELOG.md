@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.109
+
+- **Vault settings rows** (the gaps Notes worked around): a row's `sub` can be a Node or a function read each time the
+  row is drawn (live words such as the signed-in email); a control row with `bare: true` is the whole row (no words,
+  no padding; its label still names it to the search and a screen reader); `drawn(row)` on any row runs once the row
+  is in the page, each draw; `find: false` keeps a row out of the search (a second copy on another page);
+  `refresh({ ifRowsChanged: true })` draws a page again only if a row came or went, so a switch moved from elsewhere
+  keeps its slide. Gallery and tests in `e2e/vault-side.spec.mjs`.
+
 ## 1.0.0-rc.108
 
 - **App shell in the design system:** app-update (the service worker core `update/sw-core.js` and the page module
