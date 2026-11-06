@@ -23,15 +23,20 @@ export function settingsSheet(o: {
 }): SettingsSheet;
 export type IconNodes = import("../../icons/lucide.js").IconNodes;
 /**
- * id: the control's (a link's button, a switch's input; default made from the sheet's id); sub: a second line;
- * keywords: more words the search finds it by; shown: read each time the page is drawn (default shown)
+ * id: the control's (a link's button, a switch's input; default made from the sheet's id); sub: a second line (a
+ * function: read each time the row is drawn, so it can carry live words such as the signed-in email); keywords: more
+ * words the search finds it by; shown: read each time the page is drawn (default shown); find: false keeps the row
+ * out of the search (a second copy of a row shown on another page); drawn: called with the row once it is on the page
+ * (in the document), each time the page is drawn
  */
 export type RowBase = {
     id?: string;
     label: string;
-    sub?: string;
+    sub?: string | Node | (() => string | Node);
     keywords?: string;
     shown?: () => boolean;
+    find?: boolean;
+    drawn?: (row: HTMLElement) => void;
 };
 /**
  * opens page `go` (its icon, else the page's)
@@ -64,12 +69,14 @@ export type ChoiceRow = RowBase & {
     };
 };
 /**
- * the app's own control, at the end
- *  of the row or under its words
+ * the app's own control,
+ *  at the end of the row or under its words; bare: the control is the whole row, no words, no padding (the label
+ *  still names it to the search and to a screen reader)
  */
 export type ControlRow = RowBase & {
     control: () => HTMLElement;
     under?: boolean;
+    bare?: boolean;
 };
 /**
  * a pill button under the words
@@ -112,7 +119,9 @@ export type SettingsSheet = {
     close: () => Promise<void>;
     go: (page: string) => Promise<void>;
     back: () => Promise<void>;
-    refresh: () => void;
+    refresh: (o?: {
+        ifRowsChanged?: boolean;
+    }) => void;
     isOpen: () => boolean;
     top: () => string;
     say: (text: string, bad?: boolean) => void;

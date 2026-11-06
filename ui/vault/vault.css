@@ -200,6 +200,7 @@ html .ui-vault-set .ui-vault-set-nav:is(:active, [data-pressed]) { background: v
 /* the setting rows: words, the control at the end or under them */
 .ui-vault-set-row { display: flex; align-items: center; gap: 12px; min-height: 53px; padding: 14px 20px; box-sizing: border-box; }
 .ui-vault-set-row.is-under { flex-direction: column; align-items: stretch; }
+.ui-vault-set-row.is-bare { display: block; padding: 0; }
 .ui-vault-set-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .ui-vault-set-name { font-size: 16px; color: var(--ui-vault-text); }
 .ui-vault-set-sub { font-size: 12px; line-height: 1.35; color: var(--ui-vault-muted); overflow-wrap: anywhere; }
