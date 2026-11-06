@@ -39,6 +39,42 @@ test('resizes-content: a tapped field and a page 344 px shorter: keyboard open, 
   await expect(page.locator('nav.ui-tabbar')).toBeVisible();
 });
 
+test('opt-in data-keyboard-close: the keyboard going with the focus in the sheet\'s field closes the sheet; a button holding the focus, or no opt-in, keeps it', async ({ sized }) => {
+  const page = await sized(390);
+  await sheetField(page);
+  await page.evaluate(() => {
+    const sheet = /** @type {HTMLElement} */ (document.getElementById('sheet'));
+    sheet.toggleAttribute('data-keyboard-close', true);
+    window.__kbClose = 0;
+    sheet.addEventListener('ui-keyboard-close', () => { window.__kbClose++; });
+  });
+  await page.setViewportSize({ width: 390, height: 500 });
+  await expect.poll(() => open(page)).toBe(true);
+  await expect(page.locator('#sheet')).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });   // Android's Back hides the keyboard; the field keeps the focus
+  await expect(page.locator('#sheet')).toBeHidden();
+  expect(await page.evaluate(() => window.__kbClose)).toBe(1);
+  // the focus on one of the sheet's buttons (a chip, a picker): the keyboard goes, the sheet stays
+  await page.locator('nav.ui-tabbar [data-open-sheet="#sheet"]').tap();
+  await expect(page.locator('#sheet')).toBeVisible();
+  await page.locator('#sheet-name').tap();
+  await page.setViewportSize({ width: 390, height: 500 });
+  await expect.poll(() => open(page)).toBe(true);
+  await page.locator('#sheet [data-close]').focus();
+  await expect.poll(() => open(page)).toBe(false);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('#sheet')).toBeVisible();
+  // without the opt-in the sheet stays when the keyboard goes
+  await page.evaluate(() => document.getElementById('sheet')?.removeAttribute('data-keyboard-close'));
+  await page.locator('#sheet-name').focus();
+  await page.setViewportSize({ width: 390, height: 500 });
+  await expect.poll(() => open(page)).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => open(page)).toBe(false);
+  await expect(page.locator('#sheet')).toBeVisible();
+  expect(await page.evaluate(() => window.__kbClose)).toBe(1);
+});
+
 test('only the visible part shrinks (no resizes-content): --ui-keyboard-h lifts the sheet over the keyboard; a blur ends it', async ({ sized }) => {
   const page = await sized(390);
   // a stand-in visual viewport the page sizes (each read is live, as the real one is)
