@@ -48,6 +48,11 @@ const NS = 'http://www.w3.org/2000/svg';
 /** @type {IconNodes} */ export const mic = [['path', { d: 'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z' }], ['path', { d: 'M19 10v2a7 7 0 0 1-14 0v-2' }],
   ['line', { x1: 12, x2: 12, y1: 19, y2: 22 }]];
 
+/** @type {IconNodes} */ export const search = [['circle', { cx: 11, cy: 11, r: 8 }], ['path', { d: 'm21 21-4.3-4.3' }]];
+/** @type {IconNodes} */ export const plus = [['path', { d: 'M5 12h14' }], ['path', { d: 'M12 5v14' }]];
+/** @type {IconNodes} */ export const circle = [['circle', { cx: 12, cy: 12, r: 10 }]];
+/** @type {IconNodes} */ export const circleDot = [['circle', { cx: 12, cy: 12, r: 10 }], ['circle', { cx: 12, cy: 12, r: 1 }]];
+
 /**
  * An icon as an <svg class="ui-icon"> (hidden from screen readers: the button or chip around it carries the name).
  * Sized by `.ui-icon` in ui.css (1.25em); stroke and fill come from the text colour.

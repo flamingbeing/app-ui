@@ -35,4 +35,8 @@ export function icon(nodes: IconNodes, o?: {
 /** @type {IconNodes} */ export const mapPin: IconNodes;
 /** @type {IconNodes} */ export const camera: IconNodes;
 /** @type {IconNodes} */ export const mic: IconNodes;
+/** @type {IconNodes} */ export const search: IconNodes;
+/** @type {IconNodes} */ export const plus: IconNodes;
+/** @type {IconNodes} */ export const circle: IconNodes;
+/** @type {IconNodes} */ export const circleDot: IconNodes;
 export type IconNodes = readonly (readonly [string, Readonly<Record<string, string | number>>])[];
