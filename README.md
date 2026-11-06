@@ -9,6 +9,8 @@ The UI core for the owner's web apps, served at exact versions from `core.anawj.
 - `kit/`: the galleries (`/kit/`, `/kit/shell/`, `/kit/dense/`, `/kit/settings/`, `/kit/parts/`) the browser tests drive; installable (manifest, service
   worker), never prompted.
 - `icons/`: shared icons.
+- `update/`: app-update, the app shell's service worker core and page module (from 1.0.0-rc.108; was app-sync's
+  `/update/`) ([docs/app-update.md](docs/app-update.md)).
 
 ## Using it in an app
 

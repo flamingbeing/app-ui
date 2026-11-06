@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-rc.108
+
+- **App shell in the design system:** app-update (the service worker core `update/sw-core.js` and the page module
+  `update/register.js`) moves here from app-sync and is served at `core.anawj.com/ui/<x.y.z>/update/` with app-ui's
+  version, so an app pins one version for the kit and the shell (a self-hosted app needs no app-sync pin). Same code
+  as app-sync's `/update/1.5.5/`, which stays served for good with every older version. Docs: `docs/app-update.md`;
+  the deploy stamp tool is `tools/stamp-versions.mjs` (copy it into the app).
+- **Share option** (from the dashboard app): `AppUpdate.init({ share })` holds the files of a Web Share Target
+  `POST` in a cache and opens the app's share page with `#<id>` at once; `sharedFiles(id)` and `dropShared()` on the
+  page side. A share with no files goes to the network as before. Tests in `test/update-sw-core.unit.test.mjs` and
+  `test/update-register.unit.test.mjs`.
+- `tools/stamp-versions.mjs`: a pre-release pin (`/ui/1.0.0-rc.108/`) now counts as pinned, as `/update/0.2.0/` did.
+
 ## 1.0.0-rc.107
 
 - A held row is a card of its own: while a finger lifts a row by its grip (`gripDrag`) it gets 12 px corners

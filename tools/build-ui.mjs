@@ -14,7 +14,7 @@ import { VERSION_RE, byVersion, listing } from './semver.mjs';
 
 export const ROOT = process.env.UI_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // what a version contains (served at /ui/<x.y.z>/<path>)
-export const PUBLISHED = ['ui', 'theme', 'settings', 'kit', 'icons'];
+export const PUBLISHED = ['ui', 'theme', 'settings', 'kit', 'icons', 'update'];   // update: app-update, from 1.0.0-rc.108
 const LOCK = path.join(ROOT, 'versions.lock.json');
 const git = (args, opts = {}) => execFileSync('git', args, { cwd: ROOT, maxBuffer: 1 << 26, ...opts });
 const sha = buf => crypto.createHash('sha256').update(buf).digest('hex');
