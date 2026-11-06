@@ -356,6 +356,7 @@ stand-in for `@core/settings` on the page.
 | Part | What is checked | Screenshot |
 |---|---|---|
 | List-only shell | with no `.ui-pane-detail`, opening a row sends `ui-open` and marks it current; nothing is pushed on a phone; the list takes the width (390, 1280 px) | |
+| Shell with no list | a `.ui-shell` with no `.ui-list` (tab pages only) starts: its size class is set, no row is current, a search sends `ui-search` from the shell with 0 shown and nothing throws | |
 | Bar ends | `.ui-bar-side` ends keep the title in the middle; `.ui-bar-end` puts its buttons at the end | |
 | Switch | an app's `input { min-width: 10rem; flex: 1 }` leaves `.ui-switch` at 3.1rem | |
 | Toasts | three stacked toasts sit above the tab bar | |
