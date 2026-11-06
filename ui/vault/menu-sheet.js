@@ -12,6 +12,7 @@ import { drag, glide } from '../motion.js';
 import { still } from '../gesture.js';
 import { check, chevronRight, circle, circleDot, x } from '../../icons/lucide.js';
 import { vaultIcon } from './icons.js';
+import { shadeEl } from './shade.js';
 
 /**
  * @typedef {import('../../icons/lucide.js').IconNodes} IconNodes
@@ -27,18 +28,6 @@ import { vaultIcon } from './icons.js';
  * @typedef {{ open: () => void, close: (v?: number) => Promise<void>, refill: () => void, isOpen: () => boolean,
  *   el: HTMLDialogElement, destroy: () => void }} MenuSheet
  */
-
-/** @type {HTMLElement | null} */
-let shade = null;
-/** the one shade behind every menu sheet (below the top layer: the sheet's own transparent backdrop takes the taps) */
-const shadeEl = () => {
-  if (!shade || !shade.isConnected) {
-    shade = Object.assign(document.createElement('div'), { className: 'ui-vault-shade' });
-    shade.setAttribute('aria-hidden', 'true');
-    document.body.append(shade);
-  }
-  return shade;
-};
 
 /**
  * @param {{ id: string, label: string | (() => string), cards: MenuCard[] | (() => MenuCard[]), heading?: string | (() => string),
