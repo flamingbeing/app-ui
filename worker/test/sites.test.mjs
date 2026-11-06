@@ -15,6 +15,7 @@ const FILES = {
   '/ui/1.0.0/kit/manifest.webmanifest': '{}',
   '/ui/1.0.0/theme/fonts/inter-latin.woff2': 'wOF2',
   '/ui/1.0.0-rc.1/theme/index.js': 'export {};',
+  '/ui/1.0.0-rc.108/update/sw-core.js': '/* sw */',
 };
 const env = { ASSETS: { fetch: async req => {
   const p = new URL(req.url).pathname;
@@ -26,7 +27,8 @@ const get = (path, method = 'GET') => worker.fetch(new Request(BASE + path, { me
 test('a released file: its type, a year immutable, any origin may load it, noindex', async () => {
   for (const [path, type] of [['/ui/1.0.0/ui/index.js', 'text/javascript'], ['/ui/1.0.0/ui/ui.css', 'text/css'], ['/ui/1.0.0/icons/icon.svg', 'image/svg+xml'],
     ['/ui/1.0.0/icons/icon-192.png', 'image/png'], ['/ui/1.0.0/kit/manifest.webmanifest', 'application/manifest+json'], ['/ui/1.0.0/theme/fonts/inter-latin.woff2', 'font/woff2'],
-    ['/ui/1.0.0/ui/types.d.ts', 'text/plain'], ['/ui/1.0.0-rc.1/theme/index.js', 'text/javascript']]) {
+    ['/ui/1.0.0/ui/types.d.ts', 'text/plain'], ['/ui/1.0.0-rc.1/theme/index.js', 'text/javascript'],
+    ['/ui/1.0.0-rc.108/update/sw-core.js', 'text/javascript']]) {
     const r = await get(path);
     assert.equal(r.status, 200, path);
     assert.ok(r.headers.get('Content-Type').startsWith(type), path);

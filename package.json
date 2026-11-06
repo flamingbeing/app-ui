@@ -1,11 +1,12 @@
 {
   "name": "app-ui",
-  "version": "1.0.0-rc.107",
-  "description": "The UI core for the apps: @core/ui, @core/theme, @core/settings, the looks and the /kit/ gallery, served at exact versions from core.anawj.com/ui/<version>/.",
+  "version": "1.0.0-rc.108",
+  "description": "The UI core for the apps: @core/ui, @core/theme, @core/settings, the looks, the /kit/ gallery and the app shell's service worker (update/), served at exact versions from core.anawj.com/ui/<version>/.",
   "type": "module",
   "sideEffects": [
     "**/*.css",
-    "theme/early.js"
+    "theme/early.js",
+    "update/sw-core.js"
   ],
   "types": "./types/ui/index.d.ts",
   "exports": {
@@ -37,6 +38,8 @@
     "./theme/*": "./theme/*",
     "./settings/*": "./settings/*",
     "./icons/*.js": "./icons/*.js",
+    "./update/register.js": "./update/register.js",
+    "./update/sw-core.js": "./update/sw-core.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -45,6 +48,7 @@
     "settings",
     "kit",
     "icons",
+    "update",
     "types"
   ],
   "scripts": {

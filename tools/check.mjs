@@ -1,7 +1,8 @@
 // Repo checks for mistakes tests don't catch. Run before merging: node tools/check.mjs
 // 1. wrangler.jsonc keeps preview links and the workers.dev address off, and routes only core.anawj.com/ui/*, /kit and /kit/*.
 // 2. The package.json version is in versions.lock.json and matches the published files (tools/build-ui.mjs --check):
-//    a released version never changes, so a change to ui/, theme/, settings/, kit/ or icons/ needs a new version.
+//    a released version never changes, so a change to ui/, theme/, settings/, kit/, icons/ or update/ needs a new version
+//    (update/'s CORE_VERSION is the package version, checked by its unit tests).
 // 3. The published code imports only its own files (relative paths): no engine, no other site, no bare names. A page
 //    hands each part the module api it shows.
 // 4. The gallery pages carry no inline script or style (the Worker's page policy allows none).
