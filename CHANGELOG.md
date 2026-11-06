@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.0-rc.103
+
+The vault shell's second half: the sidebars and the full-screen settings, opt-in in `ui/vault/` with the first half.
+
+- `sidebar({ id, label, side, views, view, onView, footer, steps, pushed })`: a full-height side drawer, left or right
+  (min(417px, 84vw), the outer corner square), the content and the pill sliding aside by its width, a shade over the
+  strip still showing. A button opens it (`open`, `toggle`) or a sideways swipe that starts on the content
+  (`swipeFrom(el, { can, edge })`), never within `DRAWER_EDGE` (24 px) of the screen's edge, which stays the phone's
+  Back; it follows the finger and lands on the kit's spring. The shade, a swipe back, Back (given the page's
+  `createTransients()`) or Esc closes it, and closing never says "Press Back again to close". The app registers views
+  (id, label, Lucide icon, render); a view is drawn the first time it shows (render may be async, an `import()`) and the
+  rest are drawn while idle once it has opened; a view may bring tools for the row over the pill. The view-picker pill
+  at the foot raises a card of the views (`menuitemradio`); a footer slot sits under it. `sideDrawer` is the bare
+  drawer.
+- `loadSettingsSheet()` -> `settingsSheet({ title, root, pages, steps, search })`: full-screen settings (lazy, not in
+  the index's static imports). A back arrow, a centred title and a close X; a search across every row (label, second
+  line, keywords) that opens a hit's page with the row flashed; cards of rows: `go` (a page, with an icon), `toggle`
+  (with `gear`: a module's options page, shown while it is on; a `set` that throws shows its message and the switch
+  goes back), `choice`, `control`, `button` (`danger`) and `value`. Pages push with a parallax; Back, the arrow or a
+  swipe right goes back (the scroll area is `touch-action: pan-y`, so a sideways swipe is the page's, not the
+  browser's); a drag down on the root's header, the X or Esc closes it.
+- Icons: `chevronsUpDown`, `arrowLeft` and `settings` join the kit's Lucide set.
+- Gallery: `/kit/vault/` gains both sidebars (pages, search, bookmarks; outline, page info) and settings (General,
+  Appearance, Modules with a module's own page, About); tests `e2e/vault-side.spec.mjs`.
+
 ## 1.0.0-rc.102
 
 The vault shell, opt-in: the first half of a notes-vault layout lifted from an app into the kit, so any app can have it.

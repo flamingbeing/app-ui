@@ -3,11 +3,20 @@
 // "@core/ui/vault": "https://core.anawj.com/ui/<version>/ui/vault/index.js", and import() it when the layout starts.
 //   navPill    the floating navigation pill (back, forward, search, +, the open tabs' count, menu; the app's handlers)
 //   menuSheet  a bottom sheet of rows in grouped rounded cards (item menus, an app menu, pickers)
+//   sidebar    a left or right drawer of the app's views (a view picker pill at the foot, a footer slot), on sideDrawer
+//   sideDrawer the drawer alone: opened by a button or a swipe from the content (the screen's edges stay Back)
+//   loadSettingsSheet  the full-screen settings (pages of rows, a search, a toggle page for optional modules), loaded
+//              when first wanted: import('./settings-sheet.js') (or import that file yourself)
 //   vaultStyles  links ui/vault/vault.css (once) and resolves when it has loaded; or link it in the page yourself
 // Nothing runs on import.
 export { navPill } from './nav-pill.js';
 export { menuSheet } from './menu-sheet.js';
 export { vaultIcon } from './icons.js';
+export { sidebar } from './sidebar.js';
+export { sideDrawer, DRAWER_EDGE } from './side-drawer.js';
+
+/** The settings sheet's code, loaded the first time it is wanted. @returns {Promise<typeof import('./settings-sheet.js').settingsSheet>} */
+export const loadSettingsSheet = () => import('./settings-sheet.js').then(m => m.settingsSheet);
 
 /** @type {Promise<void> | null} */
 let styled = null;

@@ -1,4 +1,18 @@
 /**
+ * @typedef {import('../../icons/lucide.js').IconNodes} IconNodes
+ * @typedef {{ id?: string, icon?: IconNodes, label: string, run?: () => unknown, ticked?: boolean, radio?: boolean,
+ *   danger?: boolean, next?: boolean, hint?: string, sub?: string, disabled?: boolean,
+ *   aside?: { id?: string, icon: IconNodes, label: string, run: () => unknown } }} MenuRow
+ *   ticked: an on-state (a tick at the end, aria-pressed); radio: one of a choice (a radio at the end, filled on the one
+ *   chosen); next: opens another list (a chevron); danger: red (a delete); hint: a few faint words at the end; sub: a
+ *   second, smaller line; disabled: shown, not tappable (the hint says why); aside: a button of its own at the end (a
+ *   tab's close) that keeps the sheet open and draws it again
+ * @typedef {{ title?: string, rows: MenuRow[] }} MenuCard
+ *   title: what the card is for (read by screen readers, not shown)
+ * @typedef {{ open: () => void, close: (v?: number) => Promise<void>, refill: () => void, isOpen: () => boolean,
+ *   el: HTMLDialogElement, destroy: () => void }} MenuSheet
+ */
+/**
  * @param {{ id: string, label: string | (() => string), cards: MenuCard[] | (() => MenuCard[]), heading?: string | (() => string),
  *   steps?: { open: (dismiss: () => void) => { readonly active: boolean, close: () => Promise<void> } },
  *   close?: boolean | { label?: string, at?: 'start' | 'end' } }} o

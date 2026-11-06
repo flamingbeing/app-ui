@@ -19,18 +19,27 @@
 </head>
 <body>
   <!-- The vault shell (ui/vault/, opt-in: import ui/vault/index.js) on a made-up field journal: the floating
-       navigation pill (Back, Forward, Search, +, the open tabs' count, Menu) and the grouped menu sheets (the page's
-       More menu, the app menu, a picker, the open tabs). The page's own first Back says "Press Back again to close"
-       (tabBack's guard); closing a sheet never does. Tests: docs/kit-tests.md, "Vault shell". -->
-  <header class="kit-vault-head">
-    <a class="kit-vault-home" href="../">Gallery</a>
+       navigation pill (Back, Forward, Search, +, the open tabs' count, Menu), the grouped menu sheets (the page's
+       More menu, the app menu, a picker, the open tabs), the left and right sidebars (a button or a swipe on the page;
+       the view picker at their foot) and the full-screen settings (the app menu's Settings, or the left sidebar's
+       gear). The page's own first Back says "Press Back again to close" (tabBack's guard); closing a sheet, a sidebar or
+       the settings never does. Tests: docs/kit-tests.md, "Vault shell". -->
+  <header class="kit-vault-head" id="head">
+    <div class="kit-vault-start">
+      <button type="button" id="side-left" class="kit-vault-circle" aria-label="Open the left sidebar" aria-expanded="false"></button>
+      <a class="kit-vault-home" href="../">Gallery</a>
+    </div>
     <h1 class="kit-vault-title" id="page-title">Fern walk</h1>
-    <button type="button" id="more" class="kit-vault-more" aria-label="More options"></button>
+    <div class="kit-vault-end">
+      <button type="button" id="side-right" class="kit-vault-circle" aria-label="Open the right sidebar" aria-expanded="false"></button>
+      <button type="button" id="more" class="kit-vault-circle" aria-label="More options"></button>
+    </div>
   </header>
   <main class="kit-vault-page" id="page">
     <p id="page-body"></p>
     <p class="kit-vault-lede">The pill's Back and Forward step through the pages seen here; Search picks a page; + opens
-      a new tab; the box shows how many are open; Menu is the app's menu. The dots at the top are this page's menu.</p>
+      a new tab; the box shows how many are open; Menu is the app's menu. The dots at the top are this page's menu.
+      A swipe right on the page (not from the screen's edge) opens the left sidebar, a swipe left the right one.</p>
     <label class="kit-vault-label" for="jot">A quick note (the pill steps aside while the keyboard is up)</label>
     <input type="text" id="jot" class="kit-vault-input" autocomplete="off" placeholder="Type here">
   </main>
