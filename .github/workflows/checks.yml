@@ -57,7 +57,10 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: flamingbeing/app-devkit/setup-node@v1.11.0
-      - run: npx playwright install --with-deps chromium
+      # the cached Chromium without --with-deps, as the e2e shards: the apt fonts step once ran past the 5 min limit
+      - uses: flamingbeing/app-devkit/setup-browser@v1.14.0
+        with:
+          devkit-dir: ''
       - run: node test/update/e2e.mjs
 
   e2e:
