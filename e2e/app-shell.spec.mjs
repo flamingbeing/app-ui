@@ -25,6 +25,26 @@ for (const width of [390, 1280]) {
   });
 }
 
+test('a shell with no .ui-list (tab pages only) starts: its size class is set and a search does not throw', async ({ sized }) => {
+  const page = await load(sized, 390);
+  const r = await page.evaluate(async () => {
+    const { adaptiveShell } = await import('@core/ui');
+    const shell = document.createElement('div');
+    shell.className = 'ui-shell';
+    shell.innerHTML = '<input data-shell-search aria-label="Search"><main class="ui-screens"><section class="ui-screen">Today</section></main>';
+    document.body.append(shell);
+    let searched = -1;
+    shell.addEventListener('ui-search', e => { searched = /** @type {CustomEvent} */ (e).detail.shown; });
+    const ctl = adaptiveShell(shell);
+    const input = /** @type {HTMLInputElement} */ (shell.querySelector('input'));
+    input.value = 'x'; input.dispatchEvent(new Event('input', { bubbles: true }));
+    const out = { size: shell.dataset.size, current: ctl.current(), searched };
+    ctl.stop(); shell.remove();
+    return out;
+  });
+  expect(r).toEqual({ size: 'phone', current: null, searched: 0 });
+});
+
 test('the bar: .ui-bar-side ends hold the title in the middle; .ui-bar-end lines its buttons up at the end', async ({ sized }) => {
   const page = await load(sized, 390);
   const bar = await box(page, '.ui-bar');

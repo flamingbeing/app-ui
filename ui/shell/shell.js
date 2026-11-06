@@ -8,6 +8,7 @@
 //   open a row   click, Enter, or the hold menu's "open" (a "ui-menu" event with detail.action "open"); the row gets
 //                aria-current and sends "ui-open" (detail.row, detail.size); wide: the detail pane shows it; phone: the
 //                detail screen is pushed. The detail pane is optional: without one, "ui-open" is all that happens
+//   no list      a shell without a .ui-list (tab pages only) starts as well: sizes, the side bar and its drawer work, rows don't
 //   no row open  the detail pane carries data-empty (its .ui-detail-actions hide) and shows its first words; a deleted
 //                open row empties it again
 //   many ticked  "ui-select" with 2+ rows swaps .ui-detail-one for .ui-detail-multi ([data-multi-count], [data-multi-names])
@@ -63,7 +64,8 @@ function defaultRender(row, detail) {
 export function adaptiveShell(shell, { screens = null, render = defaultRender, wide = null } = {}) {
   const l = listeners();
   const html = document.documentElement;
-  const list = /** @type {HTMLElement} */ (shell.querySelector('.ui-list'));
+  // (no .ui-list: a shell of tab pages without a list and detail; a detached stand-in has no rows, so the list's parts idle)
+  const list = /** @type {HTMLElement} */ (shell.querySelector('.ui-list') ?? document.createElement('ul'));
   // (no .ui-pane-detail: a list-only shell; opening a row marks it and sends "ui-open", the app shows it its own way)
   const detail = /** @type {HTMLElement | null} */ (shell.querySelector('.ui-pane-detail'));
   const one = /** @type {HTMLElement | null} */ (detail?.querySelector('.ui-detail-one') ?? null);
@@ -157,7 +159,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender, w
     for (const r of rows()) { r.hidden = !matchesSearch(r.textContent || '', q); if (!r.hidden) shown++; }
     if (empty) empty.hidden = shown > 0;
     list.hidden = shown === 0;
-    list.dispatchEvent(new CustomEvent('ui-search', { bubbles: true, detail: { query: q, shown } }));
+    (list.isConnected ? list : shell).dispatchEvent(new CustomEvent('ui-search', { bubbles: true, detail: { query: q, shown } }));
   }
   for (const s of searches) l.on(s, 'input', () => { for (const o of searches) if (o !== s) o.value = s.value; filter(s.value); });
   const visibleSearch = () => searches.find(s => s.getClientRects().length > 0) ?? null;
