@@ -200,11 +200,9 @@ test('less motion: a sheet shows and goes at once', async ({ phone }) => {
   await page.goto(PAGE);
   await page.waitForSelector('html[data-vault-ready]');
   await page.locator('#more').click();
-  // the sheet and its shade run no animation (a pressed button's own transition may still be ending)
-  expect(await page.evaluate(() => document.getAnimations().filter(a => {
-    const t = /** @type {KeyframeEffect} */ (a.effect)?.target;
-    return t?.closest?.('#page-menu, .ui-vault-shade');
-  }).length)).toBe(0);
+  // the sheet and its shade don't move (a row's own press or focus transition is the theme's, not the sheet's)
+  expect(await page.evaluate(() => document.getAnimations().map(a => /** @type {KeyframeEffect} */ (a.effect)?.target)
+    .filter(t => t && (t.id === 'page-menu' || t.classList.contains('ui-vault-shade'))).map(t => t.id || t.className))).toEqual([]);
   expect(await page.locator('#page-menu').evaluate(d => new DOMMatrix(getComputedStyle(d).transform).m42)).toBe(0);
   await page.keyboard.press('Escape');
   await expect(page.locator('#page-menu')).toBeHidden();
