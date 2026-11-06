@@ -3,6 +3,12 @@
  * @param {boolean[]} snap  the ticks when the drag started @param {number} from @param {number} to @param {boolean} setTo
  */
 export function dragRange(snap: boolean[], from: number, to: number, setTo: boolean): boolean[];
+/**
+ * The row an arrow key moves to (pure): the next (`step` 1) or previous (-1) row from `from` that `isShown` keeps,
+ * skipping rows a search hid (`hidden`) or the page hides (display:none); null at either end.
+ * @template T @param {T[]} rows @param {T | null} from @param {1 | -1} step @param {(row: T) => boolean} isShown
+ */
+export function nextShown<T>(rows: T[], from: T | null, step: 1 | -1, isShown: (row: T) => boolean): T | null;
 /** "2-4" -> [2, 4]; "1" -> [1, 99] */
 export function needs(spec: string): number[];
 /**

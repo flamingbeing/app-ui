@@ -7,7 +7,7 @@ import { HOLD_MS, SLOP, velocity, still, haptic, releaseVelocity, unrubber, path
 import { placeMenu, placeAtPointer } from '../ui/hold-menu.js';
 import { settle, topDetent } from '../ui/detent-sheet.js';
 import { tabBarStep } from '../ui/tab-bar.js';
-import { dragRange, needs, TICKS } from '../ui/select-mode.js';
+import { dragRange, needs, nextShown, TICKS } from '../ui/select-mode.js';
 import { swipeGoesBack, edgeBackOn, EDGE } from '../ui/screens.js';
 import { swipeIntent, pageStep, swipeEdge, rubber, springPath } from '../ui/tab-pages.js';
 
@@ -104,6 +104,17 @@ test('select drag: the range takes the new tick, rows outside go back to how the
   assert.deepEqual(dragRange(snap, 1, 3, true), [false, true, true, true, true]);
   assert.deepEqual(dragRange(snap, 3, 0, false), [false, false, false, false, true]);
   assert.deepEqual(dragRange(snap, 2, 2, true), [false, true, true, false, true]);
+});
+
+test('select mode arrows: the next shown row, skipping rows a search or the page hides; null at the ends', () => {
+  const rows = ['a', 'b', 'c', 'd', 'e'], shown = new Set(['a', 'd', 'e']), on = (/** @type {string} */ r) => shown.has(r);
+  assert.equal(nextShown(rows, 'a', 1, on), 'd');
+  assert.equal(nextShown(rows, 'd', -1, on), 'a');
+  assert.equal(nextShown(rows, 'e', 1, on), null);
+  assert.equal(nextShown(rows, 'a', -1, on), null);
+  assert.equal(nextShown(rows, null, 1, on), 'a', 'from no row, ArrowDown takes the first shown one');
+  assert.equal(nextShown(rows, 'b', 1, on), 'd', 'from a row hidden under the focus, it still moves to a shown one');
+  assert.equal(nextShown(rows, 'a', 1, () => false), null);
 });
 
 test('action bar: data-needs ranges', () => {

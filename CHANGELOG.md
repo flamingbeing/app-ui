@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.110
+
+- **Select mode arrows skip hidden rows:** ArrowDown and ArrowUp in select mode went onto rows a search had hidden;
+  they now go to the next shown row (not `hidden`, not display:none), as outside select mode. Select all, Shift-click
+  ranges and the drag use the same rule. New pure `nextShown(rows, from, step, isShown)` in `ui/select-mode.js`; unit
+  test and `e2e/shell.spec.mjs` "the arrow keys skip the rows a search hides".
+- **Nightly soak sized to its limits** (issue #72): soak.yml on app-devkit v1.18.1 with 5 normal and 2 slow-phone runs.
+  Ten normal runs no longer fit the step's limit; the killed step left its web server on port 4174 and the slow-phone
+  step died on "already used".
+
 ## 1.0.0-rc.109
 
 - **Vault settings rows** (the gaps Notes worked around): a row's `sub` can be a Node or a function read each time the

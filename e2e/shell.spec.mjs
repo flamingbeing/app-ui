@@ -250,6 +250,24 @@ test.describe('shell at 1280 px: desktop details', () => {
     await expect(all).toHaveText('Select all');
   });
 
+  test('select mode: the arrow keys skip the rows a search hides', async ({ sized }) => {
+    const page = await load(sized, 1280);
+    await page.locator('[data-shell-search]:visible').fill('kitchen');   // Basil and Mint; Fern to Lavender hidden
+    await page.locator('[data-edit-for="#plants"]:visible').click();
+    await row(page, 'Basil').focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(row(page, 'Mint')).toBeFocused();
+    await page.keyboard.press('ArrowDown');   // the last shown row: focus stays
+    await expect(row(page, 'Mint')).toBeFocused();
+    await page.keyboard.press('ArrowUp');
+    await expect(row(page, 'Basil')).toBeFocused();
+    await row(page, 'Fig').evaluate(r => { r.hidden = false; r.style.display = 'none'; });   // hidden by the page, not the search
+    await page.locator('[data-shell-search]:visible').fill('');
+    await row(page, 'Fern').focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(row(page, 'Jade')).toBeFocused();
+  });
+
   test('right-click: the menu opens with its corner at the pointer, the row not lifted', async ({ sized }) => {
     const page = await load(sized, 1280);
     const box = await row(page, 'Jade').boundingBox();
