@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-rc.101
+
+- Tap menu: the menu layer drops the browser's `[popover]` look (fit-content size, border, padding, overflow), which
+  shrank it to a small box and clipped the menu inside, so `openMenu` menus showed as a little square.
+
 ## 1.0.0-rc.100
 
 Closes the three open gaps from the core migrations (rosters, hand, pantry).

@@ -36,6 +36,9 @@ test('the tap menu: a title, a nested list with Back, Esc steps out then closes,
   await page.locator('#tm-anchor').click();
   const menu = page.locator('.ui-menu');
   await expect(menu.locator('.ui-menu-title')).toHaveText('My Projects');
+  // the layer (a popover) covers the screen, not the browser's fit-content box that clips the menu inside it
+  expect(await page.evaluate(() => { const r = document.querySelector('.ui-menu-layer').getBoundingClientRect(); return [r.width, r.height]; }))
+    .toEqual(await page.evaluate(() => [innerWidth, innerHeight]));
   await menu.getByRole('menuitem', { name: 'Colour' }).click();
   await expect(menu.getByRole('menuitem', { name: 'Red' })).toBeVisible();
   await expect(menu.getByRole('menuitem', { name: 'Edit' })).toHaveCount(0);
