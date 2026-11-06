@@ -224,7 +224,7 @@ placeToOpen's rules (path, window, deep links, bad records), theme/early.js run 
 placeToOpen opens (and nothing when storage throws), resumeTabs saves on pagehide and hidden only, keeps the last place
 for a page without a plain id, opens the kept tab itself without early.js's mark, and stops cleanly.
 
-## Vault shell (`e2e/vault.spec.mjs`, `kit/vault/`)
+## Vault shell (`e2e/vault.spec.mjs`, `e2e/vault-side.spec.mjs`, `kit/vault/`)
 
 `/kit/vault/` at 390 px (Chromium), the opt-in `ui/vault/` parts on a made-up field journal. Pill: six buttons named
 in order (Back, Forward, the app's Search label, New tab, Open tabs: n, Menu), Back and Forward `aria-disabled` and
@@ -240,6 +240,23 @@ own first; none of these shows "Press Back again to close" and no history entrie
 first Back still does. Rows: a chevron row with its hint opens another sheet, a radio pick (`radiogroup`,
 `aria-checked`) is kept, a disabled row with its hint can't be tapped, the Close row at the end. Less motion: a sheet
 shows and goes with no animation. Smoke: `gallery.spec.mjs` loads the page clean.
+
+Sidebars and settings (`e2e/vault-side.spec.mjs`). Left sidebar: no view drawn before it first opens; its button opens
+it modal at the left edge, min(417 px, 84%) wide with a square outer corner, the page pushed aside by its width, the
+view's tools, the pill naming the view and the footer; axe clean open, light and dark; the shade and Back close it.
+Swipes (a finger through the DevTools protocol): right on the page opens the left one and left on it closes it, a swipe
+from the screen's edge opens nothing, left on the page opens the right one with the page's outline (Esc closes it).
+Picker: a card of the views (`menuitemradio`, the shown one checked and focused); Back closes only the card; a pick
+shows that view (drawn then) with its own tools or none; a page opened from a view shuts the sidebar first. The
+footer's gear closes the sidebar, then opens the settings. Settings: the root's title, search and Options card (an
+icon and a chevron per row), nearly the screen's height; Modules: a switch (`role=switch`) brings its module's gear,
+the gear its page (the dialog's name follows the page); the arrow goes back with the focus on the gear, Back goes back
+to a root now showing the module's page, the X from a page closes all; a module switched off takes its view out of
+the sidebar's picker. Search: words (and keywords) find a row with its page's name, "No setting matches" when none, a
+hit opens its page with the row flashed, Back keeps the search; a refused switch shows its reason (`is-bad`) and
+stays off; a choice is kept. A swipe right on a page's rows goes Back (`touch-action: pan-y` on the scroll area); a
+drag down on the root's header closes it. None of these says "Press Back again to close" and each leaves the page on
+its own history entry. Axe clean on the root and on Modules, light and dark.
 
 ## Settings screen gallery
 

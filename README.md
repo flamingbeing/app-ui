@@ -30,14 +30,27 @@ For types, add `github:flamingbeing/app-ui#v1.0.0-rc.1` as a devDependency and p
 `ui/vault/` holds the parts of a notes-vault layout on a phone: `navPill` (a frosted pill floating over the bottom
 with the app's back, forward, search, +, open-tabs count and menu buttons; it steps aside while the keyboard is up)
 and `menuSheet` (a bottom sheet of rows in grouped rounded cards: icons, ticks, radios, a chevron, a red delete, an
-optional Close row; Back closes it given the page's `createTransients()`). It is not in `@core/ui`'s index, so nothing
-loads unless the app maps and imports it, best with `import()` when its layout starts:
+optional Close row; Back closes it given the page's `createTransients()`), `sidebar` (a left or right side drawer
+holding one of the app's views at a time, a view-picker pill at its foot and a footer slot; a button or a sideways
+swipe on the content opens it, never from the screen's edge, which stays the phone's Back) and, loaded on demand,
+`settingsSheet` (full-screen settings: a back arrow, a centred title, a close X, a search across every row, cards of
+rows, pages of the app's own, module switches with a gear for each module's options). It is not in `@core/ui`'s index,
+so nothing loads unless the app maps and imports it, best with `import()` when its layout starts:
 
 ```js
 // import map: "@core/ui/vault": "https://core.anawj.com/ui/<version>/ui/vault/index.js"
-const { navPill, menuSheet, vaultStyles } = await import('@core/ui/vault');
+const { navPill, menuSheet, sidebar, loadSettingsSheet, vaultStyles } = await import('@core/ui/vault');
 await vaultStyles();   // links ui/vault/vault.css once (or link it in the page)
+const left = sidebar({ id: 'left', label: 'Left sidebar', steps, pushed: () => [content, pill.el],
+  views: [{ id: 'files', label: 'Files', icon: folder, render: () => filesView() }], footer });
+left.swipeFrom(content);
+const settings = (await loadSettingsSheet())({ title: 'Settings', steps, root: [{ title: 'Options', rows: [...] }], pages: [...] });
 ```
+
+Views are drawn the first time they show (`render` may return a promise, so a view can be an `import()`); a view may
+bring its own tools for the row over the pill. Settings rows are `go` (a page), `toggle` (with `gear` for a module's
+page; a `set` that throws shows its message and the switch goes back), `choice`, `control`, `button` and `value`; each
+row takes `sub` and `keywords` for the search and `shown` to come and go.
 
 The gallery page is `/kit/vault/`.
 
