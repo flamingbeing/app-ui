@@ -21,7 +21,7 @@
 /* (hover only where there is a pointer: a finger's last touch would otherwise mark the item under it) */
 .ui-menu-item:focus-visible { background: var(--selection); }
 @media (hover: hover) { .ui-menu-item:hover { background: var(--selection); } }
-.ui-menu-item:is(.ui-danger, .danger) { color: var(--danger); }
+.ui-menu-item:is(.ui-danger, :where(:root:not([data-own-names])) .danger) { color: var(--danger); }
 .ui-menu hr { width: 100%; margin: 4px 0; border: 0; border-top: var(--border) solid var(--line); }
 /* a look whose menus come up as a sheet on phones (data-menu="sheet"; hold-menu.js adds is-sheet under 840 px) */
 .ui-menu.is-sheet { left: 8px; right: 8px; min-width: 0; max-width: none; padding: 28px 8px 8px;

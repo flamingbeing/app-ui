@@ -3,7 +3,7 @@
 // Still), haptics (On or Off), and a colour well for the accent with a reset to the style's own colour (choice.js). lookSwitch is the look
 // and density alone, for the gallery.
 import { THEMES, DENSITIES, themeChoice, chooseTheme, pickedAccent } from './choice.js';
-import { DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS } from './schema.js';
+import { DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS, TEXT_SIZES } from './schema.js';
 import { PRESETS, SURFACES } from './presets.js';
 import { LOOKS } from './looks.js';
 import { kept } from './guard.js';
@@ -12,7 +12,7 @@ import { icon, check } from '../icons/lucide.js';
 
 /** @type {Record<string, string>} */
 const WORDS = {
-  auto: 'Auto', light: 'Light', dark: 'Dark', oled: 'OLED black', regular: 'Regular', comfortable: 'Comfortable', compact: 'Compact', glass: 'Glass', solid: 'Solid', always: 'Glass, even here', still: 'Still', on: 'On', off: 'Off', '': "The style's own",
+  auto: 'Auto', light: 'Light', dark: 'Dark', oled: 'OLED black', regular: 'Regular', large: 'Large', larger: 'Larger', comfortable: 'Comfortable', compact: 'Compact', glass: 'Glass', solid: 'Solid', always: 'Glass, even here', still: 'Still', on: 'On', off: 'Off', '': "The style's own",
   ...Object.fromEntries(PRESETS.map(p => [p.id, p.name])),
   ...Object.fromEntries(Object.entries(SURFACES).map(([id, s]) => [id, s.label])),
 };
@@ -21,7 +21,7 @@ const WORDS = {
 const lookWords = (/** @type {string} */ own = "The app's own") => ({ '': own, ...Object.fromEntries(LOOKS.map(l => [l.id, l.name])) });
 
 /**
- * @param {'theme' | 'dark' | 'preset' | 'surface' | 'look' | 'density' | 'material' | 'motion' | 'haptics'} key @param {string} label
+ * @param {'theme' | 'dark' | 'preset' | 'surface' | 'look' | 'density' | 'material' | 'motion' | 'haptics' | 'text'} key @param {string} label
  * @param {readonly string[]} values
  * @param {() => void} after  runs after a pick (the colour well follows the style)
  * @param {Record<string, string>} [words]
@@ -67,7 +67,7 @@ function accentPicker() {
  */
 export function themeSwitch(host, { name } = {}) {
   const box = document.createElement('div');
-  box.className = 'row theme-switch';
+  box.className = 'ui-inline theme-switch';
   const accent = accentPicker();
   const note = guardNote();
   const sync = () => { accent.sync(); note.sync(); };
@@ -76,7 +76,7 @@ export function themeSwitch(host, { name } = {}) {
     picker('preset', 'Style', PRESET_IDS, sync), picker('surface', 'Ground', SURFACE_IDS, sync),
     ...accent.parts, picker('density', 'Density', DENSITIES, sync),
     picker('material', 'Bars and sheets', MATERIALS, sync), note.part, picker('motion', 'Motion', MOTIONS, sync),
-    picker('haptics', 'Haptics', HAPTICS, sync),
+    picker('haptics', 'Haptics', HAPTICS, sync), picker('text', 'Text size', TEXT_SIZES, sync),
   );
   host.append(box);
   return () => box.remove();
@@ -89,7 +89,7 @@ export function themeSwitch(host, { name } = {}) {
  */
 export function lookSwitch(host, after = () => {}) {
   const box = document.createElement('div');
-  box.className = 'row theme-switch';
+  box.className = 'ui-inline theme-switch';
   box.append(lookPicker(after), picker('density', 'Density', DENSITIES, after));
   host.append(box);
   return () => box.remove();

@@ -83,14 +83,19 @@
 :root[data-density="comfortable"] { --row: 60px; --tap: 48px; --gap: .625rem; --pad: 1.125rem; font-size: 106.25%; }
 :root[data-density="compact"] { --row: 44px; --gap: .25rem; --pad: .75rem; font-size: 93.75%; }
 
+/* text size (the theme switch's Text size, data-text on <html>): every kit size is in rem, so scaling the root scales all */
+:root[data-text="large"] { font-size: 112.5%; }
+:root[data-text="larger"] { font-size: 125%; }
 body { font-family: var(--font); font-size: var(--font-size); line-height: var(--leading); background: var(--bg); color: var(--text); }
 h1, h2, h3 { line-height: 1.2; }
 /* the look's heading face (a serif in look A) for page titles only: sheet, section and bar titles stay in the text face */
 h1 { font-family: var(--font-head); }
 button, input, select { font: inherit; color: inherit; }
-button { display: inline-flex; align-items: center; justify-content: center; gap: .4em; box-sizing: border-box; min-height: var(--button-h);
+/* (zero specificity, like the inputs below: an app's own rules for its plain buttons and selects win, so a page that loads
+   the kit's theme without its parts keeps its controls) */
+:where(button) { display: inline-flex; align-items: center; justify-content: center; gap: .4em; box-sizing: border-box; min-height: var(--button-h);
   padding: 0 var(--pad); cursor: pointer; font-family: var(--font-ui); color: var(--button-text); border-radius: var(--radius-button); }
-button { background: var(--button-bg); border: var(--border) solid var(--line); }
+:where(button) { background: var(--button-bg); border: var(--border) solid var(--line); }
 button[hidden] { display: none; }   /* (the rule above would otherwise show a hidden button) */
 /* two kinds of button: plain (the default) and filled (the accent); a link-style one has no box at all */
 :where(.ui-fill) { background: var(--fill); color: var(--on-fill); border-color: var(--fill); }
@@ -103,7 +108,7 @@ button[hidden] { display: none; }   /* (the rule above would otherwise show a hi
    soft filled field with no line round it, so it sits on a list card without a box in a box; it draws its own
    chevron (two gradients, no image) with room so the words never run under it. In a row (a list's, a setting's, the
    theme switch's) it is the row's value: muted words at the end, the chevron, no fill. */
-select { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border: var(--border) solid transparent;
+:where(select) { min-height: var(--tap); padding: 0 2rem 0 var(--gap); border: var(--border) solid transparent;
   border-radius: var(--radius-input); background-color: color-mix(in srgb, var(--text) 7%, transparent);
   -webkit-appearance: none; appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
   linear-gradient(135deg, currentColor 50%, transparent 50%); background-repeat: no-repeat;

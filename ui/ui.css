@@ -1,7 +1,8 @@
 /* @core/ui v0: the kit parts' look, on @core/theme's custom properties (theme/theme.css loads first), corners from
    the look's tokens (theme/looks.js). */
-/* the kit's own names start ui-; the bare ones (.chip .error .danger .small .row) still work for now, but go in 1.0 */
-:is(.ui-chip, .chip) { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; padding: .2rem .6rem; border-radius: var(--pill-r); border: 1px solid currentColor; color: var(--muted); }
+/* the kit's own names start ui-; the bare ones (.chip .error .danger .small .row .sides) still work, unless the app
+   marks <html data-own-names> (an app with its own .bar, .sheet, .row ... loads the kit's CSS and keeps its classes) */
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip) { display: inline-flex; align-items: center; gap: .35rem; font-size: .85rem; padding: .2rem .6rem; border-radius: var(--pill-r); border: 1px solid currentColor; color: var(--muted); }
 /* icons (icons/lucide.js): drawn in the text colour, as tall as the text */
 .ui-icon { flex: none; width: 1.25em; height: 1.25em; vertical-align: middle; }
 /* the sync chip: an icon per state (a count badge on it); colour by state, pending turns, the rest stays still */
@@ -10,22 +11,22 @@
   background: currentColor; font-size: .7rem; line-height: 1.1rem; text-align: center; }
 .ui-chip-badge:empty { display: none; }
 .ui-chip-badge { -webkit-text-fill-color: var(--bg); }
-:is(.ui-chip, .chip)[data-state="synced"] { color: var(--ok); }
-:is(.ui-chip, .chip)[data-state="pending"] { color: var(--link); }
-:is(.ui-chip, .chip):is([data-state="offline"], [data-state="at-risk"]) { color: var(--warn); }
-:is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: ui-spin 1.2s linear infinite; }
-:is(.ui-chip, .chip)[data-state="unknown"] .ui-icon { opacity: .6; }
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="synced"] { color: var(--ok); }
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="pending"] { color: var(--link); }
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip):is([data-state="offline"], [data-state="at-risk"]) { color: var(--warn); }
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="pending"] .ui-icon { animation: ui-spin 1.2s linear infinite; }
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="unknown"] .ui-icon { opacity: .6; }
 /* look E: a quiet chip with no box; once all is saved only its icon shows, muted (the word stays for screen readers) */
-:root[data-look="e"] :is(.ui-chip, .chip)[data-state] { border-color: transparent; padding-inline: .35rem; }
-:root[data-look="e"] :is(.ui-chip, .chip)[data-state="synced"] { color: var(--muted); }
-:root[data-look="e"] :is(.ui-chip, .chip)[data-state="synced"] .ui-chip-text { position: absolute; width: 1px; height: 1px;
+:root[data-look="e"] :is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state] { border-color: transparent; padding-inline: .35rem; }
+:root[data-look="e"] :is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="synced"] { color: var(--muted); }
+:root[data-look="e"] :is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="synced"] .ui-chip-text { position: absolute; width: 1px; height: 1px;
   overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @keyframes ui-spin { to { transform: rotate(1turn); } }
-@media (prefers-reduced-motion: reduce) { :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; } }
-:root[data-motion="still"] :is(.ui-chip, .chip)[data-state="pending"] .ui-icon { animation: none; }
-:is(.ui-chip, .chip)[data-state="attention"], .ui-error, .ui-danger, .error, .danger { color: var(--danger); }
+@media (prefers-reduced-motion: reduce) { :is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="pending"] .ui-icon { animation: none; } }
+:root[data-motion="still"] :is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="pending"] .ui-icon { animation: none; }
+:is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state="attention"], .ui-error, .ui-danger, :where(:root:not([data-own-names])) .error, :where(:root:not([data-own-names])) .danger { color: var(--danger); }
 /* in a band's bar (look B) the chip takes the band's white text (the state colours fail on it): its icon tells the state */
-[data-header="band"] .ui-bar :is(.ui-chip, .chip)[data-state] { color: var(--on-band); }
+[data-header="band"] .ui-bar :is(.ui-chip, :where(:root:not([data-own-names])) .chip)[data-state] { color: var(--on-band); }
 /* the sync button (sync-button.js): one colour, the bar's; the state is the icon's shape. A look themes the dot and the
    count with --ui-sync-dot and --ui-sync-badge */
 .ui-sync-btn { position: relative; }
@@ -39,8 +40,8 @@
 @keyframes ui-sync-lift { to { transform: translateY(-2px); opacity: .55; } }
 @media (prefers-reduced-motion: reduce) { .ui-sync-btn[data-state="syncing"] .ui-icon { animation: none; } }
 :root[data-motion="still"] .ui-sync-btn[data-state="syncing"] .ui-icon { animation: none; }
-.ui-small, .small { font-size: .85rem; color: var(--muted); }
-.ui-inline, .row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
+.ui-small, :where(:root:not([data-own-names])) .small { font-size: .85rem; color: var(--muted); }
+.ui-inline, :where(:root:not([data-own-names])) .row { display: flex; gap: var(--gap); flex-wrap: wrap; align-items: center; }
 
 dialog { max-width: 30rem; width: calc(100% - 2rem); background: var(--surface); color: var(--text);
   border: 1px solid var(--line); border-radius: var(--sheet-r); }
@@ -48,8 +49,8 @@ dialog::backdrop { background: var(--backdrop); }
 
 /* conflict sheet */
 .ui-attention, .attention { width: 100%; margin: var(--gap) 0; }
-.ui-sides, .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--pad); }
-:is(.ui-sides, .sides) h3 { font-size: 1rem; margin: 0 0 .25rem; }
+.ui-sides, :where(:root:not([data-own-names])) .sides { display: grid; grid-template-columns: 1fr 1fr; gap: var(--pad); }
+:is(.ui-sides, :where(:root:not([data-own-names])) .sides) h3 { font-size: 1rem; margin: 0 0 .25rem; }
 .ui-conflict-list { list-style: none; padding: 0; }
 .ui-conflict-list li { margin: 0 0 var(--pad); padding-bottom: var(--pad); border-bottom: 1px solid var(--line); }
 
