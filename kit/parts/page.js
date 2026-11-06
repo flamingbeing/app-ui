@@ -1,7 +1,7 @@
 // The reference parts gallery: the undo toast, the loading and error states and the About sheet, on made-up data.
 // ?look= and ?density= preview as on the other gallery pages (preview.js). The fake update api and import map stand in for an app's.
 import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, shareLink, qrSheet, askFirst, ASK_LATER_KEY, createTransients,
-  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard, drag, glide, afterGesture, loadPhotoViewer } from '../../ui/index.js';
+  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard, drag, glide, afterGesture, loadPhotoViewer, syncButton } from '../../ui/index.js';
 import { icon, gripVertical } from '../../icons/lucide.js';
 import { galleryPreview } from '../preview.js';
 
@@ -47,6 +47,20 @@ function run(ok) {
 }
 $('load-run').addEventListener('click', () => run(true));
 $('load-fail').addEventListener('click', () => run(false));
+
+// orbit loader: "Loading…" with the ring for 1.5 s, and a sync button that shows it while it sends
+const orbitState = loadState($('orbit-host'), { orbit: true });
+$('orbit-run').addEventListener('click', () => {
+  $('orbit-loaded').hidden = true;
+  orbitState.loading();
+  setTimeout(() => { orbitState.done(); $('orbit-loaded').hidden = false; }, 1500);
+});
+/** @type {Set<(st: { state: string, count: number }) => void>} */
+const orbitWatchers = new Set();
+const orbitSync = { status$(/** @type {(st: { state: string, count: number }) => void} */ cb) { orbitWatchers.add(cb); cb({ state: 'synced', count: 0 }); return () => orbitWatchers.delete(cb); } };
+const orbitSay = (/** @type {string} */ state, count = 0) => { for (const cb of orbitWatchers) cb({ state, count }); };
+syncButton($('orbit-sync'), { sync: /** @type {any} */ (orbitSync), syncNow: () => {}, checkUpdate: false, idPrefix: 'orbit-', orbit: true });
+$('orbit-send').addEventListener('click', () => { orbitSay('pending', 2); setTimeout(() => orbitSay('synced'), 1500); });
 
 // about: a fake update api
 let checks = 0;

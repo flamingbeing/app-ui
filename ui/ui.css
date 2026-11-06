@@ -97,6 +97,37 @@ dialog.modal p { margin: 0 0 var(--pad); }
 .ui-swap-in { position: absolute; inset: 0 0 auto; visibility: hidden; pointer-events: none; }
 /* the words are for screen readers (role=status); the rows say it to the eye */
 .load-note { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* orbit loader (orbit.js): five dots round a ring, each a full-size box turned about its centre, fading in and out;
+   they set off one after another and bunch up and spread out as they speed up and slow down. Less motion: a still ring */
+.ui-orbit { --ui-orbit-size: 34px; --ui-orbit-dot: 4.5px; position: relative; display: inline-block; flex: none;
+  width: var(--ui-orbit-size); height: var(--ui-orbit-size); color: var(--accent); vertical-align: middle; }
+.ui-orbit > i { position: absolute; inset: 0; opacity: 0; animation: ui-orbit 5.4s infinite; }
+.ui-orbit > i::after { content: ""; position: absolute; left: 50%; top: 0; width: var(--ui-orbit-dot); height: var(--ui-orbit-dot);
+  margin-left: calc(var(--ui-orbit-dot) / -2); border-radius: 50%; background: currentColor; }
+.ui-orbit > i:nth-child(2) { --n: 1; animation-delay: .24s; }
+.ui-orbit > i:nth-child(3) { --n: 2; animation-delay: .48s; }
+.ui-orbit > i:nth-child(4) { --n: 3; animation-delay: .72s; }
+.ui-orbit > i:nth-child(5) { --n: 4; animation-delay: .96s; }
+@keyframes ui-orbit {
+  0%   { transform: rotate(225deg); opacity: 1; animation-timing-function: ease-out; }
+  7%   { transform: rotate(345deg); animation-timing-function: linear; }
+  30%  { transform: rotate(455deg); animation-timing-function: ease-in-out; }
+  39%  { transform: rotate(690deg); animation-timing-function: linear; }
+  70%  { transform: rotate(815deg); opacity: 1; animation-timing-function: ease-out; }
+  75%  { transform: rotate(945deg); animation-timing-function: ease-out; }
+  76%  { transform: rotate(945deg); opacity: 0; }
+  100% { transform: rotate(945deg); opacity: 0; }
+}
+:root[data-motion="still"] .ui-orbit > i { animation: none; opacity: 1; transform: rotate(calc(var(--n, 0) * 30deg)); }
+@media (prefers-reduced-motion: reduce) { .ui-orbit > i { animation: none; opacity: 1; transform: rotate(calc(var(--n, 0) * 30deg)); } }
+/* "Loading…" with the orbit (loadState's orbit): the ring over the words, in the middle */
+.load-state.is-orbit { display: flex; flex-direction: column; align-items: center; gap: .9rem; padding: 2rem 0; animation: load-in .35s ease-out .25s both; }
+.load-state.is-orbit[hidden] { display: none; }
+.load-state.is-orbit .load-note { position: static; width: auto; height: auto; overflow: visible; clip-path: none; margin: 0;
+  font-size: .85rem; letter-spacing: .04em; color: var(--muted); }
+/* the sync button sending (syncButton's orbit): the ring in place of the cloud */
+.ui-sync-btn > .ui-orbit { --ui-orbit-size: 22px; --ui-orbit-dot: 3px; color: currentColor; }
+
 /* skeleton rows shaped like list rows: a title line and a shorter one, a soft light sweeping across, row after row.
    They fade in only after a moment, so a list that comes quickly never flashes them. */
 .load-row { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 7px;
@@ -126,7 +157,10 @@ dialog.modal p { margin: 0 0 var(--pad); }
 
 /* drag-reorder (drag-list.js) */
 .ui-grip { flex: none; min-width: var(--tap); min-height: var(--tap); display: grid; place-items: center; cursor: grab; touch-action: none; color: var(--muted); }
-li.dragging { position: relative; z-index: 2; box-shadow: var(--list-shadow); background: var(--surface); }
+/* the held row floats as a card of its own: rounded (--ui-lift-r, 12 px) over the list card, its separator gone */
+li.dragging { position: relative; z-index: 2; border-radius: var(--ui-lift-r, 12px); overflow: hidden; background: var(--list-bg, var(--surface));
+  box-shadow: var(--ui-lift-shadow, 0 6px 20px rgb(0 0 0 / .18), 0 1px 3px rgb(0 0 0 / .12)); }
+li.dragging > .ui-row { border-radius: inherit; background: var(--list-bg, var(--surface)); }
 
 /* photo viewer (photo-viewer.js): full screen on black, each photo whole (contain), the caption at the foot. The
    dialog takes every touch (touch-action: none): its fingers zoom, pan and swipe. Every look's dialog corners, padding,

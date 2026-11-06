@@ -5,6 +5,7 @@
 // A tap also looks for a newer version of the app (quietly: the app's update module installs it and reloads when allowed).
 import { LABELS } from './labels.js';
 import { el } from './dom.js';
+import { orbit } from './orbit.js';
 import { icon, cloud, cloudCheck, cloudUpload, cloudOff, cloudAlert } from '../icons/lucide.js';
 
 export const MIN_SPIN_MS = 700;   // a tap that finishes at once still shows it sending
@@ -35,13 +36,14 @@ export function syncLook(state, count, spinning, words) {
  * @param {HTMLElement} host  a <button> becomes the sync button (the app's markup places it before the script runs);
  *   any other element gets one added
  * @param {{ sync: import('./types').SyncApi, syncNow?: () => unknown, checkUpdate?: false | (() => unknown),
- *   labels?: Record<string, string>, idPrefix?: string }} o
+ *   labels?: Record<string, string>, idPrefix?: string, orbit?: boolean }} o
  *   syncNow: what a tap does (default: the sync module's nudge('wake') then flush()); checkUpdate: what a tap also
  *   does, at most once per UPDATE_GAP_MS (default: the service worker registration's update(); false: nothing);
- *   labels: words over LABELS; idPrefix: put before the button's id
+ *   labels: words over LABELS; idPrefix: put before the button's id; orbit: while sending, the orbit loader (orbit.js)
+ *   in place of the cloud
  * @returns {() => void} stop: unsubscribes, and removes the button if this part added it
  */
-export function syncButton(host, { sync, syncNow, checkUpdate = lookForUpdate, labels = {}, idPrefix = '' }) {
+export function syncButton(host, { sync, syncNow, checkUpdate = lookForUpdate, labels = {}, idPrefix = '', orbit: ring = false }) {
   const words = { ...LABELS, ...labels };
   const own = !(host instanceof HTMLButtonElement);
   const btn = own ? el('button', { type: 'button' }) : host;
@@ -60,7 +62,7 @@ export function syncButton(host, { sync, syncNow, checkUpdate = lookForUpdate, l
     if (count && look.shown !== 'attention') badge.dataset.count = String(count); else delete badge.dataset.count;
     if (drawn !== look.shown) {   // (a new icon only on a change, so the lift keeps going)
       drawn = look.shown;
-      btn.replaceChildren(icon(ICONS[/** @type {keyof typeof ICONS} */ (look.shown)] || cloud), badge);
+      btn.replaceChildren(ring && look.shown === 'syncing' ? orbit() : icon(ICONS[/** @type {keyof typeof ICONS} */ (look.shown)] || cloud), badge);
     }
   };
   const off = sync.status$(st => { state = st.state; count = st.count || 0; draw(); });

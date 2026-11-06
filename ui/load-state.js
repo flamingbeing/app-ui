@@ -2,13 +2,15 @@
 // The page says which (loading / failed / done); nothing is shown once done.
 import { LABELS } from './labels.js';
 import { el, button } from './dom.js';
+import { orbit } from './orbit.js';
 
 /**
  * @param {HTMLElement} host  the block is added here, empty until loading() or failed()
- * @param {{ rows?: number, labels?: Record<string, string> }} [o]  rows: how many skeleton rows (default 4)
+ * @param {{ rows?: number, labels?: Record<string, string>, orbit?: boolean }} [o]  rows: how many skeleton rows (default 4);
+ *   orbit: the orbit loader (orbit.js) over the words instead of skeleton rows
  * @returns {{ loading: () => void, failed: (message: string, retry: () => unknown) => void, done: () => void, stop: () => void }}
  */
-export function loadState(host, { rows = 4, labels = {} } = {}) {
+export function loadState(host, { rows = 4, labels = {}, orbit: ring = false } = {}) {
   const words = { ...LABELS, ...labels };
   const box = el('div', { class: 'load-state' });
   box.hidden = true;
@@ -17,16 +19,19 @@ export function loadState(host, { rows = 4, labels = {} } = {}) {
   return {
     loading() {
       const hadFocus = box.contains(document.activeElement);
-      const skeleton = Array.from({ length: rows }, () => el('div', { class: 'load-row', 'aria-hidden': 'true' },
-        el('span', { class: 'load-line' }), el('span', { class: 'load-line' })));
-      box.replaceChildren(el('p', { class: 'load-note', role: 'status', tabindex: '-1' }, words.loading), ...skeleton);
+      const note = el('p', { class: 'load-note', role: 'status', tabindex: '-1' }, words.loading);
+      box.classList.toggle('is-orbit', ring);
+      if (ring) box.replaceChildren(orbit(), note);   // (the ring over the words)
+      else box.replaceChildren(note, ...Array.from({ length: rows }, () => el('div', { class: 'load-row', 'aria-hidden': 'true' },
+        el('span', { class: 'load-line' }), el('span', { class: 'load-line' }))));
       box.hidden = false;
-      if (hadFocus) /** @type {HTMLElement} */ (box.firstElementChild).focus();   // Try again was pressed: focus stays in the block
+      if (hadFocus) note.focus();   // Try again was pressed: focus stays in the block
       host.setAttribute('aria-busy', 'true');
     },
     failed(message, retry) {
       const hadFocus = box.contains(document.activeElement);
       done();
+      box.classList.remove('is-orbit');
       const again = button(words.retry, retry, { class: 'load-retry' });
       box.replaceChildren(el('p', { class: 'load-error', role: 'alert' }, message), again);
       box.hidden = false;
