@@ -27,6 +27,7 @@ export { signInScreen, holdsSyncCopy } from "./sign-in-screen.js";
 export { alertModal, confirmModal } from "./modal.js";
 export { hoverCard, placeCard } from "./hover-card.js";
 export { loadState, cachedPaint, holdEmpty, swapWhenReady, SNAP_ROWS } from "./load-state.js";
+export { orbit, ORBIT_DOTS } from "./orbit.js";
 export { aboutSheet, packagesFromImportMap } from "./about-sheet.js";
 export { settingsScreen, SETTINGS_WORDS } from "./settings-screen.js";
 export { installApp, installMode, INSTALL_WORDS } from "./install.js";

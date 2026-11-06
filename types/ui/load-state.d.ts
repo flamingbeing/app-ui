@@ -1,11 +1,13 @@
 /**
  * @param {HTMLElement} host  the block is added here, empty until loading() or failed()
- * @param {{ rows?: number, labels?: Record<string, string> }} [o]  rows: how many skeleton rows (default 4)
+ * @param {{ rows?: number, labels?: Record<string, string>, orbit?: boolean }} [o]  rows: how many skeleton rows (default 4);
+ *   orbit: the orbit loader (orbit.js) over the words instead of skeleton rows
  * @returns {{ loading: () => void, failed: (message: string, retry: () => unknown) => void, done: () => void, stop: () => void }}
  */
-export function loadState(host: HTMLElement, { rows, labels }?: {
+export function loadState(host: HTMLElement, { rows, labels, orbit: ring }?: {
     rows?: number;
     labels?: Record<string, string>;
+    orbit?: boolean;
 }): {
     loading: () => void;
     failed: (message: string, retry: () => unknown) => void;

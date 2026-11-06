@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.0-rc.107
+
+- A held row is a card of its own: while a finger lifts a row by its grip (`gripDrag`) it gets 12 px corners
+  (`--ui-lift-r`), the list's fill and a soft shadow (`--ui-lift-shadow`), and goes square again once let go (from an
+  app's lifted-row style). Test in `e2e/parts.spec.mjs`.
+- Orbit loader (from an app's loading ring): `orbit()` draws a ring of five dots that chase round (CSS only, transform
+  and opacity, hidden from screen readers); under Still or Reduce Motion it is a still ring with every dot showing.
+  Opt-in: `loadState(host, { orbit: true })` shows it over the "Loading…" words in place of skeleton rows, and
+  `syncButton(host, { orbit: true })` shows a 22 px ring in place of the cloud while sending. `ORBIT_DOTS`. Gallery:
+  `/kit/parts/` "Orbit loader". Test in `e2e/parts.spec.mjs`.
+
 ## 1.0.0-rc.106
 
 - A sheet docked on the keyboard can close with it (opt-in, from an app's quick-add sheet): a dialog marked

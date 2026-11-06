@@ -47,7 +47,7 @@ for (const width of [390, 1280]) {
       expect(await AxeBuilder(page), 'axe with the error').toEqual([]);
       await page.getByRole('button', { name: 'Try again' }).click();
       await expect(page.locator('#loaded li')).toHaveText(['Rose', 'Tulip']);
-      await expect(page.locator('.load-state')).toBeHidden();
+      await expect(page.locator('#load-host .load-state')).toBeHidden();
     });
 
     test('About: version, the newest-version check and the outside code from the import map; Esc closes', async ({ sized }) => {
@@ -89,6 +89,66 @@ for (const width of [390, 1280]) {
       await drag(page, box.x + box.width / 2, box.y + box.height / 2, box.x + box.width / 2, box.y + box.height / 2 + rowH * 2.6);
       await expect(page.locator('#drag-order')).toHaveText('Order: Pear, Plum, Apple, Fig');
       expect(await AxeBuilder(page), 'axe').toEqual([]);
+    });
+
+    test('drag to reorder: the held row floats as a rounded card (12 px) with a shadow, square again once let go', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      const row = page.locator('#drag-list li').first();
+      const grip = row.locator('.ui-grip');
+      await grip.scrollIntoViewIfNeeded();
+      const box = await grip.boundingBox();
+      const cdp = await page.context().newCDPSession(page);
+      const send = (type, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x: box.x + box.width / 2, y }] });
+      await send('touchStart', box.y + box.height / 2);
+      for (let i = 1; i <= 3; i++) { await send('touchMove', box.y + box.height / 2 + i * 6); await page.waitForTimeout(16); }
+      await expect(row).toHaveClass(/dragging/);
+      await expect(row).toHaveCSS('border-top-left-radius', '12px');
+      await expect(row).toHaveCSS('border-bottom-right-radius', '12px');
+      expect(await row.evaluate(e => getComputedStyle(e).boxShadow)).not.toBe('none');
+      await send('touchEnd', 0);
+      await expect(row).not.toHaveClass(/dragging/);
+      await expect(row).toHaveCSS('border-top-left-radius', '0px');
+    });
+
+    test('orbit loader: "Loading…" shows the ring of five dots over the words, then the list; the sync button shows it while sending; a still ring under Still', async ({ sized }) => {
+      const page = await sized(width);
+      await page.goto(PARTS);
+      await page.locator('#orbit-run').click();
+      const ring = page.locator('#orbit-host .ui-orbit');
+      await expect(ring).toBeVisible();
+      await expect(ring.locator('i')).toHaveCount(5);
+      await expect(ring).toHaveAttribute('aria-hidden', 'true');
+      await expect(page.locator('#orbit-host .load-note')).toHaveText('Loading…');
+      await expect(page.locator('#orbit-host .load-note'), 'the words show under the ring').toHaveCSS('position', 'static');
+      expect((await page.locator('#orbit-host .load-note').boundingBox()).y).toBeGreaterThan((await ring.boundingBox()).y + 30);
+      await expect(page.locator('#orbit-host')).toHaveAttribute('aria-busy', 'true');
+      await expect(page.locator('#orbit-host .load-row')).toHaveCount(0);
+      const box = await ring.boundingBox();
+      expect(Math.round(box.width)).toBe(34);
+      // the dots move by transform and opacity only
+      const props = await ring.locator('i').first().evaluate(e => e.getAnimations().flatMap(a => a.effect.getKeyframes().flatMap(k => Object.keys(k))));
+      expect([...new Set(props)].filter(p => !['offset', 'easing', 'composite', 'computedOffset'].includes(p)).sort()).toEqual(['opacity', 'transform']);
+      expect(await AxeBuilder(page), 'axe while loading').toEqual([]);
+      await expect(page.locator('#orbit-loaded')).toBeVisible({ timeout: 3000 });
+      await expect(ring).toHaveCount(0);
+      // the sync button: the cloud, the ring while sending, the cloud again
+      const btn = page.locator('#orbit-sync-btn');
+      await expect(btn.locator('svg.ui-icon')).toHaveCount(1);
+      await page.locator('#orbit-send').click();
+      await expect(btn).toHaveAttribute('data-state', 'syncing');
+      await expect(btn.locator('.ui-orbit')).toBeVisible();
+      expect(Math.round((await btn.locator('.ui-orbit').boundingBox()).width)).toBe(22);
+      await expect(btn.locator('svg.ui-icon')).toHaveCount(0);
+      expect(await AxeBuilder(page), 'axe while sending').toEqual([]);
+      await expect(btn).toHaveAttribute('data-state', 'synced', { timeout: 3000 });
+      await expect(btn.locator('svg.ui-icon')).toHaveCount(1);
+      // Still: a still ring, every dot showing, each turned its own way
+      await page.evaluate(() => { document.documentElement.dataset.motion = 'still'; });
+      await page.locator('#orbit-run').click();
+      const still = await ring.locator('i').evaluateAll(dots => dots.map(d => [getComputedStyle(d).animationName, getComputedStyle(d).opacity, getComputedStyle(d).transform]));
+      expect(still.every(([name, op]) => name === 'none' && op === '1')).toBe(true);
+      expect(new Set(still.map(d => d[2])).size).toBe(5);
     });
 
     test('follow the finger: the knob goes with a finger, glides to the end it was let go nearer, and saves after', async ({ sized }) => {
