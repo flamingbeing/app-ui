@@ -10,6 +10,7 @@ export const LAYOUTS: readonly string[];
 export const MATERIALS: readonly string[];
 export const MOTIONS: readonly string[];
 export const HAPTICS: readonly string[];
+export const TEXT_SIZES: readonly string[];
 /**
  * look: '' = the app's default look (applyTheme({ look })), else one of looks.js
  * accent: '' = the preset's (or the app's) colour, else a six-digit hex
@@ -25,4 +26,5 @@ export type Choice = {
     material: string;
     motion: string;
     haptics: string;
+    text: string;
 };

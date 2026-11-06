@@ -15,7 +15,7 @@ export { THEMES, LAYOUTS, DENSITIES };
 // the <html> marks early.js puts back before the first paint
 // (no data-preset: a preset (the switch's "style": colours, corners, lines) acts only through the palette's custom
 // properties; the look (looks.js) is what the CSS styles from)
-export const MARKS = Object.freeze(['theme', 'dark', 'look', 'density', 'motion', 'haptics', 'header', 'menu', 'glass', 'tick', 'tabbar', 'family']);
+export const MARKS = Object.freeze(['theme', 'dark', 'look', 'density', 'motion', 'haptics', 'text', 'header', 'menu', 'glass', 'tick', 'tabbar', 'family']);
 const KEY = 'core-theme';
 // The last look shown (marks + palette CSS), for early.js to put back before the first paint.
 const PAINT = 'core-theme-paint';
@@ -82,6 +82,7 @@ function show(c) {
   mark(root, 'density', c.density, DENSITIES[0]);
   mark(root, 'motion', c.motion, 'auto');
   mark(root, 'haptics', c.haptics, 'on');
+  mark(root, 'text', c.text, 'regular');
   for (const [k, v] of Object.entries(look.variants)) root.dataset[k] = v;
   root.classList.toggle('glass', glassOn(c));
   if (!app.ownTheme) themeColour(c);

@@ -21,10 +21,12 @@ export const MATERIALS = Object.freeze(['glass', 'solid', 'always']);
 export const MOTIONS = Object.freeze(['auto', 'still']);
 // haptics: the taps gestures give (ui/gesture.js haptic), on by default, or off on this device
 export const HAPTICS = Object.freeze(['on', 'off']);
+// text size (theme.css): regular is the default; Large and Larger scale the page's rem (every kit size is in rem)
+export const TEXT_SIZES = Object.freeze(['regular', 'large', 'larger']);
 
 /**
  * @typedef {{ theme: string, dark: string, preset: string, accent: string, surface: string, look: string,
- *   density: string, material: string, motion: string, haptics: string }} Choice
+ *   density: string, material: string, motion: string, haptics: string, text: string }} Choice
  * look: '' = the app's default look (applyTheme({ look })), else one of looks.js
  * accent: '' = the preset's (or the app's) colour, else a six-digit hex
  */
@@ -46,5 +48,6 @@ export function cleanChoice(raw) {
     material: oneOf(MATERIALS, r.material),
     motion: oneOf(MOTIONS, r.motion),
     haptics: oneOf(HAPTICS, r.haptics),
+    text: oneOf(TEXT_SIZES, r.text),
   };
 }

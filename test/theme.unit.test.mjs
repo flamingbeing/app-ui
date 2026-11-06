@@ -4,13 +4,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseChoice, chooseTheme, themeChoice, applyTheme, THEMES, DENSITIES } from '../theme/choice.js';
 import { LOOKS } from '../theme/looks.js';
-import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS } from '../theme/schema.js';
+import { cleanChoice, DARK_STYLES, PRESET_IDS, SURFACE_IDS, MATERIALS, MOTIONS, HAPTICS, TEXT_SIZES } from '../theme/schema.js';
 import { contrast, cleanHex, mix, nudge, lightPalette, darkPalette, floor, checkPalette, pairs, glassSamples, frostAlpha, glassStrengths, glassPasses, BACKDROP } from '../theme/colour.js';
 import { palettes, paletteCss, shapeTokens, accentOf, glassTokens, DEFAULT_ACCENT } from '../theme/palette-css.js';
 import { PRESETS, SURFACES } from '../theme/presets.js';
 import { GRID, HUES, SHADES, gridIndex, snap } from '../theme/grid.js';
 
-const DEFAULTS = { theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '', look: '', density: 'regular', material: 'glass', motion: 'auto', haptics: 'on' };
+const DEFAULTS = { theme: 'auto', dark: 'dark', preset: 'default', accent: '', surface: '', look: '', density: 'regular', material: 'glass', motion: 'auto', haptics: 'on', text: 'regular' };
 // what show() puts on <html> for look A (the default), besides the marks a choice sets
 const LOOK_A = { look: 'a', header: 'plain', menu: 'popover', glass: 'bars', tick: 'round', tabbar: 'float', family: 'core' };
 
@@ -31,7 +31,7 @@ test("v0's stored { theme, layout } still reads as it did", () => {
 });
 
 test('a stored choice is kept, hex lower-cased', () => {
-  const all = { theme: 'light', dark: 'oled', preset: 'paper', accent: '#ABCDEF', surface: 'sepia', look: 'c', density: 'compact', material: 'solid', motion: 'still', haptics: 'off' };
+  const all = { theme: 'light', dark: 'oled', preset: 'paper', accent: '#ABCDEF', surface: 'sepia', look: 'c', density: 'compact', material: 'solid', motion: 'still', haptics: 'off', text: 'large' };
   assert.deepEqual(parseChoice(JSON.stringify(all)), { ...all, accent: '#abcdef' });
 });
 
@@ -351,4 +351,25 @@ test('tinted glass: every look x theme x light/dark/OLED keeps its floor on the 
   const tint = parseFloat(glassTokens(violet, { preset: 'violet', look: 'a' })['glass-tint']);
   assert.ok(tint < 7, `violet light on look A: ${tint}%`);
   assert.ok(contrast(violet.link, mix(violet.surface, violet.accent, tint / 100)) >= 4.5);
+});
+
+test('Text size is regular until picked; unknown reads as regular', () => {
+  assert.equal(TEXT_SIZES[0], 'regular');
+  assert.equal(cleanChoice({}).text, 'regular');
+  assert.equal(cleanChoice({ text: 'larger' }).text, 'larger');
+  assert.equal(cleanChoice({ text: 'huge' }).text, 'regular');
+  assert.equal(parseChoice(JSON.stringify({ theme: 'dark' })).text, 'regular', 'older choices get regular');
+});
+
+test('bare class names in the kit CSS sit behind the data-own-names guard', async () => {
+  const { readFileSync } = await import('node:fs');
+  const BARE = /(?<![-\w])\.(chip|small|row|danger|error|sides|bar|sheet)\b(?!-)/g;
+  for (const f of ['ui/ui.css', 'ui/layout.css', 'ui/gestures/action-bar.css', 'ui/gestures/menu.css', 'theme/glass.css']) {
+    const css = readFileSync(new URL(`../${f}`, import.meta.url), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const m of css.matchAll(BARE)) {
+      // (the rule's selector so far, back to the last } or ;)
+      const rule = css.slice(Math.max(css.lastIndexOf('}', m.index), css.lastIndexOf(';', m.index)) + 1, m.index + m[0].length);
+      assert.match(rule, /data-own-names/, `${f}: unguarded .${m[1]} in "${rule.trim().slice(0, 60)}"`);
+    }
+  }
 });

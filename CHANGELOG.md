@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-rc.100
+
+Closes the three open gaps from the core migrations (rosters, hand, pantry).
+
+- Text size: `themeSwitch` has a Text size picker (Regular, Large, Larger), kept per device like the other choices
+  (`text` in the choice, `data-text` on `<html>`, `TEXT_SIZES`). Large and Larger scale the root size (112.5%, 125%), so
+  every size in rem follows. Regular is the default; older choices read as Regular.
+- Bare class names: the kit still styles `.chip .small .row .danger .error .sides .bar .sheet` for older apps, but an
+  app that has its own marks `<html data-own-names>` and gets none of them (glass bars and sheets included), so it can
+  load ui.css, glass.css and gestures.css. `themeSwitch`/`lookSwitch` use `ui-inline` and no longer depend on `.row`.
+- Base element rules: theme.css's `button` and `select` rules are `:where()` (zero specificity, like the inputs and the
+  checkbox already were), so an app's own rules for plain controls win without resets.
+
 ## 1.0.0-rc.99
 
 - Warm start keeps every tab page's own scroll, not only the one showing: `keepPlace` takes `ys` (the other pages'

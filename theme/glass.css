@@ -23,11 +23,11 @@ html.glass {
 }
 
 /* ---------- the material ---------- */
-.glass .bar, .glass .toast, .glass .glass-panel {
+.glass:where(:not([data-own-names])) .bar, .glass .toast, .glass .glass-panel {
   background: var(--glass-bg); box-shadow: var(--glass-rim), var(--glass-shadow); border-color: transparent;
   -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
 }
-.glass dialog, .glass .sheet {
+.glass dialog, .glass:where(:not([data-own-names])) .sheet {
   background: var(--glass-bg-thick); box-shadow: var(--glass-rim), var(--glass-shadow); border-color: transparent;
   -webkit-backdrop-filter: var(--glass-blur-thick); backdrop-filter: var(--glass-blur-thick);
 }
@@ -38,11 +38,11 @@ html.glass {
 }
 
 /* ---------- top bar: a floating capsule over the scroll edge ---------- */
-.glass .bar {
+.glass:where(:not([data-own-names])) .bar {
   position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--gap)); z-index: 5;
   margin: var(--gap) 0; padding: var(--gap) var(--pad); border-radius: var(--glass-r);
 }
-.glass .bar h1 { margin: 0; }
+.glass:where(:not([data-own-names])) .bar h1 { margin: 0; }
 /* the scroll edge: the content fades and blurs out under the bar instead of meeting a hard line */
 .glass body::before {
   content: ""; position: fixed; inset: 0 0 auto; z-index: 4; pointer-events: none;
@@ -56,7 +56,7 @@ html.glass {
 .glass dialog { border-radius: var(--glass-r); padding: var(--pad) calc(var(--pad) * 1.25); }
 .glass dialog[open] { animation: glass-in var(--d-spring) var(--spring-snappy); }
 .glass dialog::backdrop { animation: glass-fade var(--d-spring) var(--spring); }
-.glass .sheet { border-radius: var(--glass-r); padding: var(--pad); }
+.glass:where(:not([data-own-names])) .sheet { border-radius: var(--glass-r); padding: var(--pad); }
 
 /* ---------- toasts: capsules that spring up ---------- */
 .glass .toast { border-radius: var(--glass-r); padding-inline: calc(var(--pad) * 1.25) var(--gap);
@@ -69,13 +69,14 @@ html.glass {
 /* ---------- a look with glass on its floating pills only (data-glass="pill", looks.js) ---------- */
 /* the bar is solid card colour too (menus, sheets, dialogs and the action bar always are); the toasts and a floating
    tab bar keep the glass. (Glass stays within one blur tier and two layers: the scroll edge, a bar or pill.) */
-html.glass[data-glass="pill"] :is(.bar, dialog, .sheet, .glass-panel, .ui-bar, .ui-menu),
+html.glass[data-glass="pill"] :is(dialog, .glass-panel, .ui-bar, .ui-menu),
+html.glass[data-glass="pill"]:where(:not([data-own-names])) :is(.bar, .sheet),
 html.glass[data-glass="pill"][data-tabbar="edge"] .ui-tabbar {
   --glass-bg: var(--surface); --glass-bg-thick: var(--surface); --glass-blur: none; --glass-blur-thick: none;
   --glass-rim: 0 0 0 var(--border) var(--line); --glass-shadow: 0 0 0 transparent;
 }
 html.glass[data-glass="pill"] body::before { content: none; }
-html.glass[data-glass="pill"] .bar { position: static; margin: 0 0 var(--gap); border-radius: 0; box-shadow: none;
+html.glass[data-glass="pill"]:where(:not([data-own-names])) .bar { position: static; margin: 0 0 var(--gap); border-radius: 0; box-shadow: none;
   border-bottom: var(--border) solid var(--bar-line); }
 
 @keyframes glass-in { from { opacity: 0; transform: translateY(.75rem) scale(.96); } }
