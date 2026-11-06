@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.106
+
+- A sheet docked on the keyboard can close with it (opt-in, from an app's quick-add sheet): a dialog marked
+  `data-keyboard-close` closes when the keyboard goes while the focus is still in its field, or nowhere (Android's Back
+  hides the keyboard first and may blur the field), so one Back closes both. A button, chip or picker holding the
+  focus keeps it open, and so does turning the phone. It sends `ui-keyboard-close` first (cancelable; an app can aim
+  its close motion there), then closes as Esc would (`requestClose()`, so the dialog's cancel handler and Back step
+  run; `close()` where the browser has no `requestClose`). `closesWithKeyboard` (pure) and `KEYBOARD_CLOSES`.
+  Tests in `e2e/keyboard.spec.mjs` and `test/tab-ripple-keyboard.unit.test.mjs`.
+
 ## 1.0.0-rc.105
 
 - `adaptiveShell` starts on a shell with no `.ui-list` (an app of tab pages without a list and detail): it threw on

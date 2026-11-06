@@ -66,3 +66,11 @@ export const KEYBOARD_FOLLOW_EASE: "cubic-bezier(0, 0, .2, 1)";
 export const FOLLOWS_KEYBOARD: "dialog.ui-sheet[open]:not([data-detent=\"large\"])";
 /** The fixed bars that sit above the keyboard. */
 export const OVER_KEYBOARD: ".ui-action-bar, [data-over-keyboard]";
+/** The dialogs that close with the keyboard. */
+export const KEYBOARD_CLOSES: "dialog[open][data-keyboard-close]";
+export function closesWithKeyboard(dialog: {
+    contains: (n: any) => boolean;
+}, focus: unknown, { body, typing: isTyping }: {
+    body: unknown;
+    typing: (el: any) => boolean;
+}): boolean;

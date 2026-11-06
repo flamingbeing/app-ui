@@ -48,7 +48,7 @@ export { holdMenus } from './hold-menu.js';
 export { openMenu } from './tap-menu.js';
 export { detentSheet, sheetsSettled } from './detent-sheet.js';
 export { stepsSettled } from './steps.js';
-export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD, caretShift } from './keyboard.js';
+export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD, caretShift, closesWithKeyboard, KEYBOARD_CLOSES } from './keyboard.js';
 export { holdKeyboard, HOLD_MS } from './keep-keyboard.js';
 // lazy screens (from the logbook): load on first use, the rest in idle moments after the first screen
 export { lazyModules } from './lazy-modules.js';

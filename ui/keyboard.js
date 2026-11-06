@@ -17,6 +17,11 @@
 // over KEYBOARD_FOLLOW_MS, decelerating (keyboardFollow). The moves add up, so a change mid-glide carries on from
 // where the bar is. On a wide screen (840 px+) only the bars follow (a sheet is a centred dialog there). Less motion:
 // they just move.
+// A dialog marked data-keyboard-close (opt-in: a quick-add sheet docked on the keyboard) closes when the keyboard goes
+// while the focus is still in its field, or nowhere (Android's Back hides the keyboard first and may blur the field):
+// one Back closes both, as in the platform's own quick-add sheets. A button, chip or picker holding the focus keeps it,
+// and so does turning the phone. It sends "ui-keyboard-close" first (cancelable; the app can aim a close motion), then
+// closes as Esc would (requestClose: its cancel handler runs; close() where there is none).
 // Nothing runs on import: startGestures starts it ({ keyboard: false } leaves it out).
 import { still } from './gesture.js';
 
@@ -116,12 +121,35 @@ const TYPED = /^(text|search|email|url|tel|password|number|date|datetime-local|m
 const typing = el => !!el && ((el instanceof HTMLInputElement && TYPED.test(el.type)) || el instanceof HTMLTextAreaElement
   || (el instanceof HTMLElement && el.isContentEditable));
 
+/** The dialogs that close with the keyboard. */
+export const KEYBOARD_CLOSES = 'dialog[open][data-keyboard-close]';
+
+/**
+ * Whether a dialog marked data-keyboard-close closes as the keyboard goes (pure): the focus is still in a text field in
+ * it, or nowhere (the page, or the dialog itself).
+ * @param {{ contains: (n: any) => boolean }} dialog @param {unknown} focus  document.activeElement
+ * @param {{ body: unknown, typing: (el: any) => boolean }} o
+ */
+export const closesWithKeyboard = (dialog, focus, { body, typing: isTyping }) =>
+  !focus || focus === body || focus === dialog || (isTyping(focus) && dialog.contains(focus));
+
+/** Closes the dialogs that asked to go with the keyboard (KEYBOARD_CLOSES). */
+function closeDocked() {
+  const at = document.activeElement;
+  for (const el of document.querySelectorAll(KEYBOARD_CLOSES)) {
+    const d = /** @type {HTMLDialogElement & { requestClose?: () => void }} */ (el);
+    if (!closesWithKeyboard(d, at, { body: document.body, typing })) continue;
+    if (!d.dispatchEvent(new CustomEvent('ui-keyboard-close', { cancelable: true }))) continue;
+    if (typeof d.requestClose === 'function') d.requestClose(); else d.close();
+  }
+}
+
 /** Watches the keyboard; gives back the function that stops it. @returns {() => void} */
 export function watchKeyboard() {
   const vv = typeof window !== 'undefined' ? window.visualViewport : null;
   if (!vv) return () => {};
   const html = document.documentElement;
-  let width = innerWidth, base = innerHeight, was = false, lifted = 0;
+  let width = innerWidth, base = innerHeight, was = false, lifted = 0, openWidth = 0;
   // the last state, for the glide (keyboardFollow)
   let last = { inner: innerHeight, lift: 0, open: false, covered: 0, width: innerWidth };
   /** @type {ReturnType<typeof setTimeout> | undefined} */
@@ -152,6 +180,8 @@ export function watchKeyboard() {
       was = open;
       html.classList.toggle('ui-keyboard-open', open);
       html.dispatchEvent(new CustomEvent('ui-keyboard', { detail: { open } }));
+      if (open) openWidth = innerWidth;
+      else if (innerWidth === openWidth) closeDocked();   // (turned: not a close)
     }
   }
   // focus moving from one field to the next is not a close: look once it has landed

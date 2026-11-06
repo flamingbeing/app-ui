@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { tabFadeDelays, TAB_RISE_GAP_MS, TAB_RISE_IN_MS, TAB_RISE_END_MS, TAB_RISE_MAX_STAGGER_MS, TAB_FADE_OUT_MS, TAB_FADE_GAP_MS, TAB_FADE_STAGGER_MS, TAB_FADE_BLOCKS } from '../ui/tab-pages.js';
 import { RIPPLE_IN, RIPPLE_HOLD_MS } from '../ui/motion.js';
 import { tabDip, TAB_DIP_GAP_MS, TAB_DIP_IN_MS, TAB_DIP_FROM, TAB_CUT_GAP_MS } from '../ui/tab-pages.js';
-import { keyboardFollow, KEYBOARD_FOLLOW_MS, KEYBOARD_FOLLOW_EASE, FOLLOWS_KEYBOARD } from '../ui/keyboard.js';
+import { keyboardFollow, KEYBOARD_FOLLOW_MS, KEYBOARD_FOLLOW_EASE, FOLLOWS_KEYBOARD, closesWithKeyboard, KEYBOARD_CLOSES } from '../ui/keyboard.js';
 
 const read = f => readFileSync(new URL(`../ui/${f}`, import.meta.url), 'utf8');
 const tabs = read('tab-pages.js'), tabbar = read('gestures/tabbar.css'), android = read('gestures/android.css'), motion = read('motion.js');
@@ -129,4 +129,17 @@ test('keyboard follow: the individual translate property, additive, never under 
   assert.match(fn, /\[\{ translate: `0 \$\{by\}px` \}, \{ translate: '0 0' \}\]/);
   assert.match(fn, /composite: 'add'/);
   assert.match(fn, /min-width: 840px/);
+});
+
+test('a dialog marked data-keyboard-close goes with the keyboard while its field (or nothing) has the focus', () => {
+  const body = { name: 'body' }, field = { name: 'field', text: true }, chip = { name: 'chip' }, outside = { name: 'other field', text: true };
+  const dialog = { contains: (/** @type {any} */ n) => n === field || n === chip };
+  const o = { body, typing: (/** @type {any} */ el) => !!el.text };
+  assert.equal(closesWithKeyboard(dialog, field, o), true);
+  assert.equal(closesWithKeyboard(dialog, null, o), true);
+  assert.equal(closesWithKeyboard(dialog, body, o), true);
+  assert.equal(closesWithKeyboard(dialog, dialog, o), true);
+  assert.equal(closesWithKeyboard(dialog, chip, o), false);
+  assert.equal(closesWithKeyboard(dialog, outside, o), false);
+  assert.equal(KEYBOARD_CLOSES, 'dialog[open][data-keyboard-close]');
 });

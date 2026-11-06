@@ -128,6 +128,7 @@ at 390 px, in Chromium and WebKit, with the keyboard played (no browser here sho
 | Resizes content | a tapped field in the sheet, then the page 344 px shorter: `html.ui-keyboard-open`, `--ui-keyboard-h` 0, the tab bar hidden, the sheet inside the space above; the page tall again: closed, the tab bar back | |
 | Visible part only | a field and the visual viewport 344 px shorter: `--ui-keyboard-h` 344px and the sheet's bottom on the keyboard's top; a blur: closed, 0 | |
 | Rides on the keyboard (rc.87) | a stand-in visual viewport 344 px shorter: the sheet's bottom, sampled each frame, goes from where it was to the keyboard's top over 8+ frames, never back down, no `translate` left; a blur and the viewport back: it drops with it over 5+ frames; Reduce Motion: there in the first frame (`keyboardFollow` and the additive `translate` in `test/tab-ripple-keyboard.unit.test.mjs`) | |
+| Closes with the keyboard (opt-in) | a sheet marked `data-keyboard-close`, its field focused, the page shorter then tall again (Android's Back hides the keyboard first): one `ui-keyboard-close`, the sheet closed; the focus on the sheet's button when the keyboard goes: it stays; without the mark: it stays (`closesWithKeyboard` in `test/tab-ripple-keyboard.unit.test.mjs`) | |
 
 ## Press feedback
 
