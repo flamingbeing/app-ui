@@ -200,9 +200,12 @@ test('less motion: a sheet shows and goes at once', async ({ phone }) => {
   await page.goto(PAGE);
   await page.waitForSelector('html[data-vault-ready]');
   await page.locator('#more').click();
-  // the sheet and its shade don't move (a row's own press or focus transition is the theme's, not the sheet's)
-  expect(await page.evaluate(() => document.getAnimations().map(a => /** @type {KeyframeEffect} */ (a.effect)?.target)
+  // no glide on the sheet or its shade (the theme's less-motion rule leaves a 1ms CSS transition, which isn't movement),
+  // and both are where they end at once
+  expect(await page.evaluate(() => document.getAnimations().filter(a => !(a instanceof CSSTransition))
+    .map(a => /** @type {KeyframeEffect} */ (a.effect)?.target)
     .filter(t => t && (t.id === 'page-menu' || t.classList.contains('ui-vault-shade'))).map(t => t.id || t.className))).toEqual([]);
+  expect(await page.locator('.ui-vault-shade').evaluate(s => /** @type {HTMLElement} */ (s).style.opacity)).toBe('1');
   expect(await page.locator('#page-menu').evaluate(d => new DOMMatrix(getComputedStyle(d).transform).m42)).toBe(0);
   await page.keyboard.press('Escape');
   await expect(page.locator('#page-menu')).toBeHidden();
