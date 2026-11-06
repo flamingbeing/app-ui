@@ -24,6 +24,16 @@ export function dragRange(snap, from, to, setTo) {
   return snap.map((was, i) => i >= lo && i <= hi ? setTo : was);
 }
 
+/**
+ * The row an arrow key moves to (pure): the next (`step` 1) or previous (-1) row from `from` that `isShown` keeps,
+ * skipping rows a search hid (`hidden`) or the page hides (display:none); null at either end.
+ * @template T @param {T[]} rows @param {T | null} from @param {1 | -1} step @param {(row: T) => boolean} isShown
+ */
+export function nextShown(rows, from, step, isShown) {
+  for (let i = (from ? rows.indexOf(from) : -1) + step; i >= 0 && i < rows.length; i += step) if (isShown(rows[i])) return rows[i];
+  return null;
+}
+
 /** "2-4" -> [2, 4]; "1" -> [1, 99] */
 export function needs(/** @type {string} */ spec) {
   const [lo, hi] = spec.split('-');
@@ -48,8 +58,10 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
   const alls = q('data-select-all');
   for (const c of counts) { c.setAttribute('role', 'status'); c.setAttribute('aria-live', 'polite'); }
   const rows = () => /** @type {HTMLElement[]} */ ([...list.querySelectorAll('.ui-row')]);
-  /** the rows a search leaves shown: Select all, its label and a drag take only these */
-  const shown = () => rows().filter(r => !r.hidden);
+  /** a row on screen: not hidden by a search (`hidden`) nor by the page (display:none, here or above it) */
+  const isShown = (/** @type {HTMLElement} */ r) => !r.hidden && r.getClientRects().length > 0;
+  /** the rows a search leaves shown: Select all, its label, a drag and the arrow keys take only these */
+  const shown = () => rows().filter(isShown);
   const on = () => list.classList.contains('is-editing');
   const isTicked = (/** @type {HTMLElement} */ r) => r.getAttribute('aria-selected') === 'true';
   const selected = () => rows().filter(isTicked);
@@ -118,10 +130,10 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
   let anchor = null;
   /** ticks every shown row between two rows, and nothing else @param {HTMLElement} a @param {HTMLElement} b */
   function tickRange(a, b) {
-    const shown = rows().filter(r => !r.hidden), i = shown.indexOf(a), j = shown.indexOf(b);
+    const vis = shown(), i = vis.indexOf(a), j = vis.indexOf(b);
     const lo = Math.min(i < 0 ? j : i, j), hi = Math.max(i < 0 ? j : i, j);
     rows().forEach(r => tick(r, false));
-    shown.slice(lo, hi + 1).forEach(r => tick(r, true));
+    vis.slice(lo, hi + 1).forEach(r => tick(r, true));
   }
   l.on(list, 'click', (/** @type {MouseEvent} */ e) => {
     const r = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('.ui-row'));
@@ -135,7 +147,7 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
       setEditing(true);
       if (e.shiftKey) tickRange(open ?? r, r);
       else { if (open) tick(open, true); tick(r, true); }
-    } else if (e.shiftKey) tickRange(anchor && !anchor.hidden ? anchor : selected()[0] ?? r, r);
+    } else if (e.shiftKey) tickRange(anchor && isShown(anchor) ? anchor : selected()[0] ?? r, r);
     else tick(r, !isTicked(r));
     anchor = r;
     haptic();
@@ -146,7 +158,7 @@ export function selectMode(list, { tabBar = /** @type {HTMLElement | null} */ (d
     const r = /** @type {HTMLElement | null} */ (/** @type {Element} */ (e.target).closest('.ui-row'));
     if (e.key === ' ' && r) { e.preventDefault(); r.click(); }
     else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      const all = rows(), i = r ? all.indexOf(r) : -1, next = all[i + (e.key === 'ArrowDown' ? 1 : -1)];
+      const next = nextShown(rows(), r, e.key === 'ArrowDown' ? 1 : -1, isShown);
       if (next) { e.preventDefault(); next.focus(); }
     }
   });

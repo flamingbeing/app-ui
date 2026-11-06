@@ -58,6 +58,7 @@ only transforms and sends `ui-side`; without `?wide=1` the old 14rem side bar an
 | Keyboard | Ctrl/Cmd+K focuses the search; typing filters; Esc clears, then leaves; arrows and Enter work the list | |
 | Pointer | right-click opens the row menu; Ctrl/Cmd-click adds; Shift-click takes a range; the detail summarises a multi-selection; Esc leaves select mode | |
 | Select all | 1280 px, with a search hiding rows: ticks only the shown rows; Deselect all / Select all follows them | |
+| Select mode arrows | 1280 px, with a search hiding rows: ArrowDown and ArrowUp go to the next shown row (a row the search hid, or one with display:none, is skipped); at the last one focus stays | |
 | Sheets | a side panel at 1280 px, a bottom sheet below; Back and Esc close it | open |
 | Tab bar | 390 px: the picked section (`?tab=`) is marked in both bars and its page shows; shrunk on scroll, its tab stays and Tab reaches it | |
 | Delete | removing from the detail shows an Undo toast; Undo puts the row back | |
