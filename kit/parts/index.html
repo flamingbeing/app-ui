@@ -112,6 +112,19 @@ mint    in a pot</code></pre>
       <p class="small" id="drag-order">Order: Apple, Pear, Plum, Fig</p>
     </section>
 
+    <section aria-labelledby="photos-title">
+      <h2 id="photos-title">Photo viewer</h2>
+      <div class="photo-strip" id="photos">
+        <button type="button" class="photo-thumb"><img src="photo-hills.svg" alt="Green hills under a pale sun" width="1200" height="800"></button>
+        <button type="button" class="photo-thumb"><img src="photo-tower.svg" alt="A tower at dusk" width="800" height="1200"></button>
+        <button type="button" class="photo-thumb"><img src="photo-boats.svg" alt="Two sailing boats" width="1200" height="900"></button>
+      </div>
+      <p class="small">Tap a photo: pinch or double-tap to zoom, drag to pan it, swipe for the next, swipe down to close.
+        The viewer's code loads on the first tap.</p>
+      <p class="small" id="photo-state" role="status">Closed.</p>
+      <dialog id="viewer" aria-label="Photo"></dialog>
+    </section>
+
     <section aria-labelledby="motion-title">
       <h2 id="motion-title">Follow the finger</h2>
       <div class="motion-track" id="motion-track"><div class="motion-knob" id="motion-knob">Drag</div></div>

@@ -82,6 +82,7 @@ export const HAPTIC_PATTERNS: Readonly<{
     reject: number[];
 }>;
 export const PRIORITY: Readonly<{
+    viewer: 70;
     sheet: 60;
     drawer: 50;
     back: 45;

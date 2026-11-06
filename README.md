@@ -54,6 +54,22 @@ row takes `sub` and `keywords` for the search and `shown` to come and go.
 
 The gallery page is `/kit/vault/`.
 
+### The photo viewer (opt-in, loaded on first use)
+
+`loadPhotoViewer()` (in `@core/ui`, an `import()` of `ui/photo-viewer.js`) gives `photoViewer(dialog, { steps })`, which
+fills an empty `<dialog>`; `open(photos, at)` shows the photos full screen on black from `at`. Pinch or double-tap to
+zoom, drag a zoomed photo to pan, swipe sideways for the next, swipe down (or the X, Esc, Back given the page's
+`createTransients()`) to close. A photo is `{ src, thumb?, cap?, alt? }`: a `thumb` already on the page shows at once
+until `src` has loaded. Styles are in `ui/ui.css`.
+
+```js
+let viewer;
+gallery.addEventListener('click', async e => {
+  viewer ||= (await loadPhotoViewer())(document.getElementById('viewer'), { steps });
+  viewer.open(photos, photos.findIndex(p => p.thumb === e.target.currentSrc));
+});
+```
+
 ## Responsiveness rules
 
 Every gesture in the kit, and any an app adds, keeps to these (`ui/motion.js` does the work; `e2e/jank.spec.mjs`
