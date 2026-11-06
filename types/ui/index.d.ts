@@ -41,7 +41,7 @@ export { tabBack, CLOSE_MS } from "./tab-back.js";
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from "./hide-mode.js";
 export { shrinkingTabBar, tabBarRoom } from "./tab-bar.js";
 export { detentSheet, sheetsSettled } from "./detent-sheet.js";
-export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD, caretShift } from "./keyboard.js";
+export { watchKeyboard, keyboardState, KEYBOARD_MIN, barCover, OVER_KEYBOARD, caretShift, closesWithKeyboard, KEYBOARD_CLOSES } from "./keyboard.js";
 export { holdKeyboard, HOLD_MS } from "./keep-keyboard.js";
 export { tabPages, swipeIntent, pageStep } from "./tab-pages.js";
 export { still, haptic, HAPTIC_PATTERNS, toggleTicks, claim, release, captured, onCaptured, PRIORITY } from "./gesture.js";
