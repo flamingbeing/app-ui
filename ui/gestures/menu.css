@@ -2,7 +2,10 @@
    ui/gestures.css (which loads them all, in order); link it alone
    for just this part, after theme.css and ui.css. */
 /* ---------- hold menu ---------- */
-.ui-menu-layer { position: fixed; inset: 0; z-index: 20; display: none; }
+.ui-menu-layer { position: fixed; inset: 0; z-index: 20; display: none;
+  /* tap-menu.js opens it as a popover (top layer): undo the browser's [popover] look (fit-content size, border, padding,
+     Canvas background, overflow auto), which shrank the layer to a small box and clipped the menu inside it */
+  width: auto; height: auto; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: none; color: inherit; overflow: visible; }
 .ui-menu-layer.is-open { display: block; }
 .ui-menu-safe { position: absolute; bottom: 0; width: 0; height: env(safe-area-inset-bottom, 0px); visibility: hidden; }
 .ui-menu-veil { position: absolute; inset: 0; background: var(--backdrop); animation: ui-fade var(--d-quick) var(--spring); }
