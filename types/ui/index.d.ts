@@ -11,6 +11,7 @@ export { toaster } from "./toast.js";
 export { emptyState } from "./empty-state.js";
 export { undoToast } from "./undo-toast.js";
 export { createTransients } from "./transients.js";
+export function loadPhotoViewer(): Promise<typeof import("./photo-viewer.js").photoViewer>;
 export { createNavigation } from "./navigation.js";
 export { startGestures } from "./gestures.js";
 export { largeTitle } from "./large-title.js";

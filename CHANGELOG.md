@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.0-rc.104
+
+A photo viewer, lifted from an app into the kit (opt-in, loaded on first use).
+
+- `loadPhotoViewer()` -> `photoViewer(dialog, { steps, labels, onChange })` (`ui/photo-viewer.js`, not in the index's
+  static imports): photos one at a time, full screen on black, the caption and "2 / 3" at the foot. Pinch or
+  double-tap to zoom (2.5 times towards the tapped point, up to 6), drag a zoomed photo to pan it, swipe sideways for
+  the next (past 18 % or thrown; the ends stretch), swipe down to close (past 110 px or thrown; a short drag springs
+  back), the X, Esc, and Back given the page's `createTransients()`. A `thumb` already on the page shows at once until
+  the full `src` has loaded. Fingers move it 1:1 by transform and opacity; a let-go glides on the kit's spring with the
+  finger's speed, and a finger can catch a glide. Less motion: a double-tap zooms at once.
+- The arbiter (`PRIORITY`) gains `viewer` (70), over every other part: the viewer's touch is its own.
+- Pure parts: `panLimits`, `pinchTo`, `tapZoom`, `swipeTo`.
+- Gallery: `/kit/parts/` gains a photo viewer section (three made-up photos); tests `e2e/photo-viewer.spec.mjs`,
+  `test/photo-viewer.unit.test.mjs`.
+
 ## 1.0.0-rc.103
 
 The vault shell's second half: the sidebars and the full-screen settings, opt-in in `ui/vault/` with the first half.

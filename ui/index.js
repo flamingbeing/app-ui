@@ -33,6 +33,10 @@ export { qrSheet, QR_QUIET } from './qr-sheet.js';
 export { askFirst, askStep, laterTimes, permissionState, requestPermission, ASK_KINDS, ASK_LATER_DAYS, ASK_LATER_KEY } from './ask-first.js';
 export { resumeTabs, keepPlace, placeToOpen, RESUME_KEY, RESUME_MINUTES, RESUME_HOLD_MS } from './resume.js';
 export { createTransients } from './transients.js';
+// photo viewer (from an app): full screen, pinch and double-tap zoom, pan, swipe, swipe down to close; loaded on first
+// use: `const photoViewer = await loadPhotoViewer()` (or import ui/photo-viewer.js yourself)
+/** @returns {Promise<typeof import('./photo-viewer.js').photoViewer>} */
+export const loadPhotoViewer = () => import('./photo-viewer.js').then(m => m.photoViewer);
 export { createNavigation } from './navigation.js';
 export { tabBack, CLOSE_MS } from './tab-back.js';
 export { MAX_HIDDEN, hideKey, cleanHideList, nameOf, keptBecause, targetOf, entryFor, applyHidden } from './hide-mode.js';

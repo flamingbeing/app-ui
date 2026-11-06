@@ -1,7 +1,7 @@
 // The reference parts gallery: the undo toast, the loading and error states and the About sheet, on made-up data.
 // ?look= and ?density= preview as on the other gallery pages (preview.js). The fake update api and import map stand in for an app's.
 import { toaster, undoToast, loadState, aboutSheet, draftSlot, gripDrag, moveIn, shareText, copyText, shareLink, qrSheet, askFirst, ASK_LATER_KEY, createTransients,
-  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard, drag, glide, afterGesture } from '../../ui/index.js';
+  applyHidden, cleanHideList, keptBecause, targetOf, entryFor, hideKey, hoverCard, drag, glide, afterGesture, loadPhotoViewer } from '../../ui/index.js';
 import { icon, gripVertical } from '../../icons/lucide.js';
 import { galleryPreview } from '../preview.js';
 
@@ -118,6 +118,19 @@ $('ask-reset').addEventListener('click', () => {
 
 // Back closes the top dialog: each dialog takes one history entry
 const transients = createTransients({ history, location, events: window });
+
+// photo viewer: the code loads on the first tap (loadPhotoViewer); Back closes it (the page's transients)
+/** @type {import('../../ui/photo-viewer.js').PhotoViewer | null} */
+let viewer = null;
+const thumbs = /** @type {HTMLImageElement[]} */ ([...$('photos').querySelectorAll('img')]);
+$('photos').addEventListener('click', async e => {
+  const at = thumbs.indexOf(/** @type {HTMLImageElement} */ (/** @type {Element} */ (e.target).closest('.photo-thumb')?.querySelector('img')));
+  if (at < 0) return;
+  const dialog = /** @type {HTMLDialogElement} */ ($('viewer'));
+  viewer ||= (await loadPhotoViewer())(dialog, { steps: transients, onChange: i => { $('photo-state').textContent = `Showing ${i + 1} of ${thumbs.length}.`; } });
+  dialog.addEventListener('close', () => { $('photo-state').textContent = 'Closed.'; }, { once: true });
+  viewer.open(thumbs.map(im => ({ src: im.getAttribute('src') || '', alt: im.alt, cap: im.alt })), at);
+});
 const backState = $('back-state');
 /** @type {Record<string, import('../../ui/transients.js').Transient | undefined>} */
 const open = {};

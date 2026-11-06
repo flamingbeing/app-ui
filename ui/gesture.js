@@ -93,9 +93,9 @@ export function toggleTicks(root = document) {
 // move's way have passed). A claim fails while a part of the same or a higher priority owns this touch; a higher one
 // takes it over. A win sends "ui-gesture-captured" (detail.name) on document: pressed states and hold timers clear,
 // and a part that held the touch stands down. The touch is over (nobody owns it) once the last finger lifts.
-// Higher first: a sheet's drag, the drawer, the edge swipe back, a card deck, the tab pages, a row drag, select-mode's
+// Higher first: the photo viewer (full screen, over everything), a sheet's drag, the drawer, the edge swipe back, a card deck, the tab pages, a row drag, select-mode's
 // drag down the ticks, the hold menu, the rubber band.
-export const PRIORITY = Object.freeze({ sheet: 60, drawer: 50, back: 45, tabs: 40, cards: 30, drag: 25, select: 20, hold: 15, bounce: 10 });
+export const PRIORITY = Object.freeze({ viewer: 70, sheet: 60, drawer: 50, back: 45, tabs: 40, cards: 30, drag: 25, select: 20, hold: 15, bounce: 10 });
 /** @type {string | null} */
 let owner = null;
 let watching = false;
