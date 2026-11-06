@@ -4,13 +4,39 @@
 body { background: var(--kit-vault-bg); color: var(--ui-vault-text, CanvasText); font-family: -apple-system, "Inter", "Roboto", system-ui, sans-serif; }
 .kit-vault-head { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
   padding: calc(env(safe-area-inset-top, 0px) + 12px) 13px 8px; background: var(--kit-vault-bg); }
+.kit-vault-start, .kit-vault-end { display: flex; align-items: center; gap: 6px; }
+.kit-vault-end { justify-self: end; }
 .kit-vault-home { justify-self: start; color: var(--ui-vault-link, LinkText); text-decoration: none; font-size: 16px; }
 .kit-vault-title { margin: 0; font-size: 16px; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kit-vault-more { justify-self: end; appearance: none; display: grid; place-items: center; width: 44px; height: 44px; min-height: 0; padding: 0; border: 0;
+.kit-vault-circle { flex: none; appearance: none; display: grid; place-items: center; width: 44px; height: 44px; min-height: 0; padding: 0; border: 0;
   border-radius: 999px; color: inherit; background: var(--ui-vault-glass, transparent); box-shadow: var(--ui-vault-glass-shadow, none);
   -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; }
-.kit-vault-more:focus-visible { outline: 2px solid var(--ui-vault-accent, Highlight); outline-offset: -2px; }
+.kit-vault-circle:focus-visible { outline: 2px solid var(--ui-vault-accent, Highlight); outline-offset: -2px; }
 .kit-vault-page { max-width: 44rem; margin: 0 auto; padding: 8px 25px 120px; font-size: 16px; line-height: 1.5; }
 .kit-vault-lede { color: var(--ui-vault-muted, GrayText); }
 .kit-vault-label { display: block; margin: 24px 0 6px; font-size: 14px; color: var(--ui-vault-muted, GrayText); }
 .kit-vault-input { width: 100%; box-sizing: border-box; }
+/* the sidebars' views and footers (the app's own rows: ui/vault/ draws the drawer, the picker and the foot) */
+.kit-vault-list { display: grid; gap: 2px; padding: 0 8px; }
+.kit-vault-row { appearance: none; display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; height: 36px; min-height: 0;
+  margin: 0; padding: 0 12px; border: 0; border-radius: 8px; background: none; color: inherit; font: 16px var(--ui-vault-font); text-align: start; cursor: pointer; }
+.kit-vault-row .ui-vault-icon { width: 18px; height: 18px; color: var(--ui-vault-muted); }
+.kit-vault-row.is-on { background: var(--ui-vault-hover); }
+html .kit-vault-row:is(:active, [data-pressed]) { background: var(--ui-vault-hover); box-shadow: none; transform: none; }
+.kit-vault-row:focus-visible { outline: 2px solid var(--ui-vault-accent); outline-offset: -2px; }
+.kit-vault-view-title { margin: 0 20px 8px; font-size: 13px; font-weight: 600; color: var(--ui-vault-muted); }
+:root .ui-vault-drawer input.kit-vault-filter[class] { display: block; width: calc(100% - 32px); min-width: 0; height: 38px; margin: 0 16px 8px; padding: 0; box-sizing: border-box; border: 0;
+  border-bottom: 1px solid var(--ui-vault-line); border-radius: 0; background: none; color: inherit; font: 16px var(--ui-vault-font); outline: none; box-shadow: none; }
+.kit-vault-none { margin: 14px 16px; font-size: 15px; color: var(--ui-vault-muted); }
+.kit-vault-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-left: 6px; }
+.kit-vault-foot-name { display: grid; gap: 1px; min-width: 0; }
+.kit-vault-foot-name strong { font-size: 19px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-vault-foot-name span { font-size: 12px; color: var(--ui-vault-muted); }
+.kit-vault-gear { appearance: none; flex: none; display: grid; place-items: center; width: 44px; height: 44px; min-height: 0; margin: 0; padding: 0; border: 0;
+  border-radius: 999px; background: var(--ui-vault-card); color: inherit; box-shadow: var(--ui-vault-shadow); cursor: pointer; }
+.kit-vault-gear .ui-vault-icon { width: 22px; height: 22px; }
+.kit-vault-gear:focus-visible { outline: 2px solid var(--ui-vault-accent); outline-offset: 2px; }
+.kit-vault-stat { display: flex; justify-content: space-between; padding: 8px 20px; font-size: 15px; }
+.kit-vault-stat span:last-child { color: var(--ui-vault-muted); }
+html[data-text-size="large"] .kit-vault-page { font-size: 18px; }
+.kit-vault-page { min-height: calc(100dvh - 80px); box-sizing: border-box; }
