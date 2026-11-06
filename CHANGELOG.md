@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.0-rc.102
+
+The vault shell, opt-in: the first half of a notes-vault layout lifted from an app into the kit, so any app can have it.
+
+- `ui/vault/` (not in `@core/ui`'s index: nothing loads unless an app imports `ui/vault/index.js`, best with `import()`;
+  README, "The vault shell"). `vaultStyles()` links `ui/vault/vault.css` once; tokens are `--ui-vault-*` on `:root` at
+  no specificity, light and dark.
+- `navPill({ buttons })`: a frosted pill (no ring) floating over the bottom with the app's buttons in its order. Known
+  slots bring their Lucide icon and name: back, forward, search, add (+), tabs (a box with the open tabs' count) and
+  menu; `can(slot, ok)` makes one faint and `aria-disabled`, `count(n)` sets the tabs count. While the keyboard is up
+  (the kit's keyboard watch) it fades, drops and is inert.
+- `menuSheet({ id, label, cards, steps })`: a bottom sheet of rows in grouped rounded cards, for item menus, an app
+  menu and pickers. Rows take an icon, a tick, a radio, a chevron, a hint, a second line, a red `danger`, `disabled`,
+  and a button of their own at the end that keeps the sheet open; `close` adds a Close row at the start or end. Back
+  (given the page's `createTransients()`), Esc, the shade, the Close row or a drag of the top down closes it; a tapped
+  row closes the sheet (and its history step) before it runs. Its step leaves the page's close guard in place, so
+  closing a sheet never says "Press Back again to close". Moves by transform and opacity on the kit's `glide`/`drag`.
+- Icons: `search`, `plus`, `circle` and `circleDot` join the kit's Lucide set.
+- Gallery: `/kit/vault/` (a made-up field journal); tests `e2e/vault.spec.mjs`.
+
 ## 1.0.0-rc.101
 
 - Tap menu: the menu layer drops the browser's `[popover]` look (fit-content size, border, padding, overflow), which

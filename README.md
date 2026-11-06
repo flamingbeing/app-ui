@@ -25,6 +25,22 @@ Pin one version in the import map and link the styles from the same base:
 For types, add `github:flamingbeing/app-ui#v1.0.0-rc.1` as a devDependency and point `paths` at `node_modules/app-ui`.
 `/ui/versions.json` lists the served versions (`latest` is the last stable one).
 
+### The vault shell (opt-in)
+
+`ui/vault/` holds the parts of a notes-vault layout on a phone: `navPill` (a frosted pill floating over the bottom
+with the app's back, forward, search, +, open-tabs count and menu buttons; it steps aside while the keyboard is up)
+and `menuSheet` (a bottom sheet of rows in grouped rounded cards: icons, ticks, radios, a chevron, a red delete, an
+optional Close row; Back closes it given the page's `createTransients()`). It is not in `@core/ui`'s index, so nothing
+loads unless the app maps and imports it, best with `import()` when its layout starts:
+
+```js
+// import map: "@core/ui/vault": "https://core.anawj.com/ui/<version>/ui/vault/index.js"
+const { navPill, menuSheet, vaultStyles } = await import('@core/ui/vault');
+await vaultStyles();   // links ui/vault/vault.css once (or link it in the page)
+```
+
+The gallery page is `/kit/vault/`.
+
 ## Responsiveness rules
 
 Every gesture in the kit, and any an app adds, keeps to these (`ui/motion.js` does the work; `e2e/jank.spec.mjs`

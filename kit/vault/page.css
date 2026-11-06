@@ -1,0 +1,16 @@
+/* The vault shell gallery page's own bits: a plain page as a notes vault shows one (white, or near-black in dark),
+   its title centred over the words, the page's menu in a frosted circle. The pill and sheets are ui/vault/vault.css. */
+:root { --kit-vault-bg: light-dark(#ffffff, #1e1e1e); }
+body { background: var(--kit-vault-bg); color: var(--ui-vault-text, CanvasText); font-family: -apple-system, "Inter", "Roboto", system-ui, sans-serif; }
+.kit-vault-head { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 13px 8px; background: var(--kit-vault-bg); }
+.kit-vault-home { justify-self: start; color: var(--ui-vault-link, LinkText); text-decoration: none; font-size: 16px; }
+.kit-vault-title { margin: 0; font-size: 16px; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kit-vault-more { justify-self: end; appearance: none; display: grid; place-items: center; width: 44px; height: 44px; min-height: 0; padding: 0; border: 0;
+  border-radius: 999px; color: inherit; background: var(--ui-vault-glass, transparent); box-shadow: var(--ui-vault-glass-shadow, none);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; }
+.kit-vault-more:focus-visible { outline: 2px solid var(--ui-vault-accent, Highlight); outline-offset: -2px; }
+.kit-vault-page { max-width: 44rem; margin: 0 auto; padding: 8px 25px 120px; font-size: 16px; line-height: 1.5; }
+.kit-vault-lede { color: var(--ui-vault-muted, GrayText); }
+.kit-vault-label { display: block; margin: 24px 0 6px; font-size: 14px; color: var(--ui-vault-muted, GrayText); }
+.kit-vault-input { width: 100%; box-sizing: border-box; }

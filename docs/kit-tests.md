@@ -224,6 +224,23 @@ placeToOpen's rules (path, window, deep links, bad records), theme/early.js run 
 placeToOpen opens (and nothing when storage throws), resumeTabs saves on pagehide and hidden only, keeps the last place
 for a page without a plain id, opens the kept tab itself without early.js's mark, and stops cleanly.
 
+## Vault shell (`e2e/vault.spec.mjs`, `kit/vault/`)
+
+`/kit/vault/` at 390 px (Chromium), the opt-in `ui/vault/` parts on a made-up field journal. Pill: six buttons named
+in order (Back, Forward, the app's Search label, New tab, Open tabs: n, Menu), Back and Forward `aria-disabled` and
+faint at the start (a tap does nothing), frosted (`blur(12px)`), no border or outline, 50 px high, floating clear of
+the bottom edge; axe clean light and dark. Back and Forward walk the pages seen, + raises the count and the tabs
+button's name, a tab's own close button keeps the tabs sheet open and redrawn with the focus kept. Keyboard (the
+viewport made shorter, as resizes-content does): the pill is inert, hidden, transparent, 12 px down and untappable,
+and back once it goes. Menu sheet: four cards (the Close row first), 18 px card corners, 44 px rows, red Delete, 31 px
+sheet corners on the bottom edge, focus on the first row, a tick row toggles (`aria-pressed`, a tick at the end); axe
+clean open, light and dark. Esc (focus back to the opener), Back, a tap on the shade, the Close row and a long drag of
+the top each close it; a short drag follows the pointer and settles back; a row that opens another sheet closes its
+own first; none of these shows "Press Back again to close" and no history entries are left over, while the page's own
+first Back still does. Rows: a chevron row with its hint opens another sheet, a radio pick (`radiogroup`,
+`aria-checked`) is kept, a disabled row with its hint can't be tapped, the Close row at the end. Less motion: a sheet
+shows and goes with no animation. Smoke: `gallery.spec.mjs` loads the page clean.
+
 ## Settings screen gallery
 
 `/kit/settings/` is tested by `e2e/settings.spec.mjs`: `settingsScreen` on a made-up plant app's options, held by a

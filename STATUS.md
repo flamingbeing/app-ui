@@ -10,6 +10,7 @@
 - rc.13 tab slide on tap (owner, 28 Oct).
 - rc.37 responsiveness (owner, 29 Oct): `ui/motion.js` (glide, spring, drag, afterGesture, pressFeedback), the pager, drawer, sheet and edge swipe on it, pressed at once, CI jank gate (4x slowed CPU).
 - rc.34 swipe fidelity (owner, 29 Oct): pages follow the finger also with Reduce Motion, quick flicks all count, catch a glide, pan-y pager, 28 px edge, drawer pulled from the first page.
+- rc.102 vault shell, opt-in (6 Nov): `ui/vault/` navigation pill and grouped menu sheets, lifted from an app's vault layout; gallery `/kit/vault/`. The sidebars and full-screen settings are the second half (not yet in the kit).
 
 ## Waiting on the owner
 -
