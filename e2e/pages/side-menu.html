@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" class="glass">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Side menu</title>
+  <!-- A single-pane shell with a menu button in its bar (as the Trips app): a drawer on a phone, from 600 px the button
+       hides and shows the side bar. Test-only: not part of a release. -->
+  <script type="importmap">
+{ "imports": { "@core/ui": "../../ui/index.js", "@core/theme": "../../theme/index.js" } }
+  </script>
+  <script src="../../theme/early.js"></script>
+  <link rel="stylesheet" href="https://design.flamingbeing.com/v1/tokens.css">
+  <link rel="stylesheet" href="../../theme/theme.css">
+  <link rel="stylesheet" href="../../ui/ui.css">
+  <link rel="stylesheet" href="../../theme/glass.css">
+  <link rel="stylesheet" href="../../ui/gestures.css">
+  <link rel="stylesheet" href="../../ui/shell/shell.css">
+  <script type="module">
+    import { applyTheme } from '@core/theme';
+    import { startGestures, adaptiveShell } from '@core/ui';
+    applyTheme({ accent: '#3a6390' });
+    const kit = startGestures();
+    window.app = { kit, shell: adaptiveShell(document.querySelector('.ui-shell'), { screens: kit.screens }) };
+  </script>
+</head>
+<body>
+  <div class="ui-shell">
+    <header class="ui-bar">
+      <span class="ui-bar-side" data-bar-lead><button type="button" class="ui-bar-menu" id="menu" aria-label="Sections">≡</button></span>
+      <h2 class="ui-bar-title">Shelf</h2>
+      <span class="ui-bar-side ui-bar-end"><button type="button" class="ui-primary" id="new">New</button></span>
+    </header>
+    <nav class="ui-sidebar" aria-label="Sections" id="side"><p class="ui-sidebar-name">Shelf</p><a class="ui-side-link" href="#home" aria-current="page">Home</a></nav>
+    <main class="ui-screens">
+      <section class="ui-screen" id="home" aria-labelledby="home-title">
+        <h1 class="ui-large-title" id="home-title">Shelf</h1>
+        <ul class="ui-list" id="rows">
+          <li><a class="ui-row" href="#home"><span class="ui-row-main">Link row</span></a></li>
+          <li><button type="button" class="ui-row" id="button-row"><span class="ui-row-main">Button row</span></button></li>
+          <li><a class="ui-row" href="#last"><span class="ui-row-main">Another link</span></a></li>
+        </ul>
+        <p id="last">The last line</p>
+      </section>
+    </main>
+    <nav class="ui-tabbar" aria-label="Pages">
+      <a class="ui-tab" href="#home" aria-current="page"><span class="ui-tab-icon" aria-hidden="true">▤</span>Shelf</a>
+      <a class="ui-tab" href="#rows"><span class="ui-tab-icon" aria-hidden="true">≡</span>More</a>
+    </nav>
+  </div>
+</body>
+</html>

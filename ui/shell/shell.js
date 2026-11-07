@@ -17,7 +17,9 @@
 //   Esc          on a phone's pushed detail, goes back (select mode, menus and dialogs keep their own Esc)
 //   side bar     a .ui-bar-menu button (in the bar's [data-bar-lead]) opens the side bar as a drawer on a phone
 //                (.ui-shell.is-drawer-open, over a .ui-drawer-shade); a side link, a tap on the shade, Esc or growing
-//                past phone width closes it. Open, it is a history entry (Back closes it) and the page behind is inert. No swipe opens it (it took swipes meant to change
+//                past phone width closes it. From 600 px the same button hides and shows the side bar (a single-pane
+//                shell, whose bar stays beside it; html[data-side-hidden], kept per device as the wide side bar's,
+//                wide-side.js, which it loads on the first press or at start when it was left hidden). Open, it is a history entry (Back closes it) and the page behind is inert. No swipe opens it (it took swipes meant to change
 //                page); a left swipe on the open drawer or the shade pushes it back with the finger
 //   wide side   opt-in: html[data-wide-side] at >= 840 px gives the side bar its wide look and a hide button
 //                (ui/shell/wide-side.js, imported only then, also when the window grows to it later); `wide` is the
@@ -37,6 +39,25 @@ export const sizeClass = w => w < TABLET_MIN ? 'phone' : w < LAPTOP_MIN ? 'table
  * @param {{ hasAttribute: (name: string) => boolean }} html @param {number} width */
 export const wantsWideSide = (html, width) => html.hasAttribute('data-wide-side') && width >= LAPTOP_MIN;
 
+export const SIDE_KEY = 'ui-side-hidden';
+
+/** @typedef {{ get: () => boolean, set: (v: boolean) => void }} SideStore */
+
+/**
+ * The store for the side bar's hidden state: the app's own, or localStorage (any failure reads as shown and is not
+ * kept) (pure but for the storage it is given).
+ * @param {SideStore | null} [store] @param {Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> | null} [storage]
+ * @returns {SideStore}
+ */
+export function sideStore(store = null, storage = null) {
+  if (store) return store;
+  const ls = () => storage ?? globalThis.localStorage;
+  return {
+    get() { try { return ls().getItem(SIDE_KEY) === '1'; } catch { return false; } },
+    set(v) { try { if (v) ls().setItem(SIDE_KEY, '1'); else ls().removeItem(SIDE_KEY); } catch { /* not kept here */ } },
+  };
+}
+
 /** Whether a row's text matches a search: every word, any case (pure). @param {string} text @param {string} query */
 export function matchesSearch(text, query) {
   const t = text.toLowerCase();
@@ -53,13 +74,14 @@ function defaultRender(row, detail) {
  * @param {HTMLElement} shell  .ui-shell
  * @param {{ screens?: { push: (t: string | HTMLElement, from?: HTMLElement | null) => void, pop: (a?: boolean) => void, depth: () => number } | null,
  *   render?: (row: HTMLElement, detail: HTMLElement) => void,
- *   wide?: import('./wide-side.js').SideStore | null }} [opts]  screens: the page's screen stack (startGestures().screens);
- *   wide: where the wide side bar's hidden state is kept (html[data-wide-side] only; default localStorage)
+ *   wide?: SideStore | null }} [opts]  screens: the page's screen stack (startGestures().screens);
+ *   wide: where the side bar's hidden state is kept (the wide side bar's and the menu button's; default localStorage)
  * @returns {{ open: (row: HTMLElement) => void, current: () => HTMLElement | null, size: () => string,
  *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null,
  *   side: () => { toggle: (hide?: boolean) => void, hidden: () => boolean } | null, stop: () => void }}
  *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more.
- *   side: the wide side bar's hide button once wide-side.js has loaded (null before, and on phones and tablets)
+ *   side: the side bar's hiding once wide-side.js has loaded (null before: the wide side bar, or the menu button's
+ *   first press from 600 px)
  */
 export function adaptiveShell(shell, { screens = null, render = defaultRender, wide = null } = {}) {
   const l = listeners();
@@ -87,14 +109,21 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender, w
   for (const q of queries) l.on(q, 'change', applySize);
   applySize();
 
-  // the wide side bar: its file loads once, only when the page opted in and the window is laptop wide
-  /** @type {ReturnType<typeof import('./wide-side.js').wideSide> | null} */
+  // the side bar's hiding (wide-side.js): its file loads once, when the page opted in and the window is laptop wide, or
+  // when the bar's menu button first hides it from 600 px (or at start, left hidden)
+  /** @typedef {ReturnType<typeof import('./wide-side.js').wideSide>} SideCtl */
+  /** @type {SideCtl | null} */
   let wideCtl = null;
-  let wideAsked = false, stopped = false;
+  /** @type {Promise<SideCtl | null> | null} */
+  let wideLoad = null;
+  let stopped = false;
+  const sideCtl = () => (wideLoad ??= import('./wide-side.js').then(m => {
+    if (!stopped && !wideCtl) wideCtl = m.wideSide(shell, { store: wide });
+    return wideCtl;
+  }));
   function wideCheck() {
-    if (wideAsked || !shell.querySelector('.ui-sidebar') || !wantsWideSide(html, innerWidth)) return;
-    wideAsked = true;
-    void import('./wide-side.js').then(m => { if (!stopped) wideCtl = m.wideSide(shell, { store: wide }); });
+    if (wideLoad || !shell.querySelector('.ui-sidebar') || !wantsWideSide(html, innerWidth)) return;
+    void sideCtl();
   }
   l.on(queries[1], 'change', wideCheck);
   const optIn = new MutationObserver(wideCheck);
@@ -234,7 +263,7 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender, w
     if (shade) shade.style.opacity = '';
     dx = on ? dw : 0;
     if (on === was) return;
-    for (const m of menus) m.setAttribute('aria-expanded', String(on));
+    menuState();
     // (a finger's open doesn't focus a field: the keyboard would come up)
     if (on) /** @type {HTMLElement | null} */ (side?.querySelector(touch ? 'a, button' : 'a, button, input'))?.focus({ preventScroll: true });
     else if (side?.contains(document.activeElement)) menus[0]?.focus({ preventScroll: true });
@@ -256,6 +285,11 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender, w
       run.stop();
       rest(on, touch);
     });
+  }
+  /** the menu buttons' aria-expanded: the drawer on a phone, the side bar's column from 600 px */
+  function menuState() {
+    const on = size === 'phone' ? drawerOpen() : !html.hasAttribute('data-side-hidden');
+    for (const m of menus) m.setAttribute('aria-expanded', String(on));
   }
   /** @param {boolean} on */
   function drawer(on) {
@@ -323,9 +357,19 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender, w
     l.on(el, 'touchcancel', end, { passive: true });
   }
   if (side) swipeShut(side);
-  for (const m of menus) { m.setAttribute('aria-expanded', 'false'); l.on(m, 'click', () => drawer(!drawerOpen())); }
+  // from 600 px the menu button hides and shows the side bar (only a single-pane shell's bar shows beside it); left
+  // hidden, it starts hidden (marked at once, so it doesn't show first)
+  const menuSide = !!side && menus.length > 0 && !shell.querySelector(':scope > .ui-panes');
+  if (menuSide && size !== 'phone' && sideStore(wide).get()) { html.toggleAttribute('data-side-hidden', true); void sideCtl(); }
+  if (side?.id) for (const m of menus) if (!m.hasAttribute('aria-controls')) m.setAttribute('aria-controls', side.id);
+  menuState();
+  for (const m of menus) l.on(m, 'click', () => {
+    if (size === 'phone') drawer(!drawerOpen());
+    else if (menuSide) void sideCtl().then(c => c?.toggle());
+  });
+  l.on(shell, 'ui-side', menuState);
   if (side) l.on(side, 'click', (/** @type {MouseEvent} */ e) => { if (/** @type {Element} */ (e.target).closest('a, .ui-side-link')) drawer(false); });
-  l.on(shell, 'ui-size', () => { if (size !== 'phone') { hold(); rest(false); } });
+  l.on(shell, 'ui-size', () => { if (size !== 'phone') { hold(); rest(false); } menuState(); });
 
   l.on(document, 'keydown', (/** @type {KeyboardEvent} */ e) => {
     const t = /** @type {Element} */ (e.target);
