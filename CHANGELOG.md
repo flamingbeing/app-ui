@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-rc.113
+
+- **A sheet with a form scrolls:** a sheet whose head and body sit in a `<form method="dialog">` (the usual edit sheet)
+  grew to its content and was cut off at the screen's edge, with no way to scroll to the rows below, both as the phone's
+  bottom sheet and as the laptop's `data-wide="panel"` side panel. `dialog.ui-sheet > form` now passes the sheet's
+  height on (flex column, `min-height: 0`), so `.ui-sheet-body` scrolls. New `e2e/sheet-form.spec.mjs` at 390 and
+  1280 px.
+
 ## 1.0.0-rc.112
 
 - **A shell with panes hides its side bar from 600 px:** no bar shows beside the panes, so the side bar's head row

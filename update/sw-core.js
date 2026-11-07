@@ -3,7 +3,7 @@
    manifest, ... }). See docs/app-update.md. Moved from app-sync (frozen there at /update/1.5.5/) in 1.0.0-rc.108. */
 (function (self) {
   'use strict';
-  const CORE_VERSION = '1.0.0-rc.112';
+  const CORE_VERSION = '1.0.0-rc.113';
   const MANIFEST_PATH = './.app-update-manifest';
   const SHARED = 'share-pending/';   // where the share option keeps files: <scope>share-pending/<id>/<n>
   // never cached, whatever the app says: Firebase auth pages, Cloudflare Access, and its return pages

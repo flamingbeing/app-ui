@@ -34,6 +34,9 @@ dialog.ui-sheet.is-dragging { transition: none; }
 /* a row of chips that scrolls sideways runs to the sheet's edges instead of being cut at the padding */
 .ui-sheet-body > .ui-scroll-x { margin-inline: calc(var(--pad) * -1); padding-inline: var(--pad); scroll-padding-inline: var(--pad); }
 .ui-sheet-body { flex: 1; overflow: auto; overscroll-behavior: contain; padding: 0 var(--pad) var(--pad); }
+/* a <form method="dialog"> holding the head and body passes the sheet's height on, so the body scrolls (it grew to its
+   content and the sheet cut it off: no way to reach the rows below the screen) */
+dialog.ui-sheet > form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 /* along the bottom edge (below 840 px) the last row clears the home indicator */
 @media (max-width: 839.98px) { .ui-sheet-body { padding-bottom: calc(var(--pad) + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 840px) {
