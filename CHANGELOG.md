@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.112
+
+- **A shell with panes hides its side bar from 600 px:** no bar shows beside the panes, so the side bar's head row
+  now ends in the hide button (the wide side bar's `.ui-side-toggle`, wide-side.js) on every shell with panes from
+  600 px, opted in or not: hidden, the column goes, the button stays at the top-left, the list pane's head makes room
+  and the list pane grows by that room. Same store as before (`ui-side-hidden`), marked at start with no flash. The
+  opt-in `data-wide-side` still gives the 280 px look at >= 840 px over it. `e2e/shell-wide.spec.mjs`: at 1280 px
+  without the attribute the button shows, and a new 700 px test hides, reloads and shows it.
+
 ## 1.0.0-rc.111
 
 - **The menu button hides the side bar from 600 px:** a single-pane shell (screens, no panes, the bar beside the side

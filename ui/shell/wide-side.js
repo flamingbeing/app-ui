@@ -1,7 +1,7 @@
-// The side bar's hiding. The wide side bar (opt-in, laptop only): html[data-wide-side] at >= 840 px; adaptiveShell
-// (shell.js) imports this file when both hold, or when the bar's menu button first hides the side bar from 600 px (any
-// single-pane shell; then only the button below stays unseen). Its look is ui/shell/shell.css's ":root[data-wide-side]"
-// block (and its "hidden by the menu button" block).
+// The side bar's hiding, from 600 px. adaptiveShell (shell.js) imports this file for a shell with panes once the window
+// is 600 px or wider, for a single-pane shell when its bar's menu button first hides the side bar (then the button below
+// stays unseen; the menu button does it), and for the opt-in wide side bar (html[data-wide-side] at >= 840 px). Its
+// look is ui/shell/shell.css's "side bar hiding" block, and the ":root[data-wide-side]" block over it.
 //   toggle   a 32 px button (panel-left icon) at the end of the side bar's head row (.ui-side-head; made, holding a
 //            leading .ui-sidebar-name, when the page has none). It hides the side bar fully: the main column takes the
 //            room and the button stays, fixed at the page's top-left. Enter or Space on it, as on any button.

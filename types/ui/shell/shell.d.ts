@@ -18,8 +18,8 @@ export function matchesSearch(text: string, query: string): boolean;
  *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null,
  *   side: () => { toggle: (hide?: boolean) => void, hidden: () => boolean } | null, stop: () => void }}
  *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more.
- *   side: the side bar's hiding once wide-side.js has loaded (null before: the wide side bar, or the menu button's
- *   first press from 600 px)
+ *   side: the side bar's hiding once wide-side.js has loaded (null before, and on a phone: from 600 px a shell with
+ *   panes loads it at once, a single-pane shell at its menu button's first press)
  */
 export function adaptiveShell(shell: HTMLElement, { screens, render, wide }?: {
     screens?: {
