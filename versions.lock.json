@@ -13202,7 +13202,7 @@
     "ui/vault/side-drawer.js": "d5181193e9f1255b11d314288552f9f5589299e7882bbe709ece7b9a49dd95c3",
     "ui/vault/sidebar.js": "99dae2d4589e90443c2a14b1085a82647d92415a65a1ed289f28fd4c0a9be319",
     "ui/vault/vault.css": "6c537534fb2e3f7b0c3b62baa4ef8a71aac0e57c4c5151b6b9866dc924394831",
-    "update/register.js": "61578cc7c72f8541d4c24a1c4e1cb8569654f09da6b2c2cc63f719333b4c0c38",
-    "update/sw-core.js": "04e2fcceb22b2f70f9196df258fe42f429b23295d08d5b6c88a1d166aa72c04c"
+    "update/register.js": "97deca8f7edbf1d66d42e4c23fa98fe3a8d07ed96cb6c1699f0981dbac96af53",
+    "update/sw-core.js": "2231053f87ed2c3a3a67864f097011324b34c8465ef70f8b6432f2784ed60d13"
   }
 }
