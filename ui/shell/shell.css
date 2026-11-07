@@ -117,6 +117,19 @@
 }
 @keyframes ui-slide-in { from { transform: translateX(100%); } }
 
+/* ---------- hidden by the menu button (from 600 px; ui/shell/shell.js, wide-side.js) ----------
+   A single-pane shell's bar stays beside the side bar, so its .ui-bar-menu hides and shows it: hidden, the column is 0
+   wide, the side bar out of reach (Tab skips it) and the bar and screens take the room; while it slides, the side bar
+   lies over the page at its open width (wide-side.js animates the transforms). */
+@media (min-width: 600px) {
+  :root[data-side-hidden] .ui-shell:not(:has(> .ui-panes)):has(.ui-bar-menu) { grid-template-columns: 0 minmax(0, 1fr); }
+  :root[data-side-hidden]:not([data-side-moving]) .ui-shell:not(:has(> .ui-panes)):has(.ui-bar-menu) > .ui-sidebar {
+    visibility: hidden; padding-inline: 0; overflow: hidden; }
+  :root[data-side-hidden][data-side-moving] .ui-shell:not(:has(> .ui-panes)):has(.ui-bar-menu) > .ui-sidebar { position: fixed; z-index: 30;
+    inset-block: 0; inset-inline-start: 0; width: var(--shell-side-open, var(--shell-side)); height: 100dvh; box-sizing: border-box; }
+  :root[data-side-moving] .ui-shell:not(:has(> .ui-panes)):has(.ui-bar-menu) { overflow: clip; }
+}
+
 /* ---------- opt-in wide side bar (html[data-wide-side], laptop only; ui/shell/wide-side.js) ----------
    Without the attribute, or under 840 px, nothing here applies. The side bar is 280 px on its own fill (--side-bg),
    no line; its links are left aligned (icon, label, then an optional .ui-side-count at the end); the head row

@@ -50,6 +50,9 @@ with left-aligned 34 px links and a count at the end, no FAB, axe clean; its but
 Enter), the list takes the room, the button stays on top at the top-left, the state survives a reload, the slide moves
 only transforms and sends `ui-side`; without `?wide=1` the old 14rem side bar and no `wide-side.js`; at 390 and 700 px
 `?wide=1` changes no computed look and loads nothing.
+`test/side-menu.html` (a single-pane shell with a menu button, as the Trips app) is tested by `e2e/side-menu.spec.mjs`:
+at 700 and 1280 px the menu button hides the side bar (the bar takes the room, `aria-expanded` follows), the state
+survives a reload and the button shows it again; at 390 px it still opens the drawer and keeps nothing.
 
 | Part | What is tested | axe |
 | --- | --- | --- |

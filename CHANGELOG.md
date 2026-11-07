@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0-rc.111
+
+- **The menu button hides the side bar from 600 px:** a single-pane shell (screens, no panes, the bar beside the side
+  bar, as the Trips app) showed its `.ui-bar-menu` on tablets and laptops but it did nothing there; now it hides and
+  shows the side bar (`html[data-side-hidden]`, the bar and screens take the room, the same 270 ms slide), kept per
+  device with the wide side bar's store (`localStorage` `ui-side-hidden`, or `adaptiveShell`'s `wide` store). Left
+  hidden, the page starts hidden with no flash. No opt-in; a phone still gets the drawer. `sideStore` and `SIDE_KEY`
+  moved into `ui/shell/shell.js` (still exported from `wide-side.js`). New `e2e/side-menu.spec.mjs` with
+  `e2e/pages/side-menu.html`.
+
 ## 1.0.0-rc.110
 
 - **Select mode arrows skip hidden rows:** ArrowDown and ArrowUp in select mode went onto rows a search had hidden;

@@ -1,36 +1,26 @@
-// The wide side bar (opt-in, laptop only): html[data-wide-side] at >= 840 px. adaptiveShell (shell.js) imports this file
-// only when both hold, so phones and tablets never load it. Its look is ui/shell/shell.css's ":root[data-wide-side]" block.
+// The side bar's hiding. The wide side bar (opt-in, laptop only): html[data-wide-side] at >= 840 px; adaptiveShell
+// (shell.js) imports this file when both hold, or when the bar's menu button first hides the side bar from 600 px (any
+// single-pane shell; then only the button below stays unseen). Its look is ui/shell/shell.css's ":root[data-wide-side]"
+// block (and its "hidden by the menu button" block).
 //   toggle   a 32 px button (panel-left icon) at the end of the side bar's head row (.ui-side-head; made, holding a
 //            leading .ui-sidebar-name, when the page has none). It hides the side bar fully: the main column takes the
 //            room and the button stays, fixed at the page's top-left. Enter or Space on it, as on any button.
 //   state    kept per device: the `store` passed in ({ get(): boolean, set(v) }) or localStorage 'ui-side-hidden'
+//            (sideStore, in shell.js)
 //   marks    html[data-wide-ready] once loaded, html[data-side-hidden] while hidden (html[data-side-moving] while it
 //            slides); the shell sends "ui-side" (detail.hidden) on each change
 //   motion   about 270 ms ease-out, transform only: the side bar slides out over the page while the main column slides
 //            into the room (or back), then the grid settles; reduced motion: at once
 import { still } from '../gesture.js';
+import { sideStore } from './shell.js';
 
-export const SIDE_KEY = 'ui-side-hidden';
+export { SIDE_KEY, sideStore } from './shell.js';
+
 export const SIDE_MS = 270;
 const EASE_OUT = 'cubic-bezier(0.2, 0, 0, 1)';
 const PANEL_LEFT = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg>';
 
-/** @typedef {{ get: () => boolean, set: (v: boolean) => void }} SideStore */
-
-/**
- * The store for the hidden state: the app's own, or localStorage (any failure reads as shown and is not kept) (pure but
- * for the storage it is given).
- * @param {SideStore | null} [store] @param {Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> | null} [storage]
- * @returns {SideStore}
- */
-export function sideStore(store = null, storage = null) {
-  if (store) return store;
-  const ls = () => storage ?? globalThis.localStorage;
-  return {
-    get() { try { return ls().getItem(SIDE_KEY) === '1'; } catch { return false; } },
-    set(v) { try { if (v) ls().setItem(SIDE_KEY, '1'); else ls().removeItem(SIDE_KEY); } catch { /* not kept here */ } },
-  };
-}
+/** @typedef {import('./shell.js').SideStore} SideStore */
 
 /**
  * @param {HTMLElement} shell  .ui-shell (with a nav.ui-sidebar)
