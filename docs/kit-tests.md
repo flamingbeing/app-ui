@@ -48,8 +48,9 @@ Add a line here, and a test, for every part or behaviour the gallery gains.
 `/kit/shell/?wide=1` (the opt-in wide side bar) is tested by `e2e/shell-wide.spec.mjs`: at 1280 px a 280 px side bar
 with left-aligned 34 px links and a count at the end, no FAB, axe clean; its button hides and shows it (click and
 Enter), the list takes the room, the button stays on top at the top-left, the state survives a reload, the slide moves
-only transforms and sends `ui-side`; without `?wide=1` the old 14rem side bar and no `wide-side.js`; at 390 and 700 px
-`?wide=1` changes no computed look and loads nothing.
+only transforms and sends `ui-side`; without `?wide=1` the old 14rem side bar and FAB with the plain hide button; at
+390 and 700 px `?wide=1` changes no computed look (wide-side.js loads from 600 px either way); at 700 px without it the
+head's button hides the side bar (the list head makes room, axe clean), the state survives a reload and it shows again.
 `test/side-menu.html` (a single-pane shell with a menu button, as the Trips app) is tested by `e2e/side-menu.spec.mjs`:
 at 700 and 1280 px the menu button hides the side bar (the bar takes the room, `aria-expanded` follows), the state
 survives a reload and the button shows it again; at 390 px it still opens the drawer and keeps nothing.

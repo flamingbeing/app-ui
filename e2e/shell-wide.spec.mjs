@@ -1,6 +1,7 @@
 // The opt-in wide side bar (html[data-wide-side], ui/shell/wide-side.js) on /kit/shell/?wide=1: at 1280 px the side
 // bar is 280 px with left-aligned links, the FAB hides and a button hides and shows it (kept over a reload); without
-// the attribute the laptop layout is the old one; at 390 and 700 px the attribute changes nothing. docs/kit-tests.md.
+// the attribute the laptop layout is the old one, with the plain hide button any shell with panes has from 600 px (also
+// tested at 700 px); at 390 and 700 px the attribute changes nothing. docs/kit-tests.md.
 import AxeBuilder from './axe.mjs';
 import { test, expect } from './fixtures.mjs';
 
@@ -114,23 +115,48 @@ test.describe('wide side bar at 1280 px', () => {
     expect(await page.evaluate(() => window.sides)).toEqual([true, false]);
   });
 
-  test('without the attribute: the old laptop layout, no button, nothing loaded', async ({ sized }) => {
+  test('without the attribute: the old laptop layout and FAB, with the plain hide button (any shell with panes)', async ({ sized }) => {
     const page = await load(sized, 1280, false);
     const rem = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize));
     expect(Math.round((await page.locator('.ui-sidebar').boundingBox()).width)).toBe(Math.round(14 * rem));
-    expect(await page.locator('.ui-side-toggle').count()).toBe(0);
+    await expect(page.locator('.ui-side-head .ui-side-toggle')).toBeVisible();
     await page.evaluate(() => { const b = document.createElement('button'); b.className = 'ui-fab'; b.ariaLabel = 'Add'; document.body.append(b); });
     await expect(page.locator('.ui-fab')).toBeVisible();
-    await expect(page.locator('html')).not.toHaveAttribute('data-wide-ready', '');
-    expect(await page.evaluate(() => performance.getEntriesByType('resource').some(e => e.name.includes('wide-side.js')))).toBe(false);
   });
 });
 
 for (const width of [390, 700]) {
-  test(`at ${width} px the attribute changes nothing (and wide-side.js is not loaded)`, async ({ sized }) => {
+  test(`at ${width} px the attribute changes nothing`, async ({ sized }) => {
     const plain = await looks(await load(sized, width, false));
     const page = await load(sized, width, true);
     expect(await looks(page)).toEqual(plain);
-    expect(await page.evaluate(() => performance.getEntriesByType('resource').some(e => e.name.includes('wide-side.js')))).toBe(false);
+    // wide-side.js: never on a phone; from 600 px a shell with panes takes it for its hide button, opted in or not
+    expect(await page.evaluate(() => performance.getEntriesByType('resource').some(e => e.name.includes('wide-side.js')))).toBe(width >= 600);
   });
 }
+
+test('at 700 px, without the attribute, the side bar head\'s button hides and shows it; the list head makes room; kept over a reload', async ({ sized }) => {
+  const page = await load(sized, 700, false);
+  const toggle = page.locator('.ui-side-head .ui-side-toggle');
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  const list = await page.locator('.ui-pane-list').boundingBox();
+  await toggle.click();
+  await expect(page.locator('html')).toHaveAttribute('data-side-hidden', '');
+  await settled(page);
+  await expect(page.locator('.ui-sidebar a').first()).toBeHidden();
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute('aria-label', 'Show sidebar');
+  expect((await page.locator('.ui-pane-list').boundingBox()).x).toBeLessThan(list.x - 100);
+  const tb = await toggle.boundingBox(), head = await page.locator('.ui-pane-list > .ui-pane-head').boundingBox();
+  expect(await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('.ui-side-toggle') !== null, [tb.x + 16, tb.y + 16])).toBe(true);
+  expect(tb.y).toBeLessThan(head.y + head.height);
+  expect(await AxeBuilder(page)).toEqual([]);
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => !!window.shell)).toBe(true);
+  await expect(page.locator('html')).toHaveAttribute('data-side-hidden', '');
+  await page.locator('.ui-side-toggle').click();
+  await settled(page);
+  await expect(page.locator('.ui-sidebar a').first()).toBeVisible();
+  await expect(page.locator('.ui-side-toggle')).toHaveAttribute('aria-expanded', 'true');
+});

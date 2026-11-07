@@ -17,11 +17,12 @@
 //   Esc          on a phone's pushed detail, goes back (select mode, menus and dialogs keep their own Esc)
 //   side bar     a .ui-bar-menu button (in the bar's [data-bar-lead]) opens the side bar as a drawer on a phone
 //                (.ui-shell.is-drawer-open, over a .ui-drawer-shade); a side link, a tap on the shade, Esc or growing
-//                past phone width closes it. From 600 px the same button hides and shows the side bar (a single-pane
-//                shell, whose bar stays beside it; html[data-side-hidden], kept per device as the wide side bar's,
-//                wide-side.js, which it loads on the first press or at start when it was left hidden). Open, it is a history entry (Back closes it) and the page behind is inert. No swipe opens it (it took swipes meant to change
+//                past phone width closes it. From 600 px the side bar hides (html[data-side-hidden], kept per device,
+//                wide-side.js): in a single-pane shell, whose bar stays beside it, by the same button (the file loads
+//                on its first press, or at start when it was left hidden); in a shell with panes, by the hide button
+//                wide-side.js puts in the side bar's head (the file loads once the window is 600 px or wider). Open, it is a history entry (Back closes it) and the page behind is inert. No swipe opens it (it took swipes meant to change
 //                page); a left swipe on the open drawer or the shade pushes it back with the finger
-//   wide side   opt-in: html[data-wide-side] at >= 840 px gives the side bar its wide look and a hide button
+//   wide side   opt-in: html[data-wide-side] at >= 840 px gives the side bar its wide look (and the hide button)
 //                (ui/shell/wide-side.js, imported only then, also when the window grows to it later); `wide` is the
 //                store for its hidden state (default localStorage)
 // Pointer: right-click is the hold menu; Shift-click takes a range and Ctrl/Cmd-click adds a row (select-mode.js).
@@ -80,8 +81,8 @@ function defaultRender(row, detail) {
  *   drawer: { pull: (x: number) => void, release: (x: number, v: number) => void } | null,
  *   side: () => { toggle: (hide?: boolean) => void, hidden: () => boolean } | null, stop: () => void }}
  *   drawer: the side bar's drawer as a finger would pull it (null without a side bar); no swipe pulls it any more.
- *   side: the side bar's hiding once wide-side.js has loaded (null before: the wide side bar, or the menu button's
- *   first press from 600 px)
+ *   side: the side bar's hiding once wide-side.js has loaded (null before, and on a phone: from 600 px a shell with
+ *   panes loads it at once, a single-pane shell at its menu button's first press)
  */
 export function adaptiveShell(shell, { screens = null, render = defaultRender, wide = null } = {}) {
   const l = listeners();
@@ -357,10 +358,16 @@ export function adaptiveShell(shell, { screens = null, render = defaultRender, w
     l.on(el, 'touchcancel', end, { passive: true });
   }
   if (side) swipeShut(side);
-  // from 600 px the menu button hides and shows the side bar (only a single-pane shell's bar shows beside it); left
-  // hidden, it starts hidden (marked at once, so it doesn't show first)
-  const menuSide = !!side && menus.length > 0 && !shell.querySelector(':scope > .ui-panes');
-  if (menuSide && size !== 'phone' && sideStore(wide).get()) { html.toggleAttribute('data-side-hidden', true); void sideCtl(); }
+  // from 600 px the side bar hides: a single-pane shell's menu button (its bar shows beside the side bar) or, in a
+  // shell with panes (no bar there), the hide button wide-side.js puts in the side bar's head; left hidden, it starts
+  // hidden (marked at once, so it doesn't show first)
+  const panes = !!shell.querySelector(':scope > .ui-panes');
+  const menuSide = !!side && menus.length > 0 && !panes;
+  const panesSide = !!side && panes;
+  if ((menuSide || panesSide) && size !== 'phone' && sideStore(wide).get()) { html.toggleAttribute('data-side-hidden', true); void sideCtl(); }
+  const panesCheck = () => { if (panesSide && size !== 'phone') void sideCtl(); };
+  l.on(queries[0], 'change', panesCheck);
+  panesCheck();
   if (side?.id) for (const m of menus) if (!m.hasAttribute('aria-controls')) m.setAttribute('aria-controls', side.id);
   menuState();
   for (const m of menus) l.on(m, 'click', () => {
